@@ -1,0 +1,71 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template for EventBridge rule 'chariot-webhook'
+Resources:
+  ChariotWebhookConnection:
+    Type: AWS::Events::Connection
+    Properties:
+      AuthorizationType: BASIC
+      AuthParameters:
+        BasicAuthParameters:
+          Username: unused
+          Password: unused
+      Name: chariot-webhook-connection
+  ChariotWebhookApiDestination:
+    Type: AWS::Events::ApiDestination
+    Properties:
+      ConnectionArn:
+        Fn::GetAtt:
+          - ChariotWebhookConnection
+          - Arn
+      HttpMethod: POST
+      InvocationEndpoint: !Ref ChariotWebhookEndpoint
+      Name: chariot-webhook-api-destination
+  EventBridgeInvokeApiDestinationRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: InvokeApiDestinationPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: events:InvokeApiDestination
+                Resource: !GetAtt ChariotWebhookApiDestination.Arn
+  AWSEventRule:
+    Type: AWS::Events::Rule
+    Properties:
+      EventBusName: default
+      EventPattern:
+        source:
+          - aws.ssm
+          - aws.lambda
+          - aws.route53
+          - aws.apigateway
+        detail-type:
+          - AWS API Call via CloudTrail
+        detail:
+          eventSource:
+            - ssm.amazonaws.com
+            - lambda.amazonaws.com
+            - route53.amazonaws.com
+            - apigateway.amazonaws.com
+      Name: chariot-eventbridge-rule
+      State: ENABLED
+      Targets:
+        - Id: ChariotWebhookApiTarget
+          Arn:
+            Fn::GetAtt:
+              - ChariotWebhookApiDestination
+              - Arn
+          RoleArn: !GetAtt EventBridgeInvokeApiDestinationRole.Arn
+Parameters:
+  ChariotWebhookEndpoint:
+    Type: String
+    Default: <CHARIOT_WEBHOOK>

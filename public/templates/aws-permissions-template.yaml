@@ -1,0 +1,24 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation for Chariot Role
+Resources:
+  ChariotRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: Chariot
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: 992382785633
+            Action: 'sts:AssumeRole'
+            Condition:
+              StringEquals:
+                'sts:ExternalId': !Ref ExternalId
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/ReadOnlyAccess
+        - arn:aws:iam::aws:policy/SecurityAudit
+Parameters:
+  ExternalId:
+    Type: String
+    Description: Email address of your Chariot organization
