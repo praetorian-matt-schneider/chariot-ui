@@ -23,6 +23,7 @@ import { Asset, Attribute, Risk, Seed, SeedStatus } from '../../types';
 import { Comment } from './Comment';
 import { DetailsDrawerHeader } from './DetailsDrawerHeader';
 import { useOpenDrawer } from './useOpenDrawer';
+import { DRAWER_WIDTH } from '.';
 
 interface Props {
   compositeKey: string;
@@ -119,7 +120,7 @@ export const SeedDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
       open={open}
       onClose={() => removeSearchParams(StorageKey.DRAWER_COMPOSITE_KEY)}
       onBack={() => navigate(-1)}
-      className={'w-[864px]'}
+      className={DRAWER_WIDTH}
     >
       <Loader isLoading={isLoading} type="spinner">
         <div className="flex h-[calc(100%-24px)] flex-col gap-8">

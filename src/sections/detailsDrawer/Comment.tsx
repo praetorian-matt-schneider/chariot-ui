@@ -13,7 +13,7 @@ import { StorageKey } from '@/utils/storage/useStorage.util';
 interface Props {
   comment: string;
   isLoading: boolean;
-  onSave: (comment: string) => Promise<void>;
+  onSave?: (comment: string) => Promise<void>;
 }
 
 export const Comment: React.FC<Props> = ({
@@ -50,18 +50,20 @@ export const Comment: React.FC<Props> = ({
     <Accordian
       title="Comment"
       titlerightContainer={
-        <Button
-          styleType="textPrimary"
-          className="p-0 text-xs font-bold"
-          endIcon={<ChevronRightIcon className="ml-1 size-3" />}
-          onClick={event => {
-            event.preventDefault();
-            event.stopPropagation();
-            setIsEditing(true);
-          }}
-        >
-          Edit
-        </Button>
+        onSave && (
+          <Button
+            styleType="textPrimary"
+            className="p-0 text-xs font-bold"
+            endIcon={<ChevronRightIcon className="ml-1 size-3" />}
+            onClick={event => {
+              event.preventDefault();
+              event.stopPropagation();
+              setIsEditing(true);
+            }}
+          >
+            Edit
+          </Button>
+        )
       }
     >
       <Loader className="h-32" isLoading={isLoading}>
@@ -82,7 +84,7 @@ export const Comment: React.FC<Props> = ({
           onClick: async () => {
             try {
               setIsSaving(true);
-              await onSave(value);
+              onSave && (await onSave(value));
               setIsEditing(false);
             } catch (e) {
               console.error(e);

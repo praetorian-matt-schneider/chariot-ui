@@ -1,16 +1,27 @@
+import { useNavigate } from 'react-router-dom';
+
+import { Accordian } from '@/components/Accordian';
 import { Chip } from '@/components/Chip';
+import { Drawer } from '@/components/Drawer';
+import { HorizontalSplit } from '@/components/HorizontalSplit';
 import { Loader } from '@/components/Loader';
+import { Table } from '@/components/table/Table';
+import { DetailsListContainer } from '@/components/ui/DetailsListContainer';
 import { useMy } from '@/hooks';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
+import { useSearchParams } from '@/hooks/useSearchParams';
+import { StorageKey } from '@/utils/storage/useStorage.util';
 
 import { Risk } from '../../types';
 
+import { Comment } from './Comment';
 import { DetailsDrawerHeader } from './DetailsDrawerHeader';
-import { DetailsDrawerTable } from './DetailsDrawerTable';
 import { useOpenDrawer } from './useOpenDrawer';
+import { DRAWER_WIDTH } from '.';
 
 interface Props {
   compositeKey: string;
+  open: boolean;
 }
 
 const getSeverityChipProps = (value: number) => {
@@ -43,14 +54,16 @@ const getSeverityChipProps = (value: number) => {
   return {};
 };
 
-export const KEVDrawer: React.FC<Props> = ({ compositeKey }: Props) => {
+export const KEVDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
+  const navigate = useNavigate();
+  const { removeSearchParams } = useSearchParams();
   const kev = compositeKey.split('#')?.[2];
   const { openRisk } = useOpenDrawer();
   const { data: threats = [], isLoading } = useMy({
     resource: 'threat',
     query: compositeKey,
   });
-  const { data: genericSearch, isLoading: isLoadingRisks } = useGenericSearch({
+  const { data: genericSearch, status: risksStatus } = useGenericSearch({
     query: kev,
   });
 
@@ -60,54 +73,78 @@ export const KEVDrawer: React.FC<Props> = ({ compositeKey }: Props) => {
   const severityProps = getSeverityChipProps(threat.value);
 
   return (
-    <div className="flex h-[calc(100%-24px)] flex-col gap-8">
-      <DetailsDrawerHeader
-        title={threat.name}
-        subtitle={threat.source === 'KEV' ? 'CISA KEV' : ''}
-        isLoading={isLoading}
-      />
+    <Drawer
+      open={open}
+      onClose={() => removeSearchParams(StorageKey.DRAWER_COMPOSITE_KEY)}
+      onBack={() => navigate(-1)}
+      className={DRAWER_WIDTH}
+    >
+      <Loader isLoading={isLoading} type="spinner">
+        <div className="flex h-full flex-col gap-10">
+          <DetailsDrawerHeader
+            title={threat.name}
+            subtitle={threat.source === 'KEV' ? 'CISA KEV' : ''}
+          />
 
-      {!isLoading && (
-        <div className="flex gap-2 text-sm">
-          <Chip className={`p-2 ${severityProps.className}`}>
-            <div className="flex items-center justify-center gap-2">
-              <span className="flex-1">{severityProps.name}</span>
-              <Chip
-                className={`w-fit px-4 text-white ${severityProps.valueClassNames}`}
-              >
-                {threat.value}
-              </Chip>
-            </div>
-          </Chip>
+          <HorizontalSplit
+            leftContainer={
+              <Accordian title="Risk History" contentClassName="pt-0">
+                <Table
+                  tableClassName="border-none p-0 shadow-none [&_.th-top-border]:hidden"
+                  name="Associated Risks"
+                  status={risksStatus}
+                  data={risks}
+                  columns={[
+                    {
+                      label: 'Name',
+                      id: 'name',
+                      className: 'text-primary',
+                      cell: 'highlight',
+                      onClick: (row: Risk) => openRisk(row),
+                    },
+                  ]}
+                  error={null}
+                  header={false}
+                  footer={false}
+                />
+              </Accordian>
+            }
+            rightContainer={
+              <>
+                <DetailsListContainer
+                  title="Vulnerability Details"
+                  list={[
+                    {
+                      label: '',
+                      value: (
+                        <div className="flex gap-2 text-sm">
+                          <Chip className={`p-2 ${severityProps.className}`}>
+                            <div className="flex items-center justify-center gap-2">
+                              <span className="flex-1">
+                                {severityProps.name}
+                              </span>
+                              <Chip
+                                className={`w-fit px-4 text-white ${severityProps.valueClassNames}`}
+                              >
+                                {threat.value}
+                              </Chip>
+                            </div>
+                          </Chip>
+                        </div>
+                      ),
+                    },
+                    {
+                      label: 'Vulnerability ID',
+                      value: threat.name,
+                    },
+                  ]}
+                />
+                <Comment comment={threat.comment} isLoading={isLoading} />
+              </>
+            }
+          />
         </div>
-      )}
-
-      <Loader className="h-48" isLoading={isLoading}>
-        <p className="text-sm text-default-light">{threat.comment}</p>
       </Loader>
-
-      <DetailsDrawerTable<{ label: string; key: string }>
-        title="Vulnerability Details"
-        isLoading={isLoading}
-        data={[{ label: 'Vulnerability ID', key: threat.name }]}
-        columns={[
-          { id: 'label', className: 'text-default-light', copy: false },
-          { id: 'key', className: 'text-right' },
-        ]}
-      />
-
-      <DetailsDrawerTable<Risk>
-        isLoading={isLoadingRisks}
-        title="Risks"
-        data={risks}
-        columns={[
-          {
-            id: 'name',
-            className: 'text-primary',
-            onClick: (row: Risk) => openRisk(row),
-          },
-        ]}
-      />
-    </div>
+    </Drawer>
   );
 };
