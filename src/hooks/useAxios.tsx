@@ -36,7 +36,14 @@ export function useInitAxiosInterceptors() {
         return response;
       },
       error => {
-        if (error.code === 'ERR_NETWORK') {
+        if (error.response.status === 402) {
+          Snackbar({
+            title: 'License Required',
+            description: 'Please contact support@praetorian.com',
+            variant: 'error',
+            toastId: uuid,
+          });
+        } else if (error.code === 'ERR_NETWORK') {
           Snackbar({
             title: 'Network Error',
             description: `Status: ${error.response}`,
