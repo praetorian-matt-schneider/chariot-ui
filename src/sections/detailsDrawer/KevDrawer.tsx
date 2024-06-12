@@ -98,7 +98,6 @@ export const KEVDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
                     {
                       label: 'Name',
                       id: 'name',
-                      className: 'text-primary',
                       cell: 'highlight',
                       onClick: (row: Risk) => openRisk(row),
                     },
