@@ -133,10 +133,6 @@ export const KEVDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
                         </div>
                       ),
                     },
-                    {
-                      label: 'Vulnerability ID',
-                      value: threat.name,
-                    },
                   ]}
                 />
                 <Comment comment={threat.comment} isLoading={isLoading} />
