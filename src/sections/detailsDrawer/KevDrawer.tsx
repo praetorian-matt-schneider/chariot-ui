@@ -88,7 +88,7 @@ export const KEVDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
 
           <HorizontalSplit
             leftContainer={
-              <Accordian title="Risk History" contentClassName="pt-0">
+              <Accordian title="Associated Risks" contentClassName="pt-0">
                 <Table
                   tableClassName="border-none p-0 shadow-none [&_.th-top-border]:hidden"
                   name="Associated Risks"
