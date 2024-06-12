@@ -30,7 +30,7 @@
 
 Chariot is an expert-driven, all-in-one offensive security platform that helps organizations shift from a reactive "assume breach" mentality to a prevention-first strategy. By actively seeking out vulnerabilities and addressing potential weaknesses before attackers can exploit them, Chariot ensures a robust security posture through continuous offensive security testing. 
 
-⚠️ This repository mirrors the SaaS offering at preview.chariot.praetorian.com, enabling you to customize your entire user experience.
+⚠️ This repository mirrors the SaaS offering at preview.chariot.praetorian.com, enabling you to customize your full user experience.
 
 ## Key Features
 
