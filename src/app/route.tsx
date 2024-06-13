@@ -107,7 +107,7 @@ export function AppRoutes() {
   return <RenderRoutes appRoutes={appRoutes} conditions={{}} />;
 }
 
-export type AppRoutes = typeof appRoutes;
+export type TAppRoutes = typeof appRoutes;
 
 // Note: This is just to make sure that the routes are valid
 validateRoutes(appRoutes);

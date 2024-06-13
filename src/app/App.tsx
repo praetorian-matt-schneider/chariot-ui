@@ -2,15 +2,13 @@ import { BrowserRouter } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
+import { AppRoutes } from '@/app/Route';
 import { useInitAxiosInterceptors } from '@/hooks/useAxios';
+import { queryClient } from '@/queryclient';
 import AuthProvider from '@/state/auth';
 import { BreadCrumbsProvider } from '@/state/breadcrumbs';
 import { SearchProvider } from '@/state/search';
 import { QueryClientProvider } from '@/utils/api';
-
-import { queryClient } from '../queryclient';
-
-import { AppRoutes } from './route';
 
 import 'react-toastify/dist/ReactToastify.css';
 
