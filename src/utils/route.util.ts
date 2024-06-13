@@ -1,8 +1,8 @@
 import { IRouteObj } from '@/components/route/RenderRoutes';
 
-import { appRoutes } from '../app/route';
+import type { AppRoutes } from '../app/route';
 
-type TData = typeof appRoutes;
+type TData = AppRoutes;
 
 type ExcludeFallback<TData> = Exclude<
   keyof TData,

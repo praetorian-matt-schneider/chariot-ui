@@ -1,3 +1,4 @@
+/* eslint-disable unused-imports/no-unused-vars */
 export const Regex = {
   DOMAIN:
     /(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}(?:\.\w+)?/,
@@ -30,7 +31,7 @@ type seedRegexName = keyof typeof seedRegex;
  * @param file raw content of a uploaded file
  * @returns discovered seeds from the provided file
  */
-export function GetSeeds(file: string): Record<seedRegexName, string[]> {
+export function GetSeeds(file: string, maxSeed: number): string[] {
   let rawText = file;
   const seeds: Record<seedRegexName, string[]> = {
     email: [],
@@ -47,7 +48,10 @@ export function GetSeeds(file: string): Record<seedRegexName, string[]> {
     rawText = rawText.replace(new RegExp(regex, 'g'), matchedValue => {
       const currentSeedValue = seeds[regexName];
 
-      if (!currentSeedValue.includes(matchedValue)) {
+      if (
+        !currentSeedValue.includes(matchedValue) &&
+        !checkMaxSeeds(seeds, maxSeed)
+      ) {
         currentSeedValue.push(matchedValue);
       }
 
@@ -55,5 +59,18 @@ export function GetSeeds(file: string): Record<seedRegexName, string[]> {
     });
   });
 
-  return seeds;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { email, ...restSeedTypes } = seeds;
+
+  return Object.values(restSeedTypes).flatMap(x => x);
+}
+
+function checkMaxSeeds(
+  seedByTypes: Record<seedRegexName, string[]>,
+  maxSeed: number
+): boolean {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { email, ...restSeedTypes } = seedByTypes;
+
+  return Object.values(restSeedTypes).flatMap(x => x).length >= maxSeed;
 }

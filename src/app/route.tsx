@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 
+import { RenderRoutes } from '@/components/route/RenderRoutes';
 import { Body } from '@/components/ui/Body';
 import Account from '@/sections/Account';
 import Assets from '@/sections/Assets';
@@ -32,7 +33,7 @@ function CheckAuth(props: { children: ReactNode }) {
   }
 }
 
-export const appRoutes = {
+const appRoutes = {
   login: {
     element: <Login />,
     title: 'login',
@@ -101,6 +102,12 @@ export const appRoutes = {
   },
   '*': <Navigate to="/app/risks" replace />,
 } as const;
+
+export function AppRoutes() {
+  return <RenderRoutes appRoutes={appRoutes} conditions={{}} />;
+}
+
+export type AppRoutes = typeof appRoutes;
 
 // Note: This is just to make sure that the routes are valid
 validateRoutes(appRoutes);

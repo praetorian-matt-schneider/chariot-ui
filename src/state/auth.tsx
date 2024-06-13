@@ -276,7 +276,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     document.addEventListener('visibilitychange', updateTabVisibility);
 
     return () => {
-      document.addEventListener('visibilitychange', updateTabVisibility);
+      document.removeEventListener('visibilitychange', updateTabVisibility);
     };
   }, [updateTabVisibility]);
 

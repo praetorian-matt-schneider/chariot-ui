@@ -10,24 +10,28 @@ import { Snackbar } from './Snackbar';
 
 export type FileResult = string | ArrayBuffer | null;
 
+export type Files = { result: FileResult; file: File }[];
+
 interface Props extends PropsWithChildren {
-  onChange: (result: FileResult, file: File) => void;
-  validate?: (result: FileResult, file: File) => boolean;
+  onFilesDrop: (files: Files) => void;
+  validate?: (result: string | ArrayBuffer | null, file: File) => boolean;
   title?: string;
   subTitle?: string;
   maxFileSizeInMb?: number;
   maxFileSizeMessage?: ReactNode;
+  maxFileSizeErrorMessage?: ReactNode;
 }
 
 export const Dropzone: React.FC<Props> = (props: Props) => {
   const {
-    onChange,
+    onFilesDrop,
     validate,
     title = 'Drop files here',
     subTitle = 'Suggest file types: TXT, CSV, JSON, or XML',
     children,
     maxFileSizeInMb,
     maxFileSizeMessage,
+    maxFileSizeErrorMessage,
   } = props;
   interface Error {
     title: string;
@@ -36,37 +40,35 @@ export const Dropzone: React.FC<Props> = (props: Props) => {
   const [error, setError] = React.useState<Error | false>(false);
 
   const handleDrop = (files: File[]): void => {
-    files.forEach(file => {
+    const fileValue: Files = [];
+
+    const totalSize = files.reduce((acc, file) => acc + file.size, 0);
+
+    if (maxFileSizeInMb && totalSize > mbToBytes(maxFileSizeInMb)) {
+      setError({
+        title: 'Limit Exceeded',
+        message:
+          maxFileSizeErrorMessage ||
+          `Uploads cannot exceed ${maxFileSizeInMb}MB in file size.`,
+      });
+
+      return;
+    }
+
+    files.forEach((file, index) => {
       const reader = new FileReader();
-      const totalSize = file.size;
-
-      if (maxFileSizeInMb && totalSize > mbToBytes(maxFileSizeInMb)) {
-        setError({
-          title: 'Limit Exceeded',
-          message: (
-            <span>
-              Bulk uploads cannot exceed 500 Seeds or 2MB in file size.{' '}
-              <a href="#" className="text-brand">
-                Learn more
-              </a>
-              , or get help{' '}
-              <a href="#" className="text-brand">
-                formatting your Seed File.
-              </a>
-            </span>
-          ),
-        });
-
-        return;
-      }
 
       reader.onload = () => {
         const result = reader.result;
         const isValid = validate ? validate(result, file) : true;
         if (isValid) {
-          onChange(result, file);
+          fileValue.push({ result, file });
         } else {
           handleError();
+        }
+
+        if (files.length - 1 === index && fileValue.length > 0) {
+          onFilesDrop(fileValue);
         }
       };
       reader.onerror = handleError;

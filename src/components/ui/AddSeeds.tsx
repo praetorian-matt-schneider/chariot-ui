@@ -8,7 +8,7 @@ import { create as createSeed } from '@/hooks/useSeeds';
 import { AllowedSeedRegex, GetSeeds } from '@/utils/regex.util';
 
 import { Button } from '../Button';
-import { Dropzone, FileResult } from '../Dropzone';
+import { Dropzone, Files } from '../Dropzone';
 import { Modal } from '../Modal';
 import { Tooltip } from '../Tooltip';
 
@@ -37,15 +37,13 @@ export const AddSeeds: React.FC<Props> = (props: Props) => {
     }
   };
 
-  const handleChange = (result: FileResult): void => {
+  const handleFilesDrop = (files: Files): void => {
     onClose();
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars, unused-imports/no-unused-vars
-    const { email, ...restSeedTypes } = GetSeeds(result?.toString() ?? '');
+    const concatFiles = files.map(({ result }) => result).join('');
 
-    const seeds = Object.values(restSeedTypes)
-      .flatMap(x => x)
-      .slice(0, 500);
+    const seeds = GetSeeds(concatFiles, 500);
+
     const toastId = uuidv4();
 
     seeds?.forEach(word => {
@@ -90,7 +88,7 @@ export const AddSeeds: React.FC<Props> = (props: Props) => {
         <div className="w-full border-t-2 border-default" />
       </div>
       <Dropzone
-        onChange={handleChange}
+        onFilesDrop={handleFilesDrop}
         title={'Bulk Upload'}
         subTitle={`Add a document with a list of Domains, IP addresses, CIDR ranges, or GitHub organizations.`}
         maxFileSizeInMb={6}
@@ -121,6 +119,20 @@ export const AddSeeds: React.FC<Props> = (props: Props) => {
               </Button>
             </Tooltip>
           </div>
+        }
+        maxFileSizeErrorMessage={
+          <span>
+            Bulk uploads cannot exceed 500 Seeds or 6MB in file size. Get help{' '}
+            <a
+              onClick={e => e.stopPropagation()}
+              href="https://docs.praetorian.com/hc/en-us/articles/25814362281627-Adding-and-Managing-Seeds"
+              className="cursor-pointer text-brand"
+              target={'_blank'}
+              rel="noreferrer"
+            >
+              formatting your Seed File.
+            </a>
+          </span>
         }
       />
     </Modal>
