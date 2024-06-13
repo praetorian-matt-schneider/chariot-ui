@@ -1,5 +1,3 @@
-import { cn } from '@/utils/classname';
-
 import { AssetStatus } from '../../types';
 import { Chip, ChipProps } from '../Chip';
 
@@ -22,13 +20,8 @@ export const AssetStatusChip: React.FC<{
   };
 
   return (
-    <div className="flex items-center gap-2">
-      <Chip
-        className={cn(status !== AssetStatus.ActiveHigh && 'ml-4', className)}
-        style={chipStyle[status]}
-      >
-        {chipText[status]}
-      </Chip>
-    </div>
+    <Chip className={className} style={chipStyle[status]}>
+      {chipText[status]}
+    </Chip>
   );
 };
