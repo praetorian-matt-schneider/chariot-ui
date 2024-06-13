@@ -9,5 +9,5 @@
   },
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "tailwindCSS.experimental.classRegex": ["className\\: '([^']*)'"],
-  "typescript.preferences.importModuleSpecifier": "shortest"
+  "typescript.preferences.importModuleSpecifier": "non-relative"
 }

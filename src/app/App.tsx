@@ -2,23 +2,20 @@ import { BrowserRouter } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
-import { RenderRoutes } from '@/components/route/RenderRoutes';
+import { AppRoutes } from '@/app/AppRoute';
 import { useInitAxiosInterceptors } from '@/hooks/useAxios';
+import { queryClient } from '@/queryclient';
 import AuthProvider from '@/state/auth';
 import { BreadCrumbsProvider } from '@/state/breadcrumbs';
 import { SearchProvider } from '@/state/search';
 import { QueryClientProvider } from '@/utils/api';
-
-import { queryClient } from '../queryclient';
-
-import { appRoutes } from './route';
 
 import 'react-toastify/dist/ReactToastify.css';
 
 function AppComponent() {
   useInitAxiosInterceptors();
 
-  return <RenderRoutes appRoutes={appRoutes} conditions={{}} />;
+  return <AppRoutes />;
 }
 
 // ThirdPartyProviders is a wrapper for third-party providers like react-query, react-router, etc.
