@@ -25,8 +25,15 @@ const WebhookExample: React.FC<Props> = ({ defaultPin }) => {
     },
     {
       id: 'Risk',
-      payload: `# Finding is a regex pattern that matches /^\\S+$/
-{  
+      comment: (
+        <p>
+          Finding is a regex pattern that matches{' '}
+          <pre className="inline rounded-[2px] bg-gray-200 p-1 text-xs">
+            {`/^\\S+$/`}
+          </pre>
+        </p>
+      ),
+      payload: `{  
   "dns": "public-facing-api.domain.com",
   "name": "192.168.15.30",
   "finding": "exposed-administration-interface"
@@ -47,6 +54,7 @@ const WebhookExample: React.FC<Props> = ({ defaultPin }) => {
           <span className="block text-sm font-medium leading-6 text-gray-900">
             {sample.id} Payload Example
           </span>
+          {sample.comment && <p className="mb-2 text-xs">{sample.comment}</p>}
           <pre className="overflow-x-auto whitespace-pre-wrap rounded bg-gray-100 text-xs">
             {sample.payload}
           </pre>
