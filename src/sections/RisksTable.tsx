@@ -37,10 +37,6 @@ const getFilteredRisksByCISA = (
   let filteredRisks = risks;
   if (knownExploitedThreats && knownExploitedThreats.length > 0) {
     filteredRisks = filteredRisks.filter(risk => {
-      if (risk.status[0] !== 'O') {
-        return false;
-      }
-
       const matchedCVEID = Regex.CVE_ID.exec(risk.name)?.[0];
 
       return (
@@ -135,6 +131,7 @@ export function Risks() {
   }, [
     severityFilter,
     statusFilter,
+    sourceFilter,
     JSON.stringify(risks),
     JSON.stringify(knownExploitedThreats),
   ]);
