@@ -17,6 +17,7 @@ import { CELL_WIDTHS, ROW_HEIGHT } from './constants';
 import { TableAction } from './TableAction';
 import { TableBody } from './TableBody';
 import { TableCheckBoxIcon } from './TableCheckboxIcon';
+import { TableFilters } from './TableFilters';
 import { CellAlignment, InternalTData, TableProps } from './types';
 import { mapActionsWithRowSelection } from './util';
 
@@ -24,6 +25,7 @@ export function Table<TData>(props: TableProps<TData>) {
   const {
     counters,
     className,
+    filters,
     tableClassName,
     columns,
     data: rawData,
@@ -277,6 +279,7 @@ export function Table<TData>(props: TableProps<TData>) {
   return (
     <Body ref={parentRef} className={className} footer={footer} header={header}>
       {counters && counters}
+      <TableFilters filters={filters} />
       <TableAction actions={actionsProps as DropdownProps['menu']} />
       {isError && (
         <NoData

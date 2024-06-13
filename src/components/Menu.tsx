@@ -62,6 +62,7 @@ const menuMarginClassName = `m-[8px] w-[calc(100%-16px)]`;
 
 export interface MenuItemProps {
   label: string | JSX.Element;
+  labelSuffix?: string | number;
   value?: string;
   icon?: React.ReactNode;
   description?: string;
@@ -255,7 +256,7 @@ function Content(props: MenuItemProps) {
       <div className="w-full overflow-hidden">
         <div className="flex items-center justify-between text-sm">
           <div
-            className={`overflow-hidden text-ellipsis ${labelText ? '' : 'font-semibold'} leading-8 ${disabled ? 'italic text-default-light' : ''} ${label === 'View All' && 'm-auto'}`}
+            className={`flex w-full justify-between gap-2 overflow-hidden text-ellipsis ${labelText ? '' : 'font-semibold'} leading-8 ${disabled ? 'italic text-default-light' : ''} ${label === 'View All' && 'm-auto'}`}
           >
             {typeof label === 'string' ? (
               <OverflowText text={label} placement="left" />
