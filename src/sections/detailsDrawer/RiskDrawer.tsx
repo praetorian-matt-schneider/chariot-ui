@@ -45,6 +45,7 @@ import {
 
 import { Comment } from './Comment';
 import { DetailsDrawerHeader } from './DetailsDrawerHeader';
+import { DRAWER_WIDTH } from '.';
 
 const getJobTimeline = ({
   status,
@@ -237,7 +238,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
       open={open}
       onClose={() => removeSearchParams(StorageKey.DRAWER_COMPOSITE_KEY)}
       onBack={() => navigate(-1)}
-      className={'w-[864px]'}
+      className={DRAWER_WIDTH}
       footer={
         <div className="flex gap-2">
           <Dropdown
