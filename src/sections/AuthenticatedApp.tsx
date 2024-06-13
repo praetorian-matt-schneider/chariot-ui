@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 
 import { BreadCrumbs } from '@/components/BreadCrumbs';
 import { Loader } from '@/components/Loader';
-import { MaxWidthContainer } from '@/components/MaxWidthContainer';
 import ImpersonationBanner from '@/components/ui/ImpersonationBanner';
 import { ShortcutsHelper } from '@/components/ui/Shortcuts';
 import { useMy } from '@/hooks';
@@ -127,7 +126,7 @@ export function Header() {
           `${friend?.email?.length > 0 && 'pt-[10px]'} flex flex-col items-center w-full bg-header text-header px-4`
         )}
       >
-        <MaxWidthContainer>
+        <div className="w-full max-w-screen-xl">
           <TopNavBar />
           <hr className="h-px bg-layer0 opacity-15" />
 
@@ -141,7 +140,7 @@ export function Header() {
             </Loader>
             <div id="table-buttons" />
           </div>
-        </MaxWidthContainer>
+        </div>
       </div>
     </>
   );

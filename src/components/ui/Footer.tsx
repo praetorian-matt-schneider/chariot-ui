@@ -1,12 +1,11 @@
 import React from 'react';
 
 import { LogoIcon } from '../icons/Logo.icon';
-import { MaxWidthContainer } from '../MaxWidthContainer';
 
 const Footer = () => {
   return (
     <div className="w-full">
-      <MaxWidthContainer className="m-auto">
+      <div className="m-auto w-full max-w-screen-xl">
         <footer className="mt-12 flex w-full items-center justify-between gap-2 border-t border-default p-4 text-xs text-gray-400">
           <div>
             Copyright &copy; {new Date().getFullYear()}. All Rights Reserved.
@@ -27,7 +26,7 @@ const Footer = () => {
             </a>
           </div>
         </footer>
-      </MaxWidthContainer>
+      </div>
     </div>
   );
 };
