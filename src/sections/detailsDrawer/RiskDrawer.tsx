@@ -476,7 +476,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                     },
                     {
                       label: 'Occurrences',
-                      value: riskOccurrence.length,
+                      value: riskOccurrence.length.toString(),
                       to: {
                         pathname: getRoute(['app', 'risks']),
                         search: `?q=${encodeURIComponent(name)}`,
