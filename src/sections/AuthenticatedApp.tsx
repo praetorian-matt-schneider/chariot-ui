@@ -1,9 +1,9 @@
 import React, { ReactNode, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { XMarkIcon } from '@heroicons/react/20/solid';
 
 import { BreadCrumbs } from '@/components/BreadCrumbs';
 import { Loader } from '@/components/Loader';
-import ImpersonationBanner from '@/components/ui/ImpersonationBanner';
 import { ShortcutsHelper } from '@/components/ui/Shortcuts';
 import { useMy } from '@/hooks';
 import { DetailsDrawer } from '@/sections/detailsDrawer';
@@ -110,6 +110,31 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
     </div>
   );
 }
+
+const ImpersonationBanner: React.FC = () => {
+  const { friend, stopImpersonation } = useAuth();
+
+  if (friend?.email === '') {
+    return null;
+  }
+
+  return (
+    <div className="absolute top-0 flex w-full items-center bg-brand px-10 py-1 text-xs text-white">
+      <button
+        className="hover:bg-brand-hover mr-2 w-4 rounded text-center"
+        onClick={stopImpersonation}
+      >
+        <XMarkIcon className="mr-2 size-4" />
+      </button>
+      <div>
+        Viewing{' '}
+        <span className="italic">
+          {friend?.displayName?.length > 0 ? friend.displayName : friend.email}
+        </span>
+      </div>
+    </div>
+  );
+};
 
 export function Header() {
   const { friend } = useAuth();
