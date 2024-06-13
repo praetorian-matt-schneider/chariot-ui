@@ -25,10 +25,11 @@ const WebhookExample: React.FC<Props> = ({ defaultPin }) => {
     },
     {
       id: 'Risk',
-      payload: `{
+      payload: `# Finding is a regex pattern that matches /^\\S+$/
+{  
   "dns": "public-facing-api.domain.com",
   "name": "192.168.15.30",
-  "finding": "exposed-administration-interface" # must match regex /^\\S+$/
+  "finding": "exposed-administration-interface"
 }`,
     },
   ];
