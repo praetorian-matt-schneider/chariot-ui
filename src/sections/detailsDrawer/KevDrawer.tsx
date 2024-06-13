@@ -88,54 +88,56 @@ export const KEVDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
 
           <HorizontalSplit
             leftContainer={
-              <Accordian title="Associated Risks" contentClassName="pt-0">
-                <Table
-                  tableClassName="border-none p-0 shadow-none [&_.th-top-border]:hidden"
-                  name="Associated Risks"
-                  status={risksStatus}
-                  data={risks}
-                  columns={[
-                    {
-                      label: 'Name',
-                      id: 'name',
-                      cell: 'highlight',
-                      onClick: (row: Risk) => openRisk(row),
-                    },
-                  ]}
-                  error={null}
-                  header={false}
-                  footer={false}
+              <>
+                <Comment
+                  title="Description"
+                  comment={threat.comment}
+                  isLoading={isLoading}
                 />
-              </Accordian>
+                <Accordian title="Associated Risks" contentClassName="pt-0">
+                  <Table
+                    tableClassName="border-none p-0 shadow-none [&_.th-top-border]:hidden"
+                    name="Associated Risks"
+                    status={risksStatus}
+                    data={risks}
+                    columns={[
+                      {
+                        label: 'Name',
+                        id: 'name',
+                        cell: 'highlight',
+                        onClick: (row: Risk) => openRisk(row),
+                      },
+                    ]}
+                    error={null}
+                    header={false}
+                    footer={false}
+                  />
+                </Accordian>
+              </>
             }
             rightContainer={
-              <>
-                <DetailsListContainer
-                  title="Vulnerability Details"
-                  list={[
-                    {
-                      label: '',
-                      value: (
-                        <div className="flex gap-2 text-sm">
-                          <Chip className={`p-2 ${severityProps.className}`}>
-                            <div className="flex items-center justify-center gap-2">
-                              <span className="flex-1">
-                                {severityProps.name}
-                              </span>
-                              <Chip
-                                className={`w-fit px-4 text-white ${severityProps.valueClassNames}`}
-                              >
-                                {threat.value}
-                              </Chip>
-                            </div>
-                          </Chip>
-                        </div>
-                      ),
-                    },
-                  ]}
-                />
-                <Comment comment={threat.comment} isLoading={isLoading} />
-              </>
+              <DetailsListContainer
+                title="Vulnerability Details"
+                list={[
+                  {
+                    label: '',
+                    value: (
+                      <div className="flex gap-2 text-sm">
+                        <Chip className={`p-2 ${severityProps.className}`}>
+                          <div className="flex items-center justify-center gap-2">
+                            <span className="flex-1">{severityProps.name}</span>
+                            <Chip
+                              className={`w-fit px-4 text-white ${severityProps.valueClassNames}`}
+                            >
+                              {threat.value}
+                            </Chip>
+                          </div>
+                        </Chip>
+                      </div>
+                    ),
+                  },
+                ]}
+              />
             }
           />
         </div>

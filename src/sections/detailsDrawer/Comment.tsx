@@ -14,12 +14,14 @@ interface Props {
   comment: string;
   isLoading: boolean;
   onSave?: (comment: string) => Promise<void>;
+  title?: string;
 }
 
 export const Comment: React.FC<Props> = ({
   isLoading,
   comment,
   onSave,
+  title = 'Comment',
 }: Props) => {
   const { searchParams, removeSearchParams } = useSearchParams();
 
@@ -48,7 +50,7 @@ export const Comment: React.FC<Props> = ({
 
   return (
     <Accordian
-      title="Comment"
+      title={title}
       titlerightContainer={
         onSave && (
           <Button
