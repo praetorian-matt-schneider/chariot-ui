@@ -2,7 +2,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
-import { AppRoutes } from '@/app/Route';
+import { AppRoutes } from '@/app/AppRoute';
 import { useInitAxiosInterceptors } from '@/hooks/useAxios';
 import { queryClient } from '@/queryclient';
 import AuthProvider from '@/state/auth';

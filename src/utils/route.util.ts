@@ -1,4 +1,4 @@
-import { TAppRoutes } from '@/app/Route';
+import { TAppRoutes } from '@/app/AppRoute';
 import { IRouteObj } from '@/components/route/RenderRoutes';
 
 type TData = TAppRoutes;
