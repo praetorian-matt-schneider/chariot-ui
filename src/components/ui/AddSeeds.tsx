@@ -44,7 +44,6 @@ export const AddSeeds: React.FC<Props> = (props: Props) => {
     const seedsString = GetSeeds(concatFiles, 500);
     const seeds = seedsString.map(seed => ({ asset: seed }));
 
-    console.log('seeds', seeds);
     bulkAddSeed(seeds);
   };
 
