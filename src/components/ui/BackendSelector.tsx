@@ -1,6 +1,12 @@
 import { Fragment } from 'react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
-import { Menu, Transition } from '@headlessui/react';
+import {
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuItems,
+  Transition,
+} from '@headlessui/react';
 
 import { cn } from '@/utils/classname';
 
@@ -34,7 +40,7 @@ export default function BackendSelector() {
     <Menu as="div" className="relative inline-block w-full">
       <div>
         <div className="font-sm mb-2 font-medium">Select a Region</div>
-        <Menu.Button className="flex w-full rounded-[4px] border border-gray-300 p-3 px-6 text-center transition duration-300 ease-in-out hover:bg-gray-50">
+        <MenuButton className="flex w-full rounded-[4px] border border-gray-300 p-3 px-6 text-center transition duration-300 ease-in-out hover:bg-gray-50">
           <span className="flex w-full items-center text-left">
             <img
               src="https://hatscripts.github.io/circle-flags/flags/us.svg"
@@ -44,7 +50,7 @@ export default function BackendSelector() {
             United States - East
           </span>
           <ChevronDownIcon className="-mr-1 ml-2 size-5" aria-hidden="true" />
-        </Menu.Button>
+        </MenuButton>
       </div>
 
       <Transition
@@ -56,16 +62,16 @@ export default function BackendSelector() {
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95"
       >
-        <Menu.Items className="absolute z-10 mt-2 w-full rounded-[2px] bg-white shadow-lg ring-1 ring-black/5 focus:outline-none">
+        <MenuItems className="absolute z-10 mt-2 w-full rounded-[2px] bg-white shadow-lg ring-1 ring-black/5 focus:outline-none">
           <div className="py-1">
             {displayBackends.map(backend => (
-              <Menu.Item key={backend.name}>
-                {({ active }) => (
+              <MenuItem key={backend.name}>
+                {({ focus }) => (
                   <button
                     type="button"
                     disabled={!backend.available}
                     className={classNames(
-                      active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                      focus ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                       'block w-full px-6 py-2 text-center disabled:grayscale'
                     )}
                   >
@@ -97,10 +103,10 @@ export default function BackendSelector() {
                     </div>
                   </button>
                 )}
-              </Menu.Item>
+              </MenuItem>
             ))}
           </div>
-        </Menu.Items>
+        </MenuItems>
       </Transition>
     </Menu>
   );
