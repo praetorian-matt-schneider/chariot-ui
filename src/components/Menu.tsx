@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import React, { ReactNode, useMemo, useRef, useState } from 'react';
 import { Link, To } from 'react-router-dom';
 import { ChevronRightIcon } from '@heroicons/react/24/outline';
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
@@ -29,119 +29,9 @@ export const Menu: React.FC<MenuProps> = props => {
 
   const [isSubMenuOpen, setIsSubMenuOpen] = useState(false);
 
-  const [activeIndex, setActiveIndex] = React.useState<number>();
-
   const items = useMemo(() => {
     return unparsedItems.filter(item => !item.hide);
   }, [unparsedItems]);
-
-  function findNextFocusableIndex(index: number, itemLength: number): number {
-    if (checkIsNonFocusable(index)) {
-      return index === itemLength
-        ? -1
-        : findNextFocusableIndex(
-            index === itemLength ? 0 : index + 1,
-            itemLength
-          );
-    }
-
-    return index;
-  }
-
-  function findPreviousFocusableIndex(index: number, itemLength: number) {
-    if (checkIsNonFocusable(index)) {
-      return findPreviousFocusableIndex(
-        index === 0 ? itemLength : index - 1,
-        itemLength
-      );
-    }
-
-    return index;
-  }
-
-  function checkIsNonFocusable(index: number): boolean {
-    return (
-      ['label', 'divider'].includes(items[index]?.type || '') ||
-      items[index]?.disabled ||
-      items[index]?.hide ||
-      false
-    );
-  }
-
-  useEffect(() => {
-    if (!isSubMenuOpen) {
-      const handleKeyDown = (event: globalThis.KeyboardEvent) => {
-        if (event.key === 'ArrowUp' || event.key.toLowerCase() === 'k') {
-          event.preventDefault();
-          setActiveIndex(prevIndex => {
-            const itemLength = items.length - 1;
-            const nextValue =
-              prevIndex !== undefined
-                ? prevIndex === 0
-                  ? itemLength
-                  : prevIndex - 1
-                : itemLength;
-
-            const focusIndex = findPreviousFocusableIndex(
-              nextValue,
-              itemLength
-            );
-
-            return focusIndex;
-          });
-        } else if (
-          event.key === 'ArrowDown' ||
-          event.key.toLowerCase() === 'j'
-        ) {
-          event.preventDefault();
-          setActiveIndex(prevIndex => {
-            const itemLength = items.length - 1;
-            const nextValue =
-              prevIndex !== undefined
-                ? prevIndex === itemLength
-                  ? 0
-                  : prevIndex + 1
-                : 0;
-
-            const focusIndex = findNextFocusableIndex(nextValue, itemLength);
-
-            return focusIndex;
-          });
-        } else if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          if (typeof activeIndex === 'number') {
-            const selectedLi = ulRef.current?.children[
-              activeIndex
-            ] as HTMLLIElement;
-            selectedLi?.click();
-          }
-        } else if (event.key === 'Tab' && event.shiftKey) {
-          setActiveIndex(undefined);
-        }
-      };
-
-      document.addEventListener('keydown', handleKeyDown);
-
-      return () => {
-        document.removeEventListener('keydown', handleKeyDown);
-      };
-    }
-  }, [activeIndex, items, isSubMenuOpen]);
-
-  useEffect(() => {
-    if (items.length > 0) {
-      const selectedIndex = value
-        ? items.findIndex(item => item.value === value)
-        : undefined;
-
-      const focusIndex =
-        selectedIndex && selectedIndex !== -1
-          ? selectedIndex
-          : findNextFocusableIndex(0, items.length - 1);
-
-      setActiveIndex(focusIndex);
-    }
-  }, []);
 
   return (
     <ul
@@ -157,7 +47,6 @@ export const Menu: React.FC<MenuProps> = props => {
           {...item}
           isSubMenuOpen={isSubMenuOpen}
           setIsSubMenuOpen={setIsSubMenuOpen}
-          isFocused={activeIndex === index}
           isSelected={value ? item.value === value : false}
           onClick={(...args) => {
             onClick?.(...args);

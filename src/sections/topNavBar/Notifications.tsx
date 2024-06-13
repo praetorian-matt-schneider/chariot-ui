@@ -1,13 +1,16 @@
-import { BellIcon } from '@heroicons/react/24/solid';
+import React, { useEffect, useState } from 'react';
 
 import { Dropdown } from '@/components/Dropdown';
 import { useMy } from '@/hooks/useMy';
-import { formatDate, sortByDate, sToMs } from '@/utils/date.util';
+import { JobStatus } from '@/types';
+import { sToMs } from '@/utils/date.util';
 import { getRoute } from '@/utils/route.util';
 
-import { Job } from '../../types';
+interface Props {
+  onNotify?: (showNotification: boolean) => void;
+}
 
-export const Notifications: React.FC = () => {
+export const Notifications: React.FC<Props> = ({ onNotify }) => {
   const { data: jobs = [] } = useMy(
     {
       resource: 'job',
@@ -16,22 +19,63 @@ export const Notifications: React.FC = () => {
       refetchInterval: sToMs(10),
     }
   );
-  const sortedAndLimitedJobs = sortByDate(jobs)?.slice(0, 5) || [];
+
+  const [prevRunningJobs, setPrevRunningJobs] = useState<number>(0);
+
+  const runningJobs = jobs.filter(
+    job => job.status === JobStatus.Running
+  ).length;
+  const queuedJobs = jobs.filter(job => job.status === JobStatus.Queued).length;
+  const failedJobs = jobs.filter(job => job.status === JobStatus.Fail).length;
+  const completedJobs = jobs.filter(
+    job => job.status === JobStatus.Pass
+  ).length;
+
+  useEffect(() => {
+    if (runningJobs !== prevRunningJobs) {
+      setPrevRunningJobs(runningJobs);
+      onNotify && onNotify(true);
+    }
+  }, [runningJobs, prevRunningJobs]);
 
   return (
     <Dropdown
       className="p-2"
-      startIcon={<BellIcon className="size-5 text-header-dark" />}
+      startIcon={
+        <span className="relative inline-flex">
+          <button
+            type="button"
+            className="inline-flex items-center  text-sm font-semibold leading-6 text-white transition duration-150 ease-in-out"
+          >
+            {runningJobs}
+          </button>
+        </span>
+      }
       styleType="none"
       menu={{
         width: 300,
         items: [
-          ...(sortedAndLimitedJobs ?? []).map(job => ({
-            className: 'flex items-center hover:bg-layer0 cursor-default',
-            label: getDns(job) ?? '',
-            description: formatDate(job.updated) ?? '',
-            helpText: job.source,
-          })),
+          {
+            label: `Recent Activity (Last 24 hours)`,
+            className: 'cursor-default',
+            type: 'label',
+          },
+          {
+            label: `Running Jobs: ${runningJobs}`,
+            className: 'flex items-center cursor-default',
+          },
+          {
+            label: `Queued Jobs: ${queuedJobs}`,
+            className: 'flex items-center cursor-default',
+          },
+          {
+            label: `Failed Jobs: ${failedJobs}`,
+            className: 'flex items-center cursor-default',
+          },
+          {
+            label: `Completed Jobs: ${completedJobs}`,
+            className: 'flex items-center cursor-default',
+          },
           {
             label: 'View All',
             styleType: 'primary',
@@ -44,11 +88,4 @@ export const Notifications: React.FC = () => {
   );
 };
 
-const getDns = (job: Job) => {
-  if (job.asset && job.asset.dns.length > 0) {
-    return job.asset.dns;
-  } else {
-    const key = job.key.split('#');
-    return key[3];
-  }
-};
+export default Notifications;
