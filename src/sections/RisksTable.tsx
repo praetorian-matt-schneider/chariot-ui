@@ -3,7 +3,7 @@ import { ArrowDownOnSquareStackIcon } from '@heroicons/react/24/outline';
 import { ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
 
 import { HorseIcon } from '@/components/icons/Horse.icon';
-import Spinner from '@/components/Spinner';
+import { SpinnerIcon } from '@/components/icons/Spinner.icon';
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
 import Counts from '@/components/ui/Counts';
@@ -250,7 +250,7 @@ export function Risks() {
               : `Congratulations! Your Assets look safe, secure, and properly configured.\nWe'll continue to watch them to ensure nothing changes.`,
           icon:
             risks.length > 0 ? (
-              <Spinner className="size-[100px]" />
+              <SpinnerIcon className="size-[100px]" />
             ) : (
               <HorseIcon />
             ),

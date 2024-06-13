@@ -1,4 +1,4 @@
-function Spinner({ className }: { className?: string }) {
+export function SpinnerIcon({ className }: { className?: string }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -179,5 +179,3 @@ function Spinner({ className }: { className?: string }) {
     </svg>
   );
 }
-
-export default Spinner;

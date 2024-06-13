@@ -11,9 +11,9 @@ import {
 import { CheckIcon, XMarkIcon } from '@heroicons/react/24/solid';
 
 import { CopyToClipboard } from '@/components/CopyToClipboard';
+import { SpinnerIcon } from '@/components/icons/Spinner.icon';
 import { OverflowText } from '@/components/OverflowText';
 import { showBulkSnackbar, Snackbar } from '@/components/Snackbar';
-import Spinner from '@/components/Spinner';
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
 import { AddRisks } from '@/components/ui/AddRisks';
@@ -347,7 +347,7 @@ const Assets: React.FC = () => {
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={isFetchingNextPage}
         noData={{
-          icon: <Spinner className="size-[100px]" />,
+          icon: <SpinnerIcon className="size-[100px]" />,
           title: 'Scans Running',
           description:
             'Your seeds are being scanned and your assets will appear here soon',
