@@ -142,7 +142,7 @@ const Seeds: React.FC = () => {
         return seeds.filter((seed: Seed) => isIP(seed.dns, 4));
       } else if (filter === 'cidr') {
         return seeds.filter((seed: Seed) => isIPRange(seed.dns));
-      } else if (filter === 'github') {
+      } else if (filter === 'repository') {
         return seeds.filter((seed: Seed) =>
           seed.dns.startsWith('https://github')
         );
@@ -312,6 +312,8 @@ const Seeds: React.FC = () => {
     ],
   };
 
+  console.log({ stats, SeedLabels });
+
   return (
     <div className="flex w-full flex-col">
       <Table
@@ -343,6 +345,7 @@ const Seeds: React.FC = () => {
                   }),
                 ],
                 onClick: value => {
+                  console.log({ value });
                   setFilter(value || '');
                 },
                 value: filter,
