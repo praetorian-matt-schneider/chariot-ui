@@ -28,6 +28,13 @@ const DownIcon = (
   <ChevronDownIcon className="size-3 stroke-[4px] text-header-dark" />
 );
 
+const FilterLabel = ({ label, count }: { label: string; count: number }) => (
+  <div className="flex w-full justify-between gap-4">
+    <span>{label}</span>
+    <span>{count}</span>
+  </div>
+);
+
 const getStatus = (status: string) => (status[0] || '') + (status[2] || '');
 
 const getFilteredRisksByCISA = (
@@ -91,14 +98,10 @@ export function Risks() {
   const { addSearchParams } = useSearchParams();
 
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
-
   const [severityFilter, setSeverityFilter] = useFilter('', setSelectedRows);
   const [statusFilter, setStatusesFilter] = useFilter('', setSelectedRows);
   const [sourceFilter, setSourceFilter] = useFilter('', setSelectedRows);
-  // const { data: stats = {}, status: statsStatus } = useCounts({
-  //   resource: 'risk',
-  //   filterByGlobalSearch: true,
-  // });
+
   const { data: threats, status: threatsStatus } = useMy({
     resource: 'threat',
   });
@@ -242,8 +245,9 @@ export function Risks() {
   const sourceFilterOptions = useMemo(() => {
     return [
       {
-        label: 'All Sources',
-        labelSuffix: risksExceptSource.length,
+        label: (
+          <FilterLabel label="All Sources" count={risksExceptSource.length} />
+        ),
         value: '',
       },
       {
@@ -251,11 +255,15 @@ export function Risks() {
         type: 'divider',
       },
       {
-        label: 'CISA KEV',
-        labelSuffix: getFilteredRisksByCISA(
-          risksExceptSource,
-          knownExploitedThreats
-        ).length,
+        label: (
+          <FilterLabel
+            label="CISA KEV"
+            count={
+              getFilteredRisksByCISA(risksExceptSource, knownExploitedThreats)
+                .length
+            }
+          />
+        ),
         value: 'cisa_kev',
       },
     ];
@@ -282,8 +290,12 @@ export function Risks() {
               menu={{
                 items: [
                   {
-                    label: 'All Statuses',
-                    labelSuffix: risksExceptStatus.length,
+                    label: (
+                      <FilterLabel
+                        label={'All Statuses'}
+                        count={risksExceptStatus.length}
+                      />
+                    ),
                     value: '',
                   },
                   {
@@ -292,10 +304,17 @@ export function Risks() {
                   },
                   ...riskStatusOptions.map(option => ({
                     ...option,
-                    labelSuffix: risksExceptStatus.filter(
-                      ({ status }: { status: string }) =>
-                        getStatus(status) === option.value
-                    ).length,
+                    label: (
+                      <FilterLabel
+                        label={option.label}
+                        count={
+                          risksExceptStatus.filter(
+                            ({ status }: { status: string }) =>
+                              getStatus(status) === option.value
+                          ).length
+                        }
+                      />
+                    ),
                   })),
                 ],
                 onClick: value => {
@@ -315,8 +334,12 @@ export function Risks() {
               menu={{
                 items: [
                   {
-                    label: 'All Severities',
-                    labelSuffix: risksExceptSeverity.length,
+                    label: (
+                      <FilterLabel
+                        label="All Severities"
+                        count={risksExceptSeverity.length}
+                      />
+                    ),
                     value: '',
                   },
                   {
@@ -325,10 +348,17 @@ export function Risks() {
                   },
                   ...Object.entries(SeverityDef)
                     .map(([value, label]) => ({
-                      label: label,
-                      labelSuffix: risksExceptSeverity.filter(
-                        ({ status }) => status[1] === value
-                      ).length,
+                      label: (
+                        <FilterLabel
+                          label={label}
+                          count={
+                            risksExceptSeverity.filter(
+                              ({ status }) => status[1] === value
+                            ).length
+                          }
+                        />
+                      ),
+
                       value,
                     }))
                     .reverse(),
