@@ -16,11 +16,5 @@ export function TableFilters(props: TableFiltersProps) {
     return null;
   }
 
-  return createPortal(
-    <>
-      <hr className="h-px bg-layer0 opacity-15" />
-      <div className="mb-9 mt-4">{filters}</div>
-    </>,
-    filtersElement
-  );
+  return createPortal(<div className="mb-9">{filters}</div>, filtersElement);
 }
