@@ -61,7 +61,7 @@ export const Menu: React.FC<MenuProps> = props => {
 const menuMarginClassName = `m-[8px] w-[calc(100%-16px)]`;
 
 export interface MenuItemProps {
-  label: string;
+  label: string | JSX.Element;
   value?: string;
   icon?: React.ReactNode;
   description?: string;
@@ -257,7 +257,11 @@ function Content(props: MenuItemProps) {
           <div
             className={`overflow-hidden text-ellipsis ${labelText ? '' : 'font-semibold'} leading-8 ${disabled ? 'italic text-default-light' : ''} ${label === 'View All' && 'm-auto'}`}
           >
-            <OverflowText text={label} placement="left" />
+            {typeof label === 'string' ? (
+              <OverflowText text={label} placement="left" />
+            ) : (
+              label
+            )}
           </div>
         </div>
         {(description || helpText) && (

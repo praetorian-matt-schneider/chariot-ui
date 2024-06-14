@@ -1,17 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 
 import { Dropdown } from '@/components/Dropdown';
 import { useMy } from '@/hooks/useMy';
+import { getStatusColor } from '@/sections/JobsTable';
 import { JobStatus } from '@/types';
 import { sToMs } from '@/utils/date.util';
 import { getRoute } from '@/utils/route.util';
+import { StorageKey, useStorage } from '@/utils/storage/useStorage.util';
 
 interface Props {
   onNotify?: (showNotification: boolean) => void;
+  onClick?: () => void;
 }
 
-export const Notifications: React.FC<Props> = ({ onNotify }) => {
-  const { data: jobs = [] } = useMy(
+export const Notifications: React.FC<Props> = ({ onNotify, onClick }) => {
+  const { data: jobs = [], isPending } = useMy(
     {
       resource: 'job',
     },
@@ -20,7 +23,10 @@ export const Notifications: React.FC<Props> = ({ onNotify }) => {
     }
   );
 
-  const [prevRunningJobs, setPrevRunningJobs] = useState<number>(0);
+  const [prevRunningJobs, setPrevRunningJobs] = useStorage<undefined | number>(
+    { key: StorageKey.RUNNING_JOBS },
+    undefined
+  );
 
   const runningJobs = jobs.filter(
     job => job.status === JobStatus.Running
@@ -32,11 +38,15 @@ export const Notifications: React.FC<Props> = ({ onNotify }) => {
   ).length;
 
   useEffect(() => {
-    if (runningJobs !== prevRunningJobs) {
+    if (
+      runningJobs !== prevRunningJobs &&
+      !isPending &&
+      prevRunningJobs !== undefined
+    ) {
       setPrevRunningJobs(runningJobs);
       onNotify && onNotify(true);
     }
-  }, [runningJobs, prevRunningJobs]);
+  }, [isPending, runningJobs, prevRunningJobs]);
 
   return (
     <Dropdown
@@ -46,8 +56,9 @@ export const Notifications: React.FC<Props> = ({ onNotify }) => {
           <button
             type="button"
             className="inline-flex items-center  text-sm font-semibold leading-6 text-white transition duration-150 ease-in-out"
+            onClick={onClick}
           >
-            {runningJobs}
+            {isPending ? '' : runningJobs}
           </button>
         </span>
       }
@@ -61,21 +72,62 @@ export const Notifications: React.FC<Props> = ({ onNotify }) => {
             type: 'label',
           },
           {
-            label: `Running Jobs: ${runningJobs}`,
+            label: (
+              <div className="flex cursor-default items-center">
+                Failed Jobs
+                <span
+                  className={`ml-2 inline-flex items-center rounded-full  px-2.5 py-0.5 text-xs font-medium  ${getStatusColor(JobStatus.Fail)}`}
+                >
+                  {failedJobs}
+                </span>
+              </div>
+            ),
             className: 'flex items-center cursor-default',
+            to: `/app/jobs?status=${JobStatus.Fail}`,
           },
           {
-            label: `Queued Jobs: ${queuedJobs}`,
             className: 'flex items-center cursor-default',
+            label: (
+              <div className="flex cursor-default items-center">
+                Completed Jobs
+                <span
+                  className={`ml-2 inline-flex items-center rounded-full  px-2.5 py-0.5 text-xs font-medium  ${getStatusColor(JobStatus.Pass)}`}
+                >
+                  {completedJobs}
+                </span>
+              </div>
+            ),
+            to: `/app/jobs?status=${JobStatus.Pass}`,
           },
           {
-            label: `Failed Jobs: ${failedJobs}`,
             className: 'flex items-center cursor-default',
+            label: (
+              <div className="flex cursor-default items-center">
+                Queued Jobs
+                <span
+                  className={`ml-2 inline-flex items-center rounded-full  px-2.5 py-0.5 text-xs font-medium  ${getStatusColor(JobStatus.Queued)}`}
+                >
+                  {queuedJobs}
+                </span>
+              </div>
+            ),
+            to: `/app/jobs?status=${JobStatus.Queued}`,
           },
           {
-            label: `Completed Jobs: ${completedJobs}`,
+            label: (
+              <div className="flex cursor-default items-center">
+                Running Jobs
+                <span
+                  className={`ml-2 inline-flex items-center rounded-full  px-2.5 py-0.5 text-xs font-medium  ${getStatusColor(JobStatus.Running)}`}
+                >
+                  {runningJobs}
+                </span>
+              </div>
+            ),
             className: 'flex items-center cursor-default',
+            to: `/app/jobs?status=${JobStatus.Running}`,
           },
+
           {
             label: 'View All',
             styleType: 'primary',

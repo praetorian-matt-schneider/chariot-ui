@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { format } from 'date-fns';
 
@@ -17,7 +18,7 @@ const formatDate = (dateString: string) => {
   return format(date, "MMM d, yyyy '@' h:mm a");
 };
 
-const getStatusColor = (status: JobStatus) => {
+export const getStatusColor = (status: JobStatus) => {
   switch (status) {
     case JobStatus.Pass:
       return 'bg-emerald-100 text-emerald-800 inline';
@@ -51,6 +52,8 @@ const getStatusText = (status: JobStatus) => {
 };
 
 const JobsTable: React.FC = () => {
+  const location = useLocation();
+
   const { data: stats = {}, status: statsStatus } = useCounts({
     resource: 'job',
     filterByGlobalSearch: true,
@@ -66,7 +69,10 @@ const JobsTable: React.FC = () => {
 
   const status = useMergeStatus(statsStatus, jobStatus);
 
-  const [filter, setFilter] = useFilter('');
+  const searchParams = new URLSearchParams(location.search);
+  const initialFilter = searchParams.get('status') || '';
+
+  const [filter, setFilter] = useFilter(initialFilter);
   const parentRef = useRef<HTMLDivElement>(null);
 
   const filteredJobs: Job[] = useMemo(() => {
@@ -83,6 +89,11 @@ const JobsTable: React.FC = () => {
     }, 15_000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    const newFilter = searchParams.get('status') || '';
+    setFilter(newFilter);
+  }, [location.search, setFilter]);
 
   const virtualizer = useVirtualizer({
     count: status === 'pending' ? EMPTY_ROWS_COUNT : filteredJobs.length,

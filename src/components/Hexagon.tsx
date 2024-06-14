@@ -8,7 +8,7 @@ interface HexagonProps {
 class Hexagon extends Component<HexagonProps> {
   render() {
     return (
-      <div>
+      <div className="relative">
         <div className="hexagon">
           <div className="hexagon-content">{this.props.children}</div>
         </div>

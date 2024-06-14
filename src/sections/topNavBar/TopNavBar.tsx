@@ -72,6 +72,7 @@ export function TopNavBar() {
                 onNotify={shouldShow => {
                   setShowNotification(shouldShow);
                 }}
+                onClick={() => setShowNotification(false)}
               />
             </Hexagon>
           </div>
