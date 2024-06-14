@@ -20,6 +20,7 @@ import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
 import { AddRisks } from '@/components/ui/AddRisks';
 import { AssetStatusChip } from '@/components/ui/AssetStatusChip';
+import { FilterCounts } from '@/components/ui/FilterCounts';
 import { useMy } from '@/hooks';
 import { AssetsSnackbarTitle, useUpdateAsset } from '@/hooks/useAssets';
 import { useCounts } from '@/hooks/useCounts';
@@ -305,33 +306,37 @@ const Assets: React.FC = () => {
       <Table
         name="assets"
         filters={
-          <Dropdown
-            styleType="header"
-            label={'All Assets'}
-            endIcon={
-              <ChevronDownIcon className="size-3 stroke-[4px] text-header-dark" />
-            }
-            menu={{
-              items: [
-                {
-                  label: 'All Assets',
-                  labelSuffix: assets.length,
-                  value: '',
-                },
-                {
-                  label: 'Divider',
-                  type: 'divider',
-                },
-                ...Object.entries(AssetLabels).map(([key, label]) => {
-                  return {
-                    label,
-                    labelSuffix: stats[key] || 0,
-                    value: key,
-                  };
-                }),
-              ],
-            }}
-          />
+          <div className="flex gap-4">
+            <Dropdown
+              styleType="header"
+              label={'All Assets'}
+              endIcon={
+                <ChevronDownIcon className="size-3 stroke-[4px] text-header-dark" />
+              }
+              menu={{
+                items: [
+                  {
+                    label: 'All Assets',
+                    labelSuffix: assets.length,
+                    value: '',
+                  },
+                  {
+                    label: 'Divider',
+                    type: 'divider',
+                  },
+                  ...Object.entries(AssetLabels).map(([key, label]) => {
+                    return {
+                      label,
+                      className: 'cursor-not-allowed italic text-default-light',
+                      labelSuffix: stats[key] || 0,
+                      value: key,
+                    };
+                  }),
+                ],
+              }}
+            />
+            <FilterCounts count={assets.length} type="Assets" />
+          </div>
         }
         rowActions={{
           items: actionItems.map(item => ({
