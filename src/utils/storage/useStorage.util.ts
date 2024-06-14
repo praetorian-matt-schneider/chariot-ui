@@ -13,7 +13,6 @@ export enum StorageKey {
   DRAWER_COMPOSITE_KEY = 'drawerCompositeKey',
   HASH_SEARCH = 'hashSearch',
   GENERIC_SEARCH = 'q',
-  FORCE_UPDATE_GLOBAL_SEARCH = 'FORCE_UPDATE_GLOBAL_SEARCH',
   POE = 'POE',
   RUNNING_JOBS = 'RUNNING_JOBS',
 }

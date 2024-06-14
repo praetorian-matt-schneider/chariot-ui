@@ -248,7 +248,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                   label: 'Show References',
                   to: {
                     pathname: getRoute(['app', 'references']),
-                    search: `?${StorageKey.HASH_SEARCH}=${encodeURIComponent(referenceFilter)}&${StorageKey.FORCE_UPDATE_GLOBAL_SEARCH}=true`,
+                    search: `?${StorageKey.HASH_SEARCH}=${encodeURIComponent(referenceFilter)}`,
                   },
                 },
                 {

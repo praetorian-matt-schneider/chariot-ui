@@ -119,7 +119,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
         <Link
           to={{
             pathname: getRoute(['app', 'attributes']),
-            search: `?${StorageKey.HASH_SEARCH}=${encodeURIComponent(attributeFilter)}&${StorageKey.FORCE_UPDATE_GLOBAL_SEARCH}=true`,
+            search: `?${StorageKey.HASH_SEARCH}=${encodeURIComponent(attributeFilter)}`,
           }}
         >
           <Button className="ml-auto hover:bg-layer0" styleType="secondary">
@@ -174,7 +174,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
                         className="ml-auto"
                         to={{
                           pathname: getRoute(['app', 'assets']),
-                          search: `?${StorageKey.GENERIC_SEARCH}=${encodeURIComponent(name)}&${StorageKey.FORCE_UPDATE_GLOBAL_SEARCH}=true`,
+                          search: `?${StorageKey.GENERIC_SEARCH}=${encodeURIComponent(name)}`,
                         }}
                       >
                         <Button styleType="textPrimary">
@@ -217,7 +217,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
                         className="ml-auto"
                         to={{
                           pathname: getRoute(['app', 'assets']),
-                          search: `?${StorageKey.HASH_SEARCH}=${encodeURIComponent(linkedIpsFilter)}&${StorageKey.FORCE_UPDATE_GLOBAL_SEARCH}=true`,
+                          search: `?${StorageKey.HASH_SEARCH}=${encodeURIComponent(linkedIpsFilter)}`,
                         }}
                       >
                         and {hasMoreLinkedIps} more
@@ -268,7 +268,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
                         risks.length > 0
                           ? {
                               pathname: getRoute(['app', 'risks']),
-                              search: `?${StorageKey.HASH_SEARCH}=${encodeURIComponent(riskFilter)}&${StorageKey.FORCE_UPDATE_GLOBAL_SEARCH}=true`,
+                              search: `?${StorageKey.HASH_SEARCH}=${encodeURIComponent(riskFilter)}`,
                             }
                           : undefined,
                     },
