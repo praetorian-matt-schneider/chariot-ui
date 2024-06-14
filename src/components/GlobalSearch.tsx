@@ -63,7 +63,10 @@ const GlobalSearch = () => {
 
   const threatEnabled = debouncedSearch.startsWith('CVE-');
 
-  const { data, status } = useGenericSearch({ query: debouncedSearch });
+  const { data, status } = useGenericSearch(
+    { query: debouncedSearch },
+    { enabled: Boolean(isGenericSearch && debouncedSearch) }
+  );
   const { data: threatData = [], status: threatStatus } = useMy(
     {
       resource: 'threat',
