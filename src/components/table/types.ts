@@ -12,6 +12,7 @@ export interface TableProps<TData> {
   columns: Columns<TData>;
   data: TData[];
   counters?: JSX.Element;
+  filters?: JSX.Element;
   selection?: {
     value?: string[];
     onChange?: (value: string[]) => void;

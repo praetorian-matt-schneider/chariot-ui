@@ -51,6 +51,22 @@ export const RiskSeverityOptions = [
   { label: 'Critical', value: 'C' },
 ];
 
+export const riskStatusOptions = RiskStatusOptions.map(option => {
+  let states = [{ label: option.label, value: option.value }];
+  if (option.states) {
+    states = [
+      ...states,
+      ...option.states.map(state => ({
+        label: option.label + ' - ' + state.label,
+        value: option.value + state.value,
+      })),
+    ];
+    states.push();
+  }
+
+  return states;
+}).flat();
+
 export const RiskDropdown: React.FC<Props> = ({
   risk,
   className,
@@ -96,22 +112,6 @@ export const RiskDropdown: React.FC<Props> = ({
   const statusLabel = riskSubStatusKey
     ? `${StatusDef[riskStatusKey]} - ${StatusSubDef[riskSubStatusKey]}`
     : StatusDef[riskStatusKey];
-
-  const riskStatusOptions = RiskStatusOptions.map(option => {
-    let states = [{ label: option.label, value: option.value }];
-    if (option.states) {
-      states = [
-        ...states,
-        ...option.states.map(state => ({
-          label: option.label + ' - ' + state.label,
-          value: option.value + state.value,
-        })),
-      ];
-      states.push();
-    }
-
-    return states;
-  }).flat();
 
   if (type === 'status') {
     return (

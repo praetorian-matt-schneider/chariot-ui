@@ -165,6 +165,7 @@ export function Header() {
             </Loader>
             <div id="table-buttons" />
           </div>
+          <div id="table-filters" />
         </div>
       </div>
     </>
