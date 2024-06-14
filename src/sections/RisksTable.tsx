@@ -243,7 +243,7 @@ export function Risks() {
     return [
       {
         label: 'All Sources',
-        labelSuffix: risks.length,
+        labelSuffix: risksExceptSource.length,
         value: '',
       },
       {
@@ -283,7 +283,7 @@ export function Risks() {
                 items: [
                   {
                     label: 'All Statuses',
-                    labelSuffix: risks.length,
+                    labelSuffix: risksExceptStatus.length,
                     value: '',
                   },
                   {
@@ -316,7 +316,7 @@ export function Risks() {
                 items: [
                   {
                     label: 'All Severities',
-                    labelSuffix: risks.length,
+                    labelSuffix: risksExceptSeverity.length,
                     value: '',
                   },
                   {
@@ -364,10 +364,7 @@ export function Risks() {
         error={error}
         selection={{ value: selectedRows, onChange: setSelectedRows }}
         noData={{
-          title:
-            risks?.length > 0
-              ? `Scanning for${severityFilter in SeverityDef ? ' ' + SeverityDef[severityFilter as RiskSeverity] : ''} Risks`
-              : 'No Risks Found',
+          title: risks?.length > 0 ? 'Scanning for Risks' : 'No Risks Found',
           description:
             risks.length > 0
               ? `None of these Risks have been found, but we're actively scanning for them.\nWe'll alert you if we find any.`
