@@ -8,7 +8,6 @@ import { ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
 import { Dropdown } from '@/components/Dropdown';
 import { HorseIcon } from '@/components/icons/Horse.icon';
 import { SpinnerIcon } from '@/components/icons/Spinner.icon';
-import { MenuProps } from '@/components/Menu';
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
 import { RiskDropdown, riskStatusOptions } from '@/components/ui/RiskDropdown';
@@ -242,37 +241,6 @@ export function Risks() {
     [risks, severityFilter, statusFilter]
   );
 
-  const sourceFilterOptions = useMemo(() => {
-    return [
-      {
-        label: (
-          <FilterLabel label="All Sources" count={risksExceptSource.length} />
-        ),
-        value: '',
-      },
-      {
-        label: 'Divider',
-        type: 'divider',
-      },
-      {
-        label: (
-          <FilterLabel
-            label="CISA KEV"
-            count={
-              getFilteredRisksByCISA(risksExceptSource, knownExploitedThreats)
-                .length
-            }
-          />
-        ),
-        value: 'cisa_kev',
-      },
-    ];
-  }, [
-    risks.length,
-    JSON.stringify(risksExceptSource),
-    JSON.stringify(knownExploitedThreats),
-  ]);
-
   return (
     <div className="flex w-full flex-col">
       <Table
@@ -372,13 +340,39 @@ export function Risks() {
             <Dropdown
               styleType="header"
               label={
-                sourceFilter
-                  ? `${sourceFilterOptions.find(option => option.value === sourceFilter)?.label} Sources`
-                  : 'All Sources'
+                sourceFilter === 'cisa_kev' ? 'CISA KEV Sources' : 'All Sources'
               }
               endIcon={DownIcon}
               menu={{
-                items: sourceFilterOptions as MenuProps['items'],
+                items: [
+                  {
+                    label: (
+                      <FilterLabel
+                        label="All Sources"
+                        count={risksExceptSource.length}
+                      />
+                    ),
+                    value: '',
+                  },
+                  {
+                    label: 'Divider',
+                    type: 'divider',
+                  },
+                  {
+                    label: (
+                      <FilterLabel
+                        label="CISA KEV"
+                        count={
+                          getFilteredRisksByCISA(
+                            risksExceptSource,
+                            knownExploitedThreats
+                          ).length
+                        }
+                      />
+                    ),
+                    value: 'cisa_kev',
+                  },
+                ],
                 onClick: value => {
                   setSourceFilter(value || '');
                 },
