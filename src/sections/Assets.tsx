@@ -2,12 +2,13 @@ import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import {
-  ArrowUpCircleIcon,
+  CheckCircleIcon,
   DocumentArrowDownIcon,
+  ExclamationCircleIcon,
   PauseIcon,
   PlayIcon,
   PlusIcon,
-  StopIcon,
+  QuestionMarkCircleIcon,
 } from '@heroicons/react/24/outline';
 import { CheckIcon, XMarkIcon } from '@heroicons/react/24/solid';
 
@@ -255,13 +256,13 @@ const Assets: React.FC = () => {
         },
       },
       {
-        label: 'Priority',
-        icon: <PlusIcon className="size-5" />,
+        label: 'Status',
+        icon: <PlayIcon className="size-5" />,
         disabled: (assets: Asset[]) => assets.length === 0,
         submenu: [
           {
-            label: 'High',
-            icon: <ArrowUpCircleIcon className="size-5" />,
+            label: 'High Priority',
+            icon: <ExclamationCircleIcon className="size-5" />,
             disabled: (assets: Asset[]) =>
               assets.every(asset => asset.status === AssetStatus.ActiveHigh),
             onClick: (assets: Asset[]) => {
@@ -271,15 +272,15 @@ const Assets: React.FC = () => {
             },
           },
           {
-            label: 'Default',
-            icon: <PlayIcon className="size-5" />,
+            label: 'Standard Priority',
+            icon: <CheckCircleIcon className="size-5" />,
             disabled: (assets: Asset[]) =>
               assets.every(asset => isActive(asset)),
             onClick: (assets: Asset[]) =>
               updateStatus(assets, AssetStatus.Active),
           },
           {
-            label: 'Freeze',
+            label: 'Stop Scanning',
             icon: <PauseIcon className="size-5" />,
             disabled: (assets: Asset[]) =>
               assets.every(asset => isFrozen(asset)),
@@ -289,13 +290,15 @@ const Assets: React.FC = () => {
               setAssetStatus(AssetStatus.Frozen);
             },
           },
+          {
+            label: "I don't recognize this",
+            icon: <QuestionMarkCircleIcon className="size-5" />,
+            disabled: (assets: Asset[]) =>
+              assets.every(asset => isUnknown(asset)),
+            onClick: (assets: Asset[]) =>
+              updateStatus(assets, AssetStatus.Unknown),
+          },
         ],
-      },
-      {
-        label: 'Unknown',
-        icon: <StopIcon className="size-5" />,
-        disabled: (assets: Asset[]) => assets.every(asset => isUnknown(asset)),
-        onClick: (assets: Asset[]) => updateStatus(assets, AssetStatus.Unknown),
       },
     ],
     []
