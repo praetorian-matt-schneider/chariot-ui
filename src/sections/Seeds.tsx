@@ -327,7 +327,7 @@ const Seeds: React.FC = () => {
                 items: [
                   {
                     label: 'All Seeds',
-                    labelSuffix: seeds.length,
+                    labelSuffix: seeds.length?.toLocaleString(),
                     value: '',
                   },
                   {
@@ -337,7 +337,7 @@ const Seeds: React.FC = () => {
                   ...Object.entries(SeedLabels).map(([key, label]) => {
                     return {
                       label,
-                      labelSuffix: stats[key] || 0,
+                      labelSuffix: stats[key]?.toLocaleString() || 0,
                       value: key,
                     };
                   }),

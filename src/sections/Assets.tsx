@@ -320,7 +320,7 @@ const Assets: React.FC = () => {
                 items: [
                   {
                     label: 'All Assets',
-                    labelSuffix: assets.length,
+                    labelSuffix: assets.length?.toLocaleString(),
                     value: '',
                   },
                   {
@@ -331,7 +331,7 @@ const Assets: React.FC = () => {
                     return {
                       label,
                       className: 'cursor-not-allowed italic text-default-light',
-                      labelSuffix: stats[key] || 0,
+                      labelSuffix: stats[key]?.toLocaleString() || 0,
                       value: key,
                     };
                   }),

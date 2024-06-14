@@ -261,7 +261,7 @@ export function Risks() {
                 items: [
                   {
                     label: 'All Statuses',
-                    labelSuffix: risksExceptStatus.length,
+                    labelSuffix: risksExceptStatus.length?.toLocaleString(),
 
                     value: '',
                   },
@@ -272,10 +272,12 @@ export function Risks() {
                   ...riskStatusOptions.map(option => ({
                     ...option,
                     label: option.label,
-                    labelSuffix: risksExceptStatus.filter(
-                      ({ status }: { status: string }) =>
-                        getStatus(status) === option.value
-                    ).length,
+                    labelSuffix: risksExceptStatus
+                      .filter(
+                        ({ status }: { status: string }) =>
+                          getStatus(status) === option.value
+                      )
+                      .length?.toLocaleString(),
                   })),
                 ],
                 onClick: value => {

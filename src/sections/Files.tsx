@@ -118,7 +118,7 @@ const Files: React.FC = () => {
                 items: [
                   {
                     label: 'All Documents',
-                    labelSuffix: files.length,
+                    labelSuffix: files.length?.toLocaleString(),
                     value: '',
                   },
                   {
@@ -128,7 +128,7 @@ const Files: React.FC = () => {
                   ...Object.entries(FileLabels).map(([key, label]) => {
                     return {
                       label,
-                      labelSuffix: stats[key] || 0,
+                      labelSuffix: stats[key]?.toLocaleString() || 0,
                       value: key,
                     };
                   }),
