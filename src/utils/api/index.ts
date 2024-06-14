@@ -45,7 +45,7 @@ export function useMutation<
       try {
         return await options.mutationFn(...args);
       } catch (error) {
-        throw getQueryError(options.defaultErrorMessage, error);
+        throw getQueryError(options, error);
       }
     },
     onError: (err, ...restArgs) => {
@@ -77,7 +77,7 @@ export function useQuery<
       try {
         return await options.queryFn(...args);
       } catch (error) {
-        throw getQueryError(options.defaultErrorMessage, error);
+        throw getQueryError(options, error);
       }
     },
   });
@@ -129,7 +129,7 @@ export function useInfiniteQuery<
       try {
         return await options.queryFn(...args);
       } catch (error) {
-        throw getQueryError(options.defaultErrorMessage, error);
+        throw getQueryError(options, error);
       }
     },
   });
@@ -180,21 +180,35 @@ function updateAllQueryCache<T>(key: QueryKey, data: (currentValue: T) => T) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getQueryError(defaultErrorMessage: string, error: any) {
-  const queryErrorTitle = appendPeriodIfMissing(defaultErrorMessage);
-  const queryErrorMessage = appendContactSupport(getError(error).message);
+function getQueryError(options: CustomOptions, error: any) {
+  const isLicenseError = error?.response?.status === 402;
+  const errorMessageByStatusCode =
+    options.errorByStatusCode?.[error?.response?.status];
+
+  const queryErrorTitle =
+    errorMessageByStatusCode || options.defaultErrorMessage;
+  let queryErrorMessage = '';
+
+  if (isLicenseError && !errorMessageByStatusCode) {
+    queryErrorMessage = appendContactSupport('License Required');
+  } else {
+    queryErrorMessage = appendContactSupport('');
+  }
 
   return createError(queryErrorMessage, queryErrorTitle);
 }
 
 function appendContactSupport(error: string) {
+  const support = 'Please contact support@praetorian.com.';
+
   return capitalize(
-    appendPeriodIfMissing(error) + ' Please contact support@praetorian.com.'
+    error ? appendPeriodIfMissing(error) + ` ${support}` : support
   );
 }
 
 interface CustomOptions {
   defaultErrorMessage: string;
+  errorByStatusCode?: Record<number, string>;
 }
 
 /**

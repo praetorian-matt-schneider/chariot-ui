@@ -2,9 +2,8 @@ import React from 'react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { InformationCircleIcon } from '@heroicons/react/24/solid';
-import { v4 as uuidv4 } from 'uuid';
 
-import { create as createSeed } from '@/hooks/useSeeds';
+import { create as createSeed, useBulkAddSeed } from '@/hooks/useSeeds';
 import { AllowedSeedRegex, GetSeeds } from '@/utils/regex.util';
 
 import { Button } from '../Button';
@@ -22,6 +21,7 @@ export const AddSeeds: React.FC<Props> = (props: Props) => {
   const [seedInput, setSeedInput] = useState<string>('');
 
   const { mutate: addSeed } = createSeed();
+  const { mutate: bulkAddSeed } = useBulkAddSeed();
 
   const handleSubmitSeed = () => {
     if (seedInput.match(AllowedSeedRegex)) {
@@ -41,19 +41,10 @@ export const AddSeeds: React.FC<Props> = (props: Props) => {
     onClose();
 
     const concatFiles = files.map(({ result }) => result).join('');
+    const seedsString = GetSeeds(concatFiles, 500);
+    const seeds = seedsString.map(seed => ({ asset: seed }));
 
-    const seeds = GetSeeds(concatFiles, 500);
-
-    const toastId = uuidv4();
-
-    seeds?.forEach(word => {
-      try {
-        const asset = word;
-        addSeed({ asset, toastId, seedsCount: seeds.length });
-      } catch (error) {
-        console.error(error);
-      }
-    });
+    bulkAddSeed(seeds);
   };
 
   return (

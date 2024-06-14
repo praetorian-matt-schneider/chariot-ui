@@ -10,8 +10,6 @@ import { useMy } from './useMy';
 
 interface NewSeed {
   asset: string;
-  toastId?: string;
-  seedsCount?: number;
 }
 
 interface InfiniteQueryData {
@@ -31,49 +29,37 @@ export const create = () => {
   );
 
   return useMutation<Seed, Error, NewSeed>({
-    defaultErrorMessage: `Failed to create seed`,
+    defaultErrorMessage: `Failed to add seed`,
+    errorByStatusCode: {
+      402: 'License is required to add more seeds',
+    },
     mutationFn: async (seed: NewSeed) => {
-      const { seedsCount = 1 } = seed;
-      try {
-        const { data } = await axios.post(`/seed`, {
-          dns: seed.asset,
-          status: SeedStatus.Active,
-        });
+      const { data } = await axios.post(`/seed`, {
+        dns: seed.asset,
+        status: SeedStatus.Active,
+      });
 
-        Snackbar({
-          title:
-            seedsCount > 1
-              ? `Added ${seedsCount} seeds`
-              : `${seed.asset} added`,
-          description: startMessage,
-          variant: 'success',
-          toastId: seed?.toastId,
-        });
+      Snackbar({
+        title: `${seed.asset} added`,
+        description: startMessage,
+        variant: 'success',
+      });
 
-        invalidateJob();
+      invalidateJob();
 
-        queryClient.setQueryData<InfiniteQueryData>(queryKey, previous => {
-          // If there's no previous data, initialize with the new seed
-          if (!previous) {
-            return { pages: [[...data]], pageParams: [] };
-          }
+      queryClient.setQueryData<InfiniteQueryData>(queryKey, previous => {
+        // If there's no previous data, initialize with the new seed
+        if (!previous) {
+          return { pages: [[...data]], pageParams: [] };
+        }
 
-          const updatedPages = previous.pages.map((page, index) =>
-            index === 0 ? [...data, ...page] : page
-          );
-          return { ...previous, pages: updatedPages };
-        });
+        const updatedPages = previous.pages.map((page, index) =>
+          index === 0 ? [...data, ...page] : page
+        );
+        return { ...previous, pages: updatedPages };
+      });
 
-        return data;
-      } catch (error) {
-        Snackbar({
-          title: 'Error',
-          description: `Failed to add ${seedsCount > 1 ? `${seedsCount} seeds` : seed.asset} due to an error. Please try again.`,
-          variant: 'error',
-          toastId: seed?.toastId,
-        });
-        throw error;
-      }
+      return data;
     },
   });
 };
@@ -193,3 +179,59 @@ export function useDeleteSeed() {
     },
   });
 }
+
+export const useBulkAddSeed = () => {
+  const axios = useAxios();
+  const { invalidate: invalidateJob } = useMy(
+    { resource: 'job' },
+    { enabled: false }
+  );
+  const { invalidate: invalidateSeed } = useMy(
+    { resource: 'seed' },
+    { enabled: false }
+  );
+
+  return useMutation<void, Error, NewSeed[]>({
+    defaultErrorMessage: 'Failed to bulk add seed',
+    errorByStatusCode: {
+      402: 'License is required to add more seeds',
+    },
+    mutationFn: async (seeds: NewSeed[]) => {
+      const response = await Promise.all(
+        seeds
+          .map(async seed => {
+            await axios.post(`/seed`, {
+              dns: seed.asset,
+              status: SeedStatus.Active,
+            });
+          })
+          // Note: Catch error so we can continue adding seeds even if some fail
+          .map(p => p.catch(e => e))
+      );
+
+      const validResults = response.filter(
+        result => !(result instanceof Error)
+      );
+
+      if (validResults.length > 0) {
+        Snackbar({
+          title: `Added ${validResults.length} seeds`,
+          description: startMessage,
+          variant: 'success',
+        });
+
+        invalidateJob();
+        invalidateSeed();
+      }
+
+      if (validResults.length !== seeds.length) {
+        const firstError = response.find(result => result instanceof Error);
+        // Note: Some seeds failed to add, so throwing the first error, and useMutation will handle the error toast
+
+        throw firstError;
+      }
+
+      return;
+    },
+  });
+};
