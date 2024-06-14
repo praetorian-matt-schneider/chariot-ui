@@ -27,17 +27,12 @@ const RiskStatusOptions = [
   {
     label: 'Open',
     value: 'O',
-    states: [
-      { label: 'Progress', value: 'P' },
-      { label: 'Fixed', value: 'F' },
-    ],
   },
   {
     label: 'Closed',
     value: 'C',
     states: [
       { label: 'Accepted', value: 'A' },
-
       { label: 'Rejected', value: 'R' },
     ],
   },

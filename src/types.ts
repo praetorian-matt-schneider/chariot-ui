@@ -23,9 +23,7 @@ export enum RiskStatus {
   Closed = 'C',
 }
 export enum RiskStatusSub {
-  Progress = 'P',
   Accepted = 'A',
-  Fixed = 'F',
   Rejected = 'R',
 }
 export enum RiskSeverity {
@@ -53,9 +51,7 @@ export const StatusDef: Record<RiskStatus, string> = {
 };
 
 export const StatusSubDef: Record<RiskStatusSub, string> = {
-  P: 'In Progress',
   A: 'Accepted',
-  F: 'Fixed',
   R: 'Rejected',
 };
 
