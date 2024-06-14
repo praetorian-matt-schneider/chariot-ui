@@ -27,13 +27,6 @@ const DownIcon = (
   <ChevronDownIcon className="size-3 stroke-[4px] text-header-dark" />
 );
 
-const FilterLabel = ({ label, count }: { label: string; count: number }) => (
-  <div className="flex w-full justify-between gap-4">
-    <span>{label}</span>
-    <span>{count}</span>
-  </div>
-);
-
 const getStatus = (status: string) => (status[0] || '') + (status[2] || '');
 
 const getFilteredRisksByCISA = (
@@ -266,12 +259,9 @@ export function Risks() {
               menu={{
                 items: [
                   {
-                    label: (
-                      <FilterLabel
-                        label={'All Statuses'}
-                        count={risksExceptStatus.length}
-                      />
-                    ),
+                    label: 'All Statuses',
+                    labelSuffix: risksExceptStatus.length,
+
                     value: '',
                   },
                   {
@@ -280,17 +270,11 @@ export function Risks() {
                   },
                   ...riskStatusOptions.map(option => ({
                     ...option,
-                    label: (
-                      <FilterLabel
-                        label={option.label}
-                        count={
-                          risksExceptStatus.filter(
-                            ({ status }: { status: string }) =>
-                              getStatus(status) === option.value
-                          ).length
-                        }
-                      />
-                    ),
+                    label: option.label,
+                    labelSuffix: risksExceptStatus.filter(
+                      ({ status }: { status: string }) =>
+                        getStatus(status) === option.value
+                    ).length,
                   })),
                 ],
                 onClick: value => {
@@ -310,12 +294,8 @@ export function Risks() {
               menu={{
                 items: [
                   {
-                    label: (
-                      <FilterLabel
-                        label="All Severities"
-                        count={risksExceptSeverity.length}
-                      />
-                    ),
+                    label: 'All Severities',
+                    labelSuffix: risksExceptSeverity.length,
                     value: '',
                   },
                   {
@@ -324,17 +304,10 @@ export function Risks() {
                   },
                   ...Object.entries(SeverityDef)
                     .map(([value, label]) => ({
-                      label: (
-                        <FilterLabel
-                          label={label}
-                          count={
-                            risksExceptSeverity.filter(
-                              ({ status }) => status[1] === value
-                            ).length
-                          }
-                        />
-                      ),
-
+                      label,
+                      labelSuffix: risksExceptSeverity.filter(
+                        ({ status }) => status[1] === value
+                      ).length,
                       value,
                     }))
                     .reverse(),
@@ -354,12 +327,8 @@ export function Risks() {
               menu={{
                 items: [
                   {
-                    label: (
-                      <FilterLabel
-                        label="All Sources"
-                        count={risksExceptSource.length}
-                      />
-                    ),
+                    label: 'All Sources',
+                    labelSuffix: risksExceptSource.length,
                     value: '',
                   },
                   {
@@ -367,17 +336,11 @@ export function Risks() {
                     type: 'divider',
                   },
                   {
-                    label: (
-                      <FilterLabel
-                        label="CISA KEV"
-                        count={
-                          getFilteredRisksByCISA(
-                            risksExceptSource,
-                            knownExploitedThreats
-                          ).length
-                        }
-                      />
-                    ),
+                    label: 'CISA KEV',
+                    labelSuffix: getFilteredRisksByCISA(
+                      risksExceptSource,
+                      knownExploitedThreats
+                    ).length,
                     value: 'cisa_kev',
                   },
                 ],
