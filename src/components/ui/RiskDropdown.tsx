@@ -104,9 +104,10 @@ export const RiskDropdown: React.FC<Props> = ({
   const riskStatusKey = risk.status?.[0] as RiskStatus;
   const riskSeverityKey = risk.status?.[1] as RiskSeverity;
   const riskSubStatusKey = risk.status?.[2] as RiskStatusSub;
-  const statusLabel = riskSubStatusKey
-    ? `${StatusDef[riskStatusKey]} - ${StatusSubDef[riskSubStatusKey]}`
-    : StatusDef[riskStatusKey];
+  const statusLabel =
+    riskSubStatusKey && StatusSubDef[riskSubStatusKey]
+      ? `${StatusDef[riskStatusKey]} - ${StatusSubDef[riskSubStatusKey]}`
+      : StatusDef[riskStatusKey];
 
   if (type === 'status') {
     return (

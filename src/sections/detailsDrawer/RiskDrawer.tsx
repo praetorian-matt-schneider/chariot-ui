@@ -513,9 +513,10 @@ function getHistoryDiff(
   const riskStatusKey = history.to?.[0] as RiskStatus;
   const riskSeverityKey = history.to?.[1] as RiskSeverity;
   const riskSubStatusKey = history.to?.[2] as RiskStatusSub;
-  const statusLabel = riskSubStatusKey
-    ? `${StatusDef[riskStatusKey]} - ${StatusSubDef[riskSubStatusKey]}`
-    : StatusDef[riskStatusKey];
+  const statusLabel =
+    riskSubStatusKey && StatusSubDef[riskSubStatusKey]
+      ? `${StatusDef[riskStatusKey]} - ${StatusSubDef[riskSubStatusKey]}`
+      : StatusDef[riskStatusKey];
   const severityLabel = SeverityDef[riskSeverityKey];
 
   if (isFirst) {
