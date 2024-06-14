@@ -22,6 +22,7 @@ import { useSearchContext } from '@/state/search';
 import { cn } from '@/utils/classname';
 import { getSeverityClass } from '@/utils/risk.util';
 import { getRoute } from '@/utils/route.util';
+import { StorageKey } from '@/utils/storage/useStorage.util';
 
 import {
   Account,
@@ -50,9 +51,9 @@ const GlobalSearch = () => {
   const ref = useRef<HTMLDivElement>(null);
 
   const {
-    search: term,
-    update: onTermChange,
-    genericSearch,
+    search,
+    debouncedSearch,
+    update: onSearchChange,
     isGenericSearch,
   } = useSearchContext();
 
@@ -60,13 +61,13 @@ const GlobalSearch = () => {
   const navigate = useNavigate();
   const [isFocused, setIsFocused] = useState(false);
 
-  const threatEnabled = genericSearch.startsWith('CVE-');
+  const threatEnabled = debouncedSearch.startsWith('CVE-');
 
-  const { data, status } = useGenericSearch({ query: genericSearch });
+  const { data, status } = useGenericSearch({ query: debouncedSearch });
   const { data: threatData = [], status: threatStatus } = useMy(
     {
       resource: 'threat',
-      query: `#KEV#${genericSearch}`,
+      query: `#KEV#${debouncedSearch}`,
     },
     {
       enabled: threatEnabled,
@@ -75,20 +76,21 @@ const GlobalSearch = () => {
 
   const threatLoading = threatEnabled && threatStatus === 'pending';
 
+  console.log('threatEnabled', threatEnabled, threatStatus);
   const handleInputChange = (e: InputEvent): void => {
-    onTermChange(e.target.value);
+    onSearchChange(e.target.value);
   };
 
   const handleSelectChange = (resource: keyof MyResource | 'user') => {
     if (resource === 'user') {
       navigate({
         pathname: getRoute(['app', 'account']),
-        search: `?q=${encodeURIComponent(term)}`,
+        search: `?${StorageKey.GENERIC_SEARCH}=${encodeURIComponent(search)}`,
       });
     } else {
       navigate({
         pathname: `/app/${resource}s`,
-        search: `?q=${encodeURIComponent(term)}`,
+        search: `?${StorageKey.GENERIC_SEARCH}=${encodeURIComponent(search)}`,
       });
     }
   };
@@ -121,17 +123,17 @@ const GlobalSearch = () => {
           'placeholder:default-dark w-full rounded-3xl bg-header-dark text-header ring-header-dark md:w-[270px] lg:w-[320px] xl:w-[400px]'
         }
         name="search-bar"
-        value={term}
+        value={search}
         onChange={handleInputChange}
         placeholder="Search"
         startIcon={<MagnifyingGlassIcon className="size-4 text-header-dark" />}
         endIcon={
-          term ? (
+          search ? (
             <span
               className="cursor-pointer"
               onClick={() => {
                 removeSearchParams('q');
-                onTermChange('');
+                onSearchChange('');
               }}
             >
               <XMarkIcon className="size-4 text-header-dark" />
@@ -140,12 +142,12 @@ const GlobalSearch = () => {
         }
         onFocus={() => setIsFocused(true)}
       />
-      {isGenericSearch && isFocused && term?.length > 0 && (
+      {isGenericSearch && isFocused && search?.length > 0 && (
         <SearchResultDropdown
           {...(data as unknown as Search)}
           threats={threatData}
           isLoading={
-            status === 'pending' || threatLoading || term !== genericSearch
+            status === 'pending' || threatLoading || search !== debouncedSearch
           }
           onSelect={handleSelectChange}
           setIsFocused={setIsFocused}

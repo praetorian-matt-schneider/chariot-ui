@@ -6,7 +6,6 @@ import { MyResourceKey, Statistics } from '../types';
 
 import { useAxios } from './useAxios';
 import { getQueryKey } from './useQueryKeys';
-import { useSearchParams } from './useSearchParams';
 
 interface UseCountsProps<ResourceKey extends MyResourceKey> {
   resource: ResourceKey;
@@ -21,24 +20,20 @@ export const useCounts = <ResourceKey extends MyResourceKey>(
   options?: UseExtendQueryOptions<Statistics>
 ) => {
   const axios = useAxios();
-  const { searchParams } = useSearchParams();
-  const { hashSearch } = useSearchContext();
+  const { hashSearchFromQuery, genericSearchFromQuery } = useSearchContext();
 
   let key = '';
   let compositeKey = '';
 
   if (props.filterByGlobalSearch) {
-    const unparsedQ = searchParams.get('q');
-    const q = unparsedQ && decodeURIComponent(unparsedQ);
-
-    if (q) {
+    if (genericSearchFromQuery) {
       // Resource data will be filtered by url parameter
-      key = q;
-      compositeKey = q;
+      key = genericSearchFromQuery;
+      compositeKey = genericSearchFromQuery;
     } else {
       // Resource data will be filtered by global search
-      key = `#${props.resource}${hashSearch}`;
-      compositeKey = hashSearch;
+      key = `#${props.resource}${hashSearchFromQuery}`;
+      compositeKey = hashSearchFromQuery;
     }
   } else {
     if (props.query) {

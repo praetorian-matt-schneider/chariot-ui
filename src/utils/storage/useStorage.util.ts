@@ -10,13 +10,12 @@ export enum StorageKey {
   AUTH = 'chariot.auth',
   SHOW_NEW_USER_SEED_MODAL = 'chariot.showNewUserSeedModal',
 
-  FOCUS_ON_COMMENT = 'focusOnComment',
   DRAWER_COMPOSITE_KEY = 'drawerCompositeKey',
   HASH_SEARCH = 'hashSearch',
   GENERIC_SEARCH = 'q',
   FORCE_UPDATE_GLOBAL_SEARCH = 'FORCE_UPDATE_GLOBAL_SEARCH',
   POE = 'POE',
-  RUNNING_JOBS = 0,
+  RUNNING_JOBS = 'RUNNING_JOBS',
 }
 
 interface UseStorageOptions<S> {

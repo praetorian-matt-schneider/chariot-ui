@@ -8,7 +8,6 @@ import { Asset, MyResource, MyResourceKey } from '../types';
 import { mapAssetStataus } from './useAssets';
 import { useAxios } from './useAxios';
 import { getQueryKey } from './useQueryKeys';
-import { useSearchParams } from './useSearchParams';
 
 interface UseMyProps<ResourceKey extends MyResourceKey> {
   resource: ResourceKey;
@@ -23,8 +22,7 @@ export const useMy = <ResourceKey extends MyResourceKey>(
   options?: UseExtendInfiniteQueryOptions<MyResource[ResourceKey]>
 ) => {
   const axios = useAxios();
-  const { searchParams } = useSearchParams();
-  const { hashSearch } = useSearchContext();
+  const { hashSearchFromQuery, genericSearchFromQuery } = useSearchContext();
 
   const [offset, setOffset] = useState<string | undefined>(undefined);
 
@@ -32,17 +30,14 @@ export const useMy = <ResourceKey extends MyResourceKey>(
   let compositeKey = '';
 
   if (props.filterByGlobalSearch) {
-    const unparsedQ = searchParams.get('q');
-    const q = unparsedQ && decodeURIComponent(unparsedQ);
-
-    if (q) {
+    if (genericSearchFromQuery) {
       // Resource data will be filtered by url parameter
-      key = q;
-      compositeKey = q;
+      key = genericSearchFromQuery;
+      compositeKey = genericSearchFromQuery;
     } else {
       // Resource data will be filtered by global search
-      key = `#${props.resource}${hashSearch}`;
-      compositeKey = hashSearch;
+      key = `#${props.resource}${hashSearchFromQuery}`;
+      compositeKey = hashSearchFromQuery;
     }
   } else {
     if (props.query) {

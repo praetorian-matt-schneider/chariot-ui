@@ -19,8 +19,5 @@ export function useOpenDrawer() {
     openThreat: (threat: Pick<Threat, 'key'>) => {
       addSearchParams(StorageKey.DRAWER_COMPOSITE_KEY, threat.key);
     },
-    focusOnComment: () => {
-      addSearchParams(StorageKey.FOCUS_ON_COMMENT);
-    },
   };
 }
