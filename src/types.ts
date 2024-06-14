@@ -94,10 +94,10 @@ export const AssetLabels: Record<string, string> = {
 };
 
 export const JobLabels: Record<string, string> = {
-  JF: 'Failed Jobs',
-  JP: 'Completed Jobs',
-  JQ: 'Queued Jobs',
-  JR: 'Running Jobs',
+  JF: 'Failed',
+  JP: 'Completed',
+  JQ: 'Queued',
+  JR: 'Running',
 };
 
 interface AccountTemplate {

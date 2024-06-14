@@ -158,7 +158,7 @@ const JobsTable: React.FC = () => {
                   items: [
                     {
                       label: 'All Jobs',
-                      labelSuffix: jobs.length,
+                      labelSuffix: jobs.length?.toLocaleString(),
                       value: '',
                     },
                     {
@@ -168,7 +168,7 @@ const JobsTable: React.FC = () => {
                     ...Object.entries(JobLabels).map(([key, label]) => {
                       return {
                         label,
-                        labelSuffix: stats[key] || 0,
+                        labelSuffix: stats[key]?.toLocaleString() || 0,
                         value: key,
                       };
                     }),
