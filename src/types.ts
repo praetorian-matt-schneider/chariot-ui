@@ -76,7 +76,7 @@ export const SeedLabels: Record<string, string> = {
   cloud: 'Cloud Accounts',
   ipv4: 'IPv4 Addresses',
   cidr: 'CIDR Ranges',
-  github: 'GitHub Organizations',
+  repository: 'GitHub Organizations',
   domain: 'Domains',
 };
 
