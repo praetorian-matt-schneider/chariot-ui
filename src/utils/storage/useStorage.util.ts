@@ -16,6 +16,7 @@ export enum StorageKey {
   GENERIC_SEARCH = 'q',
   FORCE_UPDATE_GLOBAL_SEARCH = 'FORCE_UPDATE_GLOBAL_SEARCH',
   POE = 'POE',
+  RUNNING_JOBS = 0,
 }
 
 interface UseStorageOptions<S> {

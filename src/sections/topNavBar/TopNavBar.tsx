@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 
@@ -13,6 +14,8 @@ import { AccountDropdown } from './AccountDropdown';
 import { Notifications } from './Notifications';
 
 export function TopNavBar() {
+  const [showNotification, setShowNotification] = useState<boolean>(false);
+
   return (
     <div className="flex flex-col items-center justify-between py-3 md:flex-row">
       <div className="flex w-full items-center">
@@ -64,8 +67,13 @@ export function TopNavBar() {
         <GlobalSearch />
         <div className="hidden items-center md:flex">
           <div className="ml-4">
-            <Hexagon>
-              <Notifications />
+            <Hexagon notify={showNotification}>
+              <Notifications
+                onNotify={shouldShow => {
+                  setShowNotification(shouldShow);
+                }}
+                onClick={() => setShowNotification(false)}
+              />
             </Hexagon>
           </div>
           <AccountDropdown />
