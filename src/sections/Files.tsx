@@ -8,6 +8,7 @@ import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
 import { AddFile } from '@/components/ui/AddFile';
+import { FilterCounts } from '@/components/ui/FilterCounts';
 import { useDownloadFile, useMy } from '@/hooks';
 import { useCounts } from '@/hooks/useCounts';
 import { useFilter } from '@/hooks/useFilter';
@@ -138,7 +139,10 @@ const Files: React.FC = () => {
                 value: filter,
               }}
             />
-            <span className="ml-auto text-2xl font-bold">{`${filteredAndSortedFiles.length} Documents Shown`}</span>
+            <FilterCounts
+              count={filteredAndSortedFiles.length}
+              type="Documents"
+            />
           </div>
         }
         actions={{

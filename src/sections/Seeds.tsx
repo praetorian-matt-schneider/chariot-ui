@@ -18,6 +18,7 @@ import { showBulkSnackbar, Snackbar } from '@/components/Snackbar';
 import { Table } from '@/components/table/Table';
 import { ActionsWithRowSelection, Columns } from '@/components/table/types';
 import { AddSeeds } from '@/components/ui/AddSeeds';
+import { FilterCounts } from '@/components/ui/FilterCounts';
 import { useModifyAccount, useMy } from '@/hooks';
 import { useCounts } from '@/hooks/useCounts';
 import { useFilter } from '@/hooks/useFilter';
@@ -347,7 +348,7 @@ const Seeds: React.FC = () => {
                 value: filter,
               }}
             />
-            <span className="ml-auto text-2xl font-bold">{`${filteredSeeds.length} Seeds Shown`}</span>
+            <FilterCounts count={filteredSeeds.length} type="Seeds" />
           </div>
         }
         rowActions={{

@@ -10,6 +10,7 @@ import { HorseIcon } from '@/components/icons/Horse.icon';
 import { SpinnerIcon } from '@/components/icons/Spinner.icon';
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
+import { FilterCounts } from '@/components/ui/FilterCounts';
 import { RiskDropdown, riskStatusOptions } from '@/components/ui/RiskDropdown';
 import { useFilter } from '@/hooks/useFilter';
 import { useMy } from '@/hooks/useMy';
@@ -350,7 +351,7 @@ export function Risks() {
                 value: sourceFilter,
               }}
             />
-            <span className="ml-auto text-2xl font-bold">{`${filteredRisks.length} Risks Shown`}</span>
+            <FilterCounts count={filteredRisks.length} type="Risks" />
           </div>
         }
         columns={columns}

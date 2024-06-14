@@ -8,6 +8,7 @@ import { Dropdown } from '@/components/Dropdown';
 import { Loader } from '@/components/Loader';
 import { TableFilters } from '@/components/table/TableFilters';
 import { Body } from '@/components/ui/Body';
+import { FilterCounts } from '@/components/ui/FilterCounts';
 import { useMy } from '@/hooks';
 import { useCounts } from '@/hooks/useCounts';
 import { useFilter } from '@/hooks/useFilter';
@@ -176,7 +177,7 @@ const JobsTable: React.FC = () => {
                   value: filter,
                 }}
               />
-              <span className="ml-auto text-2xl font-bold">{`${filteredJobs.length} Jobs Shown`}</span>
+              <FilterCounts count={filteredJobs.length} type="Jobs" />
             </div>
           }
         />
