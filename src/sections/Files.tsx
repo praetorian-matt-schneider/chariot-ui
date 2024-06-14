@@ -1,19 +1,21 @@
 import React, { useMemo } from 'react';
+import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import { ArrowDownCircleIcon } from '@heroicons/react/24/outline';
 
 import { Button } from '@/components/Button';
+import { Dropdown } from '@/components/Dropdown';
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
 import { AddFile } from '@/components/ui/AddFile';
-import Counts from '@/components/ui/Counts';
+import { FilterCounts } from '@/components/ui/FilterCounts';
 import { useDownloadFile, useMy } from '@/hooks';
 import { useCounts } from '@/hooks/useCounts';
 import { useFilter } from '@/hooks/useFilter';
 import { useMergeStatus } from '@/utils/api';
 import { sortByDate } from '@/utils/date.util';
 
-import { MyFile } from '../types';
+import { FileLabels, MyFile } from '../types';
 
 const Files: React.FC = () => {
   const {
@@ -102,19 +104,46 @@ const Files: React.FC = () => {
         status={status}
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={isFetchingNextPage}
-        counters={
-          <Counts
-            stats={stats}
-            onClick={(label: string) => {
-              if (label === filter && label !== '') {
-                setFilter('');
-              } else {
-                setFilter(label);
+        filters={
+          <div className="flex gap-4">
+            <Dropdown
+              styleType="header"
+              label={
+                filter ? `${FileLabels[filter]} Documents` : 'All Documents'
               }
-            }}
-            selected={filter}
-            type="files"
-          />
+              endIcon={
+                <ChevronDownIcon className="size-3 stroke-[4px] text-header-dark" />
+              }
+              menu={{
+                items: [
+                  {
+                    label: 'All Documents',
+                    labelSuffix: files.length?.toLocaleString(),
+                    value: '',
+                  },
+                  {
+                    label: 'Divider',
+                    type: 'divider',
+                  },
+                  ...Object.entries(FileLabels).map(([key, label]) => {
+                    return {
+                      label,
+                      labelSuffix: stats[key]?.toLocaleString() || 0,
+                      value: key,
+                    };
+                  }),
+                ],
+                onClick: value => {
+                  setFilter(value || '');
+                },
+                value: filter,
+              }}
+            />
+            <FilterCounts
+              count={filteredAndSortedFiles.length}
+              type="Documents"
+            />
+          </div>
         }
         actions={{
           items: [

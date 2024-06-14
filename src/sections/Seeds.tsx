@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import {
   ArrowDownOnSquareStackIcon,
   ArrowUturnLeftIcon,
@@ -10,13 +11,14 @@ import { isFQDN, isIP, isIPRange } from 'validator';
 
 import { Button } from '@/components/Button';
 import { Chip } from '@/components/Chip';
+import { Dropdown } from '@/components/Dropdown';
 import { Input } from '@/components/form/Input';
 import { Modal } from '@/components/Modal';
 import { showBulkSnackbar, Snackbar } from '@/components/Snackbar';
 import { Table } from '@/components/table/Table';
 import { ActionsWithRowSelection, Columns } from '@/components/table/types';
 import { AddSeeds } from '@/components/ui/AddSeeds';
-import Counts from '@/components/ui/Counts';
+import { FilterCounts } from '@/components/ui/FilterCounts';
 import { useModifyAccount, useMy } from '@/hooks';
 import { useCounts } from '@/hooks/useCounts';
 import { useFilter } from '@/hooks/useFilter';
@@ -29,7 +31,13 @@ import {
 } from '@/utils/availableIntegrations';
 import { exportContent } from '@/utils/download.util';
 
-import { Account, RiskScanMessage, Seed, SeedStatus } from '../types';
+import {
+  Account,
+  RiskScanMessage,
+  Seed,
+  SeedLabels,
+  SeedStatus,
+} from '../types';
 
 import { useOpenDrawer } from './detailsDrawer/useOpenDrawer';
 
@@ -307,19 +315,41 @@ const Seeds: React.FC = () => {
   return (
     <div className="flex w-full flex-col">
       <Table
-        counters={
-          <Counts
-            stats={stats}
-            type="seeds"
-            selected={filter}
-            onClick={(label: string) => {
-              if (label === filter && label !== '') {
-                setFilter('');
-              } else {
-                setFilter(label);
+        filters={
+          <div className="flex gap-4">
+            <Dropdown
+              styleType="header"
+              label={filter ? `${SeedLabels[filter]} Seeds` : 'All Seeds'}
+              endIcon={
+                <ChevronDownIcon className="size-3 stroke-[4px] text-header-dark" />
               }
-            }}
-          />
+              menu={{
+                items: [
+                  {
+                    label: 'All Seeds',
+                    labelSuffix: seeds.length?.toLocaleString(),
+                    value: '',
+                  },
+                  {
+                    label: 'Divider',
+                    type: 'divider',
+                  },
+                  ...Object.entries(SeedLabels).map(([key, label]) => {
+                    return {
+                      label,
+                      labelSuffix: stats[key]?.toLocaleString() || 0,
+                      value: key,
+                    };
+                  }),
+                ],
+                onClick: value => {
+                  setFilter(value || '');
+                },
+                value: filter,
+              }}
+            />
+            <FilterCounts count={filteredSeeds.length} type="Seeds" />
+          </div>
         }
         rowActions={{
           items: [
