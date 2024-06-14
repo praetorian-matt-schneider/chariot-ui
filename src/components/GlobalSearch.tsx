@@ -79,7 +79,6 @@ const GlobalSearch = () => {
 
   const threatLoading = threatEnabled && threatStatus === 'pending';
 
-  console.log('threatEnabled', threatEnabled, threatStatus);
   const handleInputChange = (e: InputEvent): void => {
     onSearchChange(e.target.value);
   };

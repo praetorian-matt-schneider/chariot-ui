@@ -479,7 +479,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                       value: riskOccurrence.length.toString(),
                       to: {
                         pathname: getRoute(['app', 'risks']),
-                        search: `?q=${encodeURIComponent(name)}`,
+                        search: `?${StorageKey.GENERIC_SEARCH}=${encodeURIComponent(name)}`,
                       },
                       onClick: () => {
                         update(name);
