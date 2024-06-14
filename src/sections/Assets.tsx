@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import {
   ArrowUpCircleIcon,
   DocumentArrowDownIcon,
@@ -11,6 +12,7 @@ import {
 import { CheckIcon, XMarkIcon } from '@heroicons/react/24/solid';
 
 import { CopyToClipboard } from '@/components/CopyToClipboard';
+import { Dropdown } from '@/components/Dropdown';
 import { SpinnerIcon } from '@/components/icons/Spinner.icon';
 import { OverflowText } from '@/components/OverflowText';
 import { showBulkSnackbar, Snackbar } from '@/components/Snackbar';
@@ -18,7 +20,6 @@ import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
 import { AddRisks } from '@/components/ui/AddRisks';
 import { AssetStatusChip } from '@/components/ui/AssetStatusChip';
-import Counts from '@/components/ui/Counts';
 import { useMy } from '@/hooks';
 import { AssetsSnackbarTitle, useUpdateAsset } from '@/hooks/useAssets';
 import { useCounts } from '@/hooks/useCounts';
@@ -26,7 +27,13 @@ import { useMergeStatus } from '@/utils/api';
 import { exportContent } from '@/utils/download.util';
 import { getRoute } from '@/utils/route.util';
 
-import { Asset, AssetStatus, Risk, RiskScanMessage } from '../types';
+import {
+  Asset,
+  AssetLabels,
+  AssetStatus,
+  Risk,
+  RiskScanMessage,
+} from '../types';
 
 import { useOpenDrawer } from './detailsDrawer/useOpenDrawer';
 import { AssetStatusWarning } from './AssetStatusWarning';
@@ -297,15 +304,33 @@ const Assets: React.FC = () => {
     <div className="flex w-full flex-col">
       <Table
         name="assets"
-        counters={
-          <Counts
-            stats={{
-              total: Object.keys(stats).reduce((acc, key) => {
-                return acc + stats[key];
-              }, 0),
-              ...stats,
+        filters={
+          <Dropdown
+            styleType="header"
+            label={'All Assets'}
+            endIcon={
+              <ChevronDownIcon className="size-3 stroke-[4px] text-header-dark" />
+            }
+            menu={{
+              items: [
+                {
+                  label: 'All Assets',
+                  labelSuffix: assets.length,
+                  value: '',
+                },
+                {
+                  label: 'Divider',
+                  type: 'divider',
+                },
+                ...Object.entries(AssetLabels).map(([key, label]) => {
+                  return {
+                    label,
+                    labelSuffix: stats[key] || 0,
+                    value: key,
+                  };
+                }),
+              ],
             }}
-            type="assets"
           />
         }
         rowActions={{
