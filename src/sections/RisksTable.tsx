@@ -129,6 +129,14 @@ export function Risks() {
       sourceFilter,
       knownExploitedThreats,
     });
+
+    const sortOrder = ['C', 'H', 'M', 'L', 'I'];
+    filteredRisks = filteredRisks.sort((a, b) => {
+      return (
+        sortOrder.indexOf(a.status[1]) - sortOrder.indexOf(b.status[1]) ||
+        new Date(b.updated).getTime() - new Date(a.updated).getTime()
+      );
+    });
     return filteredRisks;
   }, [
     severityFilter,
