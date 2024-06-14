@@ -296,7 +296,7 @@ export function Risks() {
               label={
                 severityFilter
                   ? `${SeverityDef[severityFilter as RiskSeverity]} Severity`
-                  : 'Severities'
+                  : 'Severity'
               }
               endIcon={DownIcon}
               menu={{
