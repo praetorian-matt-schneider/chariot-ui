@@ -72,57 +72,33 @@ export const Notifications: React.FC<Props> = ({ onNotify, onClick }) => {
             type: 'label',
           },
           {
-            label: (
-              <div className="flex cursor-default items-center">
-                Failed Jobs
-                <span
-                  className={`ml-2 inline-flex items-center rounded-full  px-2.5 py-0.5 text-xs font-medium  ${getStatusColor(JobStatus.Fail)}`}
-                >
-                  {failedJobs}
-                </span>
-              </div>
+            label: 'Failed Jobs',
+            labelSuffix: (
+              <JobsCount status={JobStatus.Fail} count={failedJobs} />
             ),
             className: 'flex items-center cursor-default',
             to: `/app/jobs?status=${JobStatus.Fail}`,
           },
           {
             className: 'flex items-center cursor-default',
-            label: (
-              <div className="flex cursor-default items-center">
-                Completed Jobs
-                <span
-                  className={`ml-2 inline-flex items-center rounded-full  px-2.5 py-0.5 text-xs font-medium  ${getStatusColor(JobStatus.Pass)}`}
-                >
-                  {completedJobs}
-                </span>
-              </div>
+            label: 'Completed Jobs',
+            labelSuffix: (
+              <JobsCount status={JobStatus.Pass} count={completedJobs} />
             ),
             to: `/app/jobs?status=${JobStatus.Pass}`,
           },
           {
             className: 'flex items-center cursor-default',
-            label: (
-              <div className="flex cursor-default items-center">
-                Queued Jobs
-                <span
-                  className={`ml-2 inline-flex items-center rounded-full  px-2.5 py-0.5 text-xs font-medium  ${getStatusColor(JobStatus.Queued)}`}
-                >
-                  {queuedJobs}
-                </span>
-              </div>
+            label: 'Queued Jobs',
+            labelSuffix: (
+              <JobsCount status={JobStatus.Queued} count={queuedJobs} />
             ),
             to: `/app/jobs?status=${JobStatus.Queued}`,
           },
           {
-            label: (
-              <div className="flex cursor-default items-center">
-                Running Jobs
-                <span
-                  className={`ml-2 inline-flex items-center rounded-full  px-2.5 py-0.5 text-xs font-medium  ${getStatusColor(JobStatus.Running)}`}
-                >
-                  {runningJobs}
-                </span>
-              </div>
+            label: 'Running Jobs',
+            labelSuffix: (
+              <JobsCount status={JobStatus.Running} count={runningJobs} />
             ),
             className: 'flex items-center cursor-default',
             to: `/app/jobs?status=${JobStatus.Running}`,
@@ -139,5 +115,13 @@ export const Notifications: React.FC<Props> = ({ onNotify, onClick }) => {
     />
   );
 };
+
+const JobsCount = ({ status, count }: { status: JobStatus; count: number }) => (
+  <span
+    className={`my-1 ml-2 inline-flex items-center rounded-full  px-2.5 py-0.5 text-xs font-medium  ${getStatusColor(status)}`}
+  >
+    {count.toLocaleString()}
+  </span>
+);
 
 export default Notifications;
