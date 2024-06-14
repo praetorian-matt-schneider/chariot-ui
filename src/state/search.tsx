@@ -40,9 +40,9 @@ export const SearchProvider: React.FC<{ children: React.ReactNode }> = ({
     ? decodeURIComponent(unparsedHashSearch)
     : '';
   const genericSearchFromQuery = unparsedQ ? decodeURIComponent(unparsedQ) : '';
-  const initialSearchTerm = genericSearchFromQuery || hashSearchFromQuery || '';
+  const querySearchTerm = genericSearchFromQuery || hashSearchFromQuery || '';
 
-  const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
+  const [searchTerm, setSearchTerm] = useState(querySearchTerm);
   const [debouncedSearch] = useDebounce(searchTerm, 500);
 
   const isHashSearch = checkIsHashSearch(searchTerm);
@@ -58,9 +58,10 @@ export const SearchProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [debouncedSearch]);
 
   useComponentDidUpdate(() => {
-    // Reset search on route change
-    setSearchTerm('');
-  }, [location.pathname]);
+    if (querySearchTerm !== debouncedSearch) {
+      setSearchTerm(querySearchTerm);
+    }
+  }, [querySearchTerm]);
 
   function update(term: string) {
     const trimmedTerm = term.trimStart();
