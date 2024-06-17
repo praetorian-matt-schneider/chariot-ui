@@ -67,7 +67,16 @@ export function TableCellContent<TData>(props: {
         <ConditionalRender
           condition={Boolean(col.to)}
           conditionalWrapper={children => {
-            return <Link to={col.to?.(item) || ''}>{children}</Link>;
+            return (
+              <Link
+                to={col.to?.(item) || ''}
+                onClick={event => {
+                  event.stopPropagation();
+                }}
+              >
+                {children}
+              </Link>
+            );
           }}
         >
           {getCell()}

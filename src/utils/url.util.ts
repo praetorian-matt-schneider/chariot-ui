@@ -17,3 +17,26 @@ export const useSearchParams = () => {
 
   return { searchParams, addSearchParams, removeSearchParams };
 };
+
+export function getCurrentSearchParam() {
+  return new URLSearchParams(window.location.search);
+}
+
+export function generatePathWithSearch({
+  pathname = window.location.pathname,
+  appendSearch = [],
+}: {
+  pathname?: string;
+  appendSearch?: [string, string][];
+}) {
+  const searchParams = getCurrentSearchParam();
+
+  appendSearch.forEach(([key, value]) => {
+    searchParams.set(key, value);
+  });
+
+  return {
+    pathname,
+    search: searchParams.toString(),
+  };
+}

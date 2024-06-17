@@ -16,13 +16,13 @@ import { Menu } from '@headlessui/react';
 
 import { useMy } from '@/hooks';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
-import { useSearchParams } from '@/hooks/useSearchParams';
 import { useOpenDrawer } from '@/sections/detailsDrawer/useOpenDrawer';
 import { useSearchContext } from '@/state/search';
 import { cn } from '@/utils/classname';
 import { getSeverityClass } from '@/utils/risk.util';
 import { getRoute } from '@/utils/route.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
+import { useSearchParams } from '@/utils/url.util';
 
 import {
   Account,

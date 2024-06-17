@@ -23,13 +23,12 @@ import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useInterval } from '@/hooks/useInterval';
 import { useReRunJob } from '@/hooks/useJobs';
 import { useReportRisk, useUpdateRisk } from '@/hooks/useRisks';
-import { useSearchParams } from '@/hooks/useSearchParams';
-import { useSearchContext } from '@/state/search';
 import { cn } from '@/utils/classname';
 import { formatDate } from '@/utils/date.util';
 import { getSeverityClass } from '@/utils/risk.util';
 import { getRoute } from '@/utils/route.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
+import { generatePathWithSearch, useSearchParams } from '@/utils/url.util';
 
 import {
   JobStatus,
@@ -95,8 +94,7 @@ interface RiskDrawerProps {
 
 export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
   const navigate = useNavigate();
-  const { update } = useSearchContext();
-  const { removeSearchParams, addSearchParams } = useSearchParams();
+  const { removeSearchParams } = useSearchParams();
 
   const [, dns, name] = compositeKey.split('#');
 
@@ -253,11 +251,9 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                 },
                 {
                   label: 'Proof of Exploit',
-                  onClick: () =>
-                    addSearchParams(
-                      StorageKey.POE,
-                      encodeURIComponent(`${dns}/${name}`)
-                    ),
+                  to: generatePathWithSearch({
+                    appendSearch: [[StorageKey.POE, `${dns}/${name}`]],
+                  }),
                 },
               ],
             }}
@@ -480,9 +476,6 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                       to: {
                         pathname: getRoute(['app', 'risks']),
                         search: `?${StorageKey.GENERIC_SEARCH}=${encodeURIComponent(name)}`,
-                      },
-                      onClick: () => {
-                        update(name);
                       },
                     },
                   ]}

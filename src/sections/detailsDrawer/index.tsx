@@ -1,5 +1,5 @@
-import { useSearchParams } from '@/hooks/useSearchParams';
 import { StorageKey } from '@/utils/storage/useStorage.util';
+import { useSearchParams } from '@/utils/url.util';
 
 import { AssetDrawer } from './AssetDrawer';
 import { KEVDrawer } from './KevDrawer';
