@@ -2,12 +2,18 @@ import React from 'react';
 import { XMarkIcon } from '@heroicons/react/20/solid';
 import { AreaChart, BarChart, DonutChart, LineChart } from '@tremor/react';
 import { useMy } from '@/hooks';
-import { Account, ChartType, MyResourceKey } from '@/types';
+import { Account, ChartType, MyResourceKey, Risk } from '@/types';
 import {
-  runAggregate,
-  getAggregates,
+  runAggregate as runAccountAggregate,
+  getAggregates as getAccountAggregates,
+  CountData as AccountCountData,
   CountData,
 } from '@/utils/aggregates/account';
+import {
+  runAggregate as runRiskAggregate,
+  getAggregates as getRiskAggregates,
+  CountData as RiskCountData,
+} from '@/utils/aggregates/risk';
 
 interface ChartProps {
   type: ChartType;
@@ -85,7 +91,27 @@ const ChartWrapper: React.FC<ChartWrapperProps> = ({
     query: '',
   });
 
-  if (!isLoading && data && aggregate in getAggregates()) {
+  if (!isLoading && data) {
+    const getAggregates = () => {
+      switch (endpoint) {
+        case 'account':
+          return getAccountAggregates();
+        case 'risk':
+          return getRiskAggregates();
+        default:
+          return {};
+      }
+    };
+    const runAggregate = (aggregate: string, data: Account[] | Risk[]) => {
+      switch (endpoint) {
+        case 'account':
+          return runAccountAggregate(aggregate, data as Account[]);
+        case 'risk':
+          return runRiskAggregate(aggregate, data as Risk[]);
+        default:
+          return [];
+      }
+    };
     const aggregateFunction = getAggregates()[aggregate];
     const chartData = runAggregate(aggregate, data as Account[]);
 

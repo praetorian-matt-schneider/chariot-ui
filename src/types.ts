@@ -172,6 +172,7 @@ export type RiskHistory = {
 };
 
 export interface Risk extends RiskTemplate {
+  class: string;
   username: string;
   dns: string;
   created: string;

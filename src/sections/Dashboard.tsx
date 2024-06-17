@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 
 import ChartWrapper from '@/sections/dashboard/ChartWrapper';
 import { ChartType, MyResourceKey } from '@/types'; // Adjust paths as needed
-import { getAggregates } from '@/utils/aggregates/account'; // Adjust paths as needed
+import { getAggregates as getAccountAggregates } from '@/utils/aggregates/account';
+import { getAggregates as getRiskAggregates } from '@/utils/aggregates/risk';
 
 interface ChartConfig {
   id: number;
@@ -20,6 +21,17 @@ const Dashboard: React.FC = () => {
   const [aggregate, setAggregate] = useState<string>('');
 
   const [isFormVisible, setIsFormVisible] = useState<boolean>(false);
+
+  const getAggregates = () => {
+    switch (newEndpoint) {
+      case 'account':
+        return getAccountAggregates();
+      case 'risk':
+        return getRiskAggregates();
+      default:
+        return {};
+    }
+  };
 
   const addChart = () => {
     if (aggregate && aggregate in getAggregates()) {
@@ -40,6 +52,8 @@ const Dashboard: React.FC = () => {
   const removeChart = (chartId: number) => {
     setCharts(charts.filter(chart => chart.id !== chartId));
   };
+
+  console.log('chart', charts);
 
   return (
     <div className="w-full p-4">
