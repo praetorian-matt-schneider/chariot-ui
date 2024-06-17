@@ -7,6 +7,7 @@ import Account from '@/sections/Account';
 import Assets from '@/sections/Assets';
 import { Attributes } from '@/sections/Attributes';
 import { AuthenticatedApp } from '@/sections/AuthenticatedApp';
+import Dashboard from '@/sections/Dashboard';
 import Files from '@/sections/Files';
 import Hello from '@/sections/Hello';
 import Integrations from '@/sections/Integrations';
@@ -53,6 +54,10 @@ const appRoutes = {
     logout: {
       element: <Logout />,
       title: 'logout',
+    },
+    dashboard: {
+      element: <Dashboard />,
+      title: 'Dashboard',
     },
     assets: {
       element: <Assets />,
