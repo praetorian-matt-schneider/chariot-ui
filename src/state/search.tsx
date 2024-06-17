@@ -2,9 +2,9 @@ import React, { createContext, useContext, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useDebounce } from 'use-debounce';
 
-import { useSearchParams } from '@/hooks/useSearchParams';
 import { useComponentDidUpdate } from '@/utils/reactHooks.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
+import { useSearchParams } from '@/utils/url.util';
 
 interface SearchContextType {
   search: string;

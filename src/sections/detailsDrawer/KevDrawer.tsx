@@ -9,8 +9,8 @@ import { Table } from '@/components/table/Table';
 import { DetailsListContainer } from '@/components/ui/DetailsListContainer';
 import { useMy } from '@/hooks';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
-import { useSearchParams } from '@/hooks/useSearchParams';
 import { StorageKey } from '@/utils/storage/useStorage.util';
+import { useSearchParams } from '@/utils/url.util';
 
 import { Risk } from '../../types';
 

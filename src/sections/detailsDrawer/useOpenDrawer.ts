@@ -1,7 +1,7 @@
 import { To } from 'react-router-dom';
 
-import { generateUrlWithSearchParam } from '@/hooks/useSearchParams';
 import { StorageKey } from '@/utils/storage/useStorage.util';
+import { generateUrlWithSearchParam } from '@/utils/url.util';
 
 import { Asset, Risk, Seed, Threat } from '../../types';
 

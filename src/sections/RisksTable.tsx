@@ -15,11 +15,11 @@ import { FilterCounts } from '@/components/ui/FilterCounts';
 import { RiskDropdown, riskStatusOptions } from '@/components/ui/RiskDropdown';
 import { useFilter } from '@/hooks/useFilter';
 import { useMy } from '@/hooks/useMy';
-import { generateUrlWithSearchParam } from '@/hooks/useSearchParams';
 import { useMergeStatus } from '@/utils/api';
 import { exportContent } from '@/utils/download.util';
 import { Regex } from '@/utils/regex.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
+import { generateUrlWithSearchParam } from '@/utils/url.util';
 
 import { Risk, RiskSeverity, SeverityDef } from '../types';
 

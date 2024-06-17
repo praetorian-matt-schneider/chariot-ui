@@ -13,10 +13,10 @@ import { DetailsListContainer } from '@/components/ui/DetailsListContainer';
 import { useMy } from '@/hooks';
 import { useUpdateAsset } from '@/hooks/useAssets';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
-import { useSearchParams } from '@/hooks/useSearchParams';
 import { formatDate } from '@/utils/date.util';
 import { getRoute } from '@/utils/route.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
+import { useSearchParams } from '@/utils/url.util';
 
 import { Asset, AssetStatus } from '../../types';
 

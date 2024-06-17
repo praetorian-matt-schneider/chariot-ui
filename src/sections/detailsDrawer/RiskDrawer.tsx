@@ -23,16 +23,13 @@ import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useInterval } from '@/hooks/useInterval';
 import { useReRunJob } from '@/hooks/useJobs';
 import { useReportRisk, useUpdateRisk } from '@/hooks/useRisks';
-import {
-  generateUrlWithSearchParam,
-  useSearchParams,
-} from '@/hooks/useSearchParams';
 import { useSearchContext } from '@/state/search';
 import { cn } from '@/utils/classname';
 import { formatDate } from '@/utils/date.util';
 import { getSeverityClass } from '@/utils/risk.util';
 import { getRoute } from '@/utils/route.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
+import { generateUrlWithSearchParam, useSearchParams } from '@/utils/url.util';
 
 import {
   JobStatus,
