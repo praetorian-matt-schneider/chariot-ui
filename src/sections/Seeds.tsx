@@ -316,7 +316,7 @@ const Seeds: React.FC = () => {
           <div className="flex gap-4">
             <Dropdown
               styleType="header"
-              label={filter ? `${SeedLabels[filter]} Seeds` : 'All Seeds'}
+              label={filter ? `${SeedLabels[filter]}` : 'All Seeds'}
               endIcon={
                 <ChevronDownIcon className="size-3 stroke-[4px] text-header-dark" />
               }

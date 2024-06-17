@@ -252,8 +252,8 @@ export function Risks() {
               styleType="header"
               label={
                 statusFilter
-                  ? `${riskStatusOptions.find(option => option.value === statusFilter)?.label} Status`
-                  : 'Status'
+                  ? `${riskStatusOptions.find(option => option.value === statusFilter)?.label}`
+                  : 'All Statuses'
               }
               endIcon={DownIcon}
               menu={{
@@ -289,8 +289,8 @@ export function Risks() {
               styleType="header"
               label={
                 severityFilter
-                  ? `${SeverityDef[severityFilter as RiskSeverity]} Severity`
-                  : 'Severity'
+                  ? `${SeverityDef[severityFilter as RiskSeverity]}`
+                  : 'All Severities'
               }
               endIcon={DownIcon}
               menu={{
@@ -322,9 +322,7 @@ export function Risks() {
             />
             <Dropdown
               styleType="header"
-              label={
-                sourceFilter === 'cisa_kev' ? 'CISA KEV Sources' : 'Source'
-              }
+              label={sourceFilter === 'cisa_kev' ? 'CISA KEV' : 'All Sources'}
               endIcon={DownIcon}
               menu={{
                 items: [
