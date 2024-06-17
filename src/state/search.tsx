@@ -1,10 +1,5 @@
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import React, { createContext, useContext, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useDebounce } from 'use-debounce';
 
 import { useSearchParams } from '@/hooks/useSearchParams';
@@ -13,19 +8,15 @@ import { StorageKey } from '@/utils/storage/useStorage.util';
 
 interface SearchContextType {
   search: string;
-  genericSearch: string;
-  hashSearch: string;
-  advancedSearch: Record<string, string>;
-  isAdvancedSearch: boolean;
+  debouncedSearch: string;
+  genericSearchFromQuery: string;
+  hashSearchFromQuery: string;
   isHashSearch: boolean;
   isGenericSearch: boolean;
-  appendAdvancedSearch: (search: string) => void;
-  update: (term: string) => void;
+  update: (search: string) => void;
 }
 
 const SearchContext = createContext<SearchContextType | undefined>(undefined);
-
-const ADVANCED_SEARCH_REGEX = /(\w+):?(.*?)(?=\s|$)/;
 
 export const useSearchContext = () => {
   const context = useContext(SearchContext);
@@ -38,113 +29,62 @@ export const useSearchContext = () => {
 export const SearchProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  const location = useLocation();
   const { searchParams, addSearchParams, removeSearchParams } =
     useSearchParams();
 
-  const unparsedFilterComposite = searchParams.get(StorageKey.HASH_SEARCH);
+  const unparsedHashSearch = searchParams.get(StorageKey.HASH_SEARCH);
   const unparsedQ = searchParams.get(StorageKey.GENERIC_SEARCH);
-  const forceUpdateGlobalSearch = searchParams.get(
-    StorageKey.FORCE_UPDATE_GLOBAL_SEARCH
-  );
 
-  const filterComposite = unparsedFilterComposite
-    ? decodeURIComponent(unparsedFilterComposite)
+  const hashSearchFromQuery = unparsedHashSearch
+    ? decodeURIComponent(unparsedHashSearch)
     : '';
-  const q = unparsedQ && decodeURIComponent(unparsedQ);
+  const genericSearchFromQuery = unparsedQ ? decodeURIComponent(unparsedQ) : '';
+  const querySearchTerm = genericSearchFromQuery || hashSearchFromQuery || '';
 
-  const [searchTerm, setSearchTerm] = useState(q || filterComposite || '');
-  const [debouncedSearch, setDebouncedSearchTerm] = useDebounce(
-    searchTerm,
-    500
-  );
+  const [searchTerm, setSearchTerm] = useState(querySearchTerm);
+  const [debouncedSearch] = useDebounce(searchTerm, 500);
 
-  const isAdvancedSearch = isAdvancedSearchFn(searchTerm);
-  const isHashSearch =
-    searchTerm.startsWith('#') || searchTerm.startsWith('%23');
-  const isGenericSearch = !isAdvancedSearch && !isHashSearch;
-
-  useEffect(() => {
-    if (forceUpdateGlobalSearch && forceUpdateGlobalSearch === 'true') {
-      removeSearchParams(StorageKey.FORCE_UPDATE_GLOBAL_SEARCH);
-    }
-  }, []);
+  const isHashSearch = checkIsHashSearch(searchTerm);
+  const isGenericSearch = Boolean(searchTerm) && !isHashSearch;
 
   useComponentDidUpdate(() => {
-    if (isHashSearch) {
-      const setHashSearchTimer = setTimeout(() => {
-        addSearchParams(StorageKey.HASH_SEARCH, searchTerm);
-      }, 500);
-
-      return () => {
-        clearTimeout(setHashSearchTimer);
-      };
+    if (checkIsHashSearch(debouncedSearch)) {
+      removeSearchParams(StorageKey.GENERIC_SEARCH);
+      addSearchParams(StorageKey.HASH_SEARCH, debouncedSearch);
     } else {
       removeSearchParams(StorageKey.HASH_SEARCH);
     }
-  }, [isHashSearch, searchTerm]);
+  }, [debouncedSearch]);
 
   useComponentDidUpdate(() => {
-    if (forceUpdateGlobalSearch && forceUpdateGlobalSearch === 'true') {
-      setSearchTerm(q || filterComposite || '');
-      removeSearchParams(StorageKey.FORCE_UPDATE_GLOBAL_SEARCH);
+    if (querySearchTerm !== debouncedSearch) {
+      setSearchTerm(querySearchTerm);
     }
-  }, [forceUpdateGlobalSearch]);
-
-  const advancedSearch: Record<string, string> = useMemo(() => {
-    const searchItems = isAdvancedSearchFn(searchTerm)
-      ? searchTerm.match(new RegExp(ADVANCED_SEARCH_REGEX, 'g'))
-      : [];
-
-    return searchItems
-      ? Object.fromEntries(
-          searchItems
-            .map(searchItem => {
-              const searchItems = searchItem.match(ADVANCED_SEARCH_REGEX);
-
-              if (searchItems) {
-                return [searchItems[1], searchItems[2]];
-              }
-
-              return [];
-            })
-            .filter(x => x.length > 0)
-        )
-      : {};
-  }, [searchTerm]);
-
-  function isAdvancedSearchFn(search: string) {
-    return search.startsWith('=');
-  }
+  }, [querySearchTerm]);
 
   function update(term: string) {
     const trimmedTerm = term.trimStart();
     setSearchTerm(trimmedTerm);
-    setDebouncedSearchTerm(trimmedTerm);
-  }
-
-  function appendAdvancedSearch(search: string) {
-    setSearchTerm(currentSearch => {
-      return isAdvancedSearchFn(currentSearch)
-        ? `${currentSearch} ${search}`
-        : `= ${search}`;
-    });
   }
 
   return (
     <SearchContext.Provider
       value={{
         search: searchTerm,
-        genericSearch: isGenericSearch ? debouncedSearch : '',
-        hashSearch: isHashSearch ? debouncedSearch : '',
-        advancedSearch,
-        isAdvancedSearch,
+        debouncedSearch,
+        genericSearchFromQuery: isGenericSearch ? genericSearchFromQuery : '',
+        hashSearchFromQuery: isHashSearch ? hashSearchFromQuery : '',
         isHashSearch,
         isGenericSearch,
         update,
-        appendAdvancedSearch,
       }}
     >
       {children}
     </SearchContext.Provider>
   );
 };
+
+function checkIsHashSearch(search: string) {
+  return search.startsWith('#');
+}

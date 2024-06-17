@@ -248,7 +248,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                   label: 'Show References',
                   to: {
                     pathname: getRoute(['app', 'references']),
-                    search: `?${StorageKey.HASH_SEARCH}=${encodeURIComponent(referenceFilter)}&${StorageKey.FORCE_UPDATE_GLOBAL_SEARCH}=true`,
+                    search: `?${StorageKey.HASH_SEARCH}=${encodeURIComponent(referenceFilter)}`,
                   },
                 },
                 {
@@ -479,7 +479,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                       value: riskOccurrence.length.toString(),
                       to: {
                         pathname: getRoute(['app', 'risks']),
-                        search: `?q=${encodeURIComponent(name)}`,
+                        search: `?${StorageKey.GENERIC_SEARCH}=${encodeURIComponent(name)}`,
                       },
                       onClick: () => {
                         update(name);

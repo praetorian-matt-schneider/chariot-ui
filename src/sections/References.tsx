@@ -18,7 +18,7 @@ export function References() {
     isFetchingNextPage,
     fetchNextPage,
   } = useMy({ resource: 'ref', filterByGlobalSearch: true });
-  const { openRisk } = useOpenDrawer();
+  const { getRiskDrawerLink } = useOpenDrawer();
 
   const columns: Columns<Reference> = [
     {
@@ -26,10 +26,11 @@ export function References() {
       id: 'name',
       className: 'w-full',
       copy: false,
-      onClick: item => {
-        openRisk({
-          key: `#risk#${item.key.split('#')[2]}#${item.key.split('#')[3]}`,
-        });
+      to: item => {
+        const dns = item.key.split('#')[2];
+        const name = item.key.split('#')[3];
+
+        return getRiskDrawerLink({ dns, name });
       },
       cell: item => {
         const ip = item.key.split('#')[3];

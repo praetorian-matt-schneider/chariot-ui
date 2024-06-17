@@ -6,5 +6,9 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
   return (...args: Parameters<T>) => {
     clearTimeout(timer);
     timer = setTimeout(() => fn(...args), timeout);
+
+    return () => {
+      clearTimeout(timer);
+    };
   };
 }

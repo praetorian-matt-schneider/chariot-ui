@@ -1,26 +1,55 @@
+import { To, useLocation } from 'react-router-dom';
+
 import { useSearchParams } from '@/hooks/useSearchParams';
 import { StorageKey } from '@/utils/storage/useStorage.util';
 
 import { Asset, Risk, Seed, Threat } from '../../types';
 
 export function useOpenDrawer() {
-  const { addSearchParams } = useSearchParams();
+  const location = useLocation();
+  const { searchParams } = useSearchParams();
 
   return {
-    openSeed: (seed: Pick<Seed, 'name'>) => {
-      addSearchParams(StorageKey.DRAWER_COMPOSITE_KEY, '#seed#' + seed.name);
+    getAssetDrawerLink: (asset: Pick<Asset, 'dns' | 'name'>): To => {
+      searchParams.set(
+        StorageKey.DRAWER_COMPOSITE_KEY,
+        `#asset#${asset.dns}#${asset.name}`
+      );
+
+      return {
+        pathname: location.pathname,
+        search: searchParams.toString(),
+      };
     },
-    openRisk: (risk: Pick<Risk, 'key'>) => {
-      addSearchParams(StorageKey.DRAWER_COMPOSITE_KEY, risk.key);
+    getThreatDrawerLink: (threat: Pick<Threat, 'name'>): To => {
+      searchParams.set(
+        StorageKey.DRAWER_COMPOSITE_KEY,
+        `#threat#KEV#${threat.name}`
+      );
+
+      return {
+        pathname: location.pathname,
+        search: searchParams.toString(),
+      };
     },
-    openAsset: (asset: Partial<Pick<Asset, 'key'>>) => {
-      addSearchParams(StorageKey.DRAWER_COMPOSITE_KEY, asset.key);
+    getRiskDrawerLink: (risk: Pick<Risk, 'dns' | 'name'>): To => {
+      searchParams.set(
+        StorageKey.DRAWER_COMPOSITE_KEY,
+        `#risk#${risk.dns}#${risk.name}`
+      );
+
+      return {
+        pathname: location.pathname,
+        search: searchParams.toString(),
+      };
     },
-    openThreat: (threat: Pick<Threat, 'key'>) => {
-      addSearchParams(StorageKey.DRAWER_COMPOSITE_KEY, threat.key);
-    },
-    focusOnComment: () => {
-      addSearchParams(StorageKey.FOCUS_ON_COMMENT);
+    getSeedDrawerLink: (seed: Pick<Seed, 'name'>): To => {
+      searchParams.set(StorageKey.DRAWER_COMPOSITE_KEY, `#seed#${seed.name}`);
+
+      return {
+        pathname: location.pathname,
+        search: searchParams.toString(),
+      };
     },
   };
 }

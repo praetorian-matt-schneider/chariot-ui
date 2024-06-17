@@ -58,7 +58,7 @@ export const KEVDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
   const navigate = useNavigate();
   const { removeSearchParams } = useSearchParams();
   const kev = compositeKey.split('#')?.[2];
-  const { openRisk } = useOpenDrawer();
+  const { getRiskDrawerLink } = useOpenDrawer();
   const { data: threats = [], isLoading } = useMy({
     resource: 'threat',
     query: compositeKey,
@@ -104,8 +104,7 @@ export const KEVDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
                       {
                         label: 'Name',
                         id: 'name',
-                        cell: 'highlight',
-                        onClick: (row: Risk) => openRisk(row),
+                        to: (row: Risk) => getRiskDrawerLink(row),
                       },
                     ]}
                     error={null}

@@ -7,8 +7,6 @@ import { Button } from '@/components/Button';
 import { Loader } from '@/components/Loader';
 import { Modal } from '@/components/Modal';
 import { NoData } from '@/components/ui/NoData';
-import { useSearchParams } from '@/hooks/useSearchParams';
-import { StorageKey } from '@/utils/storage/useStorage.util';
 
 interface Props {
   comment: string;
@@ -23,26 +21,10 @@ export const Comment: React.FC<Props> = ({
   onSave,
   title = 'Comment',
 }: Props) => {
-  const { searchParams, removeSearchParams } = useSearchParams();
-
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   const [value, setValue] = useState('');
-
-  useEffect(() => {
-    if (!isLoading) {
-      const focusOnComment = searchParams.get(StorageKey.FOCUS_ON_COMMENT);
-
-      if (focusOnComment !== null) {
-        setTimeout(() => {
-          setIsEditing(true);
-
-          removeSearchParams(StorageKey.FOCUS_ON_COMMENT);
-        }, 200);
-      }
-    }
-  }, [isLoading]);
 
   useEffect(() => {
     setValue(isEditing ? comment : '');

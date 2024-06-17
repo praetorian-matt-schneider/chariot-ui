@@ -92,7 +92,7 @@ const Seeds: React.FC = () => {
 
     return account?.displayName;
   };
-  const { openSeed } = useOpenDrawer();
+  const { getSeedDrawerLink } = useOpenDrawer();
   const { mutate: updateSeed } = changeSeed();
   const [descriptionSeed, setDescriptionSeed] = useState<Seed>();
   const [integrationSeed, setIntegrationSeed] = useState<Seed>();
@@ -168,11 +168,8 @@ const Seeds: React.FC = () => {
       label: 'Seed Name',
       id: 'dns',
       className: 'w-full',
-      cell: 'highlight',
       copy: true,
-      onClick: item => {
-        openSeed(item);
-      },
+      to: item => getSeedDrawerLink(item),
     },
     {
       label: 'Status',

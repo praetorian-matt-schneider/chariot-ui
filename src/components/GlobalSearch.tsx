@@ -22,6 +22,7 @@ import { useSearchContext } from '@/state/search';
 import { cn } from '@/utils/classname';
 import { getSeverityClass } from '@/utils/risk.util';
 import { getRoute } from '@/utils/route.util';
+import { StorageKey } from '@/utils/storage/useStorage.util';
 
 import {
   Account,
@@ -50,9 +51,9 @@ const GlobalSearch = () => {
   const ref = useRef<HTMLDivElement>(null);
 
   const {
-    search: term,
-    update: onTermChange,
-    genericSearch,
+    search,
+    debouncedSearch,
+    update: onSearchChange,
     isGenericSearch,
   } = useSearchContext();
 
@@ -60,13 +61,16 @@ const GlobalSearch = () => {
   const navigate = useNavigate();
   const [isFocused, setIsFocused] = useState(false);
 
-  const threatEnabled = genericSearch.startsWith('CVE-');
+  const threatEnabled = debouncedSearch.startsWith('CVE-');
 
-  const { data, status } = useGenericSearch({ query: genericSearch });
+  const { data, status } = useGenericSearch(
+    { query: debouncedSearch },
+    { enabled: Boolean(isGenericSearch && debouncedSearch) }
+  );
   const { data: threatData = [], status: threatStatus } = useMy(
     {
       resource: 'threat',
-      query: `#KEV#${genericSearch}`,
+      query: `#KEV#${debouncedSearch}`,
     },
     {
       enabled: threatEnabled,
@@ -76,19 +80,19 @@ const GlobalSearch = () => {
   const threatLoading = threatEnabled && threatStatus === 'pending';
 
   const handleInputChange = (e: InputEvent): void => {
-    onTermChange(e.target.value);
+    onSearchChange(e.target.value);
   };
 
   const handleSelectChange = (resource: keyof MyResource | 'user') => {
     if (resource === 'user') {
       navigate({
         pathname: getRoute(['app', 'account']),
-        search: `?q=${encodeURIComponent(term)}`,
+        search: `?${StorageKey.GENERIC_SEARCH}=${encodeURIComponent(search)}`,
       });
     } else {
       navigate({
         pathname: `/app/${resource}s`,
-        search: `?q=${encodeURIComponent(term)}`,
+        search: `?${StorageKey.GENERIC_SEARCH}=${encodeURIComponent(search)}`,
       });
     }
   };
@@ -121,17 +125,17 @@ const GlobalSearch = () => {
           'placeholder:default-dark w-full rounded-3xl bg-header-dark text-header ring-header-dark md:w-[270px] lg:w-[320px] xl:w-[400px]'
         }
         name="search-bar"
-        value={term}
+        value={search}
         onChange={handleInputChange}
         placeholder="Search"
         startIcon={<MagnifyingGlassIcon className="size-4 text-header-dark" />}
         endIcon={
-          term ? (
+          search ? (
             <span
               className="cursor-pointer"
               onClick={() => {
                 removeSearchParams('q');
-                onTermChange('');
+                onSearchChange('');
               }}
             >
               <XMarkIcon className="size-4 text-header-dark" />
@@ -140,12 +144,12 @@ const GlobalSearch = () => {
         }
         onFocus={() => setIsFocused(true)}
       />
-      {isGenericSearch && isFocused && term?.length > 0 && (
+      {isGenericSearch && isFocused && search?.length > 0 && (
         <SearchResultDropdown
           {...(data as unknown as Search)}
           threats={threatData}
           isLoading={
-            status === 'pending' || threatLoading || term !== genericSearch
+            status === 'pending' || threatLoading || search !== debouncedSearch
           }
           onSelect={handleSelectChange}
           setIsFocused={setIsFocused}
@@ -204,7 +208,14 @@ const SearchResultDropdown: React.FC<Search> = ({
   isLoading,
   setIsFocused,
 }) => {
-  const { openSeed, openRisk, openAsset, openThreat } = useOpenDrawer();
+  const navigate = useNavigate();
+
+  const {
+    getSeedDrawerLink,
+    getRiskDrawerLink,
+    getAssetDrawerLink,
+    getThreatDrawerLink,
+  } = useOpenDrawer();
 
   const { search } = useSearchContext();
   const isEmpty =
@@ -249,9 +260,7 @@ const SearchResultDropdown: React.FC<Search> = ({
               onClick={item => {
                 const dns = item.key.split('#')[2];
                 const name = item.key.split('#')[3];
-                openAsset({
-                  key: `#asset#${dns}#${name}`,
-                });
+                navigate(getAssetDrawerLink({ dns, name }));
               }}
               row={item => (
                 <div className="flex items-center space-x-2">
@@ -269,7 +278,7 @@ const SearchResultDropdown: React.FC<Search> = ({
               onSelect={() => onSelect('asset')}
               Icon={AssetsIcon}
               onClick={item => {
-                openAsset(item);
+                navigate(getAssetDrawerLink(item));
               }}
               row={item => (
                 <div className="flex items-center space-x-2">
@@ -285,7 +294,7 @@ const SearchResultDropdown: React.FC<Search> = ({
               onSelect={() => onSelect('seed')}
               Icon={SeedsIcon}
               onClick={item => {
-                openSeed(item);
+                navigate(getSeedDrawerLink(item));
               }}
               row={item => item.name}
             />
@@ -295,7 +304,7 @@ const SearchResultDropdown: React.FC<Search> = ({
               onSelect={() => onSelect('risk')}
               Icon={RisksIcon}
               onClick={item => {
-                openRisk(item);
+                navigate(getRiskDrawerLink(item));
               }}
               row={item => {
                 const status = item.status?.[0] as RiskStatus;
@@ -324,7 +333,10 @@ const SearchResultDropdown: React.FC<Search> = ({
               items={attribute}
               Icon={AttributesIcon}
               onClick={item => {
-                openAsset({ key: item.key });
+                const dns = item.key.split('#')[2];
+                const name = item.key.split('#')[3];
+
+                navigate(getAssetDrawerLink({ dns, name }));
               }}
               row={item => (
                 <div className="flex flex-nowrap items-center space-x-2">
@@ -354,7 +366,7 @@ const SearchResultDropdown: React.FC<Search> = ({
               items={threats}
               Icon={UserIcon}
               onClick={item => {
-                openThreat(item);
+                navigate(getThreatDrawerLink(item));
               }}
               row={item => item.name}
             />

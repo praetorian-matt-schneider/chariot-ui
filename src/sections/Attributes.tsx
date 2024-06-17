@@ -1,15 +1,15 @@
 import { DocumentArrowDownIcon } from '@heroicons/react/24/outline';
 
+import { Link } from '@/components/Link';
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
 import { useMy } from '@/hooks';
+import { useOpenDrawer } from '@/sections/detailsDrawer/useOpenDrawer';
 import { exportContent } from '@/utils/download.util';
 import { prettyPrint } from '@/utils/prettyPrint.util';
 
 import { Attribute } from '../types';
-
-import { useOpenDrawer } from './detailsDrawer/useOpenDrawer';
 
 export function Attributes() {
   const {
@@ -19,7 +19,7 @@ export function Attributes() {
     isFetchingNextPage,
     fetchNextPage,
   } = useMy({ resource: 'attribute', filterByGlobalSearch: true });
-  const { openAsset } = useOpenDrawer();
+  const { getAssetDrawerLink } = useOpenDrawer();
 
   const columns: Columns<Attribute> = [
     {
@@ -27,13 +27,13 @@ export function Attributes() {
       id: 'name',
       className: 'w-full',
       copy: false,
-      onClick: item => {
-        openAsset({ key: `#asset#${item.dns}#${item.key.split('#')[3]}` });
-      },
       cell: item => {
         const ip = item.key.split('#')[3];
         return (
-          <p className="cursor-pointer truncate font-medium text-brand">
+          <Link
+            to={getAssetDrawerLink({ dns: item.dns, name: ip })}
+            className="cursor-pointer truncate font-medium"
+          >
             {ip !== item.dns ? (
               <span>
                 {item.dns} ({ip})
@@ -41,7 +41,7 @@ export function Attributes() {
             ) : (
               item.dns
             )}
-          </p>
+          </Link>
         );
       },
     },
