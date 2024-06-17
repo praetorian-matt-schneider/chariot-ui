@@ -95,6 +95,7 @@ export function TableBody<TData>(props: TableBodyProps<TData>) {
         isClickable && `cursor-pointer`
       )}
       onClick={event => {
+        event.preventDefault();
         handleRowClick(Number(rowData._idx), event);
       }}
     >
