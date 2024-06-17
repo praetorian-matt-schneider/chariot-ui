@@ -36,7 +36,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
   const linkedIpsFilter = `#${dns}#`;
   const attributeFilter = `#${dns}#${name}`;
 
-  const { openAsset } = useOpenDrawer();
+  const { getAssetDrawerLink } = useOpenDrawer();
   const { removeSearchParams } = useSearchParams();
   const navigate = useNavigate();
 
@@ -155,8 +155,8 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
                         label: 'DNS',
                         id: 'dns',
                         className: 'w-full cursor-pointer pl-0',
-                        cell: 'highlight',
-                        onClick: (item: Asset) => openAsset(item),
+                        copy: true,
+                        to: item => getAssetDrawerLink(item),
                       },
                       {
                         label: 'Last Seen',
@@ -198,8 +198,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
                         label: 'IP Address',
                         id: 'name',
                         className: 'w-full cursor-pointer pl-0',
-                        cell: 'highlight',
-                        onClick: (item: Asset) => openAsset(item),
+                        to: item => getAssetDrawerLink(item),
                       },
                       {
                         label: 'Last Seen',

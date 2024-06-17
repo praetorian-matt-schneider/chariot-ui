@@ -87,7 +87,7 @@ const getFilteredRisks = (
 };
 
 export function Risks() {
-  const { openRisk } = useOpenDrawer();
+  const { getRiskDrawerLink } = useOpenDrawer();
   const { addSearchParams } = useSearchParams();
 
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
@@ -145,8 +145,7 @@ export function Risks() {
       {
         label: 'Risk Name',
         id: 'name',
-        cell: 'highlight',
-        onClick: (item: Risk) => openRisk(item),
+        to: (item: Risk) => getRiskDrawerLink(item),
         className: 'w-full',
         copy: true,
       },

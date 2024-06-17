@@ -94,7 +94,7 @@ const Assets: React.FC = () => {
 
   const status = useMergeStatus(riskStatus, assetsStatus, countsStatus);
 
-  const { openAsset } = useOpenDrawer();
+  const { getAssetDrawerLink } = useOpenDrawer();
   const openRiskDataset = useMemo(
     () => buildOpenRiskDataset(risks as Risk[]),
     [risks]
@@ -137,8 +137,7 @@ const Assets: React.FC = () => {
       label: 'Asset Name',
       id: 'name',
       className: 'w-full',
-      cell: 'highlight',
-      onClick: (item: Asset) => openAsset(item),
+      to: item => getAssetDrawerLink(item),
       copy: true,
     },
     {

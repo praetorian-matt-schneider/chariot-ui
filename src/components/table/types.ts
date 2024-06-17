@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import { To } from 'react-router-dom';
 
 import { DropdownProps } from '../Dropdown';
 import { NoDataProps } from '../ui/NoData';
@@ -41,6 +42,8 @@ export interface Column<TData> {
     | 'date'
     | 'highlight'
     | ((item: TData, selectedRowsData?: TData[]) => ReactNode);
+  to?: (item: TData, selectedRowsData?: TData[]) => To;
+  formatText?: (item: TData) => string;
   className?: string;
   fixedWidth?: number;
   align?: CellAlignment;

@@ -208,7 +208,14 @@ const SearchResultDropdown: React.FC<Search> = ({
   isLoading,
   setIsFocused,
 }) => {
-  const { openSeed, openRisk, openAsset, openThreat } = useOpenDrawer();
+  const navigate = useNavigate();
+
+  const {
+    getSeedDrawerLink,
+    getRiskDrawerLink,
+    getAssetDrawerLink,
+    getThreatDrawerLink,
+  } = useOpenDrawer();
 
   const { search } = useSearchContext();
   const isEmpty =
@@ -253,9 +260,7 @@ const SearchResultDropdown: React.FC<Search> = ({
               onClick={item => {
                 const dns = item.key.split('#')[2];
                 const name = item.key.split('#')[3];
-                openAsset({
-                  key: `#asset#${dns}#${name}`,
-                });
+                navigate(getAssetDrawerLink({ dns, name }));
               }}
               row={item => (
                 <div className="flex items-center space-x-2">
@@ -273,7 +278,7 @@ const SearchResultDropdown: React.FC<Search> = ({
               onSelect={() => onSelect('asset')}
               Icon={AssetsIcon}
               onClick={item => {
-                openAsset(item);
+                navigate(getAssetDrawerLink(item));
               }}
               row={item => (
                 <div className="flex items-center space-x-2">
@@ -289,7 +294,7 @@ const SearchResultDropdown: React.FC<Search> = ({
               onSelect={() => onSelect('seed')}
               Icon={SeedsIcon}
               onClick={item => {
-                openSeed(item);
+                navigate(getSeedDrawerLink(item));
               }}
               row={item => item.name}
             />
@@ -299,7 +304,7 @@ const SearchResultDropdown: React.FC<Search> = ({
               onSelect={() => onSelect('risk')}
               Icon={RisksIcon}
               onClick={item => {
-                openRisk(item);
+                navigate(getRiskDrawerLink(item));
               }}
               row={item => {
                 const status = item.status?.[0] as RiskStatus;
@@ -328,7 +333,10 @@ const SearchResultDropdown: React.FC<Search> = ({
               items={attribute}
               Icon={AttributesIcon}
               onClick={item => {
-                openAsset({ key: item.key });
+                const dns = item.key.split('#')[2];
+                const name = item.key.split('#')[3];
+
+                navigate(getAssetDrawerLink({ dns, name }));
               }}
               row={item => (
                 <div className="flex flex-nowrap items-center space-x-2">
@@ -358,7 +366,7 @@ const SearchResultDropdown: React.FC<Search> = ({
               items={threats}
               Icon={UserIcon}
               onClick={item => {
-                openThreat(item);
+                navigate(getThreatDrawerLink(item));
               }}
               row={item => item.name}
             />

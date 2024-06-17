@@ -33,7 +33,7 @@ interface Props {
 const TABLE_LIMIT = 10;
 
 export const SeedDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
-  const { openSeed, openAsset, openRisk } = useOpenDrawer();
+  const { getRiskDrawerLink, getAssetDrawerLink } = useOpenDrawer();
   const {
     data: seedObj,
     isLoading,
@@ -128,7 +128,6 @@ export const SeedDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
             title={seed.name}
             subtitle={isLoading ? '' : `${refs?.length} Risks Found`}
             isLoading={isLoading}
-            onClick={() => openSeed(seed)}
           />
 
           <HorizontalSplit
@@ -154,10 +153,12 @@ export const SeedDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
                           </div>
                         ),
                         copy: true,
-                        onClick: (item: Asset) =>
-                          openAsset({
-                            key: `#asset#${item.dns}#${item.key.split('#')[3]}`,
-                          }),
+                        to: item => {
+                          return getAssetDrawerLink({
+                            dns: item.dns,
+                            name: item.key.split('#')[3],
+                          });
+                        },
                       },
                       {
                         label: 'Last Seen',
@@ -207,11 +208,10 @@ export const SeedDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
                           </div>
                         ),
                         copy: true,
-                        onClick: (item: Risk) => {
+                        to: (item: Risk) => {
                           const dns = item.key.split('#')[2];
                           const name = item.key.split('#')[3];
-
-                          openRisk({ key: `#risk#${dns}#${name}` });
+                          return getRiskDrawerLink({ dns, name });
                         },
                       },
                       {

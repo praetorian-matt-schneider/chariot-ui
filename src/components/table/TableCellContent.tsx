@@ -1,3 +1,5 @@
+import { ConditionalRender } from '@/components/ConditionalRender';
+import { Link } from '@/components/Link';
 import { cn } from '@/utils/classname';
 import { formatDate } from '@/utils/date.util';
 
@@ -15,10 +17,15 @@ export function TableCellContent<TData>(props: {
 }) {
   const { col, item, selectedRowsData } = props;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const content = (item as unknown as Record<string, any>)[col.id as string];
-
   function getCell() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const itemContent: any = (item as unknown as Record<any, any>)[col.id];
+    const content = col.formatText
+      ? col.formatText(item)
+      : typeof itemContent === 'string'
+        ? itemContent
+        : `${itemContent}`;
+
     if (typeof col.cell === 'function') {
       return col.cell(item, selectedRowsData);
     }
@@ -51,8 +58,21 @@ export function TableCellContent<TData>(props: {
       )}
       onClick={props.onClick}
     >
-      {col.copy && <CopyToClipboard>{getCell()}</CopyToClipboard>}
-      {!col.copy && getCell()}
+      <ConditionalRender
+        condition={Boolean(col.copy)}
+        conditionalWrapper={children => {
+          return <CopyToClipboard>{children}</CopyToClipboard>;
+        }}
+      >
+        <ConditionalRender
+          condition={Boolean(col.to)}
+          conditionalWrapper={children => {
+            return <Link to={col.to?.(item) || ''}>{children}</Link>;
+          }}
+        >
+          {getCell()}
+        </ConditionalRender>
+      </ConditionalRender>
     </div>
   );
 }
