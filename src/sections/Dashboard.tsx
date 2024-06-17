@@ -66,6 +66,7 @@ interface ChartProps {
 interface ChartConfig {
   id: number;
   type: ChartType;
+  width: string;
 }
 
 const Chart: React.FC<ChartProps> = ({ type }) => {
@@ -127,9 +128,16 @@ const Chart: React.FC<ChartProps> = ({ type }) => {
 
 const Dashboard: React.FC = () => {
   const [charts, setCharts] = useState<ChartConfig[]>([]);
+  const [newChartType, setNewChartType] = useState<ChartType>('area');
+  const [newChartWidth, setNewChartWidth] = useState<string>('w-full');
+  const [isFormVisible, setIsFormVisible] = useState<boolean>(false);
 
-  const addChart = (chartType: ChartType) => {
-    setCharts([...charts, { id: Date.now(), type: chartType }]);
+  const addChart = () => {
+    setCharts([
+      ...charts,
+      { id: Date.now(), type: newChartType, width: newChartWidth },
+    ]);
+    setIsFormVisible(false);
   };
 
   const removeChart = (chartId: number) => {
@@ -138,28 +146,56 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="w-full p-4">
-      <div className="mb-4">
-        <label className="mr-2">Add Chart:</label>
-        <select onChange={e => addChart(e.target.value as ChartType)}>
-          <option value="">Select Chart Type</option>
-          <option value="area">Area Chart</option>
-          <option value="bar">Bar Chart</option>
-          <option value="line">Line Chart</option>
-          <option value="donut">Donut Chart</option>
-        </select>
-      </div>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <button
+        onClick={() => setIsFormVisible(!isFormVisible)}
+        className="mb-4 rounded bg-green-500 p-2 text-white"
+      >
+        {isFormVisible ? 'Cancel' : 'New Chart'}
+      </button>
+
+      {isFormVisible && (
+        <div className="mb-4">
+          <label className="mr-2">Chart Type:</label>
+          <select
+            value={newChartType}
+            onChange={e => setNewChartType(e.target.value as ChartType)}
+          >
+            <option value="area">Area Chart</option>
+            <option value="bar">Bar Chart</option>
+            <option value="line">Line Chart</option>
+            <option value="donut">Donut Chart</option>
+          </select>
+          <label className="ml-4 mr-2">Width:</label>
+          <select
+            value={newChartWidth}
+            onChange={e => setNewChartWidth(e.target.value)}
+          >
+            <option value="w-full">Full Width</option>
+            <option value="w-1/2">Half Width</option>
+            <option value="w-1/3">One Third Width</option>
+            <option value="w-1/4">One Fourth Width</option>
+          </select>
+          <button
+            onClick={addChart}
+            className="ml-4 rounded bg-blue-500 p-2 text-white"
+          >
+            Add Chart
+          </button>
+        </div>
+      )}
+
+      <div className="flex flex-wrap gap-4">
         {charts.map(chart => (
           <div
             key={chart.id}
-            className="relative w-full rounded border border-gray-200 bg-white p-2 shadow"
+            className={`relative rounded border  border-gray-300 p-2 shadow ${chart.width}`}
           >
             <Chart type={chart.type} />
             <button
               onClick={() => removeChart(chart.id)}
-              className="absolute -right-4 -top-4 w-8 rounded-full  border border-gray-200 bg-white p-1 text-gray-700 hover:bg-gray-200"
+              className="absolute -right-5 -top-5 m-2 size-7 rounded-full border border-gray-300 bg-white text-gray-500"
             >
-              <XMarkIcon className="size-6" />
+              <XMarkIcon />
             </button>
           </div>
         ))}
