@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { XMarkIcon } from '@heroicons/react/20/solid';
 import { AreaChart, BarChart, DonutChart, LineChart } from '@tremor/react';
 
 // Example data for AreaChart
@@ -53,81 +54,116 @@ const donutChartData = [
   { category: 'Others', value: 5 },
 ];
 
-const dataFormatter = (number: number | bigint) =>
+const dataFormatter = (number: number | bigint): string =>
   `$${Intl.NumberFormat('us').format(number).toString()}`;
 
-const Dashboard = () => {
-  const [chartType, setChartType] = useState('area');
+type ChartType = 'area' | 'bar' | 'line' | 'donut';
 
-  const renderChart = () => {
-    switch (chartType) {
-      case 'area':
-        return (
-          <AreaChart
-            className="h-96 w-full"
-            data={areaChartData}
-            index="date"
-            categories={['SolarPanels', 'Inverters']}
-            colors={['indigo', 'rose']}
-            valueFormatter={dataFormatter}
-            yAxisWidth={60}
-          />
-        );
-      case 'bar':
-        return (
-          <BarChart
-            className="h-96 w-full"
-            data={barChartData}
-            index="name"
-            categories={['Number of threatened species']}
-            colors={['blue']}
-            valueFormatter={number =>
-              Intl.NumberFormat('us').format(number).toString()
-            }
-            yAxisWidth={48}
-          />
-        );
-      case 'line':
-        return (
-          <LineChart
-            className="h-96 w-full"
-            data={lineChartData}
-            index="date"
-            yAxisWidth={65}
-            categories={['value']}
-            colors={['green']}
-            valueFormatter={number =>
-              Intl.NumberFormat('us').format(number).toString()
-            }
-          />
-        );
-      case 'donut':
-        return (
-          <DonutChart
-            className="h-96 w-full"
-            data={donutChartData}
-            index="category"
-            colors={['purple', 'orange', 'red', 'blue', 'green']}
-            valueFormatter={dataFormatter}
-          />
-        );
-      default:
-        return <span>{chartType}</span>;
-    }
+interface ChartProps {
+  type: ChartType;
+}
+
+interface ChartConfig {
+  id: number;
+  type: ChartType;
+}
+
+const Chart: React.FC<ChartProps> = ({ type }) => {
+  switch (type) {
+    case 'area':
+      return (
+        <AreaChart
+          className="h-96 w-full"
+          data={areaChartData}
+          index="date"
+          categories={['SolarPanels', 'Inverters']}
+          colors={['indigo', 'rose']}
+          valueFormatter={dataFormatter}
+          yAxisWidth={60}
+        />
+      );
+    case 'bar':
+      return (
+        <BarChart
+          className="h-96 w-full"
+          data={barChartData}
+          index="name"
+          categories={['Number of threatened species']}
+          colors={['blue']}
+          valueFormatter={number =>
+            Intl.NumberFormat('us').format(number).toString()
+          }
+          yAxisWidth={48}
+        />
+      );
+    case 'line':
+      return (
+        <LineChart
+          className="h-96 w-full"
+          data={lineChartData}
+          index="date"
+          yAxisWidth={65}
+          categories={['value']}
+          colors={['green']}
+          valueFormatter={number =>
+            Intl.NumberFormat('us').format(number).toString()
+          }
+        />
+      );
+    case 'donut':
+      return (
+        <DonutChart
+          className="h-96 w-full"
+          data={donutChartData}
+          index="category"
+          colors={['purple', 'orange', 'red', 'blue', 'green']}
+          valueFormatter={dataFormatter}
+        />
+      );
+    default:
+      return null;
+  }
+};
+
+const Dashboard: React.FC = () => {
+  const [charts, setCharts] = useState<ChartConfig[]>([]);
+
+  const addChart = (chartType: ChartType) => {
+    setCharts([...charts, { id: Date.now(), type: chartType }]);
+  };
+
+  const removeChart = (chartId: number) => {
+    setCharts(charts.filter(chart => chart.id !== chartId));
   };
 
   return (
-    <div className="p-4">
+    <div className="w-full p-4">
       <div className="mb-4">
-        <label className="mr-2">Select Chart Type:</label>
-        <select onChange={e => setChartType(e.target.value)}>
+        <label className="mr-2">Add Chart:</label>
+        <select onChange={e => addChart(e.target.value as ChartType)}>
+          <option value="">Select Chart Type</option>
           <option value="area">Area Chart</option>
           <option value="bar">Bar Chart</option>
           <option value="line">Line Chart</option>
           <option value="donut">Donut Chart</option>
         </select>
       </div>
-      <div className="flex w-full justify-center">{renderChart()}</div>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {charts.map(chart => (
+          <div
+            key={chart.id}
+            className="relative w-full rounded border border-gray-200 bg-white p-2 shadow"
+          >
+            <Chart type={chart.type} />
+            <button
+              onClick={() => removeChart(chart.id)}
+              className="absolute -right-4 -top-4 w-8 rounded-full  border border-gray-200 bg-white p-1 text-gray-700 hover:bg-gray-200"
+            >
+              <XMarkIcon className="size-6" />
+            </button>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
