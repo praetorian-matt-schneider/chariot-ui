@@ -8,7 +8,6 @@ import {
 } from '@heroicons/react/24/outline';
 
 import { useModifyAccount } from '@/hooks';
-import { useSearchContext } from '@/state/search';
 import { IntegrationMeta } from '@/utils/availableIntegrations';
 import { cn } from '@/utils/classname';
 import { getRoute } from '@/utils/route.util';
@@ -26,7 +25,6 @@ interface Props {
 
 export const IntegrationModal = (props: Props) => {
   const { form, updateForm, onClose } = props;
-  const { update } = useSearchContext();
   const connectedAccounts = form?.connectedAccounts || [];
   const { mutate: link } = useModifyAccount('link');
   const [formValues, setFormValues] = useState<Values[]>([]);
@@ -81,7 +79,6 @@ export const IntegrationModal = (props: Props) => {
           connectedAccounts?.length > 0 && form && form.name !== 'hook' ? (
             <Button
               onClick={() => {
-                update(`#${form.name}`);
                 navigate({
                   pathname: getRoute(['app', 'jobs']),
                   search: `?hashSearch=%23${encodeURIComponent(form.name)}`,
