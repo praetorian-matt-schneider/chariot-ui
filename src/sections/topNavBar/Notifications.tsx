@@ -38,11 +38,7 @@ export const Notifications: React.FC<Props> = ({ onNotify, onClick }) => {
   ).length;
 
   useEffect(() => {
-    if (
-      runningJobs !== prevRunningJobs &&
-      !isPending &&
-      prevRunningJobs !== undefined
-    ) {
+    if (runningJobs !== prevRunningJobs) {
       setPrevRunningJobs(runningJobs);
       onNotify && onNotify(true);
     }
