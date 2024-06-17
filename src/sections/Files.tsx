@@ -108,9 +108,7 @@ const Files: React.FC = () => {
           <div className="flex gap-4">
             <Dropdown
               styleType="header"
-              label={
-                filter ? `${FileLabels[filter]} Documents` : 'All Documents'
-              }
+              label={filter ? `${FileLabels[filter]}` : 'All Documents'}
               endIcon={
                 <ChevronDownIcon className="size-3 stroke-[4px] text-header-dark" />
               }
