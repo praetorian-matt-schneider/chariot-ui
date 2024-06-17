@@ -287,8 +287,8 @@ export const IntegrationsMeta: IntegrationMeta[] = [
         hidden: true,
       },
       {
-        name: 'username',
-        value: 'value',
+        name: 'value',
+        value: 'ns1',
         hidden: true,
       },
       {
