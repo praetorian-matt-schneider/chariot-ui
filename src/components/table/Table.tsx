@@ -181,6 +181,7 @@ export function Table<TData>(props: TableProps<TData>) {
     const clickedCheckbox = target?.closest?.('[data-checkbox]');
 
     if (enableCheckbox && clickedCheckbox) {
+      event.preventDefault();
       if (isBulkSelectionEnabled) {
         setSelectedRows(selectedRows => {
           const isChecked = selectedRows.includes(idx.toString());
