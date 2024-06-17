@@ -401,3 +401,5 @@ export interface CognitoAuthStates {
   refreshToken?: string;
   expiresIn?: number;
 }
+
+export type ChartType = 'area' | 'bar' | 'line' | 'donut';
