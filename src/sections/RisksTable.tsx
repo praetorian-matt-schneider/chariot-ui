@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   ArrowDownOnSquareStackIcon,
   ChevronDownIcon,
@@ -14,7 +15,7 @@ import { FilterCounts } from '@/components/ui/FilterCounts';
 import { RiskDropdown, riskStatusOptions } from '@/components/ui/RiskDropdown';
 import { useFilter } from '@/hooks/useFilter';
 import { useMy } from '@/hooks/useMy';
-import { useSearchParams } from '@/hooks/useSearchParams';
+import { generateUrlWithSearchParam } from '@/hooks/useSearchParams';
 import { useMergeStatus } from '@/utils/api';
 import { exportContent } from '@/utils/download.util';
 import { Regex } from '@/utils/regex.util';
@@ -88,7 +89,6 @@ const getFilteredRisks = (
 
 export function Risks() {
   const { getRiskDrawerLink } = useOpenDrawer();
-  const { addSearchParams } = useSearchParams();
 
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [severityFilter, setSeverityFilter] = useFilter('', setSelectedRows);
@@ -190,15 +190,15 @@ export function Risks() {
         label: 'POE',
         id: '',
         cell: risk => (
-          <ChatBubbleLeftIcon
-            className="size-5 cursor-pointer text-default-light"
-            onClick={() => {
-              addSearchParams(
-                StorageKey.POE,
-                encodeURIComponent(`${risk.dns}/${risk.name}`)
-              );
-            }}
-          />
+          <Link
+            to={generateUrlWithSearchParam(
+              StorageKey.POE,
+              `${risk.dns}/${risk.name}`
+            )}
+            className="cursor-pointer"
+          >
+            <ChatBubbleLeftIcon className="size-5 text-default-light" />
+          </Link>
         ),
         align: 'center',
         fixedWidth: 56,

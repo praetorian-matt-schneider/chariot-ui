@@ -23,7 +23,10 @@ import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useInterval } from '@/hooks/useInterval';
 import { useReRunJob } from '@/hooks/useJobs';
 import { useReportRisk, useUpdateRisk } from '@/hooks/useRisks';
-import { useSearchParams } from '@/hooks/useSearchParams';
+import {
+  generateUrlWithSearchParam,
+  useSearchParams,
+} from '@/hooks/useSearchParams';
 import { useSearchContext } from '@/state/search';
 import { cn } from '@/utils/classname';
 import { formatDate } from '@/utils/date.util';
@@ -96,7 +99,7 @@ interface RiskDrawerProps {
 export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
   const navigate = useNavigate();
   const { update } = useSearchContext();
-  const { removeSearchParams, addSearchParams } = useSearchParams();
+  const { removeSearchParams } = useSearchParams();
 
   const [, dns, name] = compositeKey.split('#');
 
@@ -253,11 +256,10 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                 },
                 {
                   label: 'Proof of Exploit',
-                  onClick: () =>
-                    addSearchParams(
-                      StorageKey.POE,
-                      encodeURIComponent(`${dns}/${name}`)
-                    ),
+                  to: generateUrlWithSearchParam(
+                    StorageKey.POE,
+                    `${dns}/${name}`
+                  ),
                 },
               ],
             }}
