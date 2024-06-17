@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import {
   ArrowDownOnSquareStackIcon,
   ChevronDownIcon,
+  DocumentTextIcon,
 } from '@heroicons/react/24/outline';
-import { ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
 
 import { Dropdown } from '@/components/Dropdown';
 import { HorseIcon } from '@/components/icons/Horse.icon';
@@ -181,26 +181,10 @@ export function Risks() {
         },
       },
       {
-        label: 'DNS',
+        label: 'Asset',
         id: 'dns',
         className: 'w-full hidden md:table-cell',
         copy: true,
-      },
-      {
-        label: 'POE',
-        id: '',
-        cell: risk => (
-          <Link
-            to={generatePathWithSearch({
-              appendSearch: [[StorageKey.POE, `${risk.dns}/${risk.name}`]],
-            })}
-            className="cursor-pointer"
-          >
-            <ChatBubbleLeftIcon className="size-5 text-default-light" />
-          </Link>
-        ),
-        align: 'center',
-        fixedWidth: 56,
       },
       {
         label: 'First Seen',
@@ -213,6 +197,22 @@ export function Risks() {
         id: 'updated',
         cell: 'date',
         className: 'hidden lg:table-cell',
+      },
+      {
+        label: 'Proof',
+        id: '',
+        cell: risk => (
+          <Link
+            to={generatePathWithSearch({
+              appendSearch: [[StorageKey.POE, `${risk.dns}/${risk.name}`]],
+            })}
+            className="cursor-pointer"
+          >
+            <DocumentTextIcon className="size-5 text-default-light" />
+          </Link>
+        ),
+        align: 'center',
+        fixedWidth: 70,
       },
     ],
     []
