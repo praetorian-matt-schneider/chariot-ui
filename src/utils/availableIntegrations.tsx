@@ -217,6 +217,11 @@ export const IntegrationsMeta: IntegrationMeta[] = [
         hidden: true,
       },
       {
+        name: 'value',
+        value: 'github',
+        hidden: true,
+      },
+      {
         label: 'Personal Access Token (PAT)',
         value: '',
         placeholder: 'github_pat_123456abcdefg_123456abcdefg',
@@ -279,6 +284,11 @@ export const IntegrationsMeta: IntegrationMeta[] = [
       {
         name: 'username',
         value: 'ns1',
+        hidden: true,
+      },
+      {
+        name: 'username',
+        value: 'value',
         hidden: true,
       },
       {
@@ -352,6 +362,11 @@ export const IntegrationsMeta: IntegrationMeta[] = [
         hidden: true,
       },
       {
+        name: 'value',
+        value: 'azure',
+        hidden: true,
+      },
+      {
         label: 'Application ID',
         value: '',
         placeholder: uuid,
@@ -392,6 +407,11 @@ export const IntegrationsMeta: IntegrationMeta[] = [
     inputs: [
       {
         name: 'username',
+        value: 'crowdstrike',
+        hidden: true,
+      },
+      {
+        name: 'value',
         value: 'crowdstrike',
         hidden: true,
       },
