@@ -12,7 +12,6 @@ import { Table } from '@/components/table/Table';
 import { DetailsListContainer } from '@/components/ui/DetailsListContainer';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { change as changeSeed } from '@/hooks/useSeeds';
-import { useSearchContext } from '@/state/search';
 import { formatDate } from '@/utils/date.util';
 import { getRoute } from '@/utils/route.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
@@ -55,7 +54,6 @@ export const SeedDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
   ) as unknown as Asset[];
   const { removeSearchParams } = useSearchParams();
   const navigate = useNavigate();
-  const { update } = useSearchContext();
   const [assetsLimit, setAssetsLimit] = useState(TABLE_LIMIT);
   const showMoreAssets = assets.length > TABLE_LIMIT;
 
@@ -231,9 +229,6 @@ export const SeedDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
                         to={{
                           pathname: getRoute(['app', 'risks']),
                           search: `?${StorageKey.HASH_SEARCH}=${encodeURIComponent(`#${seed.name}`)}`,
-                        }}
-                        onClick={() => {
-                          update(`#${seed.name}`);
                         }}
                       >
                         <Button styleType="textPrimary">

@@ -22,12 +22,21 @@ export function getCurrentSearchParam() {
   return new URLSearchParams(window.location.search);
 }
 
-export function generateUrlWithSearchParam(key: string, value = '') {
+export function generatePathWithSearch({
+  pathname = window.location.pathname,
+  appendSearch = [],
+}: {
+  pathname?: string;
+  appendSearch?: [string, string][];
+}) {
   const searchParams = getCurrentSearchParam();
-  searchParams.set(key, value);
+
+  appendSearch.forEach(([key, value]) => {
+    searchParams.set(key, value);
+  });
 
   return {
-    pathname: window.location.pathname,
+    pathname,
     search: searchParams.toString(),
   };
 }

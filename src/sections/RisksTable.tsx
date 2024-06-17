@@ -19,7 +19,7 @@ import { useMergeStatus } from '@/utils/api';
 import { exportContent } from '@/utils/download.util';
 import { Regex } from '@/utils/regex.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
-import { generateUrlWithSearchParam } from '@/utils/url.util';
+import { generatePathWithSearch } from '@/utils/url.util';
 
 import { Risk, RiskSeverity, SeverityDef } from '../types';
 
@@ -191,10 +191,9 @@ export function Risks() {
         id: '',
         cell: risk => (
           <Link
-            to={generateUrlWithSearchParam(
-              StorageKey.POE,
-              `${risk.dns}/${risk.name}`
-            )}
+            to={generatePathWithSearch({
+              appendSearch: [[StorageKey.POE, `${risk.dns}/${risk.name}`]],
+            })}
             className="cursor-pointer"
           >
             <ChatBubbleLeftIcon className="size-5 text-default-light" />
