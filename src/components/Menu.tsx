@@ -75,15 +75,16 @@ export const Menu: React.FC<MenuProps> = props => {
               let newSelected = prev;
               if (multiSelect && item.value !== undefined) {
                 if (item.value) {
-                  const selected = new Set(prev);
-                  if (selected.has(item.value)) {
-                    selected.delete(item.value);
+                  // Toggle the value
+                  if (prev.includes(item.value)) {
+                    newSelected = prev.filter(v => v !== item.value);
                   } else {
-                    selected.add(item.value);
+                    newSelected = [...prev, item.value];
                   }
-                  selected.delete('');
-                  newSelected = Array.from(selected);
+                  // Remove empty string if there are other values for multiSelect 'All' option
+                  newSelected = newSelected.filter(v => v !== '');
                 } else {
+                  // If 'All' option is selected, remove all other values
                   newSelected = [''];
                 }
               }
