@@ -125,7 +125,7 @@ const ChartWrapper: React.FC<ChartWrapperProps> = ({
 
     return (
       <div
-        className={`relative rounded border border-gray-300 p-2 shadow ${width}`}
+        className={`w- relative p-2${width} border border-gray-200 bg-white`}
       >
         <Chart
           type={type}
@@ -135,9 +135,12 @@ const ChartWrapper: React.FC<ChartWrapperProps> = ({
         />
         <button
           onClick={() => removeChart(id)}
-          className="absolute -right-5 -top-5 m-2 size-7 rounded-full border border-gray-300 bg-white text-gray-500"
+          className="absolute -right-[22px] -top-[22px] m-2 size-7 rotate-45 rounded-full border border-gray-200 bg-white text-gray-500"
+          style={{
+            borderBottomColor: 'transparent',
+          }}
         >
-          <XMarkIcon />
+          <XMarkIcon className="rotate-45" />
         </button>
       </div>
     );

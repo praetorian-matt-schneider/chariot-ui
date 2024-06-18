@@ -1,5 +1,6 @@
-import { Account } from '@/types';
+import { isFQDN } from 'validator';
 
+import { Account } from '@/types';
 export interface CountData {
   [key: string]: string | number; // Adjust this type based on your specific needs
 }
@@ -16,71 +17,75 @@ interface AggregateCollection {
 }
 
 const aggregates: AggregateCollection = {
-  countAccountsByMember: {
-    label: 'Count accounts by member',
-    run: (accounts: Account[]): CountData[] =>
-      accounts.map(account => ({
-        [aggregates.countAccountsByMember.xField]: account.member,
-        [aggregates.countAccountsByMember.yField]: 1,
-      })),
-    xField: 'member',
-    yField: 'count',
-  },
-  countAccountsByUsername: {
-    label: 'Count accounts by username',
+  uniqueDomainNames: {
+    label: 'Unique domain names',
     run: (accounts: Account[]): CountData[] =>
       accounts.reduce((acc: CountData[], account) => {
+        const domain = account.member.split('@')[1];
+        if (!domain || !isFQDN(domain)) {
+          return acc; // Skip the counter if domain is empty or not a valid domain
+        }
         const existingIndex = acc.findIndex(
-          item =>
-            item[aggregates.countAccountsByUsername.xField] === account.username
+          item => item[aggregates.uniqueDomainNames.xField] === domain
         );
-        if (existingIndex !== -1) {
-          acc[existingIndex][aggregates.countAccountsByUsername.yField] =
-            Number(
-              acc[existingIndex][aggregates.countAccountsByUsername.yField]
-            ) + 1;
-        } else {
+        if (existingIndex === -1) {
           acc.push({
-            [aggregates.countAccountsByUsername.xField]: account.username,
-            [aggregates.countAccountsByUsername.yField]: 1,
+            [aggregates.uniqueDomainNames.xField]: domain,
+            [aggregates.uniqueDomainNames.yField]: 1,
           });
+        } else {
+          acc[existingIndex][aggregates.uniqueDomainNames.yField] =
+            (acc[existingIndex][
+              aggregates.uniqueDomainNames.yField
+            ] as number) + 1;
         }
         return acc;
       }, []),
-    xField: 'username',
+    xField: 'member',
     yField: 'count',
   },
-  latestAccountUpdateByMember: {
-    label: 'Latest account update by member',
+  numberOfAccountsOverTime: {
+    label: 'Number of Accounts Over Time',
     run: (accounts: Account[]): CountData[] =>
-      accounts.reduce((acc: CountData[], account) => {
-        const existingIndex = acc.findIndex(
-          item =>
-            item[aggregates.latestAccountUpdateByMember.xField] ===
-            account.member
-        );
-        if (existingIndex !== -1) {
-          if (
-            Number(
-              acc[existingIndex][aggregates.latestAccountUpdateByMember.yField]
-            ) < Number(account.updated)
-          ) {
-            acc[existingIndex][aggregates.latestAccountUpdateByMember.yField] =
-              Number.parseInt(account.updated, 10);
+      accounts
+        .reduce((acc: CountData[], account) => {
+          const updateDate = account.updated.split('T')[0]; // Extract just the date part
+          const existingIndex = acc.findIndex(
+            item =>
+              item[aggregates.numberOfAccountsOverTime.xField] === updateDate
+          );
+          if (existingIndex === -1) {
+            acc.push({
+              [aggregates.numberOfAccountsOverTime.xField]: updateDate,
+              [aggregates.numberOfAccountsOverTime.yField]: 1 as number, // Explicitly marking as number
+            });
+          } else {
+            // Ensure we are working with numbers by explicitly casting
+            acc[existingIndex][aggregates.numberOfAccountsOverTime.yField] =
+              (acc[existingIndex][
+                aggregates.numberOfAccountsOverTime.yField
+              ] as number) + 1;
           }
-        } else {
-          acc.push({
-            [aggregates.latestAccountUpdateByMember.xField]: account.member,
-            [aggregates.latestAccountUpdateByMember.yField]: Number.parseInt(
-              account.updated,
-              10
+          return acc;
+        }, [])
+        .sort(
+          (a, b) =>
+            new Date(a[aggregates.numberOfAccountsOverTime.xField]).getTime() -
+            new Date(b[aggregates.numberOfAccountsOverTime.xField]).getTime()
+        )
+        .map((item, index, array) => ({
+          ...item,
+          [aggregates.numberOfAccountsOverTime.yField]: array
+            .slice(0, index + 1)
+            .reduce(
+              (sum, current) =>
+                sum +
+                (current[aggregates.numberOfAccountsOverTime.yField] as number),
+              0 as number
             ),
-          });
-        }
-        return acc;
-      }, []),
-    xField: 'member',
-    yField: 'updated',
+        })),
+    xField: 'date',
+    yField: 'cumulativeAccounts',
   },
 };
 
