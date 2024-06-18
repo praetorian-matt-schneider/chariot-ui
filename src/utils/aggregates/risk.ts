@@ -11,7 +11,7 @@ interface AggregateDefinition {
   yField: string;
 }
 
-interface AggregateCollection {
+export interface AggregateCollection {
   [key: string]: AggregateDefinition;
 }
 

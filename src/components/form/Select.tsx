@@ -10,6 +10,7 @@ export interface Option {
   value: number | string;
   label: string;
   disabled?: boolean;
+  divider?: boolean;
 }
 
 export interface SelectProps {
@@ -84,8 +85,10 @@ export const Select = (props: InputProps & SelectProps) => {
   }, [options]);
 
   useEffect(() => {
-    setValue(selected.label);
-    setOptions(optionsProps);
+    if (selected) {
+      setValue(selected.label);
+      setOptions(optionsProps);
+    }
   }, [selected]);
 
   return (
@@ -116,7 +119,9 @@ export const Select = (props: InputProps & SelectProps) => {
             const isSelected = selected.value === value;
             const isHovered = hoverIndex === index;
 
-            return (
+            return options[index].divider ? (
+              <div className="my-1 w-full border-t border-gray-100" />
+            ) : (
               <SelectItem
                 key={value}
                 label={label}
