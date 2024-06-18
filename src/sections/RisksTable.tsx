@@ -9,6 +9,7 @@ import {
 import { Dropdown } from '@/components/Dropdown';
 import { HorseIcon } from '@/components/icons/Horse.icon';
 import { SpinnerIcon } from '@/components/icons/Spinner.icon';
+import { MenuItemProps } from '@/components/Menu';
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
 import { FilterCounts } from '@/components/ui/FilterCounts';
@@ -29,10 +30,17 @@ const DownIcon = (
   <ChevronDownIcon className="size-3 stroke-[4px] text-header-dark" />
 );
 
-const getFilterLabel = (filter: string[] = [], label = '') => {
+const getFilterLabel = (
+  label = '',
+  filter: string[],
+  options: MenuItemProps[]
+) => {
+  const labels = filter.map(
+    v => options.find(({ value }) => value === v)?.label || ''
+  );
   return filter.length === 1 && filter[0] === ''
     ? `All ${label}`
-    : `${label}: (${filter.length})`;
+    : labels.join(', ');
 };
 
 const getStatus = (status: string) => (status[0] || '') + (status[2] || '');
@@ -234,6 +242,21 @@ export function Risks() {
       }),
     [risks, statusFilter, sourceFilter, JSON.stringify(knownExploitedThreats)]
   );
+
+  const severityOptions = useMemo(
+    () =>
+      Object.entries(SeverityDef)
+        .map(([value, label]) => ({
+          label,
+          labelSuffix: risksExceptSeverity.filter(
+            ({ status }) => status[1] === value
+          ).length,
+          value,
+        }))
+        .reverse(),
+    [risksExceptSeverity]
+  );
+
   const risksExceptStatus = useMemo(
     () =>
       getFilteredRisks(risks, {
@@ -256,7 +279,11 @@ export function Risks() {
           <div className="flex gap-4">
             <Dropdown
               styleType="header"
-              label={getFilterLabel(statusFilter, 'Statuses')}
+              label={getFilterLabel(
+                'Statuses',
+                statusFilter,
+                riskStatusOptions
+              )}
               endIcon={DownIcon}
               menu={{
                 items: [
@@ -287,7 +314,11 @@ export function Risks() {
             />
             <Dropdown
               styleType="header"
-              label={getFilterLabel(severityFilter, 'Severities')}
+              label={getFilterLabel(
+                'Severities',
+                severityFilter,
+                severityOptions
+              )}
               endIcon={DownIcon}
               menu={{
                 items: [
@@ -300,15 +331,7 @@ export function Risks() {
                     label: 'Divider',
                     type: 'divider',
                   },
-                  ...Object.entries(SeverityDef)
-                    .map(([value, label]) => ({
-                      label,
-                      labelSuffix: risksExceptSeverity.filter(
-                        ({ status }) => status[1] === value
-                      ).length,
-                      value,
-                    }))
-                    .reverse(),
+                  ...severityOptions,
                 ],
                 onSelect: selectedRows => setSeverityFilter(selectedRows),
                 value: severityFilter,
@@ -317,7 +340,9 @@ export function Risks() {
             />
             <Dropdown
               styleType="header"
-              label={getFilterLabel(sourceFilter, 'Sources')}
+              label={getFilterLabel('Sources', sourceFilter, [
+                { label: 'CISA KEV', value: 'cisa_kev' },
+              ])}
               endIcon={DownIcon}
               menu={{
                 items: [
