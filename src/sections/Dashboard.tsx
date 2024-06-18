@@ -10,6 +10,7 @@ import { Button } from '@/components/Button';
 import ChartWrapper from '@/components/charts/ChartWrapper';
 import { Input, Type } from '@/components/form/Input';
 import { Tooltip } from '@/components/Tooltip';
+import { NoData } from '@/components/ui/NoData';
 import { ChartType, MyResourceKey } from '@/types';
 import { getAggregates as getAccountAggregates } from '@/utils/aggregates/account';
 import { getAggregates as getRiskAggregates } from '@/utils/aggregates/risk';
@@ -260,6 +261,12 @@ const Dashboard: React.FC = () => {
         )}
       </div>
 
+      {charts.length === 0 && (
+        <NoData
+          title="No widgets"
+          description={`Click on the Add Widget button to add a new widget`}
+        />
+      )}
       <div className="mt-4 grid grid-cols-4 gap-4">
         {charts.map(chart => (
           <div
