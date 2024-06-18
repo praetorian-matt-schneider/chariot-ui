@@ -56,7 +56,11 @@ const appRoutes = {
       title: 'logout',
     },
     dashboard: {
-      element: <Dashboard />,
+      element: (
+        <Body>
+          <Dashboard />
+        </Body>
+      ),
       title: 'Dashboard',
     },
     assets: {

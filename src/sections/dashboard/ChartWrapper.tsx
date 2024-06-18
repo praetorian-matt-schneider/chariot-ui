@@ -1,18 +1,23 @@
 import React from 'react';
 import { XMarkIcon } from '@heroicons/react/20/solid';
-import { AreaChart, BarChart, DonutChart, LineChart } from '@tremor/react';
+import {
+  AreaChart,
+  BarChart,
+  DonutChart,
+  Legend,
+  LineChart,
+} from '@tremor/react';
+
 import { useMy } from '@/hooks';
 import { Account, ChartType, MyResourceKey, Risk } from '@/types';
 import {
-  runAggregate as runAccountAggregate,
-  getAggregates as getAccountAggregates,
-  CountData as AccountCountData,
   CountData,
+  getAggregates as getAccountAggregates,
+  runAggregate as runAccountAggregate,
 } from '@/utils/aggregates/account';
 import {
-  runAggregate as runRiskAggregate,
   getAggregates as getRiskAggregates,
-  CountData as RiskCountData,
+  runAggregate as runRiskAggregate,
 } from '@/utils/aggregates/risk';
 
 interface ChartProps {
@@ -23,6 +28,7 @@ interface ChartProps {
 }
 
 const Chart: React.FC<ChartProps> = ({ type, data, xField, yField }) => {
+  console.log('data', data, 'xField', xField, 'yField', yField);
   switch (type) {
     case 'area':
       return (
@@ -31,7 +37,6 @@ const Chart: React.FC<ChartProps> = ({ type, data, xField, yField }) => {
           data={data}
           index={xField}
           categories={[yField]}
-          // Other props as needed
         />
       );
     case 'bar':
@@ -41,7 +46,7 @@ const Chart: React.FC<ChartProps> = ({ type, data, xField, yField }) => {
           data={data}
           index={xField}
           categories={[yField]}
-          // Other props as needed
+          colors={['blue']}
         />
       );
     case 'line':
@@ -51,18 +56,21 @@ const Chart: React.FC<ChartProps> = ({ type, data, xField, yField }) => {
           data={data}
           index={xField}
           categories={[yField]}
-          // Other props as needed
+          colors={['indigo', 'rose']}
         />
       );
     case 'donut':
       return (
-        <DonutChart
-          className="h-96 w-full"
-          data={data}
-          index={xField}
-
-          // Other props as needed
-        />
+        <div className="flex items-center justify-center space-x-6 text-default">
+          <DonutChart
+            className="h-96 w-full"
+            variant="donut"
+            data={data}
+            index={xField}
+            category={yField}
+          />
+          <Legend categories={data.map(d => d[xField].toString())} />
+        </div>
       );
     default:
       return null;

@@ -1,7 +1,7 @@
 import { Risk } from '@/types';
 
 export interface CountData {
-  [key: string]: string | number; // Adjust this type based on your specific needs
+  [key: string]: string | number;
 }
 
 interface AggregateDefinition {
@@ -15,6 +15,11 @@ interface AggregateCollection {
   [key: string]: AggregateDefinition;
 }
 
+const getDateFromISO = (isoDate: string): string => {
+  const date = new Date(isoDate);
+  return date.toLocaleDateString();
+};
+
 const aggregates: AggregateCollection = {
   countRisksByClass: {
     label: 'Count risks by class',
@@ -25,7 +30,9 @@ const aggregates: AggregateCollection = {
         );
         if (existingIndex !== -1) {
           acc[existingIndex][aggregates.countRisksByClass.yField] =
-            Number(acc[existingIndex][aggregates.countRisksByClass.yField]) + 1;
+            (acc[existingIndex][
+              aggregates.countRisksByClass.yField
+            ] as number) + 1;
         } else {
           acc.push({
             [aggregates.countRisksByClass.xField]: risk.class,
@@ -37,32 +44,60 @@ const aggregates: AggregateCollection = {
     xField: 'class',
     yField: 'count',
   },
-  latestRiskUpdateByDNS: {
-    label: 'Latest risk update by DNS',
-    run: (risks: Risk[]): CountData[] =>
-      risks.reduce((acc: CountData[], risk) => {
-        const existingIndex = acc.findIndex(
-          item => item[aggregates.latestRiskUpdateByDNS.xField] === risk.dns
+  countRisksByDate: {
+    label: 'Count risks updated by date',
+    run: (risks: Risk[]): CountData[] => {
+      const counts: CountData[] = [];
+
+      risks.forEach(risk => {
+        const date = getDateFromISO(risk.updated);
+        const existingIndex = counts.findIndex(
+          item => item[aggregates.countRisksByDate.xField] === date
         );
         if (existingIndex !== -1) {
-          if (
-            Number(
-              acc[existingIndex][aggregates.latestRiskUpdateByDNS.yField]
-            ) < Number(risk.updated)
-          ) {
-            acc[existingIndex][aggregates.latestRiskUpdateByDNS.yField] =
-              Number(risk.updated);
-          }
+          counts[existingIndex][aggregates.countRisksByDate.yField] =
+            (counts[existingIndex][
+              aggregates.countRisksByDate.yField
+            ] as number) + 1;
         } else {
-          acc.push({
-            [aggregates.latestRiskUpdateByDNS.xField]: risk.dns,
-            [aggregates.latestRiskUpdateByDNS.yField]: Number(risk.updated),
+          counts.push({
+            [aggregates.countRisksByDate.xField]: date,
+            [aggregates.countRisksByDate.yField]: 1,
           });
         }
-        return acc;
-      }, []),
-    xField: 'dns',
-    yField: 'lastUpdate',
+
+        if (risk.history) {
+          risk.history.forEach(update => {
+            const historyDate = getDateFromISO(update.updated);
+            const existingHistoryIndex = counts.findIndex(
+              item => item[aggregates.countRisksByDate.xField] === historyDate
+            );
+            if (existingHistoryIndex !== -1) {
+              counts[existingHistoryIndex][aggregates.countRisksByDate.yField] =
+                (counts[existingHistoryIndex][
+                  aggregates.countRisksByDate.yField
+                ] as number) + 1;
+            } else {
+              counts.push({
+                [aggregates.countRisksByDate.xField]: historyDate,
+                [aggregates.countRisksByDate.yField]: 1,
+              });
+            }
+          });
+        }
+      });
+
+      // Sort counts by date ascending
+      counts.sort(
+        (a, b) =>
+          new Date(a[aggregates.countRisksByDate.xField]).getTime() -
+          new Date(b[aggregates.countRisksByDate.xField]).getTime()
+      );
+
+      return counts;
+    },
+    xField: 'date',
+    yField: 'count',
   },
 };
 

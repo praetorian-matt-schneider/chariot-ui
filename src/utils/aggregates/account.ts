@@ -80,7 +80,7 @@ const aggregates: AggregateCollection = {
         return acc;
       }, []),
     xField: 'member',
-    yField: 'lastUpdate',
+    yField: 'updated',
   },
 };
 
