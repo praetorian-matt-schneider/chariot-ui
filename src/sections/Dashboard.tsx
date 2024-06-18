@@ -139,17 +139,16 @@ const Dashboard: React.FC = () => {
                 setAggregate(undefined);
               }}
               options={[
-                { value: '', label: 'Select a resource', disabled: true },
+                { value: '', label: 'Select resource', disabled: true },
                 { value: 'divider', label: '', divider: true },
-                { value: 'account', label: 'Account' },
-                { value: 'risk', label: 'Risk' },
-                { value: 'asset', label: 'Asset', disabled: true },
-                { value: 'ref', label: 'Reference', disabled: true },
-                { value: 'job', label: 'Job', disabled: true },
-                { value: 'seed', label: 'Seed', disabled: true },
-                { value: 'attribute', label: 'Attribute', disabled: true },
+                { value: 'seed', label: 'Seeds', disabled: true },
+                { value: 'asset', label: 'Assets', disabled: true },
+                { value: 'risk', label: 'Risks' },
+                { value: 'account', label: 'Accounts' },
+                { value: 'job', label: 'Jobs', disabled: true },
+                { value: 'attribute', label: 'Attributes', disabled: true },
+                { value: 'ref', label: 'References', disabled: true },
                 { value: 'file', label: 'File', disabled: true },
-                { value: 'threat', label: 'Threat', disabled: true },
               ]}
             />
             {aggregates.length > 0 && (
@@ -163,7 +162,7 @@ const Dashboard: React.FC = () => {
                 options={[
                   {
                     value: '',
-                    label: 'Select a metric',
+                    label: 'Select widget',
                     disabled: true,
                   },
                   { value: 'divider', label: '', divider: true },
@@ -239,11 +238,17 @@ const Dashboard: React.FC = () => {
                   onClick={() => setIsFormVisible(false)}
                   type="button"
                   styleType="secondary"
+                  className="rounded-[4px]"
                 >
                   Cancel
                 </Button>
-                <Button onClick={addChart} type="button" styleType="primary">
-                  Add
+                <Button
+                  onClick={addChart}
+                  type="button"
+                  styleType="primary"
+                  className="rounded-[4px]"
+                >
+                  Add Widget
                 </Button>
               </div>
             )}

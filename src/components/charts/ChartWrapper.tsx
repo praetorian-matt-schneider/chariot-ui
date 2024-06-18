@@ -78,7 +78,7 @@ const ChartWrapper: React.FC<ChartWrapperProps> = ({
         />
         <button
           onClick={() => removeChart(id)}
-          className="absolute -right-[22px] -top-[22px] m-2 size-7 rotate-45 rounded-full border border-gray-200 bg-white text-gray-200"
+          className="absolute -right-[22px] -top-[22px] m-2 size-7 rotate-45 rounded-full border border-gray-200 bg-white text-gray-500"
           style={{
             borderBottomColor: 'transparent',
           }}
