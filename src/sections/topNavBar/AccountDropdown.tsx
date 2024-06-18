@@ -81,8 +81,8 @@ export const AccountDropdown: React.FC = () => {
                       className="size-5 max-w-max scale-125 rounded-full"
                     />
                   ),
+                  value: me,
                   onClick: () => friend?.email && stopImpersonation(),
-                  checked: !friend?.email,
                 },
               ]
             : []),
@@ -94,9 +94,7 @@ export const AccountDropdown: React.FC = () => {
                 className="size-5 max-w-max scale-125 rounded-full"
               />
             ),
-            checked: friend?.email
-              ? friend?.email === collaborator.email
-              : collaborator.email === me,
+            value: collaborator.email,
             onClick: () =>
               startImpersonation(
                 collaborator.email,
@@ -112,6 +110,7 @@ export const AccountDropdown: React.FC = () => {
             to: getRoute(['app', 'logout']),
           },
         ],
+        value: friend?.email || me,
       }}
     >
       <Hexagon>

@@ -104,10 +104,13 @@ module.exports = {
       error: '#dc2626',
       'error-selected': '#fbe9e9',
       'error-light': colors.red[200],
+      success: '#16a34a',
+      'success-light': '#dcfce7',
       brand: {
         DEFAULT: addOpacity('var(--brand)'),
         dark: addAlphaValue('var(--brand-dark)'),
         light: addAlphaValue('var(--brand-light)'),
+        lighter: addAlphaValue('var(--brand-lighter)'),
       },
       primary: {
         DEFAULT: addOpacity('var(--primary)'),

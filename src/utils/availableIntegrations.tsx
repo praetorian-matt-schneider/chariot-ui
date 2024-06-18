@@ -233,7 +233,7 @@ export const IntegrationsMeta: IntegrationMeta[] = [
         value: '',
         placeholder: 'https://',
         pattern: '^http(s)?://.+$',
-        name: 'organization',
+        name: 'value',
         required: true,
         info: {
           url: 'https://docs.github.com/en/organizations/collaborating-with-groups-in-organizations/about-organizations',
@@ -278,6 +278,11 @@ export const IntegrationsMeta: IntegrationMeta[] = [
     inputs: [
       {
         name: 'username',
+        value: 'ns1',
+        hidden: true,
+      },
+      {
+        name: 'value',
         value: 'ns1',
         hidden: true,
       },
@@ -377,7 +382,7 @@ export const IntegrationsMeta: IntegrationMeta[] = [
         label: 'Subscription ID',
         value: '',
         placeholder: uuid,
-        name: 'subscription',
+        name: 'value',
         required: true,
       },
     ],
@@ -414,7 +419,7 @@ export const IntegrationsMeta: IntegrationMeta[] = [
         label: 'Base URL',
         value: '',
         placeholder: 'https://example.praetorianlabs.api.crowdstrike.com',
-        name: 'baseURL',
+        name: 'value',
         required: true,
       },
     ],
