@@ -5,7 +5,6 @@ import { twMerge } from 'tailwind-merge';
 
 import { Button } from '@/components/Button';
 import { IntegrationModal } from '@/components/ui/IntegrationModal';
-import { Paper } from '@/components/Paper';
 import { useModifyAccount, useMy } from '@/hooks';
 import { partition } from '@/utils/array.util';
 import {
@@ -85,14 +84,14 @@ const Integrations: React.FC = () => {
   );
 
   return (
-    <div className="flex h-max w-full flex-col gap-8">
+    <div className="mt-10 flex h-max w-full flex-col gap-8">
       {Object.values(IntegrationType).map((integrationType, key) => {
         return (
-          <Paper key={key}>
-            <div className="flex size-full h-max my-5 flex-wrap">
-              <h2 className="text-xl">{integrationType}</h2>
+          <div key={key}>
+            <div className="flex size-full h-max flex-wrap ">
+              <h2 className="text-xl font-semibold">{integrationType}</h2>
             </div>
-            <div className="flex size-full h-max flex-wrap justify-left mb-5 gap-5">
+            <div className="justify-left mt-2 flex size-full h-max flex-wrap gap-5">
               {IntegrationsMeta.filter(
                 integration => integration.type === integrationType
               ).map(integrationMeta => {
@@ -108,7 +107,7 @@ const Integrations: React.FC = () => {
                 return (
                   <div
                     key={integration.id}
-                    className="w-[290px] max-w-[290px] rounded-[2px] bg-layer0 border-2 border-gray-100 hover:border-gray-200"
+                    className="w-[302px] max-w-[302px] rounded-[2px] bg-layer0 shadow"
                   >
                     <div className="relative flex flex-col items-center p-8">
                       <img
@@ -160,7 +159,7 @@ const Integrations: React.FC = () => {
                 );
               })}
             </div>
-          </Paper>
+          </div>
         );
       })}
       {form && (
