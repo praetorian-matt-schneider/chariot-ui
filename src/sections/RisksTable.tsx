@@ -21,13 +21,19 @@ import { Regex } from '@/utils/regex.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
 import { generatePathWithSearch } from '@/utils/url.util';
 
-import { Risk, RiskSeverity, SeverityDef } from '../types';
+import { Risk, SeverityDef } from '../types';
 
 import { useOpenDrawer } from './detailsDrawer/useOpenDrawer';
 
 const DownIcon = (
   <ChevronDownIcon className="size-3 stroke-[4px] text-header-dark" />
 );
+
+const getFilterLabel = (filter: string[] = [], label = '') => {
+  return filter.length === 1 && filter[0] === ''
+    ? `All ${label}`
+    : `${label}: (${filter.length})`;
+};
 
 const getStatus = (status: string) => (status[0] || '') + (status[2] || '');
 
@@ -53,13 +59,13 @@ const getFilteredRisks = (
   risks: Risk[],
   {
     statusFilter = [],
-    severityFilter,
-    sourceFilter,
+    severityFilter = [],
+    sourceFilter = [],
     knownExploitedThreats,
   }: {
     statusFilter?: string[];
-    severityFilter?: string;
-    sourceFilter?: string;
+    severityFilter?: string[];
+    sourceFilter?: string[];
     knownExploitedThreats?: string[];
   }
 ) => {
@@ -69,13 +75,14 @@ const getFilteredRisks = (
       statusFilter.includes(`${getStatus(status)}`)
     );
   }
-  if (severityFilter) {
-    filteredRisks = filteredRisks.filter(
-      risk => risk.status[1] === severityFilter
+  if (severityFilter?.filter(Boolean).length > 0) {
+    filteredRisks = filteredRisks.filter(risk =>
+      severityFilter?.includes(risk.status[1])
     );
   }
   if (
-    sourceFilter === 'cisa_kev' &&
+    sourceFilter.length > 0 &&
+    sourceFilter[0] === 'cisa_kev' &&
     knownExploitedThreats &&
     knownExploitedThreats.length > 0
   ) {
@@ -91,19 +98,16 @@ export function Risks() {
   const { getRiskDrawerLink } = useOpenDrawer();
 
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
-  // const [severityFilterMultiple, setSeverityFilterMultiple] = useState<
-  //   string[]
-  // >([]);
   const [statusFilter, setStatusesFilter] = useFilter<string[]>(
     [''],
     setSelectedRows
   );
-  const [severityFilter, setSeverityFilter] = useFilter<string>(
-    '',
+  const [severityFilter, setSeverityFilter] = useFilter<string[]>(
+    [''],
     setSelectedRows
   );
-  const [sourceFilter, setSourceFilter] = useFilter<string>(
-    '',
+  const [sourceFilter, setSourceFilter] = useFilter<string[]>(
+    [''],
     setSelectedRows
   );
 
@@ -261,7 +265,7 @@ export function Risks() {
           <div className="flex gap-4">
             <Dropdown
               styleType="header"
-              label="Status"
+              label={getFilterLabel(statusFilter, 'Statuses')}
               endIcon={DownIcon}
               menu={{
                 items: [
@@ -285,20 +289,14 @@ export function Risks() {
                       .length?.toLocaleString(),
                   })),
                 ],
-                onSelect: selectedRows => {
-                  setStatusesFilter(selectedRows);
-                },
+                onSelect: selectedRows => setStatusesFilter(selectedRows),
                 value: statusFilter,
                 multiSelect: true,
               }}
             />
             <Dropdown
               styleType="header"
-              label={
-                severityFilter
-                  ? `${SeverityDef[severityFilter as RiskSeverity]}`
-                  : 'All Severities'
-              }
+              label={getFilterLabel(severityFilter, 'Severities')}
               endIcon={DownIcon}
               menu={{
                 items: [
@@ -321,15 +319,14 @@ export function Risks() {
                     }))
                     .reverse(),
                 ],
-                onClick: value => {
-                  setSeverityFilter(value || '');
-                },
+                onSelect: selectedRows => setSeverityFilter(selectedRows),
                 value: severityFilter,
+                multiSelect: true,
               }}
             />
             <Dropdown
               styleType="header"
-              label={sourceFilter === 'cisa_kev' ? 'CISA KEV' : 'All Sources'}
+              label={getFilterLabel(sourceFilter, 'Sources')}
               endIcon={DownIcon}
               menu={{
                 items: [
@@ -351,10 +348,9 @@ export function Risks() {
                     value: 'cisa_kev',
                   },
                 ],
-                onClick: value => {
-                  setSourceFilter(value || '');
-                },
+                onSelect: selectedRows => setSourceFilter(selectedRows),
                 value: sourceFilter,
+                multiSelect: true,
               }}
             />
             <FilterCounts count={filteredRisks.length} type="Risks" />

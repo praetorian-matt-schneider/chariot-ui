@@ -1,6 +1,11 @@
 import React, { ReactNode, useMemo, useRef, useState } from 'react';
 import { Link, To } from 'react-router-dom';
-import { ChevronRightIcon } from '@heroicons/react/24/outline';
+import { CheckIcon } from '@heroicons/react/20/solid';
+import { ChevronRightIcon, StopIcon } from '@heroicons/react/24/outline';
+import {
+  CheckCircleIcon,
+  StopIcon as StopIconSolid,
+} from '@heroicons/react/24/solid';
 
 import { cn } from '@/utils/classname';
 
@@ -76,6 +81,7 @@ export const Menu: React.FC<MenuProps> = props => {
                   } else {
                     selected.add(item.value);
                   }
+                  selected.delete('');
                   newSelected = Array.from(selected);
                 } else {
                   newSelected = [''];
@@ -204,10 +210,10 @@ function MenuButton(
     disabled,
     onClick,
     isFocused,
-    isSelected,
     children,
     styleType = 'text',
     className,
+    isSelected,
     tootlip,
     isLoading,
     submenu,
@@ -275,14 +281,22 @@ function Content(props: MenuItemProps & { multiSelect?: boolean }) {
     description,
     disabled: controlledDisabled,
     helpText,
+    isSelected,
     isLoading,
+    multiSelect,
   } = props;
   const labelText = !description && !helpText;
 
   const disabled = isLoading ? false : controlledDisabled;
 
   return (
-    <>
+    <div className="flex w-full items-center gap-2">
+      {multiSelect && (
+        <>
+          <input type="checkbox" className="hidden" checked={isSelected} />
+          <CheckboxIcon isChecked={Boolean(isSelected)} />
+        </>
+      )}
       {icon && (
         <div className={`[&>svg]:size-5 [&>svg]:text-default-light`}>
           {icon}
@@ -306,6 +320,24 @@ function Content(props: MenuItemProps & { multiSelect?: boolean }) {
           </div>
         )}
       </div>
-    </>
+      {isSelected && !multiSelect && (
+        <div className="text-default-light">
+          <CheckCircleIcon className="size-4 text-brand" />
+        </div>
+      )}
+    </div>
   );
 }
+
+const CheckboxIcon = ({ isChecked }: { isChecked: boolean }) => {
+  const className =
+    'box-border size-6 rounded-[2px] border-brand text-brand hover:border-brand/100 hover:bg-brand/10';
+  return isChecked ? (
+    <div className="relative">
+      <StopIconSolid className={className} />
+      <CheckIcon className="absolute left-1.5 top-1.5 size-3 text-layer0" />
+    </div>
+  ) : (
+    <StopIcon className={className} />
+  );
+};
