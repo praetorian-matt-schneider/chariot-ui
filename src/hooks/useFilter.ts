@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 
-export const useFilter = (
-  defaultValue = '',
+export const useFilter = <T>(
+  defaultValue: T,
   setSelectedRows?: (value: string[]) => void
-): [string, (filter: string) => void] => {
-  const [filter, setFilter] = useState(defaultValue);
+): [T, (filter: T) => void] => {
+  const [filter, setFilter] = useState<T>(defaultValue);
 
   useEffect(() => {
     const el = document.getElementById('body');

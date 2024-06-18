@@ -52,21 +52,21 @@ const getFilteredRisksByCISA = (
 const getFilteredRisks = (
   risks: Risk[],
   {
-    statusFilter,
+    statusFilter = [],
     severityFilter,
     sourceFilter,
     knownExploitedThreats,
   }: {
-    statusFilter?: string;
+    statusFilter?: string[];
     severityFilter?: string;
     sourceFilter?: string;
     knownExploitedThreats?: string[];
   }
 ) => {
   let filteredRisks = risks;
-  if (statusFilter) {
-    filteredRisks = filteredRisks.filter(
-      ({ status }) => `${getStatus(status)}` === statusFilter
+  if (statusFilter?.filter(Boolean).length > 0) {
+    filteredRisks = filteredRisks.filter(({ status }) =>
+      statusFilter.includes(`${getStatus(status)}`)
     );
   }
   if (severityFilter) {
@@ -91,9 +91,21 @@ export function Risks() {
   const { getRiskDrawerLink } = useOpenDrawer();
 
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
-  const [severityFilter, setSeverityFilter] = useFilter('', setSelectedRows);
-  const [statusFilter, setStatusesFilter] = useFilter('', setSelectedRows);
-  const [sourceFilter, setSourceFilter] = useFilter('', setSelectedRows);
+  // const [severityFilterMultiple, setSeverityFilterMultiple] = useState<
+  //   string[]
+  // >([]);
+  const [statusFilter, setStatusesFilter] = useFilter<string[]>(
+    [''],
+    setSelectedRows
+  );
+  const [severityFilter, setSeverityFilter] = useFilter<string>(
+    '',
+    setSelectedRows
+  );
+  const [sourceFilter, setSourceFilter] = useFilter<string>(
+    '',
+    setSelectedRows
+  );
 
   const { data: threats, status: threatsStatus } = useMy({
     resource: 'threat',
@@ -249,18 +261,13 @@ export function Risks() {
           <div className="flex gap-4">
             <Dropdown
               styleType="header"
-              label={
-                statusFilter
-                  ? `${riskStatusOptions.find(option => option.value === statusFilter)?.label}`
-                  : 'All Statuses'
-              }
+              label="Status"
               endIcon={DownIcon}
               menu={{
                 items: [
                   {
                     label: 'All Statuses',
                     labelSuffix: risksExceptStatus.length?.toLocaleString(),
-
                     value: '',
                   },
                   {
@@ -278,10 +285,11 @@ export function Risks() {
                       .length?.toLocaleString(),
                   })),
                 ],
-                onClick: value => {
-                  setStatusesFilter(value || '');
+                onSelect: selectedRows => {
+                  setStatusesFilter(selectedRows);
                 },
                 value: statusFilter,
+                multiSelect: true,
               }}
             />
             <Dropdown

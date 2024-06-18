@@ -1,7 +1,6 @@
 import React, { ReactNode, useMemo, useRef, useState } from 'react';
 import { Link, To } from 'react-router-dom';
 import { ChevronRightIcon } from '@heroicons/react/24/outline';
-import { CheckCircleIcon } from '@heroicons/react/24/solid';
 
 import { cn } from '@/utils/classname';
 
@@ -13,8 +12,10 @@ import { Tooltip } from './Tooltip';
 export type MenuProps = {
   items: Omit<MenuItemProps, 'isFocused'>[];
   onClick?: (value?: string) => void;
-  value?: string;
+  value?: string | string[];
   className?: string;
+  multiSelect?: boolean;
+  onSelect?: (value: string[]) => void;
 };
 
 interface subMenuOpenProps {
@@ -23,11 +24,21 @@ interface subMenuOpenProps {
 }
 
 export const Menu: React.FC<MenuProps> = props => {
-  const { className, items: unparsedItems, onClick, value } = props;
+  const {
+    className,
+    items: unparsedItems,
+    onClick,
+    value,
+    multiSelect,
+    onSelect,
+  } = props;
 
   const ulRef = useRef<HTMLUListElement>(null);
 
   const [isSubMenuOpen, setIsSubMenuOpen] = useState(false);
+  const [selected, setSelected] = useState<string[]>(
+    (typeof value === 'string' ? [value] : value) || []
+  );
 
   const items = useMemo(() => {
     return unparsedItems.filter(item => !item.hide);
@@ -45,12 +56,34 @@ export const Menu: React.FC<MenuProps> = props => {
         <MenuItem
           key={index}
           {...item}
+          multiSelect={multiSelect}
           isSubMenuOpen={isSubMenuOpen}
           setIsSubMenuOpen={setIsSubMenuOpen}
-          isSelected={value ? item.value === value : false}
+          isSelected={
+            item.value === undefined ? false : selected.includes(item.value)
+          }
           onClick={(...args) => {
             onClick?.(...args);
             item.onClick?.(...args);
+
+            setSelected(prev => {
+              let newSelected = prev;
+              if (multiSelect && item.value !== undefined) {
+                if (item.value) {
+                  const selected = new Set(prev);
+                  if (selected.has(item.value)) {
+                    selected.delete(item.value);
+                  } else {
+                    selected.add(item.value);
+                  }
+                  newSelected = Array.from(selected);
+                } else {
+                  newSelected = [''];
+                }
+              }
+              onSelect?.(newSelected);
+              return newSelected;
+            });
           }}
         />
       ))}
@@ -80,11 +113,13 @@ export interface MenuItemProps {
   className?: string;
   tootlip?: string;
   isLoading?: boolean;
-  checked?: boolean;
+  // checked?: boolean;
   submenu?: MenuItemProps[];
 }
 
-const MenuItem: React.FC<MenuItemProps & subMenuOpenProps> = props => {
+const MenuItem: React.FC<
+  MenuItemProps & subMenuOpenProps & { multiSelect?: boolean }
+> = props => {
   if (props.hide) {
     return null;
   }
@@ -183,7 +218,7 @@ function MenuButton(
   const buttonClassName = cn(
     'relative text-start rounded-[2px] flex items-center justify-start px-4 m-0 py-2',
     isFocused ? 'outline-none z-10' : '',
-    isSelected ? 'bg-gray-200' : '',
+    isSelected ? 'bg-brand-lighter' : '',
     menuMarginClassName,
     className
   );
@@ -232,7 +267,7 @@ function MenuButton(
   );
 }
 
-function Content(props: MenuItemProps) {
+function Content(props: MenuItemProps & { multiSelect?: boolean }) {
   const {
     label,
     labelSuffix,
@@ -241,7 +276,6 @@ function Content(props: MenuItemProps) {
     disabled: controlledDisabled,
     helpText,
     isLoading,
-    checked,
   } = props;
   const labelText = !description && !helpText;
 
@@ -254,10 +288,10 @@ function Content(props: MenuItemProps) {
           {icon}
         </div>
       )}
-      <div className="w-full overflow-hidden">
+      <div className={'w-full overflow-hidden'}>
         <div className="flex items-center justify-between text-sm">
           <div
-            className={`flex w-full justify-between gap-2 overflow-hidden text-ellipsis ${labelText ? '' : 'font-semibold'} leading-8 ${disabled ? 'italic text-default-light' : ''} ${label === 'View All' && 'm-auto'}`}
+            className={`flex w-full justify-between gap-8 overflow-hidden text-ellipsis ${labelText ? '' : 'font-semibold'} leading-8 ${disabled ? 'italic text-default-light' : ''} ${label === 'View All' && 'm-auto'}`}
           >
             <OverflowText text={label} placement="left" />
             {labelSuffix}
@@ -272,12 +306,6 @@ function Content(props: MenuItemProps) {
           </div>
         )}
       </div>
-
-      {checked && (
-        <div className="text-default-light">
-          <CheckCircleIcon className="size-4" />
-        </div>
-      )}
     </>
   );
 }
