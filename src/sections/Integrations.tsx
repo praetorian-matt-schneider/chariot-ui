@@ -92,7 +92,7 @@ const Integrations: React.FC = () => {
             <div className="flex size-full h-max my-5 flex-wrap">
               <h2 className="text-xl">{integrationType}</h2>
             </div>
-            <div className="flex size-full h-max flex-wrap justify-center mb-5 gap-5">
+            <div className="flex size-full h-max flex-wrap justify-left mb-5 gap-5">
               {IntegrationsMeta.filter(
                 integration => integration.type === integrationType
               ).map(integrationMeta => {
@@ -108,7 +108,7 @@ const Integrations: React.FC = () => {
                 return (
                   <div
                     key={integration.id}
-                    className="w-[290px] max-w-[290px] rounded-[2px] bg-layer0 shadow"
+                    className="w-[290px] max-w-[290px] rounded-[2px] bg-layer0 border-2 border-gray-100 hover:border-gray-200"
                   >
                     <div className="relative flex flex-col items-center p-8">
                       <img
