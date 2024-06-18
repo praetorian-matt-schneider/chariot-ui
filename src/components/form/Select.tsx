@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { CheckIcon } from '@heroicons/react/24/outline';
 
+import { Link } from '@/components/Link';
 import { useOnScreen } from '@/hooks';
 
 import { DEFAULT_CLASS, DISABLED_CLASS, ERROR_CLASS } from './constants';
@@ -170,6 +171,17 @@ const SelectItem = (props: SelectItemProps) => {
     ref.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
   }
 
+  const isLink = typeof value === 'string' && value.startsWith('http');
+
+  if (isLink) {
+    return (
+      <li className="-ml-1">
+        <Link to={value as string} className="block truncate">
+          {label}
+        </Link>
+      </li>
+    );
+  }
   return (
     <li
       className={`relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 ${isHovered ? 'cursor-pointer bg-primary text-white' : ''} ${disabled ? 'cursor-not-allowed opacity-50' : ''}`}

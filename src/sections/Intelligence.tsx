@@ -67,20 +67,30 @@ const Intelligence: React.FC = () => {
     if (newEndpoint) {
       switch (newEndpoint.toLowerCase()) {
         case 'account':
-          setAggregates(
-            Object.keys(getAccountAggregates()).map(id => ({
+          setAggregates([
+            ...Object.keys(getAccountAggregates()).map(id => ({
               value: id,
               label: getAccountAggregates()[id].label,
-            }))
-          );
+            })),
+            {
+              value:
+                'https://github.com/praetorian-inc/chariot-ui/blob/main/src/utils/aggregates/account.ts',
+              label: 'Contribute more...',
+            },
+          ]);
           break;
         case 'risk':
-          setAggregates(
-            Object.keys(getRiskAggregates()).map(id => ({
+          setAggregates([
+            ...Object.keys(getRiskAggregates()).map(id => ({
               value: id,
               label: getRiskAggregates()[id].label,
-            }))
-          );
+            })),
+            {
+              value:
+                'https://github.com/praetorian-inc/chariot-ui/blob/main/src/utils/aggregates/risk.ts',
+              label: 'Contribute more...',
+            },
+          ]);
           break;
         default:
           setAggregates([]);
