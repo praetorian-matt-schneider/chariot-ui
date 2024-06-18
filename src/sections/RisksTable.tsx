@@ -98,18 +98,9 @@ export function Risks() {
   const { getRiskDrawerLink } = useOpenDrawer();
 
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
-  const [statusFilter, setStatusesFilter] = useFilter<string[]>(
-    [''],
-    setSelectedRows
-  );
-  const [severityFilter, setSeverityFilter] = useFilter<string[]>(
-    [''],
-    setSelectedRows
-  );
-  const [sourceFilter, setSourceFilter] = useFilter<string[]>(
-    [''],
-    setSelectedRows
-  );
+  const [statusFilter, setStatusesFilter] = useFilter([''], setSelectedRows);
+  const [severityFilter, setSeverityFilter] = useFilter([''], setSelectedRows);
+  const [sourceFilter, setSourceFilter] = useFilter([''], setSelectedRows);
 
   const { data: threats, status: threatsStatus } = useMy({
     resource: 'threat',

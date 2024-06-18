@@ -302,7 +302,7 @@ function Content(props: MenuItemProps & { multiSelect?: boolean }) {
           {icon}
         </div>
       )}
-      <div className={'w-full overflow-hidden'}>
+      <div className="w-full overflow-hidden">
         <div className="flex items-center justify-between text-sm">
           <div
             className={`flex w-full justify-between gap-8 overflow-hidden text-ellipsis ${labelText ? '' : 'font-semibold'} leading-8 ${disabled ? 'italic text-default-light' : ''} ${label === 'View All' && 'm-auto'}`}
