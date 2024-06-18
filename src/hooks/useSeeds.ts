@@ -148,19 +148,19 @@ export function useDeleteSeed() {
     }
   );
 
-  return useMutation<void, Error, { seed: string; showSnackbar?: boolean }>({
+  return useMutation<void, Error, { seed: Seed; showSnackbar?: boolean }>({
     defaultErrorMessage: `Failed to delete seed`,
     mutationFn: async ({ seed }) => {
       await axios.delete(`/seed`, {
         data: {
-          key: `#seed#${seed}`,
+          key: seed.key,
         },
       });
     },
     onSuccess: (_, { seed, showSnackbar = true }) => {
       showSnackbar &&
         Snackbar({
-          title: `Seed ${seed} removed`,
+          title: `Seed ${seed.name} removed`,
           description: '',
           variant: 'success',
         });
@@ -170,7 +170,9 @@ export function useDeleteSeed() {
           return {
             ...previous,
             pages: previous.pages.map(page =>
-              page.filter(item => item.dns !== seed)
+              page.filter(
+                item => item.dns !== seed.dns || item.name !== seed.name
+              )
             ),
           };
         }
