@@ -13,12 +13,9 @@ import {
   IntegrationMeta,
   IntegrationsMeta,
   isComingSoonIntegration,
-  ASSET_DISCOVERY,
-  RISK_IDENTIFICATION,
-  WORKFLOW,
 } from '@/utils/availableIntegrations';
 
-import { Account } from '../types';
+import { Account, IntegrationType } from '../types';
 
 function getButtonText(integration: IntegrationMeta) {
   const { name, connected, issue } = integration;
@@ -87,27 +84,18 @@ const Integrations: React.FC = () => {
     [integrationList, unlink]
   );
 
-  const integrationTypes = [
-    [ASSET_DISCOVERY, 'Asset Discovery'],
-    [RISK_IDENTIFICATION, 'Risk Identification'],
-    [WORKFLOW, 'Workflow'],
-  ];
-
   return (
     <div className="flex h-max w-full flex-col gap-8">
-      {integrationTypes.map(integrationType => {
-        var type = integrationType[0];
-        var display = integrationType[1];
-        var groupIntegrations = IntegrationsMeta.filter(
-          integration => integration.type === type
-        );
+      {Object.values(IntegrationType).map((integrationType, key) => {
         return (
-          <Paper>
+          <Paper key={key}>
             <div className="flex size-full h-max my-5 flex-wrap">
-              <h2 className="text-xl">{display}</h2>
+              <h2 className="text-xl">{integrationType}</h2>
             </div>
             <div className="flex size-full h-max flex-wrap justify-center mb-5 gap-5">
-              {groupIntegrations.map(integrationMeta => {
+              {IntegrationsMeta.filter(
+                integration => integration.type === integrationType
+              ).map(integrationMeta => {
                 const connectedAccounts = integrationList.filter(
                   account => account.member === integrationMeta.name
                 );
@@ -128,10 +116,7 @@ const Integrations: React.FC = () => {
                         alt={integration.name}
                         className="h-32 p-10"
                       />
-                      <h2
-                        className="mt-6 font-semibold
-              "
-                      >
+                      <h2 className="mt-6 font-semibold">
                         {integration.displayName}
                       </h2>
                       <p className="mt-1 line-clamp-3 min-h-[72px] text-center text-default-light">

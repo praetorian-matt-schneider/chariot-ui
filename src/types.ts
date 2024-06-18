@@ -63,6 +63,12 @@ export const SeverityDef: Record<RiskSeverity, string> = {
   C: 'Critical',
 };
 
+export enum IntegrationType {
+  AssetDiscovery = 'Asset Discovery',
+  RiskIdentification = 'Risk Identification',
+  Workflow = 'Workflow',
+}
+
 export const DisplaySeverities: Record<string, string> = {
   analyzing: 'Requires Analysis',
   L: 'Low Risks (Open)',
