@@ -14,6 +14,7 @@ import { NoData } from '@/components/ui/NoData';
 import { ChartType, MyResourceKey } from '@/types';
 import { getAggregates as getAccountAggregates } from '@/utils/aggregates/account';
 import { getAggregates as getRiskAggregates } from '@/utils/aggregates/risk';
+import { useStorage } from '@/utils/storage/useStorage.util';
 
 interface ChartConfig {
   id: number;
@@ -46,7 +47,12 @@ const sizes = [
 ];
 
 const Dashboard: React.FC = () => {
-  const [charts, setCharts] = useState<ChartConfig[]>([]);
+  const [charts, setCharts] = useStorage<ChartConfig[]>(
+    {
+      key: 'dashboardCharts',
+    },
+    []
+  );
   const [newChartType, setNewChartType] = useState<ChartType>('area');
   const [selectedSizeIndex, setSelectedSizeIndex] = useState<number>(0);
   const [newEndpoint, setNewEndpoint] = useState<MyResourceKey>();
