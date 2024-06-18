@@ -20,6 +20,7 @@ interface ChartConfig {
   width: string;
   endpoint: MyResourceKey;
   aggregate: string;
+  label: string;
 }
 
 const widthToCols = (width: string) => {
@@ -93,6 +94,7 @@ const Dashboard: React.FC = () => {
           width: selectedSize.width,
           endpoint: newEndpoint,
           aggregate,
+          label: getAggregateName(aggregate),
         },
       ]);
       setIsFormVisible(false);
@@ -106,9 +108,9 @@ const Dashboard: React.FC = () => {
   const getAggregateName = (aggregate: string) => {
     switch (newEndpoint) {
       case 'account':
-        return getAccountAggregates()[aggregate].label;
+        return getAccountAggregates()[aggregate]?.label;
       case 'risk':
-        return getRiskAggregates()[aggregate].label;
+        return getRiskAggregates()[aggregate]?.label;
       default:
         return '';
     }
@@ -158,7 +160,9 @@ const Dashboard: React.FC = () => {
                 name="aggregate"
                 className="mt-4"
                 value={aggregate ?? ''}
-                onChange={e => setAggregate(e.target.value)}
+                onChange={e => {
+                  setAggregate(e.target.value);
+                }}
                 options={[
                   {
                     value: '',
@@ -268,7 +272,7 @@ const Dashboard: React.FC = () => {
               width={chart.width}
               endpoint={chart.endpoint}
               aggregate={chart.aggregate}
-              label={getAggregateName(chart.aggregate)}
+              label={chart.label}
               removeChart={removeChart}
             />
           </div>

@@ -19,7 +19,7 @@ interface ChartWrapperProps {
   width: string;
   endpoint: MyResourceKey;
   aggregate: string;
-  label?: string;
+  label: string;
   removeChart: (chartId: number) => void;
 }
 
