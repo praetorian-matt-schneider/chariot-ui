@@ -212,7 +212,7 @@ const Dashboard: React.FC = () => {
                     options={[
                       {
                         value: '',
-                        label: 'Select an aggregate',
+                        label: 'Select a metric',
                         disabled: true,
                       },
                       { value: 'divider', label: '', divider: true },
