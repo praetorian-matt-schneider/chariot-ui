@@ -90,7 +90,7 @@ const ChartWrapper: React.FC<ChartWrapperProps> = ({
       </div>
     );
   } else {
-    return <div>Loading...</div>; // Handle loading state
+    return <></>;
   }
 };
 
