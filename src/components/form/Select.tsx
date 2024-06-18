@@ -9,6 +9,8 @@ import { InputEvent, InputProps } from './Input';
 export interface Option {
   value: number | string;
   label: string;
+  disabled?: boolean;
+  divider?: boolean;
 }
 
 export interface SelectProps {
@@ -83,8 +85,10 @@ export const Select = (props: InputProps & SelectProps) => {
   }, [options]);
 
   useEffect(() => {
-    setValue(selected.label);
-    setOptions(optionsProps);
+    if (selected) {
+      setValue(selected.label);
+      setOptions(optionsProps);
+    }
   }, [selected]);
 
   return (
@@ -115,7 +119,9 @@ export const Select = (props: InputProps & SelectProps) => {
             const isSelected = selected.value === value;
             const isHovered = hoverIndex === index;
 
-            return (
+            return options[index].divider ? (
+              <div className="my-1 w-full border-t border-gray-100" />
+            ) : (
               <SelectItem
                 key={value}
                 label={label}
@@ -125,6 +131,7 @@ export const Select = (props: InputProps & SelectProps) => {
                 index={index}
                 handleSelect={handleSelect}
                 setHoverIndex={setHoverIndex}
+                disabled={options[index].disabled}
               />
             );
           })}
@@ -142,6 +149,7 @@ interface SelectItemProps {
   index: number;
   handleSelect: (option: Option) => void;
   setHoverIndex: (index: number) => void;
+  disabled?: boolean;
 }
 
 const SelectItem = (props: SelectItemProps) => {
@@ -153,6 +161,7 @@ const SelectItem = (props: SelectItemProps) => {
     index,
     handleSelect,
     setHoverIndex,
+    disabled,
   } = props;
   const ref = useRef<HTMLLIElement>(null);
   const isVisible = useOnScreen(ref);
@@ -163,15 +172,15 @@ const SelectItem = (props: SelectItemProps) => {
 
   return (
     <li
-      className={`relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 ${isHovered ? 'cursor-pointer bg-primary text-white' : ''}`}
+      className={`relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 ${isHovered ? 'cursor-pointer bg-primary text-white' : ''} ${disabled ? 'cursor-not-allowed opacity-50' : ''}`}
       role="menuitem"
       aria-haspopup="true"
       tabIndex={0}
       key={value}
       aria-selected={isSelected}
       data-hovered={isHovered}
-      onClick={() => handleSelect({ label, value })}
-      onMouseOver={() => setHoverIndex(index)}
+      onClick={() => !disabled && handleSelect({ label, value })}
+      onMouseOver={() => !disabled && setHoverIndex(index)}
       ref={ref}
     >
       <span className={`${isSelected ? 'font-semibold' : ''}  block truncate`}>

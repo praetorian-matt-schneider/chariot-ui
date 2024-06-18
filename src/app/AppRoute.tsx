@@ -10,6 +10,7 @@ import { AuthenticatedApp } from '@/sections/AuthenticatedApp';
 import Files from '@/sections/Files';
 import Hello from '@/sections/Hello';
 import Integrations from '@/sections/Integrations';
+import Intelligence from '@/sections/Intelligence';
 import JobsTable from '@/sections/JobsTable';
 import Login from '@/sections/Login';
 import Logout from '@/sections/Logout';
@@ -53,6 +54,14 @@ const appRoutes = {
     logout: {
       element: <Logout />,
       title: 'logout',
+    },
+    intelligence: {
+      element: (
+        <Body>
+          <Intelligence />
+        </Body>
+      ),
+      title: 'Intelligence',
     },
     assets: {
       element: <Assets />,

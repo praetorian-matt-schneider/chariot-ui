@@ -172,6 +172,7 @@ export type RiskHistory = {
 };
 
 export interface Risk extends RiskTemplate {
+  class: string;
   username: string;
   dns: string;
   created: string;
@@ -401,3 +402,5 @@ export interface CognitoAuthStates {
   refreshToken?: string;
   expiresIn?: number;
 }
+
+export type ChartType = 'area' | 'bar' | 'line' | 'donut';
