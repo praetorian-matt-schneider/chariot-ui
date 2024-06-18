@@ -14,7 +14,6 @@ import {
 import { DocumentIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import { Menu } from '@headlessui/react';
 
-import { useMy } from '@/hooks';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useOpenDrawer } from '@/sections/detailsDrawer/useOpenDrawer';
 import { useSearchContext } from '@/state/search';
@@ -40,7 +39,6 @@ import {
   SeverityDef,
   StatusDef,
   StatusSubDef,
-  Threat,
 } from '../types';
 
 import { Input, InputEvent } from './form/Input';
@@ -61,23 +59,10 @@ const GlobalSearch = () => {
   const navigate = useNavigate();
   const [isFocused, setIsFocused] = useState(false);
 
-  const threatEnabled = debouncedSearch.startsWith('CVE-');
-
   const { data, status } = useGenericSearch(
     { query: debouncedSearch },
     { enabled: Boolean(isGenericSearch && debouncedSearch) }
   );
-  const { data: threatData = [], status: threatStatus } = useMy(
-    {
-      resource: 'threat',
-      query: `#KEV#${debouncedSearch}`,
-    },
-    {
-      enabled: threatEnabled,
-    }
-  );
-
-  const threatLoading = threatEnabled && threatStatus === 'pending';
 
   const handleInputChange = (e: InputEvent): void => {
     onSearchChange(e.target.value);
@@ -147,10 +132,7 @@ const GlobalSearch = () => {
       {isGenericSearch && isFocused && search?.length > 0 && (
         <SearchResultDropdown
           {...(data as unknown as Search)}
-          threats={threatData}
-          isLoading={
-            status === 'pending' || threatLoading || search !== debouncedSearch
-          }
+          isLoading={status === 'pending' || search !== debouncedSearch}
           onSelect={handleSelectChange}
           setIsFocused={setIsFocused}
         />
@@ -204,18 +186,13 @@ const SearchResultDropdown: React.FC<Search> = ({
   seeds,
   attribute,
   jobs,
-  threats,
   isLoading,
   setIsFocused,
 }) => {
   const navigate = useNavigate();
 
-  const {
-    getSeedDrawerLink,
-    getRiskDrawerLink,
-    getAssetDrawerLink,
-    getThreatDrawerLink,
-  } = useOpenDrawer();
+  const { getSeedDrawerLink, getRiskDrawerLink, getAssetDrawerLink } =
+    useOpenDrawer();
 
   const { search } = useSearchContext();
   const isEmpty =
@@ -227,7 +204,6 @@ const SearchResultDropdown: React.FC<Search> = ({
     !seeds &&
     !attribute &&
     !jobs &&
-    threats.length === 0 &&
     search?.length > 0;
 
   return (
@@ -359,15 +335,6 @@ const SearchResultDropdown: React.FC<Search> = ({
               items={accounts}
               onSelect={() => onSelect('user')}
               Icon={UserIcon}
-              row={item => item.name}
-            />
-            <SearchResultDropdownSeaction<Threat>
-              title="Threats"
-              items={threats}
-              Icon={UserIcon}
-              onClick={item => {
-                navigate(getThreatDrawerLink(item));
-              }}
               row={item => item.name}
             />
           </>
