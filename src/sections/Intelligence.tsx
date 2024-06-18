@@ -46,10 +46,10 @@ const sizes = [
   { label: '1', width: 'full', tooltip: '100%' },
 ];
 
-const Dashboard: React.FC = () => {
+const Intelligence: React.FC = () => {
   const [charts, setCharts] = useStorage<ChartConfig[]>(
     {
-      key: 'dashboardCharts',
+      key: 'intelligenceCharts',
     },
     []
   );
@@ -295,4 +295,4 @@ const Dashboard: React.FC = () => {
   );
 };
 
-export default Dashboard;
+export default Intelligence;
