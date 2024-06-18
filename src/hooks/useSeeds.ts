@@ -171,7 +171,7 @@ export function useDeleteSeed() {
             ...previous,
             pages: previous.pages.map(page =>
               page.filter(
-                item => item.dns !== seed.dns && item.name !== seed.name
+                item => item.dns !== seed.dns || item.name !== seed.name
               )
             ),
           };
