@@ -7,8 +7,9 @@ import {
 import { ChartBarIcon, ChartPieIcon } from '@heroicons/react/24/solid';
 
 import { Button } from '@/components/Button';
+import ChartWrapper from '@/components/charts/ChartWrapper';
 import { Input, Type } from '@/components/form/Input';
-import ChartWrapper from '@/sections/dashboard/ChartWrapper';
+import { Tooltip } from '@/components/Tooltip';
 import { ChartType, MyResourceKey } from '@/types';
 import { getAggregates as getAccountAggregates } from '@/utils/aggregates/account';
 import { getAggregates as getRiskAggregates } from '@/utils/aggregates/risk';
@@ -111,125 +112,125 @@ const Dashboard: React.FC = () => {
           styleType="primary"
           startIcon={<PlusIcon className="size-4" />}
         >
-          Add Chart
+          Add Widget
         </Button>
 
         {isFormVisible && (
-          <div className="absolute left-0 top-[50px] z-10 mb-2 w-[420px] rounded-[4px] bg-white p-4 shadow-md">
-            <div className="flex flex-col space-y-4">
-              <div className="grid grid-cols-[30%_1fr] items-center">
-                <label className="block font-semibold text-gray-700">
-                  Chart Type
-                </label>
+          <div className="absolute left-0 top-[50px] z-10 mb-2 w-[300px] rounded-[4px] bg-white p-4 shadow-md">
+            <Input
+              type={Type.SELECT}
+              name="endpoint"
+              value={newEndpoint ?? ''}
+              onChange={e => {
+                setNewEndpoint(e.target.value as MyResourceKey);
+                setAggregates([]);
+                setAggregate(undefined);
+              }}
+              options={[
+                { value: '', label: 'Select a resource', disabled: true },
+                { value: 'divider', label: '', divider: true },
+                { value: 'account', label: 'Account' },
+                { value: 'risk', label: 'Risk' },
+                { value: 'asset', label: 'Asset', disabled: true },
+                { value: 'ref', label: 'Reference', disabled: true },
+                { value: 'job', label: 'Job', disabled: true },
+                { value: 'seed', label: 'Seed', disabled: true },
+                { value: 'attribute', label: 'Attribute', disabled: true },
+                { value: 'file', label: 'File', disabled: true },
+                { value: 'threat', label: 'Threat', disabled: true },
+              ]}
+            />
+            {aggregates.length > 0 && (
+              <Input
+                disabled={!newEndpoint}
+                type={Type.SELECT}
+                name="aggregate"
+                className="mt-4"
+                value={aggregate ?? ''}
+                onChange={e => setAggregate(e.target.value)}
+                options={[
+                  {
+                    value: '',
+                    label: 'Select a metric',
+                    disabled: true,
+                  },
+                  { value: 'divider', label: '', divider: true },
+                  ...(aggregates ?? []),
+                ]}
+              />
+            )}
+            {aggregate && newEndpoint && (
+              <div className="mt-4 flex flex-col space-y-4">
                 <div className="flex items-center justify-between space-x-4">
-                  <button
-                    className={`w-12 rounded-[4px] p-2 ${newChartType === 'area' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                    onClick={() => setNewChartType('area')}
-                  >
-                    <ChartBarIcon className="m-auto size-6" />
-                  </button>
-                  <button
-                    className={`w-12 rounded-[4px] p-2 ${newChartType === 'line' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                    onClick={() => setNewChartType('line')}
-                  >
-                    <ArrowTrendingUpIcon className="m-auto size-6 stroke-[3px]" />
-                  </button>
-                  <button
-                    className={`w-12 rounded-[4px] p-2 ${newChartType === 'bar' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                    onClick={() => setNewChartType('bar')}
-                  >
-                    <Bars3CenterLeftIcon className="m-auto size-6 -rotate-90 stroke-[4px]" />
-                  </button>
-                  <button
-                    className={`w-12 rounded-[4px] p-2 ${newChartType === 'donut' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                    onClick={() => setNewChartType('donut')}
-                  >
-                    <ChartPieIcon className="m-auto size-6" />
-                  </button>
-                </div>
-              </div>
-              <div className="grid grid-cols-[30%_1fr] items-center">
-                <label className="block font-semibold text-gray-700">
-                  Width
-                </label>
-                <div className="flex items-center justify-between space-x-4">
-                  {sizes.map((size, index) => (
+                  <Tooltip title="Area Chart" placement="top">
                     <button
-                      key={size.label}
-                      className={`h-8 w-12 rounded-[2px] text-xl ${
-                        index === selectedSizeIndex
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-gray-200'
-                      }`}
-                      onClick={() => {
-                        setSelectedSizeIndex(index);
-                      }}
+                      className={`w-12 rounded-[4px] p-2 ${newChartType === 'area' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                      onClick={() => setNewChartType('area')}
                     >
-                      {size.label}
+                      <ChartBarIcon className="m-auto size-6" />
                     </button>
-                  ))}
+                  </Tooltip>
+                  <Tooltip title="Line Chart" placement="top">
+                    <button
+                      className={`w-12 rounded-[4px] p-2 ${newChartType === 'line' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                      onClick={() => setNewChartType('line')}
+                    >
+                      <ArrowTrendingUpIcon className="m-auto size-6 stroke-[3px]" />
+                    </button>
+                  </Tooltip>
+                  <Tooltip title="Bar Chart" placement="top">
+                    <button
+                      className={`w-12 rounded-[4px] p-2 ${newChartType === 'bar' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                      onClick={() => setNewChartType('bar')}
+                    >
+                      <Bars3CenterLeftIcon className="m-auto size-6 -rotate-90 stroke-[4px]" />
+                    </button>
+                  </Tooltip>
+                  <Tooltip title="Donut Chart" placement="top">
+                    <button
+                      className={`w-12 rounded-[4px] p-2 ${newChartType === 'donut' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                      onClick={() => setNewChartType('donut')}
+                    >
+                      <ChartPieIcon className="m-auto size-6" />
+                    </button>
+                  </Tooltip>
+                </div>
+                <div className="flex flex-col space-y-4">
+                  <div className="flex items-center justify-between space-x-4">
+                    {sizes.map((size, index) => (
+                      <Tooltip
+                        key={size.label}
+                        title={`${size.label} Width`}
+                        placement="bottom"
+                      >
+                        <button
+                          className={`h-8 w-12 rounded-[2px] text-xl ${
+                            index === selectedSizeIndex
+                              ? 'bg-blue-500 text-white'
+                              : 'bg-gray-200'
+                          }`}
+                          onClick={() => {
+                            setSelectedSizeIndex(index);
+                          }}
+                        >
+                          {size.label}
+                        </button>
+                      </Tooltip>
+                    ))}
+                  </div>
                 </div>
               </div>
-              <div className="grid grid-cols-[30%_1fr] items-center">
-                <label className="block font-semibold text-gray-700">
-                  Resource
-                </label>
-                <Input
-                  type={Type.SELECT}
-                  name="endpoint"
-                  value={newEndpoint ?? ''}
-                  onChange={e => {
-                    setNewEndpoint(e.target.value as MyResourceKey);
-                    setAggregates([]);
-                    setAggregate(undefined);
-                  }}
-                  options={[
-                    { value: '', label: 'Select a resource', disabled: true },
-                    { value: 'divider', label: '', divider: true },
-                    { value: 'account', label: 'Account' },
-                    { value: 'risk', label: 'Risk' },
-                    { value: 'asset', label: 'Asset', disabled: true },
-                    { value: 'ref', label: 'Reference', disabled: true },
-                    { value: 'job', label: 'Job', disabled: true },
-                    { value: 'seed', label: 'Seed', disabled: true },
-                    { value: 'attribute', label: 'Attribute', disabled: true },
-                    { value: 'file', label: 'File', disabled: true },
-                    { value: 'threat', label: 'Threat', disabled: true },
-                  ]}
-                />
-              </div>
-              {aggregates.length > 0 && (
-                <div className="grid grid-cols-[30%_1fr] items-center">
-                  <label className="block font-semibold text-gray-700">
-                    Metric
-                  </label>
-                  <Input
-                    disabled={!newEndpoint}
-                    type={Type.SELECT}
-                    name="aggregate"
-                    value={aggregate ?? ''}
-                    onChange={e => setAggregate(e.target.value)}
-                    options={[
-                      {
-                        value: '',
-                        label: 'Select a metric',
-                        disabled: true,
-                      },
-                      { value: 'divider', label: '', divider: true },
-                      ...(aggregates ?? []),
-                    ]}
-                  />
-                </div>
-              )}
-            </div>
-            <Button
-              onClick={addChart}
-              type="button"
-              styleType="secondary"
-              className="ml-auto mt-4"
-            >
-              Add Chart
-            </Button>
+            )}
+            {aggregate && newEndpoint && (
+              <Button
+                onClick={addChart}
+                type="button"
+                styleType="secondary"
+                className="ml-auto mt-4"
+              >
+                Add
+              </Button>
+            )}
           </div>
         )}
       </div>
