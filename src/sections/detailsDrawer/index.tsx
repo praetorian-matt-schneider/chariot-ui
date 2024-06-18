@@ -2,7 +2,6 @@ import { StorageKey } from '@/utils/storage/useStorage.util';
 import { useSearchParams } from '@/utils/url.util';
 
 import { AssetDrawer } from './AssetDrawer';
-import { KEVDrawer } from './KevDrawer';
 import { RiskDrawer } from './RiskDrawer';
 import { SeedDrawer } from './SeedDrawer';
 
@@ -16,7 +15,6 @@ export const DetailsDrawer = () => {
 
   return (
     <div id="details-id">
-      <KEVDrawer open={drawerType === 'threat'} compositeKey={compositeKey} />
       <SeedDrawer open={drawerType === 'seed'} compositeKey={compositeKey} />
       <AssetDrawer open={drawerType === 'asset'} compositeKey={compositeKey} />
       <RiskDrawer open={drawerType === 'risk'} compositeKey={compositeKey} />
