@@ -8,6 +8,7 @@ import {
 } from '@heroicons/react/24/solid';
 
 import { Button } from '@/components/Button';
+import { Input, Type } from '@/components/form/Input';
 import ChartWrapper from '@/sections/dashboard/ChartWrapper';
 import { ChartType, MyResourceKey } from '@/types'; // Adjust paths as needed
 import { getAggregates as getAccountAggregates } from '@/utils/aggregates/account';
@@ -153,56 +154,40 @@ const Dashboard: React.FC = () => {
                 <label className="block font-semibold text-gray-700">
                   Resource
                 </label>
-                <select
-                  className="mt-1 block rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                <Input
+                  type={Type.SELECT}
+                  name="endpoint"
                   value={newEndpoint}
                   onChange={e =>
                     setNewEndpoint(e.target.value as MyResourceKey)
                   }
-                >
-                  <option value="account">Account</option>
-                  <option value="risk">Risk</option>
-                  <option value="asset" disabled>
-                    Asset
-                  </option>
-                  <option value="ref" disabled>
-                    Reference
-                  </option>
-                  <option value="job" disabled>
-                    Job
-                  </option>
-                  <option value="seed" disabled>
-                    Seed
-                  </option>
-                  <option value="attribute" disabled>
-                    Attribute
-                  </option>
-                  <option value="file" disabled>
-                    File
-                  </option>
-                  <option value="threat" disabled>
-                    Threat
-                  </option>
-                </select>
+                  options={[
+                    { value: 'account', label: 'Account' },
+                    { value: 'risk', label: 'Risk' },
+                    { value: 'asset', label: 'Asset', disabled: true },
+                    { value: 'ref', label: 'Reference', disabled: true },
+                    { value: 'job', label: 'Job', disabled: true },
+                    { value: 'seed', label: 'Seed', disabled: true },
+                    { value: 'attribute', label: 'Attribute', disabled: true },
+                    { value: 'file', label: 'File', disabled: true },
+                    { value: 'threat', label: 'Threat', disabled: true },
+                  ]}
+                />
               </div>
               <div className="grid grid-cols-[30%_1fr] items-center">
                 <label className="block font-semibold text-gray-700">
                   Metric
                 </label>
-                <select
-                  className="mt-1 block rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                <Input
+                  type={Type.SELECT}
+                  name="aggregate"
                   value={aggregate}
                   onChange={e => setAggregate(e.target.value)}
-                >
-                  <option defaultChecked value="">
-                    Select an Aggregate
-                  </option>
-                  {Object.keys(getAggregates()).map(id => (
-                    <option key={id} value={id}>
-                      {getAggregates()[id].label}
-                    </option>
-                  ))}
-                </select>
+                  options={Object.keys(getAggregates()).map(id => ({
+                    value: id,
+                    label: getAggregates()[id].label,
+                  }))}
+                />
               </div>
             </div>
             <Button
