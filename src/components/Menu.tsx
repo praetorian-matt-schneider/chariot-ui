@@ -1,7 +1,11 @@
 import React, { ReactNode, useMemo, useRef, useState } from 'react';
 import { Link, To } from 'react-router-dom';
-import { ChevronRightIcon } from '@heroicons/react/24/outline';
-import { CheckCircleIcon } from '@heroicons/react/24/solid';
+import { CheckIcon } from '@heroicons/react/20/solid';
+import { ChevronRightIcon, StopIcon } from '@heroicons/react/24/outline';
+import {
+  CheckCircleIcon,
+  StopIcon as StopIconSolid,
+} from '@heroicons/react/24/solid';
 
 import { cn } from '@/utils/classname';
 
@@ -13,8 +17,10 @@ import { Tooltip } from './Tooltip';
 export type MenuProps = {
   items: Omit<MenuItemProps, 'isFocused'>[];
   onClick?: (value?: string) => void;
-  value?: string;
+  value?: string | string[];
   className?: string;
+  multiSelect?: boolean;
+  onSelect?: (value: string[]) => void;
 };
 
 interface subMenuOpenProps {
@@ -23,11 +29,21 @@ interface subMenuOpenProps {
 }
 
 export const Menu: React.FC<MenuProps> = props => {
-  const { className, items: unparsedItems, onClick, value } = props;
+  const {
+    className,
+    items: unparsedItems,
+    onClick,
+    value,
+    multiSelect,
+    onSelect,
+  } = props;
 
   const ulRef = useRef<HTMLUListElement>(null);
 
   const [isSubMenuOpen, setIsSubMenuOpen] = useState(false);
+  const [selected, setSelected] = useState<string[]>(
+    (typeof value === 'string' ? [value] : value) || []
+  );
 
   const items = useMemo(() => {
     return unparsedItems.filter(item => !item.hide);
@@ -45,12 +61,36 @@ export const Menu: React.FC<MenuProps> = props => {
         <MenuItem
           key={index}
           {...item}
+          multiSelect={multiSelect}
           isSubMenuOpen={isSubMenuOpen}
           setIsSubMenuOpen={setIsSubMenuOpen}
-          isSelected={value ? item.value === value : false}
+          isSelected={
+            item.value === undefined ? false : selected.includes(item.value)
+          }
           onClick={(...args) => {
             onClick?.(...args);
             item.onClick?.(...args);
+
+            setSelected(prev => {
+              let newSelected = prev;
+              if (multiSelect && item.value !== undefined) {
+                if (item.value) {
+                  // Toggle the value
+                  if (prev.includes(item.value)) {
+                    newSelected = prev.filter(v => v !== item.value);
+                  } else {
+                    newSelected = [...prev, item.value];
+                  }
+                  // Remove empty string if there are other values for multiSelect 'All' option
+                  newSelected = newSelected.filter(v => v !== '');
+                } else {
+                  // If 'All' option is selected, remove all other values
+                  newSelected = [''];
+                }
+              }
+              onSelect?.(newSelected);
+              return newSelected;
+            });
           }}
         />
       ))}
@@ -80,11 +120,13 @@ export interface MenuItemProps {
   className?: string;
   tootlip?: string;
   isLoading?: boolean;
-  checked?: boolean;
+  // checked?: boolean;
   submenu?: MenuItemProps[];
 }
 
-const MenuItem: React.FC<MenuItemProps & subMenuOpenProps> = props => {
+const MenuItem: React.FC<
+  MenuItemProps & subMenuOpenProps & { multiSelect?: boolean }
+> = props => {
   if (props.hide) {
     return null;
   }
@@ -169,10 +211,10 @@ function MenuButton(
     disabled,
     onClick,
     isFocused,
-    isSelected,
     children,
     styleType = 'text',
     className,
+    isSelected,
     tootlip,
     isLoading,
     submenu,
@@ -183,7 +225,7 @@ function MenuButton(
   const buttonClassName = cn(
     'relative text-start rounded-[2px] flex items-center justify-start px-4 m-0 py-2',
     isFocused ? 'outline-none z-10' : '',
-    isSelected ? 'bg-gray-200' : '',
+    isSelected ? 'bg-brand-lighter' : '',
     menuMarginClassName,
     className
   );
@@ -232,7 +274,7 @@ function MenuButton(
   );
 }
 
-function Content(props: MenuItemProps) {
+function Content(props: MenuItemProps & { multiSelect?: boolean }) {
   const {
     label,
     labelSuffix,
@@ -240,15 +282,22 @@ function Content(props: MenuItemProps) {
     description,
     disabled: controlledDisabled,
     helpText,
+    isSelected,
     isLoading,
-    checked,
+    multiSelect,
   } = props;
   const labelText = !description && !helpText;
 
   const disabled = isLoading ? false : controlledDisabled;
 
   return (
-    <>
+    <div className="flex w-full items-center gap-2">
+      {multiSelect && (
+        <>
+          <input type="checkbox" className="hidden" checked={isSelected} />
+          <CheckboxIcon isChecked={Boolean(isSelected)} />
+        </>
+      )}
       {icon && (
         <div className={`[&>svg]:size-5 [&>svg]:text-default-light`}>
           {icon}
@@ -257,7 +306,7 @@ function Content(props: MenuItemProps) {
       <div className="w-full overflow-hidden">
         <div className="flex items-center justify-between text-sm">
           <div
-            className={`flex w-full justify-between gap-2 overflow-hidden text-ellipsis ${labelText ? '' : 'font-semibold'} leading-8 ${disabled ? 'italic text-default-light' : ''} ${label === 'View All' && 'm-auto'}`}
+            className={`flex w-full justify-between gap-8 overflow-hidden text-ellipsis ${labelText ? '' : 'font-semibold'} leading-8 ${disabled ? 'italic text-default-light' : ''} ${label === 'View All' && 'm-auto'}`}
           >
             <OverflowText text={label} placement="left" />
             {labelSuffix}
@@ -272,12 +321,24 @@ function Content(props: MenuItemProps) {
           </div>
         )}
       </div>
-
-      {checked && (
+      {isSelected && !multiSelect && (
         <div className="text-default-light">
-          <CheckCircleIcon className="size-4" />
+          <CheckCircleIcon className="size-4 text-brand" />
         </div>
       )}
-    </>
+    </div>
   );
 }
+
+const CheckboxIcon = ({ isChecked }: { isChecked: boolean }) => {
+  const className =
+    'box-border size-6 rounded-[2px] border-brand text-brand hover:border-brand/100 hover:bg-brand/10';
+  return isChecked ? (
+    <div className="relative">
+      <StopIconSolid className={className} />
+      <CheckIcon className="absolute left-1.5 top-1.5 size-3 text-layer0" />
+    </div>
+  ) : (
+    <StopIcon className={className} />
+  );
+};

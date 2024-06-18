@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState } from 'react';
-import { useLocation } from 'react-router-dom';
 import { useDebounce } from 'use-debounce';
 
 import { useComponentDidUpdate } from '@/utils/reactHooks.util';
@@ -29,7 +28,6 @@ export const useSearchContext = () => {
 export const SearchProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const location = useLocation();
   const { searchParams, addSearchParams, removeSearchParams } =
     useSearchParams();
 
