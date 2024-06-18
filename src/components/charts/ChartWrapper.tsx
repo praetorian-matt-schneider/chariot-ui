@@ -70,12 +70,14 @@ const ChartWrapper: React.FC<ChartWrapperProps> = ({
             {label}
           </h3>
         )}
-        <Chart
-          type={type}
-          data={chartData}
-          xField={aggregateFunction.xField}
-          yField={aggregateFunction.yField}
-        />
+        <div className="p-6">
+          <Chart
+            type={type}
+            data={chartData}
+            xField={aggregateFunction.xField}
+            yField={aggregateFunction.yField}
+          />
+        </div>
         <button
           onClick={() => removeChart(id)}
           className="absolute -right-[22px] -top-[22px] m-2 size-7 rotate-45 rounded-full border border-gray-200 bg-white text-gray-500"
