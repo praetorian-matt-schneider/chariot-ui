@@ -21,7 +21,7 @@ const Chart: React.FC<ChartProps> = ({ type, data, xField, yField }) => {
     case 'area':
       return (
         <AreaChart
-          className="text-red h-96 w-full"
+          className="h-96 w-full text-xs"
           data={data}
           index={xField}
           categories={[yField]}
@@ -32,7 +32,7 @@ const Chart: React.FC<ChartProps> = ({ type, data, xField, yField }) => {
     case 'bar':
       return (
         <BarChart
-          className="h-96 w-full"
+          className="h-96 w-full text-xs"
           data={data}
           index={xField}
           categories={[yField]}
@@ -42,7 +42,7 @@ const Chart: React.FC<ChartProps> = ({ type, data, xField, yField }) => {
     case 'line':
       return (
         <LineChart
-          className="h-96 w-full"
+          className="h-96 w-full text-xs"
           data={data}
           index={xField}
           categories={[yField]}
@@ -51,7 +51,7 @@ const Chart: React.FC<ChartProps> = ({ type, data, xField, yField }) => {
       );
     case 'donut':
       return (
-        <div className="flex items-center justify-center space-x-6 text-default">
+        <div className="flex items-center justify-center space-x-6 text-xs">
           <DonutChart
             className="h-96 w-full"
             variant="donut"
