@@ -65,11 +65,20 @@ const ChartWrapper: React.FC<ChartWrapperProps> = ({
       <div
         className={`w- relative p-2${width} border border-gray-200 bg-white`}
       >
-        {label && (
-          <h3 className=" dark:text-dark-tremor-content-strong pl-8 pt-6 text-lg font-medium text-tremor-content-strong">
+        <div className="flex w-full items-center pl-6 pr-5 pt-6">
+          <h3 className="dark:text-dark-tremor-content-strong flex-1 text-lg font-medium text-tremor-content-strong">
             {label}
           </h3>
-        )}
+          <button
+            onClick={() => removeChart(id)}
+            className="size-7 rotate-45  text-gray-500"
+            style={{
+              borderBottomColor: 'transparent',
+            }}
+          >
+            <XMarkIcon className="rotate-45" />
+          </button>
+        </div>
         <div className="p-6">
           <Chart
             type={type}
@@ -78,15 +87,6 @@ const ChartWrapper: React.FC<ChartWrapperProps> = ({
             yField={aggregateFunction.yField}
           />
         </div>
-        <button
-          onClick={() => removeChart(id)}
-          className="absolute -right-[22px] -top-[22px] m-2 size-7 rotate-45 rounded-full border border-gray-200 bg-white text-gray-500"
-          style={{
-            borderBottomColor: 'transparent',
-          }}
-        >
-          <XMarkIcon className="rotate-45" />
-        </button>
       </div>
     );
   } else {
