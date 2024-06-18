@@ -266,7 +266,7 @@ const Seeds: React.FC = () => {
             });
           } else {
             mutateAsync(
-              { seed: seed.key, showSnackbar: !showBulk },
+              { seed: seed, showSnackbar: !showBulk },
               {
                 onSuccess: () => {
                   setSelectedRows([]);
@@ -375,7 +375,7 @@ const Seeds: React.FC = () => {
                   setIntegrationSeed(seeds[0]);
                 } else {
                   mutateAsync(
-                    { seed: seeds[0].key},
+                    { seed: seeds[0] },
                     {
                       onSuccess: () => {
                         setSelectedRows([]);
