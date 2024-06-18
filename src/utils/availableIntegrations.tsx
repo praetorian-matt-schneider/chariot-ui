@@ -6,6 +6,7 @@ import AWSExample from '@/components/ui/AWSExample';
 import WebhookExample from '@/components/ui/WebhookExample';
 
 import { getChariotWebhookURL } from './integration.util';
+import { IntegrationType } from '@/types';
 
 export interface IntegrationMeta {
   id: number;
@@ -14,6 +15,7 @@ export interface IntegrationMeta {
   description?: string;
   logo?: string;
   connected: boolean;
+  type?: IntegrationType;
   issue?: number;
   inputs?: InputsT;
   warning?: string;
@@ -49,6 +51,7 @@ export const IntegrationsMeta: IntegrationMeta[] = [
     description: 'Webhook to manage risks and assets',
     logo: '/icons/PraetorianWebhook.svg',
     connected: true,
+    type: IntegrationType.Workflow,
     copy: {
       value: ({
         api,
@@ -87,6 +90,7 @@ export const IntegrationsMeta: IntegrationMeta[] = [
       'Business communication platform offering many IRC-style features, including persistent chat rooms.',
     logo: '/icons/Slack.svg',
     connected: true,
+    type: IntegrationType.Workflow,
     inputs: [
       {
         name: 'username',
@@ -129,6 +133,7 @@ export const IntegrationsMeta: IntegrationMeta[] = [
       'Project management tool offering agile team collaboration and issue tracking.',
     logo: '/icons/Jira.svg',
     connected: true,
+    type: IntegrationType.Workflow,
     inputs: [
       {
         name: 'username',
@@ -210,6 +215,7 @@ export const IntegrationsMeta: IntegrationMeta[] = [
       'Platform for software development and version control using Git, with collaboration features.',
     logo: '/icons/GitHub.svg',
     connected: true,
+    type: IntegrationType.RiskIdentification,
     inputs: [
       {
         name: 'username',
@@ -250,6 +256,7 @@ export const IntegrationsMeta: IntegrationMeta[] = [
       'Comprehensive, evolving cloud computing platform provided by Amazon.',
     logo: '/icons/AWS.svg',
     connected: true,
+    type: IntegrationType.AssetDiscovery,
     multiple: true,
     inputs: [
       {
@@ -275,6 +282,7 @@ export const IntegrationsMeta: IntegrationMeta[] = [
       'Provides DNS and traffic management solutions with data-driven automation and optimization.',
     logo: '/icons/NS1.svg',
     connected: true,
+    type: IntegrationType.AssetDiscovery,
     inputs: [
       {
         name: 'username',
@@ -308,6 +316,7 @@ export const IntegrationsMeta: IntegrationMeta[] = [
       "Extensive suite of cloud computing services running on Google's infrastructure.",
     logo: '/icons/GoogleCloud.svg',
     connected: true,
+    type: IntegrationType.AssetDiscovery,
     inputs: [
       {
         name: 'username',
@@ -350,6 +359,7 @@ export const IntegrationsMeta: IntegrationMeta[] = [
     description: 'Asset Discovery',
     logo: '/icons/Azure.svg',
     connected: true,
+    type: IntegrationType.AssetDiscovery,
     inputs: [
       {
         name: 'username',
@@ -394,6 +404,7 @@ export const IntegrationsMeta: IntegrationMeta[] = [
     description: 'Import your assets from CloudStrike.',
     logo: '/icons/Crowdstrike.svg',
     connected: true,
+    type: IntegrationType.RiskIdentification,
     inputs: [
       {
         name: 'username',
@@ -432,6 +443,7 @@ export const IntegrationsMeta: IntegrationMeta[] = [
       'Industry-standard vulnerability scanner for comprehensive security assessments.',
     logo: '/icons/Nessus.svg',
     connected: false,
+    type: IntegrationType.RiskIdentification,
   },
   {
     id: 14,
@@ -441,6 +453,7 @@ export const IntegrationsMeta: IntegrationMeta[] = [
       'Vulnerability management solution offering risk-based prioritization and real-time remediation guidance.',
     logo: '/icons/Rapid7.svg',
     connected: false,
+    type: IntegrationType.RiskIdentification,
   },
   {
     id: 15,
@@ -450,6 +463,7 @@ export const IntegrationsMeta: IntegrationMeta[] = [
       'Offers cloud-based solutions for security and compliance across networks.',
     logo: '/icons/Qualys.svg',
     connected: false,
+    type: IntegrationType.RiskIdentification,
   },
 ];
 
