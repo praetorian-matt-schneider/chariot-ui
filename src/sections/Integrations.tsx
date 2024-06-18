@@ -5,6 +5,7 @@ import { twMerge } from 'tailwind-merge';
 
 import { Button } from '@/components/Button';
 import { IntegrationModal } from '@/components/ui/IntegrationModal';
+import { Paper } from '@/components/Paper';
 import { useModifyAccount, useMy } from '@/hooks';
 import { partition } from '@/utils/array.util';
 import {
@@ -12,6 +13,9 @@ import {
   IntegrationMeta,
   IntegrationsMeta,
   isComingSoonIntegration,
+  ASSET_DISCOVERY,
+  RISK_IDENTIFICATION,
+  WORKFLOW,
 } from '@/utils/availableIntegrations';
 
 import { Account } from '../types';
@@ -83,73 +87,95 @@ const Integrations: React.FC = () => {
     [integrationList, unlink]
   );
 
-  return (
-    <div className="flex size-full h-max flex-wrap justify-center gap-5 overflow-x-auto pb-4">
-      {IntegrationsMeta.map(integrationMeta => {
-        const connectedAccounts = integrationList.filter(
-          account => account.member === integrationMeta.name
-        );
-        const integration = {
-          ...integrationMeta,
-          connected: connectedAccounts.length > 0,
-        };
-        const isComingSoon = isComingSoonIntegration(integration.name);
+  const integrationTypes = [
+    [ASSET_DISCOVERY, 'Asset Discovery'],
+    [RISK_IDENTIFICATION, 'Risk Identification'],
+    [WORKFLOW, 'Workflow'],
+  ];
 
+  return (
+    <div className="flex h-max w-full flex-col gap-8">
+      {integrationTypes.map(integrationType => {
+        var type = integrationType[0];
+        var display = integrationType[1];
+        var groupIntegrations = IntegrationsMeta.filter(
+          integration => integration.type === type
+        );
         return (
-          <div
-            key={integration.id}
-            className="w-[302px] max-w-[302px] rounded-[2px] bg-layer0 shadow"
-          >
-            <div className="relative flex flex-col items-center p-8">
-              <img
-                src={integration.logo}
-                alt={integration.name}
-                className="h-32 p-10"
-              />
-              <h2
-                className="mt-6 font-semibold
+          <Paper>
+            <div className="flex size-full h-max my-5 flex-wrap">
+              <h2 className="text-xl">{display}</h2>
+            </div>
+            <div className="flex size-full h-max flex-wrap justify-center mb-5 gap-5">
+              {groupIntegrations.map(integrationMeta => {
+                const connectedAccounts = integrationList.filter(
+                  account => account.member === integrationMeta.name
+                );
+                const integration = {
+                  ...integrationMeta,
+                  connected: connectedAccounts.length > 0,
+                };
+                const isComingSoon = isComingSoonIntegration(integration.name);
+
+                return (
+                  <div
+                    key={integration.id}
+                    className="w-[290px] max-w-[290px] rounded-[2px] bg-layer0 shadow"
+                  >
+                    <div className="relative flex flex-col items-center p-8">
+                      <img
+                        src={integration.logo}
+                        alt={integration.name}
+                        className="h-32 p-10"
+                      />
+                      <h2
+                        className="mt-6 font-semibold
               "
-              >
-                {integration.displayName}
-              </h2>
-              <p className="mt-1 line-clamp-3 min-h-[72px] text-center text-default-light">
-                {integration.description}
-              </p>
+                      >
+                        {integration.displayName}
+                      </h2>
+                      <p className="mt-1 line-clamp-3 min-h-[72px] text-center text-default-light">
+                        {integration.description}
+                      </p>
+                    </div>
+                    <div className="flex w-full">
+                      {integration.connected && (
+                        <Button
+                          className="grow basis-1/2 rounded-none rounded-bl-[2px] border-r-2 border-t-2 border-gray-100 bg-layer0 py-4"
+                          onClick={() => {
+                            setUpdateForm(true);
+                            setForm({ ...integration, connectedAccounts });
+                          }}
+                        >
+                          Edit
+                        </Button>
+                      )}
+                      <Button
+                        className={twMerge(
+                          'grow basis-1/2 py-4 bg-layer0 rounded-none border-t-2 border-gray-100',
+                          integration.connected &&
+                            'text-red-600 hover:text-red-500 rounded-br-[2px]',
+                          !integration.connected && !isComingSoon
+                            ? 'text-brand hover:text-brand-hover'
+                            : 'cursor-default'
+                        )}
+                        startIcon={
+                          integration.connected ? (
+                            <MinusCircleIcon className="mr-2 size-5" />
+                          ) : !isComingSoon ? (
+                            <PlusCircleIcon className="mr-2 size-5" />
+                          ) : undefined
+                        }
+                        onClick={() => !isComingSoon && handleCTA(integration)}
+                      >
+                        {isLoading ? 'Loading...' : getButtonText(integration)}
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-            <div className="flex w-full">
-              {integration.connected && (
-                <Button
-                  className="grow basis-1/2 rounded-none rounded-bl-[2px] border-r-2 border-t-2 border-gray-100 bg-layer0 py-4"
-                  onClick={() => {
-                    setUpdateForm(true);
-                    setForm({ ...integration, connectedAccounts });
-                  }}
-                >
-                  Edit
-                </Button>
-              )}
-              <Button
-                className={twMerge(
-                  'grow basis-1/2 py-4 bg-layer0 rounded-none border-t-2 border-gray-100',
-                  integration.connected &&
-                    'text-red-600 hover:text-red-500 rounded-br-[2px]',
-                  !integration.connected && !isComingSoon
-                    ? 'text-brand hover:text-brand-hover'
-                    : 'cursor-default'
-                )}
-                startIcon={
-                  integration.connected ? (
-                    <MinusCircleIcon className="mr-2 size-5" />
-                  ) : !isComingSoon ? (
-                    <PlusCircleIcon className="mr-2 size-5" />
-                  ) : undefined
-                }
-                onClick={() => !isComingSoon && handleCTA(integration)}
-              >
-                {isLoading ? 'Loading...' : getButtonText(integration)}
-              </Button>
-            </div>
-          </div>
+          </Paper>
         );
       })}
       {form && (
