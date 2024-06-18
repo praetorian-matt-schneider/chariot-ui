@@ -103,6 +103,17 @@ const Dashboard: React.FC = () => {
     setCharts(charts.filter(chart => chart.id !== chartId));
   };
 
+  const getAggregateName = (aggregate: string) => {
+    switch (newEndpoint) {
+      case 'account':
+        return getAccountAggregates()[aggregate].label;
+      case 'risk':
+        return getRiskAggregates()[aggregate].label;
+      default:
+        return '';
+    }
+  };
+
   return (
     <div className="w-full">
       <div className="relative inline-block">
@@ -252,6 +263,7 @@ const Dashboard: React.FC = () => {
               width={chart.width}
               endpoint={chart.endpoint}
               aggregate={chart.aggregate}
+              label={getAggregateName(chart.aggregate)}
               removeChart={removeChart}
             />
           </div>

@@ -1,17 +1,10 @@
 import React from 'react';
 import { XMarkIcon } from '@heroicons/react/20/solid';
-import {
-  AreaChart,
-  BarChart,
-  DonutChart,
-  Legend,
-  LineChart,
-} from '@tremor/react';
 
+import Chart from '@/components/charts/Chart';
 import { useMy } from '@/hooks';
 import { Account, ChartType, MyResourceKey, Risk } from '@/types';
 import {
-  CountData,
   getAggregates as getAccountAggregates,
   runAggregate as runAccountAggregate,
 } from '@/utils/aggregates/account';
@@ -20,69 +13,13 @@ import {
   runAggregate as runRiskAggregate,
 } from '@/utils/aggregates/risk';
 
-interface ChartProps {
-  type: ChartType;
-  data: CountData[];
-  xField: string;
-  yField: string;
-}
-
-const Chart: React.FC<ChartProps> = ({ type, data, xField, yField }) => {
-  console.log('data', data, 'xField', xField, 'yField', yField);
-  switch (type) {
-    case 'area':
-      return (
-        <AreaChart
-          className="h-96 w-full"
-          data={data}
-          index={xField}
-          categories={[yField]}
-        />
-      );
-    case 'bar':
-      return (
-        <BarChart
-          className="h-96 w-full"
-          data={data}
-          index={xField}
-          categories={[yField]}
-          colors={['blue']}
-        />
-      );
-    case 'line':
-      return (
-        <LineChart
-          className="h-96 w-full"
-          data={data}
-          index={xField}
-          categories={[yField]}
-          colors={['indigo', 'rose']}
-        />
-      );
-    case 'donut':
-      return (
-        <div className="flex items-center justify-center space-x-6 text-default">
-          <DonutChart
-            className="h-96 w-full"
-            variant="donut"
-            data={data}
-            index={xField}
-            category={yField}
-          />
-          <Legend categories={data.map(d => d[xField].toString())} />
-        </div>
-      );
-    default:
-      return null;
-  }
-};
-
 interface ChartWrapperProps {
   id: number;
   type: ChartType;
   width: string;
   endpoint: MyResourceKey;
   aggregate: string;
+  label?: string;
   removeChart: (chartId: number) => void;
 }
 
@@ -92,6 +29,7 @@ const ChartWrapper: React.FC<ChartWrapperProps> = ({
   width,
   endpoint,
   aggregate,
+  label,
   removeChart,
 }) => {
   const { data, isLoading } = useMy({
@@ -127,6 +65,11 @@ const ChartWrapper: React.FC<ChartWrapperProps> = ({
       <div
         className={`w- relative p-2${width} border border-gray-200 bg-white`}
       >
+        {label && (
+          <h3 className=" dark:text-dark-tremor-content-strong pl-8 pt-6 text-lg font-medium text-tremor-content-strong">
+            {label}
+          </h3>
+        )}
         <Chart
           type={type}
           data={chartData}
@@ -135,7 +78,7 @@ const ChartWrapper: React.FC<ChartWrapperProps> = ({
         />
         <button
           onClick={() => removeChart(id)}
-          className="absolute -right-[22px] -top-[22px] m-2 size-7 rotate-45 rounded-full border border-gray-200 bg-white text-gray-500"
+          className="absolute -right-[22px] -top-[22px] m-2 size-7 rotate-45 rounded-full border border-gray-200 bg-white text-gray-200"
           style={{
             borderBottomColor: 'transparent',
           }}
