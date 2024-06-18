@@ -37,10 +37,10 @@ const widthToCols = (width: string) => {
   }
 };
 const sizes = [
-  { label: '\u00BC', width: '1/4' },
-  { label: '\u00BD', width: '1/2' },
-  { label: '\u00BE', width: '3/4' },
-  { label: 'Full', width: 'full' },
+  { label: '\u00BC', width: '1/4', tooltip: '25%' },
+  { label: '\u00BD', width: '1/2', tooltip: '50%' },
+  { label: '\u00BE', width: '3/4', tooltip: '75%' },
+  { label: '1', width: 'full', tooltip: '100%' },
 ];
 
 const Dashboard: React.FC = () => {
@@ -104,19 +104,20 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="w-full px-4 py-2">
+    <div className="w-full">
       <div className="relative inline-block">
         <Button
           onClick={() => setIsFormVisible(!isFormVisible)}
           type="button"
-          styleType="primary"
+          styleType="none"
+          className="bg-header-light text-header-light"
           startIcon={<PlusIcon className="size-4" />}
         >
           Add Widget
         </Button>
 
         {isFormVisible && (
-          <div className="absolute left-0 top-[50px] z-10 mb-2 w-[300px] rounded-[4px] bg-white p-4 shadow-md">
+          <div className="absolute -right-[305px] top-0 z-10 mb-2 w-[300px]  rounded-[2px] bg-white p-4 shadow-xl">
             <Input
               type={Type.SELECT}
               name="endpoint"
@@ -164,7 +165,7 @@ const Dashboard: React.FC = () => {
                 <div className="flex items-center justify-between space-x-4">
                   <Tooltip title="Area Chart" placement="top">
                     <button
-                      className={`w-12 rounded-[4px] p-2 ${newChartType === 'area' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                      className={`w-12 rounded-[4px] p-2 ${newChartType === 'area' ? 'bg-gray-400 text-white' : 'bg-gray-200'}`}
                       onClick={() => setNewChartType('area')}
                     >
                       <ChartBarIcon className="m-auto size-6" />
@@ -172,7 +173,7 @@ const Dashboard: React.FC = () => {
                   </Tooltip>
                   <Tooltip title="Line Chart" placement="top">
                     <button
-                      className={`w-12 rounded-[4px] p-2 ${newChartType === 'line' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                      className={`w-12 rounded-[4px] p-2 ${newChartType === 'line' ? 'bg-gray-400 text-white' : 'bg-gray-200'}`}
                       onClick={() => setNewChartType('line')}
                     >
                       <ArrowTrendingUpIcon className="m-auto size-6 stroke-[3px]" />
@@ -180,7 +181,7 @@ const Dashboard: React.FC = () => {
                   </Tooltip>
                   <Tooltip title="Bar Chart" placement="top">
                     <button
-                      className={`w-12 rounded-[4px] p-2 ${newChartType === 'bar' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                      className={`w-12 rounded-[4px] p-2 ${newChartType === 'bar' ? 'bg-gray-400 text-white' : 'bg-gray-200'}`}
                       onClick={() => setNewChartType('bar')}
                     >
                       <Bars3CenterLeftIcon className="m-auto size-6 -rotate-90 stroke-[4px]" />
@@ -188,7 +189,7 @@ const Dashboard: React.FC = () => {
                   </Tooltip>
                   <Tooltip title="Donut Chart" placement="top">
                     <button
-                      className={`w-12 rounded-[4px] p-2 ${newChartType === 'donut' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                      className={`w-12 rounded-[4px] p-2 ${newChartType === 'donut' ? 'bg-gray-400 text-white' : 'bg-gray-200'}`}
                       onClick={() => setNewChartType('donut')}
                     >
                       <ChartPieIcon className="m-auto size-6" />
@@ -200,13 +201,13 @@ const Dashboard: React.FC = () => {
                     {sizes.map((size, index) => (
                       <Tooltip
                         key={size.label}
-                        title={`${size.label} Width`}
+                        title={`${size.tooltip} width`}
                         placement="bottom"
                       >
                         <button
-                          className={`h-8 w-12 rounded-[2px] text-xl ${
+                          className={`h-8 w-12 rounded-[4px] text-xl ${
                             index === selectedSizeIndex
-                              ? 'bg-blue-500 text-white'
+                              ? 'bg-gray-400 text-white'
                               : 'bg-gray-200'
                           }`}
                           onClick={() => {
@@ -222,14 +223,18 @@ const Dashboard: React.FC = () => {
               </div>
             )}
             {aggregate && newEndpoint && (
-              <Button
-                onClick={addChart}
-                type="button"
-                styleType="secondary"
-                className="ml-auto mt-4"
-              >
-                Add
-              </Button>
+              <div className="mt-4 flex justify-end space-x-2">
+                <Button
+                  onClick={() => setIsFormVisible(false)}
+                  type="button"
+                  styleType="secondary"
+                >
+                  Cancel
+                </Button>
+                <Button onClick={addChart} type="button" styleType="primary">
+                  Add
+                </Button>
+              </div>
             )}
           </div>
         )}
