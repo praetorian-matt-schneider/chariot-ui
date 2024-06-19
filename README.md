@@ -28,7 +28,7 @@
 
 ## Description
 
-Chariot is an expert-driven, all-in-one offensive security platform that helps organizations shift from a reactive "assume breach" mentality to a prevention-first strategy. By actively seeking out vulnerabilities and addressing potential weaknesses before attackers can exploit them, Chariot ensures a robust security posture through continuous offensive security testing. 
+Chariot is an expert-driven, all-in-one offensive security platform that helps organizations shift from a reactive "assume breach" mentality to a prevention-first strategy. By actively seeking out vulnerabilities and addressing potential weaknesses before attackers can exploit them, Chariot ensures a robust security posture through continuous offensive security testing.
 
 ⚠️ This repository mirrors the SaaS offering at preview.chariot.praetorian.com, enabling you to customize your full user experience.
 
@@ -104,6 +104,45 @@ We welcome contributions from the community. To contribute:
 
 Please read our [Code of Conduct](CODE_OF_CONDUCT.md) before contributing.
 
+## Adding New Charts
+
+To add new charts to the Chariot platform, contributors will need to define a new aggregate within the `AggregateCollection`. This process involves configuring a new `defineAggregate` instance, which shapes how data is processed and visualized within the chart.
+
+### Steps to Create a New Chart
+
+1. **Define the Data Type**:
+   Ensure that the data type (e.g., `Asset`, `Risk`, `Seed`) is accurately defined in `@/types`. This TypeScript interface should clearly describe the structure of the data, which is essential for accurately accessing and aggregating the data fields.
+
+2. **Create a New Aggregate**:
+   In the relevant aggregate file (e.g., `src/utils/aggregates/asset.ts`, `src/utils/aggregates/seed.ts`), utilize the `defineAggregate` function to define your new chart. Provide:
+
+   - A meaningful label for the chart.
+   - A function to extract the key for grouping data.
+   - The field name (`xField`) for the grouping key.
+   - The field name (`yField`) for the aggregated value.
+
+   Example:
+
+   ```typescript
+   defineAggregate<Risk>(
+     'Count of Risks by Status',
+     risk => risk.status,
+     'status',
+     'count'
+   );
+   ```
+
+3. **Add to `AggregateCollection`**:
+   Include your new aggregate definition in the respective collection, making it available across the application.
+
+4. **Utilize the Aggregate**:
+   Employ the `runAggregate` and `getAggregates` generic functions to execute and retrieve your new aggregate's results, respectively.
+
+### Types and Utilities
+
+- **Types**: Defined in `@/types`, these interfaces help ensure that data handling is type-safe and clear to all contributors.
+- **Utilities**: Common utilities like `getDateFromISO` should be used for data manipulation to maintain consistency and reduce redundancy.
+
 ## Support
 
 If you have any questions or need support, please open an issue or reach out via [support@praetorian.com](mailto:support@praetorian.com).
@@ -111,5 +150,3 @@ If you have any questions or need support, please open an issue or reach out via
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-
