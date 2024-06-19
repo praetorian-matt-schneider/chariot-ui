@@ -1,128 +1,84 @@
-import { forwardRef, PropsWithChildren } from 'react';
+import { PropsWithChildren } from 'react';
 import {
   autoUpdate,
   flip,
   FloatingFocusManager,
-  FloatingPortal,
-  hide,
   offset,
   Placement,
   shift,
-  size,
   useClick,
   useDismiss,
   useFloating,
+  useId,
   useInteractions,
-  useMergeRefs,
   useRole,
 } from '@floating-ui/react';
 
+import { Button, ButtonProps } from '@/components/Button';
 import { useStorage } from '@/utils/storage/useStorage.util';
 
-import { Button, ButtonProps } from './Button';
-
-export interface PopoverProps extends ButtonProps, PropsWithChildren {
-  placement?: Placement;
+interface PopoverProps extends ButtonProps, PropsWithChildren {
   open?: boolean;
   setOpen?: (open: boolean) => void;
+  placement?: Placement;
 }
 
-export const Popover = forwardRef<HTMLButtonElement, PopoverProps>(
-  function Popover(props: PopoverProps, ref) {
-    const {
-      children,
-      placement = 'bottom-start',
-      open: openParent,
-      setOpen: setOpenParent,
-      ...buttonProps
-    } = props;
+export const Popover = (props: PopoverProps) => {
+  const {
+    open: openParent,
+    setOpen: setOpenParent,
+    placement = 'bottom-start',
+    children,
+    ...rest
+  } = props;
+  const [open, setOpen] = useStorage(
+    {
+      onParentStateChange: setOpenParent,
+      parentState: openParent,
+    },
+    false
+  );
 
-    const [open, setOpen] = useStorage(
-      {
-        parentState: openParent,
-        onParentStateChange: setOpenParent,
-      },
-      false
-    );
+  const { refs, floatingStyles, context } = useFloating({
+    placement,
+    open,
+    onOpenChange: setOpen,
+    middleware: [
+      offset(6),
+      flip({ fallbackAxisSideDirection: 'end' }),
+      shift(),
+    ],
+    whileElementsMounted: autoUpdate,
+  });
 
-    const floatingProps = useFloating({
-      placement,
-      open,
-      onOpenChange: (open: boolean) => {
-        // if (!open) {
-        //   onClose?.();
-        // }
+  const click = useClick(context);
+  const dismiss = useDismiss(context);
+  const role = useRole(context);
 
-        setOpen(open);
-      },
-      whileElementsMounted(referenceEl, floatingEl, update) {
-        const cleanup = autoUpdate(referenceEl, floatingEl, update, {
-          animationFrame: true,
-        });
-        return cleanup;
-      },
-      middleware: [
-        hide({
-          strategy: 'referenceHidden',
-        }),
-        offset(10),
-        flip({
-          crossAxis: false,
-          mainAxis: true,
-          padding: 10,
-        }),
-        shift({
-          crossAxis: false,
-          mainAxis: true,
-          padding: 10,
-        }),
-        size({
-          padding: 10,
-          apply({ availableHeight, elements }) {
-            elements.floating.style.maxHeight = `${availableHeight}px`;
-          },
-        }),
-      ],
-    });
+  const { getReferenceProps, getFloatingProps } = useInteractions([
+    click,
+    dismiss,
+    role,
+  ]);
 
-    const click = useClick(floatingProps.context);
-    const dismiss = useDismiss(floatingProps.context);
-    const role = useRole(floatingProps.context);
+  const headingId = useId();
 
-    const interactions = useInteractions([click, dismiss, role]);
-    const triggerRef = useMergeRefs([floatingProps.refs.setReference, ref]);
-
-    return (
-      <>
-        <Button
-          className={props.className}
-          ref={triggerRef}
-          {...interactions.getReferenceProps(buttonProps)}
-        />
-        {open && (
-          <FloatingPortal>
-            <FloatingFocusManager
-              context={floatingProps.context}
-              modal={false}
-              initialFocus={-1}
-            >
-              <div
-                ref={floatingProps.refs.setFloating}
-                style={{
-                  ...floatingProps.floatingStyles,
-                  visibility: floatingProps.middlewareData.hide?.referenceHidden
-                    ? 'hidden'
-                    : 'visible',
-                }}
-                className="z-20 flex rounded-[4px] bg-layer0 p-4 shadow-md outline-none"
-                {...interactions.getFloatingProps()}
-              >
-                {children || props.label}
-              </div>
-            </FloatingFocusManager>
-          </FloatingPortal>
-        )}
-      </>
-    );
-  }
-);
+  return (
+    <>
+      <Button ref={refs.setReference} {...getReferenceProps()} {...rest} />
+      {open && (
+        <FloatingFocusManager context={context} modal={false}>
+          <div
+            className="Popover z-20 rounded-[4px] bg-layer0 p-4 shadow-md outline-none"
+            ref={refs.setFloating}
+            style={floatingStyles}
+            aria-labelledby={headingId}
+            {...getFloatingProps()}
+          >
+            {children || props.label}
+          </div>
+        </FloatingFocusManager>
+      )}
+    </>
+  );
+};

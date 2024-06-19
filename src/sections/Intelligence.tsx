@@ -10,6 +10,7 @@ import { ChartBarIcon, ChartPieIcon } from '@heroicons/react/24/solid';
 import { Button } from '@/components/Button';
 import ChartWrapper from '@/components/charts/ChartWrapper';
 import { Input, Type } from '@/components/form/Input';
+import { Popover } from '@/components/Popover';
 import { Tooltip } from '@/components/Tooltip';
 import { NoData } from '@/components/ui/NoData';
 import { ChartType, MyResourceKey } from '@/types';
@@ -164,128 +165,125 @@ const Intelligence: React.FC = () => {
 
   return (
     <div className="w-full">
-      <div className="relative inline-block">
-        <Button
-          onClick={() => setIsFormVisible(!isFormVisible)}
-          type="button"
-          styleType="none"
-          className="bg-header-light text-header-light"
-          startIcon={<PlusIcon className="size-4" />}
-        >
-          Add Widget
-        </Button>
-
-        {isFormVisible && (
-          <div className="absolute -right-[305px] top-0 z-10 mb-2 w-[300px]  rounded-[2px] bg-white p-4 shadow-xl">
+      <Popover
+        onClick={() => setIsFormVisible(!isFormVisible)}
+        type="button"
+        open={isFormVisible}
+        setOpen={setIsFormVisible}
+        styleType="none"
+        className="bg-header-light text-header-light"
+        startIcon={<PlusIcon className="size-4" />}
+        label="Add Widget"
+      >
+        <div className="w-[300px]">
+          <Input
+            type={Type.SELECT}
+            name="endpoint"
+            value={newEndpoint ?? ''}
+            onChange={e => {
+              setNewEndpoint(e.target.value as MyResourceKey);
+              setAggregates([]);
+              setAggregate(undefined);
+            }}
+            options={[
+              { value: '', label: 'Select resource', disabled: true },
+              { value: 'divider', label: '', divider: true },
+              { value: 'seed', label: 'Seeds' },
+              { value: 'asset', label: 'Assets' },
+              { value: 'risk', label: 'Risks' },
+              { value: 'account', label: 'Accounts' },
+              { value: 'job', label: 'Jobs', disabled: true },
+              { value: 'attribute', label: 'Attributes', disabled: true },
+              { value: 'ref', label: 'References', disabled: true },
+              { value: 'file', label: 'File', disabled: true },
+            ]}
+          />
+          {aggregates.length > 0 && (
             <Input
+              disabled={!newEndpoint}
               type={Type.SELECT}
-              name="endpoint"
-              value={newEndpoint ?? ''}
+              name="aggregate"
+              className="mt-4"
+              value={aggregate ?? ''}
               onChange={e => {
-                setNewEndpoint(e.target.value as MyResourceKey);
-                setAggregates([]);
-                setAggregate(undefined);
+                setAggregate(e.target.value);
               }}
               options={[
-                { value: '', label: 'Select resource', disabled: true },
+                {
+                  value: '',
+                  label: 'Select widget',
+                  disabled: true,
+                },
                 { value: 'divider', label: '', divider: true },
-                { value: 'seed', label: 'Seeds' },
-                { value: 'asset', label: 'Assets' },
-                { value: 'risk', label: 'Risks' },
-                { value: 'account', label: 'Accounts' },
-                { value: 'job', label: 'Jobs', disabled: true },
-                { value: 'attribute', label: 'Attributes', disabled: true },
-                { value: 'ref', label: 'References', disabled: true },
-                { value: 'file', label: 'File', disabled: true },
+                ...(aggregates ?? []),
+                { value: 'divider', label: '', divider: true },
+                {
+                  value: `https://github.com/praetorian-inc/chariot-ui/blob/main/src/utils/aggregates/${newEndpoint}.ts`,
+                  label: 'Contribute more...',
+                },
               ]}
             />
-            {aggregates.length > 0 && (
-              <Input
-                disabled={!newEndpoint}
-                type={Type.SELECT}
-                name="aggregate"
-                className="mt-4"
-                value={aggregate ?? ''}
-                onChange={e => {
-                  setAggregate(e.target.value);
-                }}
-                options={[
-                  {
-                    value: '',
-                    label: 'Select widget',
-                    disabled: true,
-                  },
-                  { value: 'divider', label: '', divider: true },
-                  ...(aggregates ?? []),
-                  { value: 'divider', label: '', divider: true },
-                  {
-                    value: `https://github.com/praetorian-inc/chariot-ui/blob/main/src/utils/aggregates/${newEndpoint}.ts`,
-                    label: 'Contribute more...',
-                  },
-                ]}
-              />
-            )}
-            {aggregate && newEndpoint && (
-              <div className="mt-4 flex flex-col space-y-4">
-                <div className="flex items-center justify-between space-x-4">
-                  <Tooltip title="Area Chart" placement="top">
-                    <button
-                      className={`w-12 rounded-[4px] p-2 ${newChartType === 'area' ? 'bg-gray-400 text-white' : 'bg-gray-200'}`}
-                      onClick={() => setNewChartType('area')}
-                    >
-                      <ChartBarIcon className="m-auto size-6" />
-                    </button>
-                  </Tooltip>
-                  <Tooltip title="Line Chart" placement="top">
-                    <button
-                      className={`w-12 rounded-[4px] p-2 ${newChartType === 'line' ? 'bg-gray-400 text-white' : 'bg-gray-200'}`}
-                      onClick={() => setNewChartType('line')}
-                    >
-                      <ArrowTrendingUpIcon className="m-auto size-6 stroke-[3px]" />
-                    </button>
-                  </Tooltip>
-                  <Tooltip title="Bar Chart" placement="top">
-                    <button
-                      className={`w-12 rounded-[4px] p-2 ${newChartType === 'bar' ? 'bg-gray-400 text-white' : 'bg-gray-200'}`}
-                      onClick={() => setNewChartType('bar')}
-                    >
-                      <Bars3CenterLeftIcon className="m-auto size-6 -rotate-90 stroke-[4px]" />
-                    </button>
-                  </Tooltip>
-                  <Tooltip title="Donut Chart" placement="top">
-                    <button
-                      className={`w-12 rounded-[4px] p-2 ${newChartType === 'donut' ? 'bg-gray-400 text-white' : 'bg-gray-200'}`}
-                      onClick={() => setNewChartType('donut')}
-                    >
-                      <ChartPieIcon className="m-auto size-6" />
-                    </button>
-                  </Tooltip>
-                </div>
+          )}
+          {aggregate && newEndpoint && (
+            <div className="mt-4 flex flex-col space-y-4">
+              <div className="flex items-center justify-between space-x-4">
+                <Tooltip title="Area Chart" placement="top">
+                  <button
+                    className={`w-12 rounded-[4px] p-2 ${newChartType === 'area' ? 'bg-gray-400 text-white' : 'bg-gray-200'}`}
+                    onClick={() => setNewChartType('area')}
+                  >
+                    <ChartBarIcon className="m-auto size-6" />
+                  </button>
+                </Tooltip>
+                <Tooltip title="Line Chart" placement="top">
+                  <button
+                    className={`w-12 rounded-[4px] p-2 ${newChartType === 'line' ? 'bg-gray-400 text-white' : 'bg-gray-200'}`}
+                    onClick={() => setNewChartType('line')}
+                  >
+                    <ArrowTrendingUpIcon className="m-auto size-6 stroke-[3px]" />
+                  </button>
+                </Tooltip>
+                <Tooltip title="Bar Chart" placement="top">
+                  <button
+                    className={`w-12 rounded-[4px] p-2 ${newChartType === 'bar' ? 'bg-gray-400 text-white' : 'bg-gray-200'}`}
+                    onClick={() => setNewChartType('bar')}
+                  >
+                    <Bars3CenterLeftIcon className="m-auto size-6 -rotate-90 stroke-[4px]" />
+                  </button>
+                </Tooltip>
+                <Tooltip title="Donut Chart" placement="top">
+                  <button
+                    className={`w-12 rounded-[4px] p-2 ${newChartType === 'donut' ? 'bg-gray-400 text-white' : 'bg-gray-200'}`}
+                    onClick={() => setNewChartType('donut')}
+                  >
+                    <ChartPieIcon className="m-auto size-6" />
+                  </button>
+                </Tooltip>
               </div>
-            )}
-            {aggregate && newEndpoint && (
-              <div className="mt-4 flex justify-end space-x-2">
-                <Button
-                  onClick={() => setIsFormVisible(false)}
-                  type="button"
-                  styleType="secondary"
-                  className="rounded-[4px]"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={addChart}
-                  type="button"
-                  styleType="primary"
-                  className="rounded-[4px]"
-                >
-                  Add Widget
-                </Button>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+            </div>
+          )}
+          {aggregate && newEndpoint && (
+            <div className="mt-4 flex justify-end space-x-2">
+              <Button
+                onClick={() => setIsFormVisible(false)}
+                type="button"
+                styleType="secondary"
+                className="rounded-[4px]"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={addChart}
+                type="button"
+                styleType="primary"
+                className="rounded-[4px]"
+              >
+                Add Widget
+              </Button>
+            </div>
+          )}
+        </div>
+      </Popover>
 
       {layout.length === 0 && (
         <NoData
