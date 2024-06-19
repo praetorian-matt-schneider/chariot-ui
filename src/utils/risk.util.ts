@@ -69,6 +69,7 @@ const getDescription = (file: unknown) => {
         const provenanceInfo = match.provenance
           .map(prov => {
             return `Repository Path: ${prov.repo_path}
+    Blob Path: ${prov.blob_path}
     First Commit:
       - ID: ${prov.first_commit.commit_metadata.commit_id}
       - Author: ${prov.first_commit.commit_metadata.author_name} (${prov.first_commit.commit_metadata.author_email})

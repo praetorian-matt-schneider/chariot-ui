@@ -281,6 +281,7 @@ type Provenance = {
   kind: string;
   repo_path: string;
   first_commit: FirstCommit;
+  blob_path: string;
 };
 
 type FirstCommit = {
