@@ -1,7 +1,7 @@
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 
 import { useUpdateRisk } from '@/hooks/useRisks';
-import { getSeverityClass } from '@/utils/risk.util';
+import { getSeverityClass } from '@/utils/getSeverityClass.util';
 
 import {
   Risk,

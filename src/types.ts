@@ -261,7 +261,7 @@ export type Secret = {
   matches: Match[];
 };
 
-type Match = {
+export type Match = {
   provenance: Provenance[];
   blob_metadata: BlobMetadata;
   blob_id: string;

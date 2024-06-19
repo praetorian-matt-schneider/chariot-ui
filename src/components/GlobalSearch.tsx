@@ -18,7 +18,7 @@ import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useOpenDrawer } from '@/sections/detailsDrawer/useOpenDrawer';
 import { useSearchContext } from '@/state/search';
 import { cn } from '@/utils/classname';
-import { getSeverityClass } from '@/utils/risk.util';
+import { getSeverityClass } from '@/utils/getSeverityClass.util';
 import { getRoute } from '@/utils/route.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
 import { useSearchParams } from '@/utils/url.util';
