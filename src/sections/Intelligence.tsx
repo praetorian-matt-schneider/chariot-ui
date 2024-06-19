@@ -101,7 +101,7 @@ const Intelligence: React.FC = () => {
             })),
             {
               value:
-                'https://github.com/praetorian-inc/chariot-ui/blob/main/src/utils/aggregates/risk.ts',
+                'https://github.com/praetorian-inc/chariot-ui/blob/main/src/utils/aggregates/seed.ts',
               label: 'Contribute more...',
             },
           ]);
