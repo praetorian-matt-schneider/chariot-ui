@@ -133,16 +133,18 @@ export interface AccountMetadata {
   pin?: string;
 }
 
+// TODO: Discover the unknowns
 export interface Asset {
-  key: string;
-  dns: string;
-  name: string;
+  class: string;
   comment: string;
-  seed: string;
-  source: string;
+  config: unknown;
+  created: string;
+  dns: string;
+  history: unknown;
+  key: string;
+  name: string;
   status: AssetStatus;
   ttl: number;
-  created: string;
   updated: string;
   username: string;
 }

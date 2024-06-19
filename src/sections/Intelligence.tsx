@@ -13,6 +13,7 @@ import { Tooltip } from '@/components/Tooltip';
 import { NoData } from '@/components/ui/NoData';
 import { ChartType, MyResourceKey } from '@/types';
 import { getAggregates as getAccountAggregates } from '@/utils/aggregates/account';
+import { getAggregates as getAssetAggregates } from '@/utils/aggregates/asset';
 import { getAggregates as getRiskAggregates } from '@/utils/aggregates/risk';
 import { getAggregates as getSeedAggregates } from '@/utils/aggregates/seed';
 import { useStorage } from '@/utils/storage/useStorage.util';
@@ -91,6 +92,14 @@ const Intelligence: React.FC = () => {
             }))
           );
           break;
+        case 'asset':
+          setAggregates(
+            Object.keys(getAssetAggregates()).map(id => ({
+              value: id,
+              label: getAssetAggregates()[id].label,
+            }))
+          );
+          break;
         default:
           setAggregates([]);
       }
@@ -129,10 +138,31 @@ const Intelligence: React.FC = () => {
         return getRiskAggregates()[aggregate]?.label;
       case 'seed':
         return getSeedAggregates()[aggregate]?.label;
+      case 'asset':
+        return getAssetAggregates()[aggregate]?.label;
       default:
         return '';
     }
   };
+
+  const validateAggregate = (aggregate: string) => {
+    switch (newEndpoint) {
+      case 'account':
+        return getAccountAggregates()[aggregate];
+      case 'risk':
+        return getRiskAggregates()[aggregate];
+      case 'seed':
+        return getSeedAggregates()[aggregate];
+      case 'asset':
+        return getAssetAggregates()[aggregate];
+      default:
+        return undefined;
+    }
+  };
+
+  const validCharts = charts.filter(chart =>
+    validateAggregate(chart.aggregate)
+  );
 
   return (
     <div className="w-full">
@@ -162,7 +192,7 @@ const Intelligence: React.FC = () => {
                 { value: '', label: 'Select resource', disabled: true },
                 { value: 'divider', label: '', divider: true },
                 { value: 'seed', label: 'Seeds' },
-                { value: 'asset', label: 'Assets', disabled: true },
+                { value: 'asset', label: 'Assets' },
                 { value: 'risk', label: 'Risks' },
                 { value: 'account', label: 'Accounts' },
                 { value: 'job', label: 'Jobs', disabled: true },
@@ -283,14 +313,14 @@ const Intelligence: React.FC = () => {
         )}
       </div>
 
-      {charts.length === 0 && (
+      {validCharts.length === 0 && (
         <NoData
           title="No widgets"
           description={`Click on the Add Widget button to add a new widget`}
         />
       )}
       <div className="mt-4 grid grid-cols-4 gap-4">
-        {charts.map(chart => (
+        {validCharts.map(chart => (
           <div
             key={chart.id}
             className={`col-span-${widthToCols(chart.width)}`}
