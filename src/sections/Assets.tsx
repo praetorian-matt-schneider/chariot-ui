@@ -28,6 +28,7 @@ import { useCounts } from '@/hooks/useCounts';
 import { useMergeStatus } from '@/utils/api';
 import { exportContent } from '@/utils/download.util';
 import { getRoute } from '@/utils/route.util';
+import { StorageKey } from '@/utils/storage/useStorage.util';
 
 import {
   Asset,
@@ -76,7 +77,7 @@ const Assets: React.FC = () => {
 
   const { data: stats = {}, status: countsStatus } = useCounts({
     resource: 'asset',
-    filterByGlobalSearch: true,
+    filterByGlobalSearch: false,
   });
   const {
     isLoading,
@@ -303,6 +304,11 @@ const Assets: React.FC = () => {
     []
   );
 
+  // get selected class from url param class:CLASS_NAME
+  const searchParams = new URLSearchParams(window.location.search);
+  const genericSearch = searchParams.get(StorageKey.GENERIC_SEARCH);
+  const selectedFilter = genericSearch?.replace('class:', '');
+
   return (
     <div className="flex w-full flex-col">
       <Table
@@ -311,7 +317,9 @@ const Assets: React.FC = () => {
           <div className="flex gap-4">
             <Dropdown
               styleType="header"
-              label={'All Assets'}
+              label={
+                selectedFilter ? AssetLabels[selectedFilter] : 'All Assets'
+              }
               endIcon={
                 <ChevronDownIcon className="size-3 stroke-[4px] text-header-dark" />
               }
@@ -319,7 +327,9 @@ const Assets: React.FC = () => {
                 items: [
                   {
                     label: 'All Assets',
-                    labelSuffix: assets.length?.toLocaleString(),
+                    labelSuffix: Object.keys(stats)
+                      .reduce((acc, key) => acc + stats[key], 0)
+                      .toLocaleString(),
                     value: '',
                   },
                   {
@@ -329,12 +339,22 @@ const Assets: React.FC = () => {
                   ...Object.entries(AssetLabels).map(([key, label]) => {
                     return {
                       label,
-                      className: 'cursor-not-allowed italic text-default-light',
                       labelSuffix: stats[key]?.toLocaleString() || 0,
                       value: key,
                     };
                   }),
                 ],
+                onClick: value => {
+                  const pathName = getRoute(['app', 'assets']);
+                  if (value === '') {
+                    navigate(pathName);
+                  } else {
+                    const filter = `class:${value}`;
+                    const searchQuery = `?${StorageKey.GENERIC_SEARCH}=${encodeURIComponent(filter)}`;
+                    navigate(`${pathName}${searchQuery}`);
+                  }
+                },
+                value: selectedFilter ?? undefined,
               }}
             />
             <FilterCounts count={assets.length} type="Assets" />
