@@ -385,13 +385,6 @@ export const IntegrationsMeta: IntegrationMeta[] = [
         label: 'Tenant ID',
         value: '',
         placeholder: uuid,
-        name: 'tenant',
-        required: true,
-      },
-      {
-        label: 'Subscription ID',
-        value: '',
-        placeholder: uuid,
         name: 'value',
         required: true,
       },
