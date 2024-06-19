@@ -68,43 +68,28 @@ const Intelligence: React.FC = () => {
     if (newEndpoint) {
       switch (newEndpoint.toLowerCase()) {
         case 'account':
-          setAggregates([
-            ...Object.keys(getAccountAggregates()).map(id => ({
+          setAggregates(
+            Object.keys(getAccountAggregates()).map(id => ({
               value: id,
               label: getAccountAggregates()[id].label,
-            })),
-            {
-              value:
-                'https://github.com/praetorian-inc/chariot-ui/blob/main/src/utils/aggregates/account.ts',
-              label: 'Contribute more...',
-            },
-          ]);
+            }))
+          );
           break;
         case 'risk':
-          setAggregates([
-            ...Object.keys(getRiskAggregates()).map(id => ({
+          setAggregates(
+            Object.keys(getRiskAggregates()).map(id => ({
               value: id,
               label: getRiskAggregates()[id].label,
-            })),
-            {
-              value:
-                'https://github.com/praetorian-inc/chariot-ui/blob/main/src/utils/aggregates/risk.ts',
-              label: 'Contribute more...',
-            },
-          ]);
+            }))
+          );
           break;
         case 'seed':
-          setAggregates([
-            ...Object.keys(getSeedAggregates()).map(id => ({
+          setAggregates(
+            Object.keys(getSeedAggregates()).map(id => ({
               value: id,
               label: getSeedAggregates()[id].label,
-            })),
-            {
-              value:
-                'https://github.com/praetorian-inc/chariot-ui/blob/main/src/utils/aggregates/seed.ts',
-              label: 'Contribute more...',
-            },
-          ]);
+            }))
+          );
           break;
         default:
           setAggregates([]);
@@ -204,6 +189,11 @@ const Intelligence: React.FC = () => {
                   },
                   { value: 'divider', label: '', divider: true },
                   ...(aggregates ?? []),
+                  { value: 'divider', label: '', divider: true },
+                  {
+                    value: `https://github.com/praetorian-inc/chariot-ui/blob/main/src/utils/aggregates/${newEndpoint}.ts`,
+                    label: 'Contribute more...',
+                  },
                 ]}
               />
             )}
