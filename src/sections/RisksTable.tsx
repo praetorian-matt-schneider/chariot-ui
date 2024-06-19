@@ -106,7 +106,7 @@ export function Risks() {
   const { getRiskDrawerLink } = useOpenDrawer();
 
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
-  const [statusFilter, setStatusesFilter] = useFilter([''], setSelectedRows);
+  const [statusFilter, setStatusesFilter] = useFilter(['O'], setSelectedRows);
   const [severityFilter, setSeverityFilter] = useFilter([''], setSelectedRows);
   const [sourceFilter, setSourceFilter] = useFilter([''], setSelectedRows);
 
