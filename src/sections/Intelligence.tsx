@@ -14,6 +14,7 @@ import { NoData } from '@/components/ui/NoData';
 import { ChartType, MyResourceKey } from '@/types';
 import { getAggregates as getAccountAggregates } from '@/utils/aggregates/account';
 import { getAggregates as getRiskAggregates } from '@/utils/aggregates/risk';
+import { getAggregates as getSeedAggregates } from '@/utils/aggregates/seed';
 import { useStorage } from '@/utils/storage/useStorage.util';
 
 interface ChartConfig {
@@ -92,6 +93,19 @@ const Intelligence: React.FC = () => {
             },
           ]);
           break;
+        case 'seed':
+          setAggregates([
+            ...Object.keys(getSeedAggregates()).map(id => ({
+              value: id,
+              label: getSeedAggregates()[id].label,
+            })),
+            {
+              value:
+                'https://github.com/praetorian-inc/chariot-ui/blob/main/src/utils/aggregates/risk.ts',
+              label: 'Contribute more...',
+            },
+          ]);
+          break;
         default:
           setAggregates([]);
       }
@@ -128,6 +142,8 @@ const Intelligence: React.FC = () => {
         return getAccountAggregates()[aggregate]?.label;
       case 'risk':
         return getRiskAggregates()[aggregate]?.label;
+      case 'seed':
+        return getSeedAggregates()[aggregate]?.label;
       default:
         return '';
     }
@@ -160,7 +176,7 @@ const Intelligence: React.FC = () => {
               options={[
                 { value: '', label: 'Select resource', disabled: true },
                 { value: 'divider', label: '', divider: true },
-                { value: 'seed', label: 'Seeds', disabled: true },
+                { value: 'seed', label: 'Seeds' },
                 { value: 'asset', label: 'Assets', disabled: true },
                 { value: 'risk', label: 'Risks' },
                 { value: 'account', label: 'Accounts' },

@@ -3,7 +3,7 @@ import { XMarkIcon } from '@heroicons/react/20/solid';
 
 import Chart from '@/components/charts/Chart';
 import { useMy } from '@/hooks';
-import { Account, ChartType, MyResourceKey, Risk } from '@/types';
+import { Account, ChartType, MyResourceKey, Risk, Seed } from '@/types';
 import {
   getAggregates as getAccountAggregates,
   runAggregate as runAccountAggregate,
@@ -12,6 +12,10 @@ import {
   getAggregates as getRiskAggregates,
   runAggregate as runRiskAggregate,
 } from '@/utils/aggregates/risk';
+import {
+  getAggregates as getSeedAggregates,
+  runAggregate as runSeedAggregate,
+} from '@/utils/aggregates/seed';
 
 interface ChartWrapperProps {
   id: number;
@@ -44,16 +48,23 @@ const ChartWrapper: React.FC<ChartWrapperProps> = ({
           return getAccountAggregates();
         case 'risk':
           return getRiskAggregates();
+        case 'seed':
+          return getSeedAggregates();
         default:
           return {};
       }
     };
-    const runAggregate = (aggregate: string, data: Account[] | Risk[]) => {
+    const runAggregate = (
+      aggregate: string,
+      data: Account[] | Risk[] | Seed[]
+    ) => {
       switch (endpoint) {
         case 'account':
           return runAccountAggregate(aggregate, data as Account[]);
         case 'risk':
           return runRiskAggregate(aggregate, data as Risk[]);
+        case 'seed':
+          return runSeedAggregate(aggregate, data as Seed[]);
         default:
           return [];
       }
