@@ -23,6 +23,7 @@
   - [Running the Development Server](#running-the-development-server)
   - [Building the Project](#building-the-project)
 - [Contributing](#contributing)
+  - [Adding New Charts](#adding-new-charts)
 - [Support](#support)
 - [License](#license)
 
