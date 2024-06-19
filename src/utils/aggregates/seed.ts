@@ -10,6 +10,10 @@ const getStatus = (seed: Seed): string => {
   return seed.status[0] === SeedStatus.Frozen ? 'Frozen' : 'Active';
 };
 
+/* 
+  See the following link for more information on how to add new charts:
+  https://github.com/praetorian-inc/chariot-ui?tab=readme-ov-file#adding-new-charts
+*/
 export const aggregates: AggregateCollection<Seed> = {
   countSeedsByStatus: defineAggregate<Seed>(
     'Count seeds by status',

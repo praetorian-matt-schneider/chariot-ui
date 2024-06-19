@@ -13,6 +13,10 @@ const getFormattedDate = (isoDate: string): string => {
   return isoDate.split('T')[0];
 };
 
+/* 
+  See the following link for more information on how to add new charts:
+  https://github.com/praetorian-inc/chariot-ui?tab=readme-ov-file#adding-new-charts
+*/
 export const aggregates = {
   uniqueDomainNames: defineAggregate<Account>(
     'Unique domain names',
