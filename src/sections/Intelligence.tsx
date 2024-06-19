@@ -31,8 +31,14 @@ interface ChartConfig {
 }
 
 const Intelligence: React.FC = () => {
-  const [charts, setCharts] = useStorage<ChartConfig>({}, {});
-  const [layout, setLayout] = useState<Layout[]>([]);
+  const [charts, setCharts] = useStorage<ChartConfig>(
+    { key: 'dashboardCharts' },
+    {}
+  );
+  const [layout, setLayout] = useStorage<Layout[]>(
+    { key: 'dashboardLayout' },
+    []
+  );
   const [newChartType, setNewChartType] = useState<ChartType>('area');
   const [newEndpoint, setNewEndpoint] = useState<MyResourceKey>();
   const [aggregates, setAggregates] = useState<
