@@ -5,8 +5,8 @@ import { InputsT } from '@/components/form/Inputs';
 import AWSExample from '@/components/ui/AWSExample';
 import WebhookExample from '@/components/ui/WebhookExample';
 
-import { getChariotWebhookURL } from './integration.util';
 import { IntegrationType } from '@/types';
+import { getChariotWebhookURL } from './integration.util';
 
 export interface IntegrationMeta {
   id: number;
@@ -436,22 +436,53 @@ export const IntegrationsMeta: IntegrationMeta[] = [
     ],
   },
   {
+    id: 14,
+    name: 'gitlab',
+    displayName: 'GitLab',
+    description:
+      'Platform for software development and version control using Git, with collaboration features.',
+    logo: '/icons/GitLab.svg',
+    connected: true,
+    type: IntegrationType.RiskIdentification,
+    inputs: [
+      {
+        name: 'username',
+        value: 'gitlab',
+        hidden: true,
+      },
+      {
+        label: 'Personal Access Token (PAT)',
+        value: '',
+        placeholder: 'glpat-123456abcdefg-123456abcdefg',
+        name: 'pat',
+        required: true,
+        type: Input.Type.PASSWORD,
+        info: {
+          url: 'https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html',
+          text: 'Learn more',
+        },
+      },
+      {
+        label: '(Parent) GitLab Group',
+        value: '',
+        placeholder: 'https://gitlab.com/gitlab-org',
+        pattern: '^http(s)?://.+$',
+        name: 'value',
+        required: true,
+        info: {
+          url: 'https://docs.gitlab.com/ee/user/group/',
+          text: 'Learn more',
+        },
+      },
+    ],
+  },
+  {
     id: 13,
     name: 'nessus',
     displayName: 'Nessus Tenable',
     description:
       'Industry-standard vulnerability scanner for comprehensive security assessments.',
     logo: '/icons/Nessus.svg',
-    connected: false,
-    type: IntegrationType.RiskIdentification,
-  },
-  {
-    id: 14,
-    name: 'nexpose',
-    displayName: "Rapid7's Nexpose",
-    description:
-      'Vulnerability management solution offering risk-based prioritization and real-time remediation guidance.',
-    logo: '/icons/Rapid7.svg',
     connected: false,
     type: IntegrationType.RiskIdentification,
   },
