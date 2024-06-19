@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import ReactGridLayout, { Layout } from 'react-grid-layout';
 import { PlusIcon } from '@heroicons/react/20/solid';
 import {
   ArrowTrendingUpIcon,
@@ -19,44 +20,18 @@ import { getAggregates as getSeedAggregates } from '@/utils/aggregates/seed';
 import { useStorage } from '@/utils/storage/useStorage.util';
 
 interface ChartConfig {
-  id: number;
-  type: ChartType;
-  width: string;
-  endpoint: MyResourceKey;
-  aggregate: string;
-  label: string;
+  [id: string]: {
+    type: ChartType;
+    endpoint: MyResourceKey;
+    aggregate: string;
+    label: string;
+  };
 }
 
-const widthToCols = (width: string) => {
-  switch (width) {
-    case '1/4':
-      return 1;
-    case '1/2':
-      return 2;
-    case '3/4':
-      return 3;
-    case 'full':
-      return 4;
-    default:
-      return 1;
-  }
-};
-const sizes = [
-  { label: '\u00BC', width: '1/4', tooltip: '25%' },
-  { label: '\u00BD', width: '1/2', tooltip: '50%' },
-  { label: '\u00BE', width: '3/4', tooltip: '75%' },
-  { label: '1', width: 'full', tooltip: '100%' },
-];
-
 const Intelligence: React.FC = () => {
-  const [charts, setCharts] = useStorage<ChartConfig[]>(
-    {
-      key: 'intelligenceCharts',
-    },
-    []
-  );
+  const [charts, setCharts] = useStorage<ChartConfig>({}, {});
+  const [layout, setLayout] = useState<Layout[]>([]);
   const [newChartType, setNewChartType] = useState<ChartType>('area');
-  const [selectedSizeIndex, setSelectedSizeIndex] = useState<number>(0);
   const [newEndpoint, setNewEndpoint] = useState<MyResourceKey>();
   const [aggregates, setAggregates] = useState<
     { value: string; label: string }[]
@@ -110,24 +85,66 @@ const Intelligence: React.FC = () => {
 
   const addChart = () => {
     if (newEndpoint && aggregate) {
-      const selectedSize = sizes[selectedSizeIndex];
-      setCharts([
+      const i = Date.now().toString();
+      setCharts(charts => ({
         ...charts,
-        {
-          id: Date.now(),
+        [i]: {
           type: newChartType,
-          width: selectedSize.width,
           endpoint: newEndpoint,
           aggregate,
           label: getAggregateName(aggregate),
         },
-      ]);
+      }));
+      setLayout(layout => {
+        // Find the next coordinates to place the new chart
+        const lastElement = layout.reduce(
+          (acc, current) => {
+            const currentSum = current.y + current.h;
+            const existingSum = acc.y + acc.h;
+
+            if (currentSum === existingSum) {
+              return current.x + current.w > acc.x + acc.w ? current : acc;
+            } else if (currentSum > existingSum) {
+              return current;
+            }
+            return acc;
+          },
+          {
+            x: -4,
+            y: -4,
+            w: 4,
+            h: 4,
+          } as Layout
+        );
+        const nextX =
+          lastElement.x + lastElement.w + 4 <= 12
+            ? lastElement.x + lastElement.w
+            : 0;
+        const nextY =
+          nextX === 0 ? lastElement.y + lastElement.h : lastElement.y;
+        return [
+          ...layout,
+          {
+            i,
+            x: nextX,
+            y: nextY,
+            w: 4,
+            h: 4,
+            minH: 2,
+            minW: 2,
+          },
+        ];
+      });
       setIsFormVisible(false);
     }
   };
 
-  const removeChart = (chartId: number) => {
-    setCharts(charts.filter(chart => chart.id !== chartId));
+  const removeChart = (chartId: string) => {
+    setCharts(charts => {
+      delete charts[chartId];
+      return charts;
+    });
+    setLayout(layout => layout.filter(({ i }) => i !== chartId));
   };
 
   const getAggregateName = (aggregate: string) => {
@@ -244,30 +261,6 @@ const Intelligence: React.FC = () => {
                     </button>
                   </Tooltip>
                 </div>
-                <div className="flex flex-col space-y-4">
-                  <div className="flex items-center justify-between space-x-4">
-                    {sizes.map((size, index) => (
-                      <Tooltip
-                        key={size.label}
-                        title={`${size.tooltip} width`}
-                        placement="bottom"
-                      >
-                        <button
-                          className={`h-8 w-12 rounded-[4px] text-xl ${
-                            index === selectedSizeIndex
-                              ? 'bg-gray-400 text-white'
-                              : 'bg-gray-200'
-                          }`}
-                          onClick={() => {
-                            setSelectedSizeIndex(index);
-                          }}
-                        >
-                          {size.label}
-                        </button>
-                      </Tooltip>
-                    ))}
-                  </div>
-                </div>
               </div>
             )}
             {aggregate && newEndpoint && (
@@ -294,29 +287,37 @@ const Intelligence: React.FC = () => {
         )}
       </div>
 
-      {charts.length === 0 && (
+      {layout.length === 0 && (
         <NoData
           title="No widgets"
           description={`Click on the Add Widget button to add a new widget`}
         />
       )}
       <div className="mt-4 grid grid-cols-4 gap-4">
-        {charts.map(chart => (
-          <div
-            key={chart.id}
-            className={`col-span-${widthToCols(chart.width)}`}
-          >
-            <ChartWrapper
-              id={chart.id}
-              type={chart.type}
-              width={chart.width}
-              endpoint={chart.endpoint}
-              aggregate={chart.aggregate}
-              label={chart.label}
-              removeChart={removeChart}
-            />
-          </div>
-        ))}
+        <ReactGridLayout
+          className="layout"
+          layout={layout}
+          cols={12}
+          rowHeight={87}
+          width={1248}
+          onLayoutChange={setLayout}
+        >
+          {layout.map(({ i }) => {
+            const chart = charts[i];
+            return (
+              <div key={i}>
+                <ChartWrapper
+                  id={i}
+                  type={chart.type}
+                  endpoint={chart.endpoint}
+                  aggregate={chart.aggregate}
+                  label={chart.label}
+                  removeChart={removeChart}
+                />
+              </div>
+            );
+          })}
+        </ReactGridLayout>
       </div>
     </div>
   );

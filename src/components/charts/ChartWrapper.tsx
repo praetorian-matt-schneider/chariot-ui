@@ -22,13 +22,12 @@ import {
 } from '@/utils/aggregates/seed';
 
 interface ChartWrapperProps {
-  id: number;
+  id: string;
   type: ChartType;
-  width: string;
   endpoint: MyResourceKey;
   aggregate: string;
   label: string;
-  removeChart: (chartId: number) => void;
+  removeChart: (chartId: string) => void;
 }
 
 const ChartWrapper: React.FC<ChartWrapperProps> = ({
@@ -80,8 +79,8 @@ const ChartWrapper: React.FC<ChartWrapperProps> = ({
     const chartData = runAggregate(aggregate, data as Account[]);
 
     return (
-      <div className={`relative border border-gray-200 bg-white`}>
-        <div className="flex w-full items-center pl-6 pr-5 pt-6">
+      <div className="relative flex size-full flex-col gap-4 border border-gray-200 bg-white p-6">
+        <div className="flex items-center">
           <h3 className="dark:text-dark-tremor-content-strong flex-1 text-lg font-medium text-tremor-content-strong">
             {label}
           </h3>
@@ -95,14 +94,12 @@ const ChartWrapper: React.FC<ChartWrapperProps> = ({
             <XMarkIcon className="rotate-45" />
           </button>
         </div>
-        <div className="p-6">
-          <Chart
-            type={type}
-            data={chartData}
-            xField={aggregateFunction.xField}
-            yField={aggregateFunction.yField}
-          />
-        </div>
+        <Chart
+          type={type}
+          data={chartData}
+          xField={aggregateFunction.xField}
+          yField={aggregateFunction.yField}
+        />
       </div>
     );
   } else {
