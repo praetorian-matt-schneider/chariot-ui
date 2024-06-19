@@ -156,7 +156,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
   const { risks: riskOccurrence = [] } = riskNameGenericSearch || {};
 
   const hostRef = references.find(ref => ref.class === 'host');
-  const [ip, port] = hostRef?.name?.split(':') ?? '';
+  const [ip, port] = hostRef?.name?.split(/:(?=[^:]*$)/) ?? '';
   const urlRefs = references.filter(ref => ref.class === 'url');
   const urlsImpacted = urlRefs.map(ref => ref.name);
 
