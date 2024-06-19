@@ -298,32 +298,30 @@ const Intelligence: React.FC = () => {
           description={`Click on the Add Widget button to add a new widget`}
         />
       )}
-      <div className="mt-4 grid grid-cols-4 gap-4">
-        <ReactGridLayout
-          className="layout"
-          layout={layout}
-          cols={12}
-          rowHeight={87}
-          width={1248}
-          onLayoutChange={setLayout}
-        >
-          {layout.map(({ i }) => {
-            const chart = charts[i];
-            return (
-              <div key={i}>
-                <ChartWrapper
-                  id={i}
-                  type={chart.type}
-                  endpoint={chart.endpoint}
-                  aggregate={chart.aggregate}
-                  label={chart.label}
-                  removeChart={removeChart}
-                />
-              </div>
-            );
-          })}
-        </ReactGridLayout>
-      </div>
+      <ReactGridLayout
+        className="layout"
+        layout={layout}
+        cols={12}
+        rowHeight={87}
+        width={1290}
+        onLayoutChange={setLayout}
+      >
+        {layout.map(({ i }) => {
+          const chart = charts[i];
+          return (
+            <div key={i}>
+              <ChartWrapper
+                id={i}
+                type={chart.type}
+                endpoint={chart.endpoint}
+                aggregate={chart.aggregate}
+                label={chart.label}
+                removeChart={removeChart}
+              />
+            </div>
+          );
+        })}
+      </ReactGridLayout>
     </div>
   );
 };
