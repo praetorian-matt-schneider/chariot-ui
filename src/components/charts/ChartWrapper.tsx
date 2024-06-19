@@ -76,7 +76,7 @@ const ChartWrapper: React.FC<ChartWrapperProps> = ({
           <button
             onMouseDown={e => e.stopPropagation()}
             onClick={() => removeChart(id)}
-            className="absolute right-[-6px] top-[-6px] size-6 rounded-full border border-gray-200 bg-layer0 text-gray-500"
+            className=" size-7"
           >
             <XMarkIcon className="p-0.5" />
           </button>
