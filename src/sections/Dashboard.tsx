@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import GridLayout from 'react-grid-layout';
+import GridLayout, { Layout } from 'react-grid-layout';
 import { PlusIcon } from '@heroicons/react/20/solid';
 import {
   ArrowTrendingUpIcon,
@@ -72,21 +72,51 @@ const Dashboard: React.FC = () => {
           aggregate,
         },
       }));
-      setLayout(layout => [
-        ...layout,
-        {
-          i,
-          x: 0,
-          y: 0,
-          w: 4,
-          h: 4,
-          minH: 2,
-          minW: 2,
-        },
-      ]);
+      setLayout(layout => {
+        // Find the next coordinates to place the new chart
+        const lastElement = layout.reduce(
+          (acc, current) => {
+            const currentSum = current.y + current.h;
+            const existingSum = acc.y + acc.h;
+
+            if (currentSum === existingSum) {
+              return current.x + current.w > acc.x + acc.w ? current : acc;
+            } else if (currentSum > existingSum) {
+              return current;
+            }
+            return acc;
+          },
+          {
+            x: -4,
+            y: -4,
+            w: 4,
+            h: 4,
+          } as Layout
+        );
+        const nextX =
+          lastElement.x + lastElement.w + 4 <= 12
+            ? lastElement.x + lastElement.w
+            : 0;
+        const nextY =
+          nextX === 0 ? lastElement.y + lastElement.h : lastElement.y;
+        return [
+          ...layout,
+          {
+            i,
+            x: nextX,
+            y: nextY,
+            w: 4,
+            h: 4,
+            minH: 2,
+            minW: 2,
+          },
+        ];
+      });
       setIsFormVisible(false);
     }
   };
+
+  console.log(layout);
 
   const removeChart = (chartId: string) => {
     setCharts(charts => {
