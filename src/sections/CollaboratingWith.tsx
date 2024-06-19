@@ -1,9 +1,12 @@
 import React, { useMemo } from 'react';
+import { ArrowDownOnSquareStackIcon } from '@heroicons/react/24/solid';
 
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
 import useAccountDetails from '@/hooks/useAccountDetails';
+import useRiskDetails from '@/hooks/useRiskDetails';
 import { useAuth } from '@/state/auth';
+import { exportContent } from '@/utils/download.util';
 
 interface EmailData {
   email: string;
@@ -26,6 +29,7 @@ interface TableData {
 
 export const CollaboratingWith: React.FC<Props> = ({ emails }) => {
   const { startImpersonation } = useAuth();
+  const fetchRiskDetails = useRiskDetails();
   const { accountDetails, loading } = useAccountDetails(
     emails.map(e => e.email)
   );
@@ -63,10 +67,19 @@ export const CollaboratingWith: React.FC<Props> = ({ emails }) => {
             break;
         }
       });
-      data.push({ email, displayName: displayName || email, ...counts });
+      data.push({
+        email,
+        displayName: displayName || email,
+        ...counts,
+      });
     });
     return data;
   }, [accountDetails]);
+
+  const downloadRisks = async (email: string, filetype: 'json' | 'csv') => {
+    const risks = await fetchRiskDetails(email);
+    exportContent(risks, `risk-detail-${email}.${filetype}`, filetype);
+  };
 
   const columns: Columns<TableData> = [
     {
@@ -118,6 +131,22 @@ export const CollaboratingWith: React.FC<Props> = ({ emails }) => {
         header={false}
         footer={false}
         error={null}
+        rowActions={{
+          items: [
+            {
+              label: 'Export as JSON',
+              onClick: rows =>
+                rows.forEach(row => downloadRisks(row.email, 'json')),
+              icon: <ArrowDownOnSquareStackIcon className="size-5" />,
+            },
+            {
+              label: 'Export as CSV',
+              onClick: rows =>
+                rows.forEach(row => downloadRisks(row.email, 'csv')),
+              icon: <ArrowDownOnSquareStackIcon className="size-5" />,
+            },
+          ],
+        }}
       />
     </div>
   );
