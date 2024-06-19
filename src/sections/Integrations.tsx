@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { MinusCircleIcon } from '@heroicons/react/24/outline';
-import { PlusCircleIcon } from '@heroicons/react/24/solid';
+import { PlusCircleIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import { twMerge } from 'tailwind-merge';
 
 import { Button } from '@/components/Button';
@@ -15,6 +15,9 @@ import {
 } from '@/utils/availableIntegrations';
 
 import { Account, IntegrationType } from '../types';
+import { TableFilters } from '@/components/table/TableFilters';
+import { Dropdown } from '@/components/Dropdown';
+import { useFilter } from '@/hooks/useFilter';
 
 function getButtonText(integration: IntegrationMeta) {
   const { name, connected, issue } = integration;
@@ -83,81 +86,118 @@ const Integrations: React.FC = () => {
     [integrationList, unlink]
   );
 
-  return (
-    <div className="mt-10 flex h-max w-full flex-col gap-8">
-      {Object.values(IntegrationType).map((integrationType, key) => {
-        return (
-          <div key={key}>
-            <div className="flex size-full h-max flex-wrap ">
-              <h2 className="text-xl font-semibold">{integrationType}</h2>
-            </div>
-            <div className="justify-left mt-2 flex size-full h-max flex-wrap gap-5">
-              {IntegrationsMeta.filter(
-                integration => integration.type === integrationType
-              ).map(integrationMeta => {
-                const connectedAccounts = integrationList.filter(
-                  account => account.member === integrationMeta.name
-                );
-                const integration = {
-                  ...integrationMeta,
-                  connected: connectedAccounts.length > 0,
-                };
-                const isComingSoon = isComingSoonIntegration(integration.name);
+  const [integrationTypeFilter, setIntegrationTypeFilter] = useFilter('');
+  const filteredIntegrations = useMemo(() => {
+    const computeFilteredIntegrations = () => {
+      if (integrationTypeFilter) {
+        return IntegrationsMeta.filter(
+          integration =>
+            integration.types &&
+            integrationTypeFilter &&
+            integration.types.includes(integrationTypeFilter as IntegrationType)
+        );
+      }
+      return IntegrationsMeta;
+    };
 
-                return (
-                  <div
-                    key={integration.id}
-                    className="w-[302px] max-w-[302px] rounded-[2px] bg-layer0 shadow"
-                  >
-                    <div className="relative flex flex-col items-center p-8">
-                      <img
-                        src={integration.logo}
-                        alt={integration.name}
-                        className="h-32 p-10"
-                      />
-                      <h2 className="mt-6 font-semibold">
-                        {integration.displayName}
-                      </h2>
-                      <p className="mt-1 line-clamp-3 min-h-[72px] text-center text-default-light">
-                        {integration.description}
-                      </p>
-                    </div>
-                    <div className="flex w-full">
-                      {integration.connected && (
-                        <Button
-                          className="grow basis-1/2 rounded-none rounded-bl-[2px] border-r-2 border-t-2 border-gray-100 bg-layer0 py-4"
-                          onClick={() => {
-                            setUpdateForm(true);
-                            setForm({ ...integration, connectedAccounts });
-                          }}
-                        >
-                          Edit
-                        </Button>
-                      )}
-                      <Button
-                        className={twMerge(
-                          'grow basis-1/2 py-4 bg-layer0 rounded-none border-t-2 border-gray-100',
-                          integration.connected &&
-                            'text-red-600 hover:text-red-500 rounded-br-[2px]',
-                          !integration.connected && !isComingSoon
-                            ? 'text-brand hover:text-brand-hover'
-                            : 'cursor-default'
-                        )}
-                        startIcon={
-                          integration.connected ? (
-                            <MinusCircleIcon className="mr-2 size-5" />
-                          ) : !isComingSoon ? (
-                            <PlusCircleIcon className="mr-2 size-5" />
-                          ) : undefined
-                        }
-                        onClick={() => !isComingSoon && handleCTA(integration)}
-                      >
-                        {isLoading ? 'Loading...' : getButtonText(integration)}
-                      </Button>
-                    </div>
-                  </div>
-                );
-              })}
+    return computeFilteredIntegrations();
+  }, [integrationTypeFilter, JSON.stringify(IntegrationsMeta)]);
+
+  return (
+    <div className="flex size-full h-max flex-wrap justify-left gap-5 overflow-x-auto pb-4">
+      <TableFilters
+        filters={
+          <div className="flex gap-4">
+            <Dropdown
+              styleType="header"
+              label={integrationTypeFilter || 'All Integrations'}
+              endIcon={
+                <ChevronDownIcon className="size-3 stroke-[4px] text-header-dark" />
+              }
+              menu={{
+                items: [
+                  {
+                    label: 'All Integrations',
+                    value: '',
+                  },
+                  {
+                    label: 'Divider',
+                    type: 'divider',
+                  },
+                  ...Object.values(IntegrationType).map(integrationType => {
+                    return {
+                      label: integrationType,
+                      value: integrationType,
+                    };
+                  }),
+                ],
+                onClick: value => {
+                  setIntegrationTypeFilter(value || '');
+                },
+                value: integrationTypeFilter,
+              }}
+            />
+          </div>
+        }
+      />
+      {filteredIntegrations.map(integrationMeta => {
+        const connectedAccounts = integrationList.filter(
+          account => account.member === integrationMeta.name
+        );
+        const integration = {
+          ...integrationMeta,
+          connected: connectedAccounts.length > 0,
+        };
+        const isComingSoon = isComingSoonIntegration(integration.name);
+
+        return (
+          <div
+            key={integration.id}
+            className="w-[302px] max-w-[302px] rounded-[2px] bg-layer0 shadow"
+          >
+            <div className="relative flex flex-col items-center p-8">
+              <img
+                src={integration.logo}
+                alt={integration.name}
+                className="h-32 p-10"
+              />
+              <h2 className="mt-6 font-semibold">{integration.displayName}</h2>
+              <p className="mt-1 line-clamp-3 min-h-[72px] text-center text-default-light">
+                {integration.description}
+              </p>
+            </div>
+            <div className="flex w-full">
+              {integration.connected && (
+                <Button
+                  className="grow basis-1/2 rounded-none rounded-bl-[2px] border-r-2 border-t-2 border-gray-100 bg-layer0 py-4"
+                  onClick={() => {
+                    setUpdateForm(true);
+                    setForm({ ...integration, connectedAccounts });
+                  }}
+                >
+                  Edit
+                </Button>
+              )}
+              <Button
+                className={twMerge(
+                  'grow basis-1/2 py-4 bg-layer0 rounded-none border-t-2 border-gray-100',
+                  integration.connected &&
+                    'text-red-600 hover:text-red-500 rounded-br-[2px]',
+                  !integration.connected && !isComingSoon
+                    ? 'text-brand hover:text-brand-hover'
+                    : 'cursor-default'
+                )}
+                startIcon={
+                  integration.connected ? (
+                    <MinusCircleIcon className="mr-2 size-5" />
+                  ) : !isComingSoon ? (
+                    <PlusCircleIcon className="mr-2 size-5" />
+                  ) : undefined
+                }
+                onClick={() => !isComingSoon && handleCTA(integration)}
+              >
+                {isLoading ? 'Loading...' : getButtonText(integration)}
+              </Button>
             </div>
           </div>
         );
