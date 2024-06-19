@@ -7,7 +7,7 @@ import {
 } from '@tremor/react';
 
 import { ChartType } from '@/types';
-import { CountData } from '@/utils/aggregates/account';
+import { CountData } from '@/utils/aggregates/aggregate';
 
 interface ChartProps {
   type: ChartType;
