@@ -95,7 +95,8 @@ export const SeedDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
       ...(
         attributes?.filter(
           (attribute: Attribute) =>
-            !Number.isNaN(Number.parseInt(attribute.name))
+            !Number.isNaN(Number.parseInt(attribute.name)) &&
+            attribute.class?.toLowerCase() !== 'seed' // not useful information to the user
         ) || []
       ).map((attribute: Attribute) => {
         const isDate =
