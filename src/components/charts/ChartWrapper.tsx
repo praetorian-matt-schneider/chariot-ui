@@ -85,13 +85,11 @@ const ChartWrapper: React.FC<ChartWrapperProps> = ({
             {label}
           </h3>
           <button
+            onMouseDown={e => e.stopPropagation()}
             onClick={() => removeChart(id)}
-            className="size-7 rotate-45  text-gray-500"
-            style={{
-              borderBottomColor: 'transparent',
-            }}
+            className="absolute right-[-6px] top-[-6px] size-6 rounded-full border border-gray-200 bg-layer0 text-gray-500"
           >
-            <XMarkIcon className="rotate-45" />
+            <XMarkIcon className="p-0.5" />
           </button>
         </div>
         <Chart
