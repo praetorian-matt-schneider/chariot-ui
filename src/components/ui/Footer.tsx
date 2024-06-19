@@ -15,14 +15,21 @@ const Footer = () => {
             <span className="text-lg font-bold leading-8">praetorian</span>
           </div>
           <div className="flex space-x-4 font-semibold">
-            <a href="#" className="hover:underline">
-              Terms of Service
+            <a
+              href="https://github.com/praetorian-inc/chariot-ui"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:underline"
+            >
+              Chariot UI
             </a>
-            <a href="#" className="hover:underline">
-              Privacy Policy
-            </a>
-            <a href="#" className="hover:underline">
-              Manage Cookies
+            <a
+              href="https://github.com/praetorian-inc/praetorian-cli"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:underline"
+            >
+              Praetorian CLI
             </a>
           </div>
         </footer>

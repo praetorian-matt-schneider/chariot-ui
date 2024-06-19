@@ -14,10 +14,11 @@ import { Popover } from '@/components/Popover';
 import { Tooltip } from '@/components/Tooltip';
 import { NoData } from '@/components/ui/NoData';
 import { ChartType, MyResourceKey } from '@/types';
-import { getAggregates as getAccountAggregates } from '@/utils/aggregates/account';
-import { getAggregates as getAssetAggregates } from '@/utils/aggregates/asset';
-import { getAggregates as getRiskAggregates } from '@/utils/aggregates/risk';
-import { getAggregates as getSeedAggregates } from '@/utils/aggregates/seed';
+import { aggregates as accountAggregates } from '@/utils/aggregates/account';
+import { getAggregates } from '@/utils/aggregates/aggregate';
+import { aggregates as assetAggregates } from '@/utils/aggregates/asset';
+import { aggregates as riskAggregates } from '@/utils/aggregates/risk';
+import { aggregates as seedAggregates } from '@/utils/aggregates/seed';
 import { useStorage } from '@/utils/storage/useStorage.util';
 
 interface ChartConfig {
@@ -46,33 +47,33 @@ const Intelligence: React.FC = () => {
       switch (newEndpoint.toLowerCase()) {
         case 'account':
           setAggregates(
-            Object.keys(getAccountAggregates()).map(id => ({
+            Object.keys(getAggregates(accountAggregates)).map(id => ({
               value: id,
-              label: getAccountAggregates()[id].label,
+              label: getAggregates(accountAggregates)[id].label,
             }))
           );
           break;
         case 'risk':
           setAggregates(
-            Object.keys(getRiskAggregates()).map(id => ({
+            Object.keys(getAggregates(riskAggregates)).map(id => ({
               value: id,
-              label: getRiskAggregates()[id].label,
+              label: getAggregates(riskAggregates)[id].label,
             }))
           );
           break;
         case 'seed':
           setAggregates(
-            Object.keys(getSeedAggregates()).map(id => ({
+            Object.keys(getAggregates(seedAggregates)).map(id => ({
               value: id,
-              label: getSeedAggregates()[id].label,
+              label: getAggregates(seedAggregates)[id].label,
             }))
           );
           break;
         case 'asset':
           setAggregates(
-            Object.keys(getAssetAggregates()).map(id => ({
+            Object.keys(getAggregates(assetAggregates)).map(id => ({
               value: id,
-              label: getAssetAggregates()[id].label,
+              label: getAggregates(assetAggregates)[id].label,
             }))
           );
           break;
@@ -151,13 +152,13 @@ const Intelligence: React.FC = () => {
   const getAggregateName = (aggregate: string) => {
     switch (newEndpoint) {
       case 'account':
-        return getAccountAggregates()[aggregate]?.label;
+        return getAggregates(accountAggregates)[aggregate]?.label;
       case 'risk':
-        return getRiskAggregates()[aggregate]?.label;
+        return getAggregates(riskAggregates)[aggregate]?.label;
       case 'seed':
-        return getSeedAggregates()[aggregate]?.label;
+        return getAggregates(seedAggregates)[aggregate]?.label;
       case 'asset':
-        return getAssetAggregates()[aggregate]?.label;
+        return getAggregates(assetAggregates)[aggregate]?.label;
       default:
         return '';
     }

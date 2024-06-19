@@ -4,22 +4,11 @@ import { XMarkIcon } from '@heroicons/react/20/solid';
 import Chart from '@/components/charts/Chart';
 import { useMy } from '@/hooks';
 import { Account, Asset, ChartType, MyResourceKey, Risk, Seed } from '@/types';
-import {
-  getAggregates as getAccountAggregates,
-  runAggregate as runAccountAggregate,
-} from '@/utils/aggregates/account';
-import {
-  getAggregates as getAssetAggregates,
-  runAggregate as runAssetAggregate,
-} from '@/utils/aggregates/asset';
-import {
-  getAggregates as getRiskAggregates,
-  runAggregate as runRiskAggregate,
-} from '@/utils/aggregates/risk';
-import {
-  getAggregates as getSeedAggregates,
-  runAggregate as runSeedAggregate,
-} from '@/utils/aggregates/seed';
+import { aggregates as accountAggregates } from '@/utils/aggregates/account';
+import { getAggregates, runAggregate } from '@/utils/aggregates/aggregate';
+import { aggregates as assetAggregates } from '@/utils/aggregates/asset';
+import { aggregates as riskAggregates } from '@/utils/aggregates/risk';
+import { aggregates as seedAggregates } from '@/utils/aggregates/seed';
 
 interface ChartWrapperProps {
   id: string;
@@ -44,39 +33,39 @@ const ChartWrapper: React.FC<ChartWrapperProps> = ({
   });
 
   if (!isLoading && data) {
-    const getAggregates = () => {
+    const display = () => {
       switch (endpoint) {
         case 'account':
-          return getAccountAggregates();
+          return getAggregates(accountAggregates);
         case 'risk':
-          return getRiskAggregates();
+          return getAggregates(riskAggregates);
         case 'seed':
-          return getSeedAggregates();
+          return getAggregates(seedAggregates);
         case 'asset':
-          return getAssetAggregates();
+          return getAggregates(assetAggregates);
         default:
           return {};
       }
     };
-    const runAggregate = (
+    const run = (
       aggregate: string,
       data: Account[] | Risk[] | Seed[] | Asset[]
     ) => {
       switch (endpoint) {
         case 'account':
-          return runAccountAggregate(aggregate, data as Account[]);
+          return runAggregate(accountAggregates, aggregate, data as Account[]);
         case 'risk':
-          return runRiskAggregate(aggregate, data as Risk[]);
+          return runAggregate(riskAggregates, aggregate, data as Risk[]);
         case 'seed':
-          return runSeedAggregate(aggregate, data as Seed[]);
+          return runAggregate(seedAggregates, aggregate, data as Seed[]);
         case 'asset':
-          return runAssetAggregate(aggregate, data as Asset[]);
+          return runAggregate(assetAggregates, aggregate, data as Asset[]);
         default:
           return [];
       }
     };
-    const aggregateFunction = getAggregates()[aggregate];
-    const chartData = runAggregate(aggregate, data as Account[]);
+    const aggregateFunction = display()[aggregate];
+    const chartData = run(aggregate, data as Account[]);
 
     return (
       <div className="relative flex size-full flex-col gap-4 border border-gray-200 bg-white p-6">
