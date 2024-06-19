@@ -16,7 +16,7 @@ interface ChartProps {
   yField: string;
 }
 
-const defaultClass = 'h-60 w-full text-xs';
+const defaultClass = 'text-xs size-full !h-full';
 
 const Chart: React.FC<ChartProps> = ({ type, data, xField, yField }) => {
   switch (type) {
@@ -53,7 +53,7 @@ const Chart: React.FC<ChartProps> = ({ type, data, xField, yField }) => {
       );
     case 'donut':
       return (
-        <div className="flex items-center justify-center space-x-6 text-xs">
+        <div className="flex size-full items-center justify-center space-x-6 text-xs">
           <DonutChart
             className={defaultClass}
             variant="donut"
