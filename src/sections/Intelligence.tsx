@@ -145,25 +145,6 @@ const Intelligence: React.FC = () => {
     }
   };
 
-  const validateAggregate = (aggregate: string) => {
-    switch (newEndpoint) {
-      case 'account':
-        return getAccountAggregates()[aggregate];
-      case 'risk':
-        return getRiskAggregates()[aggregate];
-      case 'seed':
-        return getSeedAggregates()[aggregate];
-      case 'asset':
-        return getAssetAggregates()[aggregate];
-      default:
-        return undefined;
-    }
-  };
-
-  const validCharts = charts.filter(chart =>
-    validateAggregate(chart.aggregate)
-  );
-
   return (
     <div className="w-full">
       <div className="relative inline-block">
@@ -313,14 +294,14 @@ const Intelligence: React.FC = () => {
         )}
       </div>
 
-      {validCharts.length === 0 && (
+      {charts.length === 0 && (
         <NoData
           title="No widgets"
           description={`Click on the Add Widget button to add a new widget`}
         />
       )}
       <div className="mt-4 grid grid-cols-4 gap-4">
-        {validCharts.map(chart => (
+        {charts.map(chart => (
           <div
             key={chart.id}
             className={`col-span-${widthToCols(chart.width)}`}

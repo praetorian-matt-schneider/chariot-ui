@@ -16,12 +16,14 @@ interface ChartProps {
   yField: string;
 }
 
+const defaultClass = 'h-60 w-full text-xs';
+
 const Chart: React.FC<ChartProps> = ({ type, data, xField, yField }) => {
   switch (type) {
     case 'area':
       return (
         <AreaChart
-          className="h-96 w-full text-xs"
+          className={defaultClass}
           data={data}
           index={xField}
           categories={[yField]}
@@ -32,7 +34,7 @@ const Chart: React.FC<ChartProps> = ({ type, data, xField, yField }) => {
     case 'bar':
       return (
         <BarChart
-          className="h-96 w-full text-xs"
+          className={defaultClass}
           data={data}
           index={xField}
           categories={[yField]}
@@ -42,7 +44,7 @@ const Chart: React.FC<ChartProps> = ({ type, data, xField, yField }) => {
     case 'line':
       return (
         <LineChart
-          className="h-96 w-full text-xs"
+          className={defaultClass}
           data={data}
           index={xField}
           categories={[yField]}
@@ -53,7 +55,7 @@ const Chart: React.FC<ChartProps> = ({ type, data, xField, yField }) => {
       return (
         <div className="flex items-center justify-center space-x-6 text-xs">
           <DonutChart
-            className="h-96 w-full"
+            className={defaultClass}
             variant="donut"
             data={data}
             index={xField}

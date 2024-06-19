@@ -34,7 +34,6 @@ interface ChartWrapperProps {
 const ChartWrapper: React.FC<ChartWrapperProps> = ({
   id,
   type,
-  width,
   endpoint,
   aggregate,
   label,
@@ -81,9 +80,7 @@ const ChartWrapper: React.FC<ChartWrapperProps> = ({
     const chartData = runAggregate(aggregate, data as Account[]);
 
     return (
-      <div
-        className={`w- relative p-2${width} border border-gray-200 bg-white`}
-      >
+      <div className={`relative border border-gray-200 bg-white`}>
         <div className="flex w-full items-center pl-6 pr-5 pt-6">
           <h3 className="dark:text-dark-tremor-content-strong flex-1 text-lg font-medium text-tremor-content-strong">
             {label}
