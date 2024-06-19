@@ -109,6 +109,19 @@ function Login() {
               }
             }}
           />
+          <div className="mt-4 text-center text-sm">
+            <p className=" text-gray-600">
+              Unlicensed (free tier) users have limited access.
+            </p>
+            <a
+              href="https://www.praetorian.com/contact/"
+              target="_blank"
+              className="text-brand underline"
+              rel="noreferrer"
+            >
+              Contact us to upgrade
+            </a>
+          </div>
         </div>
       </div>
       <p className="mt-6 w-[400px] text-center font-normal text-disabled">
