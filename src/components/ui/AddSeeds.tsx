@@ -78,9 +78,6 @@ export const AddSeeds: React.FC<Props> = (props: Props) => {
               <li>
                 GitHub Organizations: <code>https://github.com/acme-corp</code>
               </li>
-              <li>
-                Gitlab Organizations: <code>https://gitlab.com/acme-corp</code>
-              </li>
             </ul>
           </p>
           <p className="mt-1 text-sm text-gray-500">
