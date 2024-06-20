@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import {
   ArrowDownOnSquareStackIcon,
-  ArrowUturnLeftIcon,
   PauseIcon,
   PlayIcon,
   PlusIcon,
@@ -44,6 +43,10 @@ import { useOpenDrawer } from './detailsDrawer/useOpenDrawer';
 
 const isFrozen = (item: Seed) => {
   return item?.status[0] === SeedStatus.Frozen;
+};
+
+const isActive = (item: Seed) => {
+  return item?.status[0] === SeedStatus.Active;
 };
 
 const Seeds: React.FC = () => {
@@ -120,14 +123,6 @@ const Seeds: React.FC = () => {
     }
   }, [unlinkStatus]);
 
-  const handleFreezeToggle = (seed: Seed) => {
-    if (isFrozen(seed)) {
-      updateSeed({ key: seed.key, status: SeedStatus.Active });
-    } else {
-      updateSeed({ key: seed.key, status: SeedStatus.Frozen });
-    }
-  };
-
   const handleAddDescription = async () => {
     await updateSeed({
       key: descriptionSeed?.key ?? '',
@@ -202,12 +197,12 @@ const Seeds: React.FC = () => {
       disabled: (seeds: Seed[]) => seeds.length === 0,
       submenu: [
         {
-          label: 'Freeze',
+          disabled: seeds => seeds.filter(seed => isActive(seed)).length === 0,
+          label: 'Stop Scanning',
           icon: <PauseIcon className="size-5" />,
-          disabled: seeds => seeds.length === 0,
           onClick: seeds => {
-            const showBulk = showBulkSnackbar(seeds.length);
             seeds.forEach(seed => {
+              const showBulk = showBulkSnackbar(seeds.length);
               updateSeed(
                 {
                   key: seed.key,
@@ -230,12 +225,12 @@ const Seeds: React.FC = () => {
           },
         },
         {
-          label: 'Activate',
-          icon: <ArrowUturnLeftIcon className="size-5" />,
-          disabled: seeds => seeds.length === 0,
+          disabled: seeds => seeds.filter(seed => isFrozen(seed)).length === 0,
+          label: 'Resume Scanning',
+          icon: <PlayIcon className="size-5" />,
           onClick: seeds => {
-            const showBulk = showBulkSnackbar(seeds.length);
             seeds.forEach(seed => {
+              const showBulk = showBulkSnackbar(seeds.length);
               updateSeed(
                 {
                   key: seed.key,
@@ -246,8 +241,8 @@ const Seeds: React.FC = () => {
                   onSuccess: () => {
                     if (showBulk) {
                       Snackbar({
-                        title: `${seeds.length} seeds will resume scanning`,
-                        description: RiskScanMessage.Start,
+                        title: `${seeds.length} seeds will be removed`,
+                        description: RiskScanMessage.Stop,
                         variant: 'success',
                       });
                     }
@@ -364,20 +359,25 @@ const Seeds: React.FC = () => {
               disabled: (seeds: Seed[]) => seeds.length === 0,
               submenu: [
                 {
-                  label: data => (isFrozen(data) ? 'Activate' : 'Freeze'),
-                  icon: data => {
-                    return (
-                      <>
-                        {isFrozen(data) ? (
-                          <ArrowUturnLeftIcon className="size-5" />
-                        ) : (
-                          <PauseIcon className="size-5" />
-                        )}
-                      </>
-                    );
-                  },
+                  disabled: seeds =>
+                    seeds.filter(seed => isFrozen(seed)).length > 0,
+                  label: 'Stop Scanning',
+                  icon: <PauseIcon className="size-5" />,
                   onClick: seeds => {
-                    handleFreezeToggle(seeds[0]);
+                    seeds.forEach(seed => {
+                      updateSeed({ key: seed.key, status: SeedStatus.Frozen });
+                    });
+                  },
+                },
+                {
+                  disabled: seeds =>
+                    seeds.filter(seed => !isFrozen(seed)).length > 0,
+                  label: 'Resume Scanning',
+                  icon: <PlayIcon className="size-5" />,
+                  onClick: seeds => {
+                    seeds.forEach(seed => {
+                      updateSeed({ key: seed.key, status: SeedStatus.Active });
+                    });
                   },
                 },
               ],
