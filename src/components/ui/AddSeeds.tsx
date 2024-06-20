@@ -56,7 +56,7 @@ export const AddSeeds: React.FC<Props> = (props: Props) => {
               What is a Seed?
             </h3>
             <p className="mt-1 text-sm text-gray-500">
-              A seed can be a domain, IPv4, IPv6, CIDR range, GitHub, or Gitlab
+              A seed can be a domain, IPv4, IPv6, CIDR range, or GitHub
               organization. Add assets you want to monitor and we’ll start
               discovering and assessing them.
             </p>
@@ -77,9 +77,6 @@ export const AddSeeds: React.FC<Props> = (props: Props) => {
               </li>
               <li>
                 GitHub Organizations: <code>https://github.com/acme-corp</code>
-              </li>
-              <li>
-                Gitlab Organizations: <code>https://gitlab.com/acme-corp</code>
               </li>
             </ul>
           </p>
