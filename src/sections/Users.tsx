@@ -33,7 +33,7 @@ export const Users: React.FC = () => {
     {
       username: friend.email || me,
       member: friend.email || me,
-      name: friend.displayName || me,
+      name: friend.email || me,
       updated: '',
       config: {},
       key: 'self',

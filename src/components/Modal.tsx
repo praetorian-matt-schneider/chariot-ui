@@ -23,6 +23,7 @@ interface Props extends PropsWithChildren {
     className?: string;
     isLoading?: boolean;
     startIcon?: React.ReactNode;
+    disabled?: boolean;
   };
   logo?: string;
   icon?: React.ReactNode;
@@ -89,7 +90,7 @@ export const Modal: React.FC<Props> = props => {
               />
             )}
             {icon && (
-              <div className="mr-2 flex size-10 items-center justify-center rounded-full bg-brand/10 text-brand">
+              <div className="mr-2 flex size-10 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">
                 {icon}
               </div>
             )}
@@ -139,6 +140,7 @@ export const Modal: React.FC<Props> = props => {
                 form={footer?.form}
                 type={footer?.form ? 'submit' : undefined}
                 isLoading={footer?.isLoading}
+                disabled={footer?.disabled}
               >
                 {footer.text}
               </Button>

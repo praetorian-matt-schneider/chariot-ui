@@ -22,14 +22,16 @@ import { useStorage } from '@/utils/storage/useStorage.util';
 import { Button, ButtonProps } from './Button';
 import { Menu, MenuProps } from './Menu';
 
+export interface DropdownMenu extends MenuProps {
+  placement?: Placement;
+  onClose?: () => void;
+  width?: number;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
 export interface DropdownProps extends ButtonProps {
-  menu: MenuProps & {
-    placement?: Placement;
-    onClose?: () => void;
-    width?: number;
-    open?: boolean;
-    onOpenChange?: (open: boolean) => void;
-  };
+  menu: DropdownMenu;
 }
 
 export const Dropdown = forwardRef<HTMLButtonElement, DropdownProps>(
@@ -119,7 +121,10 @@ export const Dropdown = forwardRef<HTMLButtonElement, DropdownProps>(
                   {...menuProps}
                   onClick={updatedValue => {
                     menuProps?.onClick?.(updatedValue);
-                    setOpen(false);
+
+                    if (!menuProps.multiSelect) {
+                      setOpen(false);
+                    }
                   }}
                 />
               </div>

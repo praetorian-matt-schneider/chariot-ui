@@ -5,7 +5,6 @@ import MDEditor from '@uiw/react-md-editor';
 
 import { Accordian } from '@/components/Accordian';
 import { Button } from '@/components/Button';
-import { Chip } from '@/components/Chip';
 import { Drawer } from '@/components/Drawer';
 import { Dropdown } from '@/components/Dropdown';
 import { HorizontalSplit } from '@/components/HorizontalSplit';
@@ -20,27 +19,15 @@ import { RiskDropdown } from '@/components/ui/RiskDropdown';
 import { useMy } from '@/hooks';
 import { useGetFile, useUploadFile } from '@/hooks/useFiles';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
-import { useInterval } from '@/hooks/useInterval';
 import { useReRunJob } from '@/hooks/useJobs';
 import { useReportRisk, useUpdateRisk } from '@/hooks/useRisks';
-import { cn } from '@/utils/classname';
 import { formatDate } from '@/utils/date.util';
-import { getSeverityClass } from '@/utils/getSeverityClass.util';
+import { sToMs } from '@/utils/date.util';
 import { getRoute } from '@/utils/route.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
 import { generatePathWithSearch, useSearchParams } from '@/utils/url.util';
 
-import {
-  JobStatus,
-  Risk,
-  RiskHistory,
-  RiskSeverity,
-  RiskStatus,
-  RiskStatusSub,
-  SeverityDef,
-  StatusDef,
-  StatusSubDef,
-} from '../../types';
+import { JobStatus, Risk, RiskCombinedStatus, RiskHistory } from '../../types';
 
 import { Comment } from './Comment';
 import { DetailsDrawerHeader } from './DetailsDrawerHeader';
@@ -148,7 +135,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
       resource: 'job',
       query: `#${dns}`,
     },
-    { enabled: open }
+    { enabled: open, refetchInterval: sToMs(10) }
   );
   const { data: riskNameGenericSearch, status: riskNameGenericSearchStatus } =
     useGenericSearch({ query: name }, { enabled: open });
@@ -189,21 +176,9 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     [jobForThisRisk]
   );
 
-  const { start: startJobRefetch, stop: stopJobRefetch } = useInterval();
-
   const resetMarkdownValue = useCallback(() => {
     setMarkdownValue(isEditingMarkdown ? definitionsFileValue : '');
   }, [isEditingMarkdown]);
-
-  useEffect(() => {
-    if (open && jobForThisRisk?.status !== JobStatus.Pass) {
-      startJobRefetch(() => refetchAllAssetJobs());
-
-      return () => {
-        stopJobRefetch();
-      };
-    }
-  }, [open]);
 
   useEffect(() => {
     resetMarkdownValue();
@@ -278,7 +253,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
               }
               onClick={async () => {
                 await reRunJob({ capability: risk.source, dns: risk.dns });
-                startJobRefetch(() => refetchAllAssetJobs());
+                refetchAllAssetJobs();
               }}
             >
               Scan Now
@@ -501,17 +476,6 @@ function getHistoryDiff(
   title: ReactNode;
   updated: string;
 } {
-  const generalChipClass = 'inline py-1 px-3 whitespace-nowrap';
-
-  const riskStatusKey = history.to?.[0] as RiskStatus;
-  const riskSeverityKey = history.to?.[1] as RiskSeverity;
-  const riskSubStatusKey = history.to?.[2] as RiskStatusSub;
-  const statusLabel =
-    riskSubStatusKey && StatusSubDef[riskSubStatusKey]
-      ? `${StatusDef[riskStatusKey]} - ${StatusSubDef[riskSubStatusKey]}`
-      : StatusDef[riskStatusKey];
-  const severityLabel = SeverityDef[riskSeverityKey];
-
   if (isFirst) {
     return {
       title: (
@@ -520,27 +484,25 @@ function getHistoryDiff(
             <strong>First Tracked</strong>
             {EmptySpace}as{EmptySpace}
           </p>
-          <Chip
-            className={cn(generalChipClass, getSeverityClass(riskSeverityKey))}
-          >
-            {severityLabel}
-          </Chip>
+          <RiskDropdown
+            risk={{
+              status: history.to as RiskCombinedStatus,
+              key: '',
+              comment: '',
+            }}
+            type={'severity'}
+            styleType="chip"
+          />
         </div>
       ),
       updated: formatDate(history.updated),
     };
   }
 
-  const prevRiskStatusKey = history.from?.[0] as RiskStatus;
-  const prevRiskSeverityKey = history.from?.[1] as RiskSeverity;
-  const prevRiskSubStatusKey = history.from?.[2] as RiskStatusSub;
-  const prevStatusLabel = prevRiskSubStatusKey
-    ? `${StatusDef[prevRiskStatusKey]} - ${StatusSubDef[prevRiskSubStatusKey]}`
-    : StatusDef[prevRiskStatusKey];
-  const prevSeverityLabel = SeverityDef[prevRiskSeverityKey];
-
-  const isStatusChanged = statusLabel !== prevStatusLabel;
-  const isSeverityChanged = severityLabel !== prevSeverityLabel;
+  const isStatusChanged =
+    `${history.from?.[0]}${history.from?.[2]}` !==
+    `${history.to?.[0]}${history.to?.[2]}`;
+  const isSeverityChanged = history.from?.[1] !== history.to?.[1];
   const isBothChanged = isSeverityChanged && isStatusChanged;
   const by = history?.by;
 
@@ -550,17 +512,27 @@ function getHistoryDiff(
         {by ? `${by} changed the Severity from` : `Severity changed from`}
         {EmptySpace}
       </p>
-      <Chip
-        className={cn(generalChipClass, getSeverityClass(prevRiskSeverityKey))}
-      >
-        {prevSeverityLabel}
-      </Chip>
+      <RiskDropdown
+        risk={{
+          status: history.from as RiskCombinedStatus,
+          key: '',
+          comment: '',
+        }}
+        type={'severity'}
+        styleType="chip"
+      />
       <p className="inline">
         {EmptySpace}to{EmptySpace}
       </p>
-      <Chip className={cn(generalChipClass, getSeverityClass(riskSeverityKey))}>
-        {severityLabel}
-      </Chip>
+      <RiskDropdown
+        risk={{
+          status: history.to as RiskCombinedStatus,
+          key: '',
+          comment: '',
+        }}
+        type={'severity'}
+        styleType="chip"
+      />
     </>
   );
 
@@ -578,21 +550,33 @@ function getHistoryDiff(
           </>
         )}
       </p>
-      <Chip className={cn(generalChipClass)} style="default">
-        {prevStatusLabel}
-      </Chip>
+      <RiskDropdown
+        risk={{
+          status: history.from as RiskCombinedStatus,
+          key: '',
+          comment: '',
+        }}
+        type={'status'}
+        styleType="chip"
+      />
       <p className="inline-block">
         {EmptySpace}to{EmptySpace}
       </p>
-      <Chip className={cn(generalChipClass)} style="default">
-        {statusLabel}
-      </Chip>
+      <RiskDropdown
+        risk={{
+          status: history.to as RiskCombinedStatus,
+          key: '',
+          comment: '',
+        }}
+        type={'status'}
+        styleType="chip"
+      />
     </>
   );
 
   return {
     title: (
-      <div className="whitespace-break-spaces">
+      <div className="whitespace-break-spaces leading-7">
         {(isSeverityChanged || isBothChanged) && severity}
         {(isStatusChanged || isBothChanged) && status}
       </div>

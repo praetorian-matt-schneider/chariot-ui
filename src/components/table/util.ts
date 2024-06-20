@@ -1,5 +1,8 @@
 import { useMemo } from 'react';
 
+import { DropdownMenu } from '@/components/Dropdown';
+import { MenuItemProps } from '@/components/Menu';
+
 import { ActionsWithRowSelection } from './types';
 
 export function mapActionsWithRowSelection<TData>(
@@ -8,30 +11,32 @@ export function mapActionsWithRowSelection<TData>(
   rowData: TData,
   isGlobal: boolean,
   props?: ActionsWithRowSelection<TData>
-) {
-  return useMemo(() => {
-    function updateProps(
+): DropdownMenu | undefined {
+  return useMemo((): DropdownMenu | undefined => {
+    function updateMenuItemsProps(
       item: ActionsWithRowSelection<TData>['items'][0],
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       rowDatasToSend: any
-    ) {
+    ): MenuItemProps {
+      const { onClick, label, icon, disabled, hide, submenu, ...restItems } =
+        item;
+
       return {
+        ...restItems,
         onClick: () => {
-          item.onClick?.(rowDatasToSend);
+          onClick?.(rowDatasToSend);
         },
-        label:
-          typeof item.label === 'function' ? item.label(rowData) : item.label,
-        icon: typeof item.icon === 'function' ? item.icon(rowData) : item.icon,
+        label: typeof label === 'function' ? label(rowData) : label,
+        icon: typeof icon === 'function' ? icon(rowData) : icon,
         disabled:
-          typeof item.disabled === 'function'
-            ? item.disabled(rowDatasToSend)
-            : item.disabled,
-        hide:
-          typeof item.hide === 'function'
-            ? item.hide(rowDatasToSend)
-            : item.hide,
+          typeof disabled === 'function' ? disabled(rowDatasToSend) : disabled,
+        hide: typeof hide === 'function' ? hide(rowDatasToSend) : hide,
+        submenu: submenu?.map(item =>
+          updateMenuItemsProps(item, rowDatasToSend)
+        ),
       };
     }
+
     if (props) {
       const rowDatasToSend = isGlobal
         ? selectedRows.map(i => data[Number(i)]).filter(Boolean)
@@ -39,16 +44,9 @@ export function mapActionsWithRowSelection<TData>(
 
       return {
         ...props,
-        items: props.items.map(item => {
-          return {
-            ...item,
-            ...updateProps(item, rowDatasToSend),
-            submenu: item.submenu?.map(item => ({
-              ...item,
-              ...updateProps(item, rowDatasToSend),
-            })),
-          };
-        }),
+        items: props.items.map(item =>
+          updateMenuItemsProps(item, rowDatasToSend)
+        ),
       };
     }
   }, [props, selectedRows.length, data.length]);

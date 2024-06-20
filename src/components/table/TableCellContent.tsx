@@ -73,6 +73,8 @@ export function TableCellContent<TData>(props: {
                 onClick={event => {
                   event.stopPropagation();
                 }}
+                className="flex overflow-hidden"
+                buttonClass="flex overflow-hidden"
               >
                 {children}
               </Link>

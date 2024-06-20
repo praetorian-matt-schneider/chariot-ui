@@ -101,7 +101,7 @@ export const Menu: React.FC<MenuProps> = props => {
 const menuMarginClassName = `m-[8px] w-[calc(100%-16px)]`;
 
 export interface MenuItemProps {
-  label: string;
+  label: ReactNode;
   labelSuffix?: string | number | JSX.Element;
   value?: string;
   icon?: React.ReactNode;
@@ -308,7 +308,10 @@ function Content(props: MenuItemProps & { multiSelect?: boolean }) {
           <div
             className={`flex w-full justify-between gap-8 overflow-hidden text-ellipsis ${labelText ? '' : 'font-semibold'} leading-8 ${disabled ? 'italic text-default-light' : ''} ${label === 'View All' && 'm-auto'}`}
           >
-            <OverflowText text={label} placement="left" />
+            {typeof label === 'string' && (
+              <OverflowText text={label} placement="left" />
+            )}
+            {typeof label !== 'string' && label}
             {labelSuffix}
           </div>
         </div>

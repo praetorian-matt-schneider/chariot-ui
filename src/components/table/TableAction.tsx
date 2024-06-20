@@ -25,11 +25,12 @@ export function TableAction(props: TableActionProps) {
       <>
         <Button
           styleType="header"
-          label={actions.items[0].label.toString()}
           onClick={() => {
             actions.items[0].onClick?.();
           }}
-        />
+        >
+          {actions.items[0].label}
+        </Button>
       </>,
       buttonElement
     );
