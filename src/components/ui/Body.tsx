@@ -115,8 +115,8 @@ const UpgradeModal = ({ isOpen, setIsOpen }: UpgradeModalProps) => {
         </ol>
 
         <p>
-          Give our managed-service plan a try for free! Upgrade now to add more
-          seeds and have our team triage your risks for 7 days.
+          Give our managed-service plan a try for free! Upgrade now to have our
+          team triage your risks for 7 days.
         </p>
       </div>
     </Modal>
