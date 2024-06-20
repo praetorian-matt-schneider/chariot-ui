@@ -91,27 +91,25 @@ const UpgradeModal = ({ isOpen, setIsOpen }: UpgradeModalProps) => {
     >
       <div className="flex flex-col justify-center gap-4 p-2">
         <p>
-          <b>We are thrilled that you are using Chariot. 🎉</b>
+          <b>We&apos;re excited to have you using Chariot! 🎉</b>
         </p>
         <p>
-          You are on the <b>free plan</b>. It is self-service and limited to one
-          seed.
+          Right now, you&apos;re on the <b>free plan</b>.
         </p>
+        <p>This plan is self-service and lets you manage one seed.</p>
 
-        <p>We have more plans:</p>
-        <ol>
-          <li>A self-service plan with unlimited seeds.</li>
+        <p>We also offer other plans:</p>
+        <ol className="list-inside list-decimal">
+          <li>Self-service plan with unlimited seeds.</li>
           <li>
-            A managed-service plan where the experts in our Managed Service team
-            triage your risks and inform you of exploitable critical risks. This
-            includes unlimited seeds.
+            Managed-service plan with unlimited seeds. Our expert team will
+            triage your risks and notify you about critical, exploitable risks.
           </li>
         </ol>
 
         <p>
-          We invite you to try out the managed-service plan for free. Click Free
-          Upgrade to add more seeds and have our team triage your risks for 7
-          days.
+          Give our managed-service plan a try for free! Upgrade now to add more
+          seeds and have our team triage your risks for 7 days.
         </p>
       </div>
     </Modal>
