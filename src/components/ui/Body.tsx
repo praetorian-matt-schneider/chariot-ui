@@ -24,7 +24,7 @@ export const Body = forwardRef(function Paper(
   });
 
   const isTrial = accounts.find(
-    account => account.member === 'chariot+trial@praetorian.com'
+    account => account.member === 'research@praetorian.com'
   );
 
   return (
