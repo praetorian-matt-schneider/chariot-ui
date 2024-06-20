@@ -4,6 +4,7 @@ import {
   ArrowDownOnSquareStackIcon,
   ArrowUturnLeftIcon,
   PauseIcon,
+  PlayIcon,
   PlusIcon,
   TrashIcon,
 } from '@heroicons/react/24/outline';
@@ -196,60 +197,67 @@ const Seeds: React.FC = () => {
 
   const DataExistActionItems: ActionsWithRowSelection<Seed>['items'] = [
     {
-      label: 'Freeze',
-      icon: <PauseIcon className="size-5" />,
-      disabled: seeds => seeds.length === 0,
-      onClick: seeds => {
-        const showBulk = showBulkSnackbar(seeds.length);
-        seeds.forEach(seed => {
-          updateSeed(
-            {
-              key: seed.key,
-              status: SeedStatus.Frozen,
-              showSnackbar: !showBulk,
-            },
-            {
-              onSuccess: () => {
-                if (showBulk) {
-                  Snackbar({
-                    title: `${seeds.length} seeds will be removed`,
-                    description: RiskScanMessage.Stop,
-                    variant: 'success',
-                  });
+      label: 'Status',
+      icon: <PlayIcon className="size-5" />,
+      disabled: (seeds: Seed[]) => seeds.length === 0,
+      submenu: [
+        {
+          label: 'Freeze',
+          icon: <PauseIcon className="size-5" />,
+          disabled: seeds => seeds.length === 0,
+          onClick: seeds => {
+            const showBulk = showBulkSnackbar(seeds.length);
+            seeds.forEach(seed => {
+              updateSeed(
+                {
+                  key: seed.key,
+                  status: SeedStatus.Frozen,
+                  showSnackbar: !showBulk,
+                },
+                {
+                  onSuccess: () => {
+                    if (showBulk) {
+                      Snackbar({
+                        title: `${seeds.length} seeds will be removed`,
+                        description: RiskScanMessage.Stop,
+                        variant: 'success',
+                      });
+                    }
+                  },
                 }
-              },
-            }
-          );
-        });
-      },
-    },
-    {
-      label: 'Activate',
-      icon: <ArrowUturnLeftIcon className="size-5" />,
-      disabled: seeds => seeds.length === 0,
-      onClick: seeds => {
-        const showBulk = showBulkSnackbar(seeds.length);
-        seeds.forEach(seed => {
-          updateSeed(
-            {
-              key: seed.key,
-              status: SeedStatus.Active,
-              showSnackbar: !showBulk,
-            },
-            {
-              onSuccess: () => {
-                if (showBulk) {
-                  Snackbar({
-                    title: `${seeds.length} seeds will resume scanning`,
-                    description: RiskScanMessage.Start,
-                    variant: 'success',
-                  });
+              );
+            });
+          },
+        },
+        {
+          label: 'Activate',
+          icon: <ArrowUturnLeftIcon className="size-5" />,
+          disabled: seeds => seeds.length === 0,
+          onClick: seeds => {
+            const showBulk = showBulkSnackbar(seeds.length);
+            seeds.forEach(seed => {
+              updateSeed(
+                {
+                  key: seed.key,
+                  status: SeedStatus.Active,
+                  showSnackbar: !showBulk,
+                },
+                {
+                  onSuccess: () => {
+                    if (showBulk) {
+                      Snackbar({
+                        title: `${seeds.length} seeds will resume scanning`,
+                        description: RiskScanMessage.Start,
+                        variant: 'success',
+                      });
+                    }
+                  },
                 }
-              },
-            }
-          );
-        });
-      },
+              );
+            });
+          },
+        },
+      ],
     },
     {
       label: 'Delete',
@@ -351,21 +359,28 @@ const Seeds: React.FC = () => {
         rowActions={{
           items: [
             {
-              label: data => (isFrozen(data) ? 'Activate' : 'Freeze'),
-              icon: data => {
-                return (
-                  <>
-                    {isFrozen(data) ? (
-                      <ArrowUturnLeftIcon className="size-5" />
-                    ) : (
-                      <PauseIcon className="size-5" />
-                    )}
-                  </>
-                );
-              },
-              onClick: seeds => {
-                handleFreezeToggle(seeds[0]);
-              },
+              label: 'Status',
+              icon: <PlayIcon className="size-5" />,
+              disabled: (seeds: Seed[]) => seeds.length === 0,
+              submenu: [
+                {
+                  label: data => (isFrozen(data) ? 'Activate' : 'Freeze'),
+                  icon: data => {
+                    return (
+                      <>
+                        {isFrozen(data) ? (
+                          <ArrowUturnLeftIcon className="size-5" />
+                        ) : (
+                          <PauseIcon className="size-5" />
+                        )}
+                      </>
+                    );
+                  },
+                  onClick: seeds => {
+                    handleFreezeToggle(seeds[0]);
+                  },
+                },
+              ],
             },
             {
               label: 'Delete',
