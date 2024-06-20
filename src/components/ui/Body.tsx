@@ -1,8 +1,6 @@
 import { forwardRef, useState } from 'react';
 
-import { Button } from '@/components/Button';
 import { Modal } from '@/components/Modal';
-import { Notification } from '@/components/Notification';
 import { useMy } from '@/hooks';
 import { useUpgrade } from '@/hooks/useUpgrade';
 import { Header } from '@/sections/AuthenticatedApp';
@@ -52,37 +50,22 @@ export const Body = forwardRef(function Paper(
       </div>
       {footer && <Footer />}
       {accountsStatus === 'success' && !isTrial && (
-        <Button
-          className="absolute bottom-16 right-8 size-16 rounded border border-layer1 bg-layer0 p-2 shadow-sm "
-          onClick={() => setIsOpen(true)}
-        >
-          <Notification />
-          <CrownIcon />
-        </Button>
+        <div className="absolute bottom-16 right-8">
+          <div className="relative flex items-center justify-center">
+            <div className="absolute inset-0 size-full animate-ping rounded-full bg-indigo-500 opacity-25 blur-md"></div>
+            <button
+              className="relative z-10 flex items-center space-x-2 rounded-full border border-indigo-500 bg-indigo-600 px-4 py-2 text-white shadow-lg transition-transform hover:scale-105 hover:bg-indigo-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
+              onClick={() => setIsOpen(true)}
+            >
+              <span className="p-3 font-semibold">Upgrade Now</span>
+            </button>
+          </div>
+        </div>
       )}
       <UpgradeModal isOpen={isOpen} setIsOpen={setIsOpen} />
     </div>
   );
 });
-
-const CrownIcon = () => (
-  <svg
-    version="1.1"
-    id="Layer_1"
-    x="0px"
-    y="0px"
-    viewBox="0 0 122.88 107.76"
-    xmlSpace="preserve"
-  >
-    <g>
-      <path
-        className="st0 "
-        fill="#eab308"
-        d="M21.13,83.86h80.25l12.54-34.73c0.65,0.21,1.35,0.32,2.07,0.32c3.8,0,6.89-3.08,6.89-6.89 c0-3.8-3.08-6.89-6.89-6.89c-3.8,0-6.89,3.08-6.89,6.89c0,1.5,0.48,2.88,1.29,4.01l-7.12,5.86c-9.97,8.2-16.22,4.4-14.27-8.34 l1.1-7.17c0.38,0.07,0.78,0.1,1.18,0.1c3.8,0,6.89-3.08,6.89-6.89c0-3.8-3.08-6.89-6.89-6.89c-3.8,0-6.89,3.08-6.89,6.89 c0,2.17,1.01,4.11,2.58,5.37l-1.71,2.7c-8.38,12.58-14.56,7.76-17.03-4.67l-4.41-20.31c2.47-1.05,4.21-3.49,4.21-6.35 c0-3.8-3.08-6.89-6.89-6.89c-3.8,0-6.89,3.08-6.89,6.89c0,3.18,2.15,5.85,5.07,6.65L56.46,25.1c-2.48,10.61-5.45,31.75-18.88,13.73 l-2.19-2.98c1.73-1.25,2.86-3.29,2.86-5.59c0-3.8-3.08-6.89-6.89-6.89c-3.8,0-6.89,3.08-6.89,6.89c0,3.8,3.08,6.89,6.89,6.89 c0.53,0,1.05-0.06,1.55-0.18l0.46,4.68c0.9,6.39,2.05,15.04-5.29,14.63c-3.64-0.2-5.01-1.44-7.79-3.42l-7.94-5.63 c0.89-1.16,1.42-2.61,1.42-4.19c0-3.8-3.08-6.89-6.89-6.89c-3.8,0-6.89,3.08-6.89,6.89s3.08,6.89,6.89,6.89 c0.9,0,1.75-0.17,2.54-0.48L21.13,83.86L21.13,83.86z M21.07,93.47h80.51v14.29H21.07V93.47L21.07,93.47z"
-      />
-    </g>
-  </svg>
-);
 
 interface UpgradeModalProps {
   isOpen: boolean;
