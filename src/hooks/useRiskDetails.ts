@@ -15,7 +15,7 @@ const useRiskDetails = () => {
         Authorization: token ? `Bearer ${token}` : '',
         account: email,
       },
-    }).then(response => response.data);
+    }).then(response => response.data.risks);
 
     return riskResponse;
   };
