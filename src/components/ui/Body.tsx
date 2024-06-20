@@ -1,5 +1,6 @@
 import { forwardRef, useState } from 'react';
 
+import { HorseIcon } from '@/components/icons/Horse.icon';
 import { Modal } from '@/components/Modal';
 import { useMy } from '@/hooks';
 import { useUpgrade } from '@/hooks/useUpgrade';
@@ -54,10 +55,11 @@ export const Body = forwardRef(function Paper(
           <div className="relative flex items-center justify-center">
             <div className="absolute inset-0 size-full animate-ping rounded-full bg-indigo-500 opacity-25 blur-md"></div>
             <button
-              className="relative z-10 flex items-center space-x-2 rounded-full border border-indigo-500 bg-indigo-600 px-4 py-2 text-white shadow-lg transition-transform hover:scale-105 hover:bg-indigo-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
+              className="relative z-10 flex items-center justify-center space-x-2 rounded-full border border-indigo-500 bg-indigo-600 px-4 py-2 text-white shadow-lg transition-transform hover:scale-105 hover:bg-indigo-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
               onClick={() => setIsOpen(true)}
             >
-              <span className="p-3 font-semibold">Upgrade Now</span>
+              <span className="p-2 font-semibold">Upgrade Now</span>
+              <HorseIcon skipHover={true} fill="white" />
             </button>
           </div>
         </div>
