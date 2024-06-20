@@ -20,6 +20,7 @@ interface Props extends PropsWithChildren {
   maxFileSizeInMb?: number;
   maxFileSizeMessage?: ReactNode;
   maxFileSizeErrorMessage?: ReactNode;
+  className?: string;
 }
 
 export const Dropzone: React.FC<Props> = (props: Props) => {
@@ -32,6 +33,7 @@ export const Dropzone: React.FC<Props> = (props: Props) => {
     maxFileSizeInMb,
     maxFileSizeMessage,
     maxFileSizeErrorMessage,
+    className,
   } = props;
   interface Error {
     title: string;
@@ -94,7 +96,8 @@ export const Dropzone: React.FC<Props> = (props: Props) => {
         {...getRootProps()}
         className={cn(
           'mt-4 flex flex-col items-center justify-center border-2 border-dashed border-default bg-primary bg-opacity-5 p-4 hover:bg-opacity-10 h-60 rounded hover:cursor-pointer',
-          isDragActive ? 'bg-opacity-10' : ''
+          isDragActive ? 'bg-opacity-10' : '',
+          className
         )}
       >
         <input {...getInputProps()} />
