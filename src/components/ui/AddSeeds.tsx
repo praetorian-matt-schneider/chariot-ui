@@ -40,7 +40,7 @@ export const AddSeeds: React.FC<Props> = (props: Props) => {
   const handleFilesDrop = (files: Files): void => {
     onClose();
 
-    const concatFiles = files.map(({ result }) => result).join('');
+    const concatFiles = files.map(({ content }) => content).join('');
     const seedsString = GetSeeds(concatFiles, 500);
     const seeds = seedsString.map(seed => ({ asset: seed }));
 
@@ -125,7 +125,7 @@ export const AddSeeds: React.FC<Props> = (props: Props) => {
         <div className="px-10 text-center">
           <div className="relative m-auto ml-4 flex h-[400px] w-full">
             <div className=" w-px bg-gray-200"></div>
-            <div className=" absolute -left-[50%] top-[50%] w-full bg-layer0 text-center text-sm text-gray-300">
+            <div className="absolute -left-[50%] top-[50%] w-full bg-layer0 text-center text-sm text-gray-300">
               or
             </div>
           </div>

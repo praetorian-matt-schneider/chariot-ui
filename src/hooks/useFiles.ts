@@ -1,3 +1,4 @@
+import { FileResult } from '@/components/Dropzone';
 import { Snackbar } from '@/components/Snackbar';
 import { queryClient } from '@/queryclient';
 import { UseExtendQueryOptions, useMutation, useQuery } from '@/utils/api';
@@ -8,7 +9,7 @@ import { getQueryKey } from './useQueryKeys';
 
 interface UploadFilesProps {
   name: string;
-  bytes: Uint8Array;
+  content: FileResult;
   ignoreSnackbar?: boolean;
 }
 
@@ -23,7 +24,7 @@ export function useUploadFile() {
   return useMutation({
     defaultErrorMessage: `Failed to Upload file`,
     mutationFn: (props: UploadFilesProps) => {
-      return axios.put(`/file`, props.bytes, {
+      return axios.put(`/file`, props.content, {
         params: {
           name: props.name,
         },

@@ -329,17 +329,10 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                         text: 'Save',
                         isLoading: updateFileStatus === 'pending',
                         onClick: async () => {
-                          const bytes: Uint8Array = new Uint8Array(
-                            markdownValue.length
-                          );
-                          for (let j = 0; j < markdownValue.length; j++) {
-                            bytes[j] = markdownValue.charCodeAt(j);
-                          }
-
                           await updateFile({
                             ignoreSnackbar: true,
                             name: `definitions/${name}`,
-                            bytes,
+                            content: markdownValue,
                           });
                           setIsEditingMarkdown(false);
                         },

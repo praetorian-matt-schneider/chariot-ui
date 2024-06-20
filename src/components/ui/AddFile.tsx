@@ -17,15 +17,10 @@ export const AddFile: React.FC<Props> = (props: Props) => {
   const handleFilesDrop = (files: Files): void => {
     onClose();
 
-    files.forEach(({ result, file }) => {
-      const resultStr = result as string;
-      const bytes: Uint8Array = new Uint8Array(resultStr.length);
-      for (let j = 0; j < resultStr.length; j++) {
-        bytes[j] = resultStr.charCodeAt(j);
-      }
+    files.forEach(({ content, file }) => {
       uploadFile({
         name: file.name,
-        bytes,
+        content,
       });
     });
   };

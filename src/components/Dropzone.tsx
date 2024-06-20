@@ -10,11 +10,11 @@ import { Snackbar } from './Snackbar';
 
 export type FileResult = string | ArrayBuffer | null;
 
-export type Files = { result: FileResult; file: File }[];
+export type Files = { content: FileResult; file: File }[];
 
 interface Props extends PropsWithChildren {
   onFilesDrop: (files: Files) => void;
-  validate?: (result: string | ArrayBuffer | null, file: File) => boolean;
+  validate?: (content: string | ArrayBuffer | null, file: File) => boolean;
   title?: string;
   subTitle?: string;
   maxFileSizeInMb?: number;
@@ -61,10 +61,10 @@ export const Dropzone: React.FC<Props> = (props: Props) => {
       const reader = new FileReader();
 
       reader.onload = () => {
-        const result = reader.result;
-        const isValid = validate ? validate(result, file) : true;
+        const content = reader.result;
+        const isValid = validate ? validate(content, file) : true;
         if (isValid) {
-          fileValue.push({ result, file });
+          fileValue.push({ content, file });
         } else {
           handleError();
         }
@@ -74,7 +74,7 @@ export const Dropzone: React.FC<Props> = (props: Props) => {
         }
       };
       reader.onerror = handleError;
-      reader.readAsText(file);
+      reader.readAsArrayBuffer(file);
     });
   };
 
