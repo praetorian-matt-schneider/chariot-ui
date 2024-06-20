@@ -46,7 +46,8 @@ export const CollaboratingWith: React.FC<Props> = ({ emails }) => {
           return;
         }
 
-        // Hide non-open risks
+        // Hide non-open status and info severity risks
+        // These were deemed not important enough to show in the table
         if (key[0] !== 'O' || key[1] === 'I') return;
 
         if (key.length === 2) {
