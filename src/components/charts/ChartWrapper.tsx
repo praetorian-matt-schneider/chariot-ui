@@ -27,7 +27,6 @@ const ChartWrapper: React.FC<ChartWrapperProps> = ({
   label,
   removeChart,
 }) => {
-  const [isHovered, setIsHovered] = React.useState(false);
   const { data, isLoading } = useMy({
     resource: endpoint,
     query: '',
@@ -69,24 +68,18 @@ const ChartWrapper: React.FC<ChartWrapperProps> = ({
     const chartData = run(aggregate, data as Account[]);
 
     return (
-      <div
-        className="relative flex size-full flex-col gap-4 border border-gray-200 bg-white p-6"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
+      <div className="relative flex size-full flex-col gap-4 border border-gray-200 bg-white p-6">
         <div className="flex items-center">
           <h3 className="dark:text-dark-tremor-content-strong flex-1 text-lg font-medium text-tremor-content-strong">
             {label}
           </h3>
-          {isHovered && (
-            <button
-              onMouseDown={e => e.stopPropagation()}
-              onClick={() => removeChart(id)}
-              className="absolute right-[-6px] top-[-6px] size-6 rounded-full border border-gray-200 bg-layer0 text-gray-500"
-            >
-              <XMarkIcon className="p-0.5" />
-            </button>
-          )}
+          <button
+            onMouseDown={e => e.stopPropagation()}
+            onClick={() => removeChart(id)}
+            className=" size-7"
+          >
+            <XMarkIcon className="p-0.5" />
+          </button>
         </div>
         <Chart
           type={type}

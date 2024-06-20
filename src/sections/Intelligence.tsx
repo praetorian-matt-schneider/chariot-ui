@@ -293,15 +293,10 @@ const Intelligence: React.FC = () => {
       </Popover>
 
       {layout.length === 0 && (
-        <div
-          className="mt-4 flex h-96 flex-col items-center justify-center rounded border-2 border-dashed border-primary/20 bg-primary/5 p-4 hover:cursor-pointer hover:bg-primary/10"
-          onClick={addChart}
-        >
-          <NoData
-            title="Add Widget"
-            description={`Click on the Add Widget button to add a new widget`}
-          />
-        </div>
+        <NoData
+          title="No widgets"
+          description={`Click on the Add Widget button to add a new widget`}
+        />
       )}
       <ReactGridLayout
         className="layout"
