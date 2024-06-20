@@ -93,7 +93,12 @@ const Account: React.FC = () => {
         friend.email.length === 0 && (
           <Section
             title="Collaborating With"
-            description="These organizations have invited you to view their account details."
+            description={
+              <p>
+                These organizations have invited you to view their account
+                details. You are currently viewing <strong>open</strong> risks.
+              </p>
+            }
           >
             <CollaboratingWith emails={collaborators} />
           </Section>
@@ -117,7 +122,7 @@ const Account: React.FC = () => {
 
 interface SectionProps extends PropsWithChildren {
   title: string;
-  description?: string;
+  description?: string | JSX.Element;
 }
 
 const Section = ({ title, description, children }: SectionProps) => {
