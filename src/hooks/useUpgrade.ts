@@ -9,7 +9,7 @@ export const useUpgrade = () => {
   const { invalidate } = useMy({ resource: 'account' }, { enabled: false });
 
   return useMutation({
-    defaultErrorMessage: 'Failed to Upgrade account',
+    defaultErrorMessage: 'Failed to upgrade account',
     mutationFn: () => {
       return axios.post('upgrade');
     },
