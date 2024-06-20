@@ -90,10 +90,13 @@ const UpgradeModal = ({ isOpen, setIsOpen }: UpgradeModalProps) => {
       }}
     >
       <div className="flex flex-col justify-center gap-4 p-2">
-        <b>
-          We are thrilled that you are using Chariot. 🎉 You are on the free
-          plan. It is self-service and limited to one seed.
-        </b>
+        <p>
+          <b>We are thrilled that you are using Chariot. 🎉</b>
+        </p>
+        <p>
+          You are on the <b>free plan</b>. It is self-service and limited to one
+          seed.
+        </p>
 
         <p>We have more plans:</p>
         <ol>
