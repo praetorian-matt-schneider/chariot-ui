@@ -47,7 +47,7 @@ export const CollaboratingWith: React.FC<Props> = ({ emails }) => {
         }
 
         // Hide non-open risks
-        if (key[0] !== 'O') return;
+        if (key[0] !== 'O' || key[1] === 'I') return;
 
         if (key.length === 2) {
           counts.total += val;
