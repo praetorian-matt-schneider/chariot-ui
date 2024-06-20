@@ -58,7 +58,9 @@ export const Body = forwardRef(function Paper(
               className="relative z-10 flex items-center justify-center space-x-2 rounded-full border border-indigo-500 bg-indigo-600 px-4 py-2 text-white shadow-lg transition-transform hover:bg-indigo-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
               onClick={() => setIsOpen(true)}
             >
-              <span className="px-2 py-1 font-semibold">Upgrade Now</span>
+              <span className="font-xl px-2 py-1 text-xl font-semibold">
+                Upgrade Now
+              </span>
               <HorseIcon skipHover={true} fill="white" />
             </button>
           </div>
