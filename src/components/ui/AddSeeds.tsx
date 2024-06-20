@@ -70,10 +70,10 @@ export const AddSeeds: React.FC<Props> = (props: Props) => {
                 <code>employee-login.acme.com</code>
               </li>
               <li>
-                IP Addresses: <code>192.168.1.1</code>
+                IP Addresses: <code>8.8.8.8</code>
               </li>
               <li>
-                CIDR Ranges: <code>192.168.1.0/24</code>
+                CIDR Ranges: <code>8.8.8.0/24</code>
               </li>
               <li>
                 GitHub Organizations: <code>https://github.com/acme-corp</code>
@@ -106,7 +106,7 @@ export const AddSeeds: React.FC<Props> = (props: Props) => {
                 placeholder="acme.com"
                 value={seedInput}
                 onChange={e => setSeedInput(e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                className="block w-full rounded-l-[2px] border border-gray-300 bg-layer0 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
               />
             </div>
             <Button
@@ -117,9 +117,8 @@ export const AddSeeds: React.FC<Props> = (props: Props) => {
               Add Seed
             </Button>
             <div className="mt-4 text-center text-xs text-gray-500">
-              Please ensure you have the necessary permissions to scan the
-              domains, IP addresses, CIDR ranges, or GitHub organizations you
-              are adding.
+              Please ensure you have the necessary permissions to scan the seeds
+              you are adding.
             </div>
           </form>
         </div>
