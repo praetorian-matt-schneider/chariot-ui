@@ -37,10 +37,15 @@ export const AddSeeds: React.FC<Props> = (props: Props) => {
     }
   };
 
-  const handleFilesDrop = (files: Files): void => {
+  const handleFilesDrop = (files: Files<'string'>): void => {
     onClose();
 
-    const concatFiles = files.map(({ content }) => content).join('');
+    const concatFiles = files
+      .map(({ content }) => {
+        console.log('content', content);
+        return content;
+      })
+      .join('');
     const seedsString = GetSeeds(concatFiles, 500);
     const seeds = seedsString.map(seed => ({ asset: seed }));
 
@@ -133,6 +138,7 @@ export const AddSeeds: React.FC<Props> = (props: Props) => {
         <div>
           <Dropzone
             className="h-[330px]"
+            type="string"
             onFilesDrop={handleFilesDrop}
             title={'Bulk Upload'}
             subTitle={`Add a document with a list of Domains, IP addresses, CIDR ranges, or GitHub organizations.`}

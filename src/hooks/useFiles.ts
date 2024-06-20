@@ -1,4 +1,3 @@
-import { FileResult } from '@/components/Dropzone';
 import { Snackbar } from '@/components/Snackbar';
 import { queryClient } from '@/queryclient';
 import { UseExtendQueryOptions, useMutation, useQuery } from '@/utils/api';
@@ -9,7 +8,7 @@ import { getQueryKey } from './useQueryKeys';
 
 interface UploadFilesProps {
   name: string;
-  content: FileResult;
+  content: string | ArrayBuffer;
   ignoreSnackbar?: boolean;
 }
 
