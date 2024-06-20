@@ -100,10 +100,13 @@ const UpgradeModal = ({ isOpen, setIsOpen }: UpgradeModalProps) => {
 
         <p>We also offer other plans:</p>
         <ol className="list-inside list-decimal">
-          <li>Self-service plan with unlimited seeds.</li>
           <li>
-            Managed-service plan with unlimited seeds. Our expert team will
-            triage your risks and notify you about critical, exploitable risks.
+            <b>Self-service</b> plan with unlimited seeds.
+          </li>
+          <li>
+            <b>Managed-service</b> plan with unlimited seeds. Our expert team
+            will triage your risks and notify you about critical, exploitable
+            risks.
           </li>
         </ol>
 
