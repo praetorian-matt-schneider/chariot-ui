@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useRef, useState } from 'react';
+import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { XMarkIcon } from '@heroicons/react/20/solid';
 
@@ -10,6 +10,7 @@ import { DetailsDrawer } from '@/sections/detailsDrawer';
 import { NewUserSeedModal } from '@/sections/NewUserSeedModal';
 import { ProofOfExploit } from '@/sections/ProofOfExploit';
 import { TopNavBar } from '@/sections/topNavBar/TopNavBar';
+import { Upgrade } from '@/sections/Upgrade';
 import { useAuth } from '@/state/auth';
 import { useBreadCrumbsContext } from '@/state/breadcrumbs';
 import { AccountMetadata } from '@/types';
@@ -29,8 +30,20 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
   const { useBreadCrumb } = useBreadCrumbsContext();
   const { me, friend } = useAuth();
 
-  const { data } = useMy({ resource: 'account' });
-  const account = data?.find(acc => acc.key.endsWith('#settings#'));
+  const { data: accounts, status: accountsStatus } = useMy({
+    resource: 'account',
+  });
+
+  const isTrial = useMemo(() => {
+    return Boolean(
+      accountsStatus === 'success' &&
+        friend.email === '' &&
+        accounts.find(account => account.member === 'research@praetorian.com')
+    );
+  }, [accountsStatus, JSON.stringify(accounts), JSON.stringify(friend)]);
+
+  console.log('isTrial', isTrial);
+  const account = accounts?.find(acc => acc.key.endsWith('#settings#'));
   const displayName = (account?.config as AccountMetadata)
     ?.displayName as string;
 
@@ -107,6 +120,7 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
         <ShortcutsHelper onClose={() => setShortcutsHelper(false)} />
       )}
       <DetailsDrawer />
+      {!isTrial && <Upgrade />}
     </div>
   );
 }
