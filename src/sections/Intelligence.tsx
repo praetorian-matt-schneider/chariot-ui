@@ -171,7 +171,7 @@ const Intelligence: React.FC = () => {
   };
 
   return (
-    <div className="w-full">
+    <div className="size-full">
       <Popover
         onClick={() => setIsFormVisible(!isFormVisible)}
         type="button"

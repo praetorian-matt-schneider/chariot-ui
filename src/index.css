@@ -130,3 +130,7 @@
   top: 100%;
   border-top: calc(var(--hexagon-size) * 0.57735) solid var(--header-dark);
 }
+
+.react-grid-item.react-grid-placeholder {
+  background-color: var(--brand-light);
+}
