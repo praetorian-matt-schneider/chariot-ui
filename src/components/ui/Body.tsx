@@ -4,6 +4,7 @@ import { Modal } from '@/components/Modal';
 import { useMy } from '@/hooks';
 import { useUpgrade } from '@/hooks/useUpgrade';
 import { Header } from '@/sections/AuthenticatedApp';
+import { useAuth } from '@/state/auth';
 import { cn } from '@/utils/classname';
 
 import Footer from './Footer';
@@ -17,6 +18,7 @@ export const Body = forwardRef(function Paper(
 ) {
   const { footer = true, header = true, ...rest } = props;
   const [isOpen, setIsOpen] = useState(false);
+  const { friend } = useAuth();
 
   const { data: accounts, status: accountsStatus } = useMy({
     resource: 'account',
@@ -49,7 +51,7 @@ export const Body = forwardRef(function Paper(
         </div>
       </div>
       {footer && <Footer />}
-      {accountsStatus === 'success' && !isTrial && (
+      {accountsStatus === 'success' && !isTrial && friend?.email === '' && (
         <div className="absolute bottom-16 right-8">
           <div className="relative flex items-center justify-center">
             <div className="absolute inset-0 w-[150px] animate-ping rounded-full bg-indigo-500 opacity-25 blur-md"></div>
