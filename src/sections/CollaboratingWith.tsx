@@ -46,8 +46,8 @@ export const CollaboratingWith: React.FC<Props> = ({ emails }) => {
           return;
         }
 
-        // Hide closed & rejected
-        if (key[0] === 'C' || key[0] === 'R') return;
+        // Hide non-open risks
+        if (key[0] !== 'O') return;
 
         if (key.length === 2) {
           counts.total += val;
@@ -78,7 +78,8 @@ export const CollaboratingWith: React.FC<Props> = ({ emails }) => {
 
   const downloadRisks = async (email: string, filetype: 'json' | 'csv') => {
     const risks = await fetchRiskDetails(email);
-    exportContent(risks, `risk-detail-${email}.${filetype}`, filetype);
+    const filteredRisks = risks.filter(risk => risk.status[0] === 'O');
+    exportContent(filteredRisks, `risk-detail-${email}.${filetype}`, filetype);
   };
 
   const columns: Columns<TableData> = [

@@ -7,7 +7,7 @@ const useRiskDetails = () => {
   const { token } = useAuth();
   const axios = useAxios();
 
-  const fetchRiskDetails = async (email: string): Promise<Risk> => {
+  const fetchRiskDetails = async (email: string): Promise<Risk[]> => {
     const riskResponse = await axios({
       method: 'get',
       url: '/my?key=%23risk',
