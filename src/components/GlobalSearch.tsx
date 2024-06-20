@@ -14,6 +14,7 @@ import {
 import { DocumentIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import { Menu } from '@headlessui/react';
 
+import { RiskDropdown } from '@/components/ui/RiskDropdown';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useOpenDrawer } from '@/sections/detailsDrawer/useOpenDrawer';
 import { useSearchContext } from '@/state/search';
@@ -31,14 +32,11 @@ import {
   MyFile,
   MyResource,
   Risk,
+  RiskCombinedStatus,
   RiskSeverity,
-  RiskStatus,
-  RiskStatusSub,
   Search,
   Seed,
   SeverityDef,
-  StatusDef,
-  StatusSubDef,
 } from '../types';
 
 import { Input, InputEvent } from './form/Input';
@@ -154,25 +152,18 @@ const SeverityBadge = ({ severity }: { severity: RiskSeverity }) => {
   );
 };
 
-const StatusBadge = ({
-  status,
-  subStatus,
-}: {
-  status: RiskStatus;
-  subStatus?: RiskStatusSub;
-}) => {
-  let label = StatusDef[status];
-
-  if (subStatus) {
-    label = `${label} - ${StatusSubDef[subStatus]}`;
-  }
-
+const StatusBadge = ({ status }: { status: RiskCombinedStatus }) => {
   return (
-    <span
-      className={`inline-flex items-center text-nowrap rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-gray-100 `}
-    >
-      {label}
-    </span>
+    <RiskDropdown
+      risk={{
+        status,
+        key: '',
+        comment: '',
+      }}
+      type={'status'}
+      styleType="chip"
+      className="rounded-full"
+    />
   );
 };
 
@@ -283,15 +274,13 @@ const SearchResultDropdown: React.FC<Search> = ({
                 navigate(getRiskDrawerLink(item));
               }}
               row={item => {
-                const status = item.status?.[0] as RiskStatus;
                 const severity = item.status?.[1] as RiskSeverity;
-                const subStatus = item.status?.[2] as RiskStatusSub;
                 return (
                   <div className="flex items-center space-x-2">
                     <span className="text-nowrap">{item.name}</span>
                     <ChevronRightIcon className="size-2" />
                     <span className="text-nowrap">{item.dns}</span>
-                    <StatusBadge status={status} subStatus={subStatus} />
+                    <StatusBadge status={item.status} />
                     <SeverityBadge severity={severity} />
                   </div>
                 );

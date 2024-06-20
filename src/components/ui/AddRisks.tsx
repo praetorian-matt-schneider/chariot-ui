@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 
 import { useCreateRisk } from '@/hooks/useRisks';
+import { RiskCombinedStatus } from '@/types';
 
-import { RiskStatus } from '../../types';
 import { Input } from '../form/Input';
 import { Inputs } from '../form/Inputs';
 import { Modal } from '../Modal';
@@ -51,7 +51,7 @@ export const AddRisks: React.FC<Props> = (props: Props) => {
       return addRisk({
         ...formData,
         key: assetKey,
-        status: `${formData.status}${formData.severity}` as RiskStatus,
+        status: `${formData.status}${formData.severity}` as RiskCombinedStatus,
       });
     });
     onClose();

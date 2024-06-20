@@ -1,42 +1,55 @@
+import { useState } from 'react';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 
+import { Chip } from '@/components/Chip';
+import { Modal } from '@/components/Modal';
 import { useUpdateRisk } from '@/hooks/useRisks';
+import { cn } from '@/utils/classname';
 import { getSeverityClass } from '@/utils/getSeverityClass.util';
 
 import {
   Risk,
+  RiskClosedStatus,
+  RiskClosedStatusLongDesc,
+  RiskClosedStatusLongLabel,
+  RiskCombinedStatus,
   RiskSeverity,
   RiskStatus,
-  RiskStatusSub,
+  RiskStatusLabel,
   SeverityDef,
-  StatusDef,
-  StatusSubDef,
 } from '../../types';
 import { Dropdown } from '../Dropdown';
 import { Snackbar } from '../Snackbar';
 
 interface Props {
-  risk: Risk;
+  risk: Pick<Risk, 'status' | 'key' | 'comment'>;
   className?: string;
   type?: 'status' | 'severity';
   selectedRowsData?: Risk[];
+  styleType?: 'chip';
 }
 
-const RiskStatusOptions = [
-  { label: 'Triage', value: 'T' },
+const riskStatusOptions = [
+  { label: 'Triage', value: RiskStatus.Triaged },
   {
     label: 'Open',
-    value: 'O',
+    value: RiskStatus.Opened,
   },
   {
     label: 'Closed',
-    value: 'C',
-    states: [
-      { label: 'Accepted', value: 'A' },
-      { label: 'Rejected', value: 'R' },
-    ],
+    value: RiskStatus.Resolved,
   },
 ];
+
+const riskClosedStatusList = Object.values(RiskClosedStatus).map(
+  riskClosedStatus => {
+    return {
+      label: RiskClosedStatusLongLabel[riskClosedStatus],
+      desc: RiskClosedStatusLongDesc[riskClosedStatus],
+      value: riskClosedStatus,
+    };
+  }
+);
 
 export const RiskSeverityOptions = [
   { label: 'Info', value: 'I' },
@@ -46,33 +59,33 @@ export const RiskSeverityOptions = [
   { label: 'Critical', value: 'C' },
 ];
 
-export const riskStatusOptions = RiskStatusOptions.map(option => {
-  let states = [{ label: option.label, value: option.value }];
-  if (option.states) {
-    states = [
-      ...states,
-      ...option.states.map(state => ({
-        label: option.label + ' - ' + state.label,
-        value: option.value + state.value,
-      })),
-    ];
-    states.push();
-  }
-
-  return states;
-}).flat();
-
 export const RiskDropdown: React.FC<Props> = ({
   risk,
   className,
   type = 'severity',
   selectedRowsData,
+  styleType,
 }: Props) => {
+  const [isClosedSubStateModalOpen, setIsClosedSubStateModalOpen] =
+    useState(false);
+  const [selectRiskClosedStatus, setSelectRiskClosedStatus] =
+    useState<RiskClosedStatus>();
+
   const data =
     selectedRowsData && selectedRowsData.length > 1 ? selectedRowsData : [risk];
   const { mutate: updateRisk } = useUpdateRisk();
 
-  function handleStatusChange(value: RiskStatus) {
+  const generalChipClass =
+    'inline-flex items-center min-h-[26px] gap-2 w-fit py-1 px-3 whitespace-nowrap';
+
+  const riskStatusKey =
+    `${risk.status?.[0]}${risk.status?.[2] || ''}` as RiskStatus;
+  const riskSeverityKey = risk.status?.[1] as RiskSeverity;
+
+  const statusLabel = RiskStatusLabel[riskStatusKey];
+  const severityLabel = SeverityDef[riskSeverityKey];
+
+  function handleStatusChange(value: RiskCombinedStatus) {
     data.forEach(item => {
       const riskComposite = item.key.split('#');
       const finding = riskComposite[4];
@@ -91,7 +104,7 @@ export const RiskDropdown: React.FC<Props> = ({
             if (data.length > 1) {
               Snackbar({
                 title: `${data.length} risks updated`,
-                description: 'All the risk has been successfully updated.',
+                description: 'All the risks have been successfully updated.',
                 variant: 'success',
               });
             }
@@ -101,40 +114,110 @@ export const RiskDropdown: React.FC<Props> = ({
     });
   }
 
-  const riskStatusKey = risk.status?.[0] as RiskStatus;
-  const riskSeverityKey = risk.status?.[1] as RiskSeverity;
-  const riskSubStatusKey = risk.status?.[2] as RiskStatusSub;
-  const statusLabel =
-    riskSubStatusKey && StatusSubDef[riskSubStatusKey]
-      ? `${StatusDef[riskStatusKey]} - ${StatusSubDef[riskSubStatusKey]}`
-      : StatusDef[riskStatusKey];
+  if (styleType === 'chip') {
+    return type === 'status' ? (
+      <Chip className={cn(generalChipClass, className)} style="default">
+        {statusLabel}
+      </Chip>
+    ) : (
+      <Chip
+        className={cn(
+          generalChipClass,
+          getSeverityClass(riskSeverityKey),
+          className
+        )}
+      >
+        {severityLabel}
+      </Chip>
+    );
+  }
 
   if (type === 'status') {
     return (
-      <Dropdown
-        className={` justify-between rounded-[2px] py-1 ${className} border-1 border border-gray-200`}
-        menu={{
-          items: riskStatusOptions,
-          onClick: value => {
-            if (value) {
-              if (value.length === 1) {
-                const newStatus = `${value}${riskSeverityKey}`;
-                handleStatusChange(newStatus as RiskStatus);
-                return;
-              } else {
-                const status = value[0];
-                const substate = value[1];
-                const newStatus = `${status}${riskSeverityKey}${substate}`;
-                handleStatusChange(newStatus as RiskStatus);
-                return;
+      <>
+        <Dropdown
+          className={`justify-between rounded-[2px] py-1 ${className} border-1 border border-gray-200`}
+          menu={{
+            items: riskStatusOptions,
+            onClick: value => {
+              if (value) {
+                if (value === RiskStatus.Resolved) {
+                  setIsClosedSubStateModalOpen(true);
+                } else {
+                  const newStatus =
+                    value.length === 1
+                      ? `${value}${riskSeverityKey}`
+                      : `${value[0]}${riskSeverityKey}${value[1]}`;
+
+                  handleStatusChange(newStatus as RiskCombinedStatus);
+                }
               }
-            }
-          },
-        }}
-        label={statusLabel}
-        endIcon={<ChevronDownIcon className="ml-1 size-3" />}
-        onClick={event => event.stopPropagation()}
-      />
+            },
+          }}
+          endIcon={<ChevronDownIcon className="ml-1 size-3" />}
+          onClick={event => event.stopPropagation()}
+        >
+          {statusLabel}
+        </Dropdown>
+        {isClosedSubStateModalOpen && (
+          <Modal
+            title="Select Reason"
+            open={isClosedSubStateModalOpen}
+            onClose={() => {
+              setIsClosedSubStateModalOpen(false);
+            }}
+            footer={{
+              text: 'Submit',
+              disabled: selectRiskClosedStatus === undefined,
+              onClick: () => {
+                if (selectRiskClosedStatus) {
+                  const newStatus =
+                    selectRiskClosedStatus.length === 1
+                      ? `${selectRiskClosedStatus}${riskSeverityKey}`
+                      : `${selectRiskClosedStatus[0]}${riskSeverityKey}${selectRiskClosedStatus[1]}`;
+
+                  handleStatusChange(newStatus);
+                  setIsClosedSubStateModalOpen(false);
+                }
+              },
+            }}
+          >
+            <div className="space-y-4">
+              <p className="text-gray-600">
+                Please select a reason for closing this risk. This information
+                helps us understand how risks are managed and ensure appropriate
+                follow-up actions.
+              </p>
+              {riskClosedStatusList.map((riskClosedStatus, index) => (
+                <label
+                  key={index}
+                  className="flex cursor-pointer items-center rounded-lg bg-gray-50 p-3 transition duration-150 ease-in-out hover:bg-gray-100"
+                >
+                  <input
+                    type="radio"
+                    name="closedSubState"
+                    value={riskClosedStatus.value}
+                    onChange={() =>
+                      setSelectRiskClosedStatus(
+                        riskClosedStatus.value as RiskClosedStatus
+                      )
+                    }
+                    className="form-radio size-5 text-indigo-600 transition duration-150 ease-in-out"
+                  />
+                  <div className="ml-3 text-sm">
+                    <span className="font-medium text-gray-900">
+                      {riskClosedStatus.label}
+                    </span>
+                    <span className="block text-gray-500">
+                      {riskClosedStatus.desc}
+                    </span>
+                  </div>
+                </label>
+              ))}
+            </div>
+          </Modal>
+        )}
+      </>
     );
   }
 
@@ -148,13 +231,22 @@ export const RiskDropdown: React.FC<Props> = ({
             const oldStatus = risk.status;
             const newStatus = `${oldStatus[0]}${value}${oldStatus[2] ?? ''}`;
 
-            handleStatusChange(newStatus as RiskStatus);
+            handleStatusChange(newStatus as RiskCombinedStatus);
           }
         },
       }}
-      label={SeverityDef[riskSeverityKey]}
+      label={severityLabel}
       endIcon={<ChevronDownIcon className="ml-1 size-3" />}
       onClick={event => event.stopPropagation()}
     />
   );
 };
+
+export const riskStatusFilterOptions = Object.values(RiskStatus).map(
+  riskStatus => {
+    return {
+      label: RiskStatusLabel[riskStatus],
+      value: riskStatus,
+    };
+  }
+);

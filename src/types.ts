@@ -20,12 +20,13 @@ export enum JobStatus {
 export enum RiskStatus {
   Triaged = 'T',
   Opened = 'O',
-  Closed = 'C',
+  Resolved = 'C',
+  FalsePositive = 'CF',
+  Rejected = 'CR',
 }
-export enum RiskStatusSub {
-  Accepted = 'A',
-  Rejected = 'R',
-}
+
+export type RiskCombinedStatus = string;
+
 export enum RiskSeverity {
   'Info' = 'I',
   'Low' = 'L',
@@ -44,15 +45,33 @@ export enum AssetStatus {
   Unknown = 'U',
 }
 
-export const StatusDef: Record<RiskStatus, string> = {
+export const RiskStatusLabel: Record<RiskStatus, string> = {
   T: 'Triage',
   O: 'Open',
-  C: 'Closed',
+  C: 'Resolved',
+  CR: 'Rejected',
+  CF: 'False Positive',
 };
 
-export const StatusSubDef: Record<RiskStatusSub, string> = {
-  A: 'Accepted',
-  R: 'Rejected',
+export enum RiskClosedStatus {
+  Resolved = RiskStatus.Resolved,
+  Rejected = RiskStatus.Rejected,
+  FalsePositive = RiskStatus.FalsePositive,
+}
+
+export const RiskClosedStatusLongLabel: Record<RiskClosedStatus, string> = {
+  [RiskStatus.Resolved]: 'Mark as Resolved',
+  [RiskStatus.Rejected]: 'Reject the Risk',
+  [RiskStatus.FalsePositive]: 'False Positive',
+};
+
+export const RiskClosedStatusLongDesc: Record<RiskClosedStatus, string> = {
+  [RiskStatus.Resolved]:
+    'This risk has been addressed and resolved; no further action is required.',
+  [RiskStatus.Rejected]:
+    'We acknowledge the presence of this risk and accept it, understanding the potential impact.',
+  [RiskStatus.FalsePositive]:
+    'This risk is deemed to be a false positive or not valid, and no further action will be taken.',
 };
 
 export const SeverityDef: Record<RiskSeverity, string> = {
@@ -169,7 +188,7 @@ export interface RiskTemplate {
   key: string;
   name: string;
   comment: string;
-  status: RiskStatus;
+  status: RiskCombinedStatus;
 }
 
 export type RiskHistory = {

@@ -13,7 +13,10 @@ import { MenuItemProps } from '@/components/Menu';
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
 import { FilterCounts } from '@/components/ui/FilterCounts';
-import { RiskDropdown, riskStatusOptions } from '@/components/ui/RiskDropdown';
+import {
+  RiskDropdown,
+  riskStatusFilterOptions,
+} from '@/components/ui/RiskDropdown';
 import { useFilter } from '@/hooks/useFilter';
 import { useMy } from '@/hooks/useMy';
 import { useMergeStatus } from '@/utils/api';
@@ -22,7 +25,7 @@ import { Regex } from '@/utils/regex.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
 import { generatePathWithSearch } from '@/utils/url.util';
 
-import { Risk, SeverityDef } from '../types';
+import { Risk, RiskStatus, RiskStatusLabel, SeverityDef } from '../types';
 
 import { useOpenDrawer } from './detailsDrawer/useOpenDrawer';
 
@@ -113,7 +116,10 @@ export function Risks() {
   const { getRiskDrawerLink } = useOpenDrawer();
 
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
-  const [statusFilter, setStatusesFilter] = useFilter(['O'], setSelectedRows);
+  const [statusFilter, setStatusesFilter] = useFilter<RiskStatus[]>(
+    [RiskStatus.Opened],
+    setSelectedRows
+  );
   const [severityFilter, setSeverityFilter] = useFilter([''], setSelectedRows);
   const [classFilter, setClassFilter] = useFilter([''], setSelectedRows);
   const [sourceFilter, setSourceFilter] = useFilter([''], setSelectedRows);
@@ -178,7 +184,7 @@ export function Risks() {
         label: 'Status',
         id: 'status',
         className: 'text-left',
-        fixedWidth: 200,
+        fixedWidth: 212,
         cell: (risk: Risk, selectedRowsData?: Risk[]) => {
           return (
             <div className="border-1 flex justify-start ">
@@ -311,6 +317,20 @@ export function Risks() {
     },
   ];
 
+  function getRiskStausOptionWithCount(riskStatus: RiskStatus[]) {
+    return riskStatus.map(riskStatus => {
+      return {
+        label: RiskStatusLabel[riskStatus],
+        labelSuffix: risksExceptStatus
+          .filter(
+            ({ status }: { status: string }) => getStatus(status) === riskStatus
+          )
+          .length?.toLocaleString(),
+        value: riskStatus,
+      };
+    });
+  }
+
   return (
     <div className="flex w-full flex-col">
       <Table
@@ -322,7 +342,7 @@ export function Risks() {
               label={getFilterLabel(
                 'Statuses',
                 statusFilter,
-                riskStatusOptions
+                riskStatusFilterOptions
               )}
               endIcon={DownIcon}
               menu={{
@@ -336,18 +356,22 @@ export function Risks() {
                     label: 'Divider',
                     type: 'divider',
                   },
-                  ...riskStatusOptions.map(option => ({
-                    ...option,
-                    label: option.label,
-                    labelSuffix: risksExceptStatus
-                      .filter(
-                        ({ status }: { status: string }) =>
-                          getStatus(status) === option.value
-                      )
-                      .length?.toLocaleString(),
-                  })),
+                  ...getRiskStausOptionWithCount([
+                    RiskStatus.Opened,
+                    RiskStatus.Triaged,
+                  ]),
+                  {
+                    label: 'Divider',
+                    type: 'divider',
+                  },
+                  ...getRiskStausOptionWithCount([
+                    RiskStatus.Resolved,
+                    RiskStatus.Rejected,
+                    RiskStatus.FalsePositive,
+                  ]),
                 ],
-                onSelect: selectedRows => setStatusesFilter(selectedRows),
+                onSelect: selectedRows =>
+                  setStatusesFilter(selectedRows as RiskStatus[]),
                 value: statusFilter,
                 multiSelect: true,
               }}
