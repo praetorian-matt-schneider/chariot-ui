@@ -1,11 +1,10 @@
 import React, { PropsWithChildren, useEffect, useState } from 'react';
-import { TrashIcon } from '@heroicons/react/24/solid';
+import { XMarkIcon } from '@heroicons/react/20/solid';
 import MD5 from 'crypto-js/md5';
 
 import { Button } from '@/components/Button';
 import { Dropzone, Files } from '@/components/Dropzone';
 import { Input } from '@/components/form/Input';
-import { Hexagon } from '@/components/Hexagon';
 import { Loader } from '@/components/Loader';
 import { Paper } from '@/components/Paper';
 import {
@@ -104,16 +103,14 @@ const Account: React.FC = () => {
                   />
                 )}
                 {!showDpDropzone && (
-                  <div>
-                    <Hexagon>
-                      <Avatar
-                        className="scale-150"
-                        email={friend.email || me}
-                      />
-                    </Hexagon>
+                  <div className="flex flex-row items-center">
+                    <Avatar
+                      className="mr-2 size-20"
+                      email={friend.email || me}
+                    />
+
                     <Button
                       styleType="text"
-                      className="p-1"
                       onClick={() => {
                         uploadFile({
                           name: PROFILE_PICTURE_ID,
@@ -121,7 +118,7 @@ const Account: React.FC = () => {
                         });
                       }}
                     >
-                      <TrashIcon className="size-4" />
+                      <XMarkIcon className="size-3" /> Remove
                     </Button>
                   </div>
                 )}

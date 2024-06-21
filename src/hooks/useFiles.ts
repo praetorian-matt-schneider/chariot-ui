@@ -1,5 +1,8 @@
 import { Snackbar } from '@/components/Snackbar';
-import { useGetProfilePictureUrl } from '@/hooks/profilePicture';
+import {
+  PROFILE_PICTURE_ID,
+  useGetProfilePictureUrl,
+} from '@/hooks/profilePicture';
 import { queryClient } from '@/queryclient';
 import { useAuth } from '@/state/auth';
 import { UseExtendQueryOptions, useMutation, useQuery } from '@/utils/api';
@@ -44,11 +47,19 @@ export function useUploadFile() {
       });
       invalidateProfilePicture();
       if (!variable.ignoreSnackbar) {
-        Snackbar({
-          variant: 'success',
-          title: `File "${variable.name}" uploaded successfully`,
-          description: '',
-        });
+        if (variable.name === PROFILE_PICTURE_ID) {
+          Snackbar({
+            variant: 'success',
+            title: `Profile picture uploaded successfully`,
+            description: '',
+          });
+        } else {
+          Snackbar({
+            variant: 'success',
+            title: `File "${variable.name}" uploaded successfully`,
+            description: '',
+          });
+        }
       }
     },
   });
