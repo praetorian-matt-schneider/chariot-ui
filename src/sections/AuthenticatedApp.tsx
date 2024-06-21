@@ -36,8 +36,7 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
 
   const isTrial = useMemo(() => {
     return Boolean(
-      accountsStatus === 'success' &&
-        friend.email === '' &&
+      friend.email === '' &&
         accounts.find(account => account.member.endsWith('praetorian.com'))
     );
   }, [accountsStatus, JSON.stringify(accounts), JSON.stringify(friend)]);
@@ -119,7 +118,7 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
         <ShortcutsHelper onClose={() => setShortcutsHelper(false)} />
       )}
       <DetailsDrawer />
-      {!isTrial && <Upgrade />}
+      {accountsStatus === 'success' && !isTrial && <Upgrade />}
     </div>
   );
 }
