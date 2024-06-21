@@ -8,6 +8,7 @@ import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
 import { AddFile } from '@/components/ui/AddFile';
+import { FilterCounts } from '@/components/ui/FilterCounts';
 import { useDownloadFile, useMy } from '@/hooks';
 import { useCounts } from '@/hooks/useCounts';
 import { useFilter } from '@/hooks/useFilter';
@@ -15,7 +16,6 @@ import { useMergeStatus } from '@/utils/api';
 import { sortByDate } from '@/utils/date.util';
 
 import { FileLabels, MyFile } from '../types';
-import FilterCounts from '@/components/ui/FilterCounts';
 
 const Files: React.FC = () => {
   const {

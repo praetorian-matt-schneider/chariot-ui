@@ -21,6 +21,7 @@ import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
 import { AddRisks } from '@/components/ui/AddRisks';
 import { AssetStatusChip } from '@/components/ui/AssetStatusChip';
+import { FilterCounts } from '@/components/ui/FilterCounts';
 import { useMy } from '@/hooks';
 import { AssetsSnackbarTitle, useUpdateAsset } from '@/hooks/useAssets';
 import { useCounts } from '@/hooks/useCounts';
@@ -39,7 +40,6 @@ import {
 
 import { useOpenDrawer } from './detailsDrawer/useOpenDrawer';
 import { AssetStatusWarning } from './AssetStatusWarning';
-import FilterCounts from '@/components/ui/FilterCounts';
 
 type Severity = 'I' | 'L' | 'M' | 'H' | 'C';
 type SeverityOpenCounts = Partial<Record<Severity, Risk[]>>;

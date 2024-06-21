@@ -12,6 +12,7 @@ import { SpinnerIcon } from '@/components/icons/Spinner.icon';
 import { MenuItemProps } from '@/components/Menu';
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
+import { FilterCounts } from '@/components/ui/FilterCounts';
 import {
   RiskDropdown,
   riskStatusFilterOptions,
@@ -27,7 +28,6 @@ import { generatePathWithSearch } from '@/utils/url.util';
 import { Risk, RiskStatus, RiskStatusLabel, SeverityDef } from '../types';
 
 import { useOpenDrawer } from './detailsDrawer/useOpenDrawer';
-import FilterCounts from '@/components/ui/FilterCounts';
 
 const DownIcon = (
   <ChevronDownIcon className="size-3 stroke-[4px] text-header-dark" />

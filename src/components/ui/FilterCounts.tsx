@@ -6,7 +6,11 @@ interface Props {
   total?: number;
 }
 
-const FilterCounts: React.FC<Props> = ({ count, type, total }: Props) => {
+export const FilterCounts: React.FC<Props> = ({
+  count,
+  type,
+  total,
+}: Props) => {
   return (
     <>
       {total ? (
@@ -17,5 +21,3 @@ const FilterCounts: React.FC<Props> = ({ count, type, total }: Props) => {
     </>
   );
 };
-
-export default FilterCounts;
