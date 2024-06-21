@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+
 import { Snackbar } from '@/components/Snackbar';
 import { useAuth } from '@/state/auth';
 import { useMutation } from '@/utils/api';
@@ -96,3 +98,23 @@ export const useModifyAccount = (
     },
   });
 };
+
+export function useGetDisplayName(accounts: Account[]) {
+  return useMemo(() => getDisplayName(accounts), [JSON.stringify(accounts)]);
+}
+
+export function getDisplayName(accounts: Account[]) {
+  const myAccount = accounts?.find(acc => acc.key.endsWith('#settings#'));
+
+  return myAccount?.config?.displayName || '';
+}
+
+export function useGetCollaboratorEmails(accounts: Account[]) {
+  return useMemo(() => {
+    return accounts
+      .filter(
+        acc => !acc.key.endsWith('#settings#') && acc?.member === acc?.username
+      )
+      .map(acc => acc.name);
+  }, [JSON.stringify(accounts)]);
+}

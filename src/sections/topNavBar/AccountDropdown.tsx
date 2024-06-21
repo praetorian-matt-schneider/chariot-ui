@@ -8,6 +8,8 @@ import {
 import { Dropdown } from '@/components/Dropdown';
 import Hexagon from '@/components/Hexagon';
 import { useGetCollaborators } from '@/hooks/collaborators';
+import { useGetDisplayName } from '@/hooks/useAccounts';
+import { useMy } from '@/hooks/useMy';
 import { useAuth } from '@/state/auth';
 import { getRoute } from '@/utils/route.util';
 
@@ -16,6 +18,14 @@ import Avatar from './Avatar';
 export const AccountDropdown: React.FC = () => {
   const { friend, me, startImpersonation, stopImpersonation } = useAuth();
 
+  const { data: accounts, status: accountsStatus } = useMy(
+    {
+      resource: 'account',
+    },
+    { doNotImpersonate: true }
+  );
+
+  const displayName = useGetDisplayName(accounts);
   const { data: collaborators, status: collaboratorsStatus } =
     useGetCollaborators({ doNotImpersonate: true });
 
@@ -50,18 +60,19 @@ export const AccountDropdown: React.FC = () => {
             type: 'divider',
           },
           {
-            isLoading: collaboratorsStatus === 'pending',
+            isLoading:
+              collaboratorsStatus === 'pending' || accountsStatus === 'pending',
             hide:
               collaboratorsStatus === 'error' ||
               (collaboratorsStatus === 'success' && collaborators.length === 0),
-            label: me,
+            label: displayName || me,
             icon: (
               <Avatar
                 account={me}
                 className="size-5 max-w-max scale-125 rounded-full"
               />
             ),
-            value: me,
+            value: displayName || me,
             onClick: () => friend?.email && stopImpersonation(),
           },
           ...collaborators.map(collaborator => ({

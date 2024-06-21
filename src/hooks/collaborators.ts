@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Snackbar } from '@/components/Snackbar';
+import { getDisplayName, useGetCollaboratorEmails } from '@/hooks/useAccounts';
 import { useAxios } from '@/hooks/useAxios';
 import { useMy } from '@/hooks/useMy';
 import { useAuth } from '@/state/auth';
@@ -33,59 +34,46 @@ export function useGetCollaborators(props?: CollaboratorProps) {
     { doNotImpersonate: props?.doNotImpersonate }
   );
 
-  const collaboratorEmails = useMemo(() => {
-    return accountsStatus === 'success'
-      ? accounts
-          .filter(
-            acc =>
-              !acc.key.endsWith('#settings#') && acc?.member === acc?.username
-          )
-          .map(acc => acc.name)
-      : [];
-  }, [JSON.stringify(accounts), accountsStatus]);
+  const collaboratorEmails = useGetCollaboratorEmails(accounts);
 
   useEffect(() => {
     const fetchCollaboratorsOrgName = async () => {
       setCollaboratorsStatus('pending');
 
-      const requests = collaboratorEmails.map(async email => {
-        const promises = [];
-        promises.push(
-          axios({
-            method: 'get',
-            url: `/my?key=${encodeURIComponent('#account')}`,
-            headers: {
-              Authorization: token ? `Bearer ${token}` : '',
-              account: email,
-            },
-          }).then(response => response.data.accounts)
-        );
-
-        if (props?.getRiskCounts) {
-          promises.push(
-            axios({
+      const requests = collaboratorEmails.map(
+        async (email): Promise<Collaborator> => {
+          const promises = [
+            axios<{ accounts: Account[] }>({
               method: 'get',
-              url: `/my/count?key=${encodeURIComponent('#risk')}`,
+              url: `/my?key=${encodeURIComponent('#account')}`,
               headers: {
                 Authorization: token ? `Bearer ${token}` : '',
                 account: email,
               },
-            }).then(response => response.data)
-          );
+            }).then(response => response.data.accounts),
+            props?.getRiskCounts
+              ? axios<Statistics>({
+                  method: 'get',
+                  url: `/my/count?key=${encodeURIComponent('#risk')}`,
+                  headers: {
+                    Authorization: token ? `Bearer ${token}` : '',
+                    account: email,
+                  },
+                }).then(response => response.data)
+              : undefined,
+          ] as const;
+
+          const [accountsResponse, counts] = await Promise.all(promises);
+
+          const friendDisplayName = getDisplayName(accountsResponse);
+
+          return {
+            displayName: friendDisplayName,
+            email,
+            counts,
+          };
         }
-
-        const [accountResponse, risksResponse] = await Promise.all(promises);
-
-        const friendSettings = accountResponse.find((account: Account) =>
-          account.key.endsWith('#settings#')
-        );
-
-        return {
-          displayName: friendSettings?.config?.displayName || '',
-          email,
-          counts: risksResponse,
-        };
-      });
+      );
 
       // Silence Error and display results that
       const results = await Promise.all(requests.map(p => p.catch(e => e)));
