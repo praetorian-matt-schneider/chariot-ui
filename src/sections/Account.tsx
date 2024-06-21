@@ -100,7 +100,7 @@ const Account: React.FC = () => {
               </p>
             }
           >
-            <CollaboratingWith emails={collaborators} />
+            <CollaboratingWith />
           </Section>
         )}
       <Section

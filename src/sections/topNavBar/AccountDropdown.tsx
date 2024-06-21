@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import {
   ArrowRightCircleIcon,
   DocumentTextIcon,
@@ -8,8 +7,7 @@ import {
 
 import { Dropdown } from '@/components/Dropdown';
 import Hexagon from '@/components/Hexagon';
-import { MenuItemProps } from '@/components/Menu';
-import { useGenericSearch } from '@/hooks/useGenericSearch';
+import { useGetCollaborators } from '@/hooks/collaborators';
 import { useAuth } from '@/state/auth';
 import { getRoute } from '@/utils/route.util';
 
@@ -17,29 +15,9 @@ import Avatar from './Avatar';
 
 export const AccountDropdown: React.FC = () => {
   const { friend, me, startImpersonation, stopImpersonation } = useAuth();
-  const { data: dataGenericSearch } = useGenericSearch({
-    query: '#account',
-    headers: {
-      common: {
-        account: undefined,
-      },
-    },
-  });
-  const data = dataGenericSearch?.accounts;
 
-  const collaborators = useMemo(
-    () =>
-      data
-        ?.filter(
-          acc =>
-            !acc.key.endsWith('#settings#') && acc?.member === acc?.username
-        )
-        .map(acc => ({
-          email: acc.name,
-          displayName: acc?.config?.displayName ?? acc.name,
-        })) || [],
-    [data]
-  );
+  const { data: collaborators, status: collaboratorsStatus } =
+    useGetCollaborators();
 
   return (
     <Dropdown
@@ -71,21 +49,21 @@ export const AccountDropdown: React.FC = () => {
             label: 'Divider',
             type: 'divider',
           },
-          ...(collaborators.length > 0
-            ? [
-                {
-                  label: me,
-                  icon: (
-                    <Avatar
-                      account={me}
-                      className="size-5 max-w-max scale-125 rounded-full"
-                    />
-                  ),
-                  value: me,
-                  onClick: () => friend?.email && stopImpersonation(),
-                },
-              ]
-            : []),
+          {
+            isLoading: collaboratorsStatus === 'pending',
+            hide:
+              collaboratorsStatus === 'error' ||
+              (collaboratorsStatus === 'success' && collaborators.length === 0),
+            label: me,
+            icon: (
+              <Avatar
+                account={me}
+                className="size-5 max-w-max scale-125 rounded-full"
+              />
+            ),
+            value: me,
+            onClick: () => friend?.email && stopImpersonation(),
+          },
           ...collaborators.map(collaborator => ({
             label: collaborator.displayName,
             icon: (
@@ -101,9 +79,11 @@ export const AccountDropdown: React.FC = () => {
                 collaborator.displayName ?? ''
               ),
           })),
-          ...(collaborators.length > 0
-            ? [{ label: 'Divider', type: 'divider' } as MenuItemProps]
-            : []),
+          {
+            label: 'Divider',
+            type: 'divider',
+            hide: collaborators.length === 0,
+          },
           {
             label: 'Log Out',
             icon: <ArrowRightCircleIcon />,
