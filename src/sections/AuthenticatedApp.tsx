@@ -129,7 +129,7 @@ const ImpersonationBanner: React.FC = () => {
   }
 
   return (
-    <div className="absolute top-0 flex w-full items-center bg-brand px-10 py-1 text-xs text-white">
+    <div className="absolute top-0 z-[99999] flex w-full items-center bg-brand px-10 py-1 text-xs text-white">
       <button
         className="hover:bg-brand-hover mr-2 w-4 rounded text-center"
         onClick={stopImpersonation}
