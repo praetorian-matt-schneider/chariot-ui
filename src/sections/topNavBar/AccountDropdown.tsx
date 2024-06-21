@@ -18,12 +18,14 @@ import Avatar from './Avatar';
 export const AccountDropdown: React.FC = () => {
   const { friend, me, startImpersonation, stopImpersonation } = useAuth();
 
-  const { data: accounts, status: accountsStatus } = useMy({
-    resource: 'account',
-  });
+  const { data: accounts, status: accountsStatus } = useMy(
+    {
+      resource: 'account',
+    },
+    { doNotImpersonate: true }
+  );
 
-  const dispalyName = useGetDisplayName(accounts);
-  console.log('dispalyName', dispalyName);
+  const displayName = useGetDisplayName(accounts);
   const { data: collaborators, status: collaboratorsStatus } =
     useGetCollaborators({ doNotImpersonate: true });
 
@@ -63,14 +65,14 @@ export const AccountDropdown: React.FC = () => {
             hide:
               collaboratorsStatus === 'error' ||
               (collaboratorsStatus === 'success' && collaborators.length === 0),
-            label: dispalyName || me,
+            label: displayName || me,
             icon: (
               <Avatar
                 account={me}
                 className="size-5 max-w-max scale-125 rounded-full"
               />
             ),
-            value: dispalyName || me,
+            value: displayName || me,
             onClick: () => friend?.email && stopImpersonation(),
           },
           ...collaborators.map(collaborator => ({
