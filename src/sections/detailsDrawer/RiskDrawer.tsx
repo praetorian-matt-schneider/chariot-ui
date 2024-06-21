@@ -356,7 +356,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
 
                           await updateFile({
                             ignoreSnackbar: true,
-                            name: `definitions/${name}`,
+                            name: `definitions/${prefix}${name}`,
                             bytes,
                           });
                           setIsEditingMarkdown(false);
