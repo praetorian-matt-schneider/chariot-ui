@@ -17,7 +17,7 @@ export const AccountDropdown: React.FC = () => {
   const { friend, me, startImpersonation, stopImpersonation } = useAuth();
 
   const { data: collaborators, status: collaboratorsStatus } =
-    useGetCollaborators();
+    useGetCollaborators({ doNotImpersonate: true });
 
   return (
     <Dropdown

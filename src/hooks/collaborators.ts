@@ -15,6 +15,7 @@ interface Collaborator {
 
 interface CollaboratorProps {
   getRiskCounts?: boolean;
+  doNotImpersonate?: boolean;
 }
 
 export function useGetCollaborators(props?: CollaboratorProps) {
@@ -25,9 +26,12 @@ export function useGetCollaborators(props?: CollaboratorProps) {
   const [collaboratorsStatus, setCollaboratorsStatus] =
     useState<QueryStatus>('pending');
 
-  const { data: accounts, status: accountsStatus } = useMy({
-    resource: 'account',
-  });
+  const { data: accounts, status: accountsStatus } = useMy(
+    {
+      resource: 'account',
+    },
+    { doNotImpersonate: true }
+  );
 
   const collaboratorEmails = useMemo(() => {
     return accountsStatus === 'success'

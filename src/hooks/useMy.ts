@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { AxiosHeaders } from 'axios';
 
+import { useAuth } from '@/state/auth';
 import { useSearchContext } from '@/state/search';
 import { UseExtendInfiniteQueryOptions, useInfiniteQuery } from '@/utils/api';
 
@@ -19,8 +21,11 @@ interface UseMyProps<ResourceKey extends MyResourceKey> {
 
 export const useMy = <ResourceKey extends MyResourceKey>(
   props: UseMyProps<ResourceKey>,
-  options?: UseExtendInfiniteQueryOptions<MyResource[ResourceKey]>
+  options?: UseExtendInfiniteQueryOptions<MyResource[ResourceKey]> & {
+    doNotImpersonate?: boolean;
+  }
 ) => {
+  const { friend } = useAuth();
   const axios = useAxios();
   const { hashSearchFromQuery, genericSearchFromQuery } = useSearchContext();
 
@@ -50,7 +55,12 @@ export const useMy = <ResourceKey extends MyResourceKey>(
     }
   }
 
-  const queryKey = getQueryKey.getMy(props.resource, compositeKey);
+  const isImperonating = friend.email !== '';
+
+  const queryKey = getQueryKey.getMy(
+    props.resource,
+    `${compositeKey}${isImperonating && options?.doNotImpersonate ? '.notImpersonating' : ''}`
+  );
   const response = useInfiniteQuery<MyResource[ResourceKey], Error>({
     ...options,
     defaultErrorMessage: `Failed to fetch ${props.resource} data`,
@@ -61,6 +71,13 @@ export const useMy = <ResourceKey extends MyResourceKey>(
           key,
           offset: pageParam,
         },
+        headers: options?.doNotImpersonate
+          ? ({
+              common: {
+                account: undefined,
+              },
+            } as unknown as AxiosHeaders)
+          : undefined,
       });
       setOffset(data?.offset);
 
