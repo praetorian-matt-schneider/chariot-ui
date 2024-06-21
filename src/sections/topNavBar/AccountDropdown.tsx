@@ -6,7 +6,7 @@ import {
 } from '@heroicons/react/24/solid';
 
 import { Dropdown } from '@/components/Dropdown';
-import Hexagon from '@/components/Hexagon';
+import { Hexagon } from '@/components/Hexagon';
 import { useGetCollaborators } from '@/hooks/collaborators';
 import { useGetDisplayName } from '@/hooks/useAccounts';
 import { useMy } from '@/hooks/useMy';
@@ -68,7 +68,7 @@ export const AccountDropdown: React.FC = () => {
             label: displayName || me,
             icon: (
               <Avatar
-                account={me}
+                email={me}
                 className="size-5 max-w-max scale-125 rounded-full"
               />
             ),
@@ -79,7 +79,7 @@ export const AccountDropdown: React.FC = () => {
             label: collaborator.displayName || collaborator.email,
             icon: (
               <Avatar
-                account={String(collaborator.email)}
+                email={String(collaborator.email)}
                 className="size-5 max-w-max scale-125 rounded-full"
               />
             ),
@@ -105,7 +105,7 @@ export const AccountDropdown: React.FC = () => {
       }}
     >
       <Hexagon>
-        <Avatar className="scale-150" account={friend.email || me} />
+        <Avatar className="scale-150" email={friend.email || me} />
       </Hexagon>
     </Dropdown>
   );

@@ -89,48 +89,6 @@
   }
 }
 
-.hexagon {
-  --hexagon-size: 1em; /* Default size, can be overridden */
-  position: relative;
-  width: calc(var(--hexagon-size) * 2);
-  height: calc(var(--hexagon-size) * 2.309);
-  background-color: var(--header-dark);
-  margin: calc(var(--hexagon-size) * 0.57735) 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: transparent;
-  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-}
-
-.hexagon-content {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: var(--header-dark);
-  overflow: hidden;
-}
-
-.hexagon:before,
-.hexagon:after {
-  content: '';
-  position: absolute;
-  border-left: calc(var(--hexagon-size) * 1) solid transparent;
-  border-right: calc(var(--hexagon-size) * 1) solid transparent;
-}
-
-.hexagon:before {
-  bottom: 100%;
-  border-bottom: calc(var(--hexagon-size) * 0.57735) solid var(--header-dark);
-}
-
-.hexagon:after {
-  top: 100%;
-  border-top: calc(var(--hexagon-size) * 0.57735) solid var(--header-dark);
-}
-
 .react-grid-item.react-grid-placeholder {
   background-color: var(--brand-light);
 }

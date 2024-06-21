@@ -9,6 +9,7 @@ export enum UniqueQueryKeys {
   GENERIC_MY_SEARCH = 'GENERIC_MY_SEARCH',
   GET_FILE = 'GET_FILE',
   COUNTS = 'COUNTS',
+  GAVATAR_PROFILE_PICTURE = 'GAVATAR_PROFILE_PICTURE',
 }
 
 export enum JobStatus {

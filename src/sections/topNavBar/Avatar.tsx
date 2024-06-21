@@ -1,43 +1,23 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { UserIcon } from '@heroicons/react/24/solid';
 
-import { useAuth } from '@/state/auth';
-
-async function computeSHA256(input: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(input);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
-}
+import { useGetProfilePictureUrl } from '@/hooks/profilePicture';
 
 interface Props {
-  account?: string;
+  email: string;
   className?: string;
 }
 
-const Avatar: React.FC<Props> = ({ account, className }: Props) => {
-  const { me } = useAuth();
-  const [gravatarUrl, setGravatarUrl] = useState<string | null>(null);
-  const [loadError, setLoadError] = useState(false);
-
-  useEffect(() => {
-    if (account || me) {
-      computeSHA256((account || me).trim().toLowerCase())
-        .then(hash => {
-          setGravatarUrl(`https://www.gravatar.com/avatar/${hash}?d=404`);
-          setLoadError(false); // Reset error state upon new hash calculation
-        })
-        .catch(() => setLoadError(true)); // Handle any errors in hash computation
-    }
-  }, [account, me]);
+const Avatar: React.FC<Props> = ({ email, className }: Props) => {
+  const [imageLoadError, setImageLoadError] = useState(false);
+  const { data: profilePictureUrl } = useGetProfilePictureUrl({ email });
 
   return (
     <>
-      {gravatarUrl && !loadError ? (
+      {profilePictureUrl && !imageLoadError ? (
         <img
-          src={gravatarUrl}
-          onError={() => setLoadError(true)}
+          src={profilePictureUrl.url}
+          onError={() => setImageLoadError(true)}
           alt="User Avatar"
           className={className}
         />
