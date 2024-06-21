@@ -48,7 +48,8 @@ export const IntegrationsMeta: IntegrationMeta[] = [
     id: 12,
     name: 'hook',
     displayName: 'Chariot Webhook',
-    description: 'Webhook to manage risks and assets',
+    description:
+      'Receive streaming events when new assets and risks are discovered',
     logo: '/icons/PraetorianWebhook.svg',
     connected: true,
     types: [IntegrationType.Workflow],
@@ -86,8 +87,7 @@ export const IntegrationsMeta: IntegrationMeta[] = [
     id: 9,
     name: 'slack',
     displayName: 'Slack',
-    description:
-      'Business communication platform offering many IRC-style features, including persistent chat rooms.',
+    description: 'Receive Slack notifications when new risks are discovered',
     logo: '/icons/Slack.svg',
     connected: true,
     types: [IntegrationType.Workflow],
@@ -130,7 +130,7 @@ export const IntegrationsMeta: IntegrationMeta[] = [
     name: 'jira',
     displayName: 'Atlassian Jira',
     description:
-      'Project management tool offering agile team collaboration and issue tracking.',
+      'Track and manage risks directly within your connected Jira project',
     logo: '/icons/Jira.svg',
     connected: true,
     types: [IntegrationType.Workflow],
@@ -212,7 +212,7 @@ export const IntegrationsMeta: IntegrationMeta[] = [
     name: 'github',
     displayName: 'GitHub',
     description:
-      'Platform for software development and version control using Git, with collaboration features.',
+      "Discover your GitHub organization's repositories and identify risks",
     logo: '/icons/GitHub.svg',
     connected: true,
     types: [IntegrationType.AssetDiscovery, IntegrationType.RiskIdentification],
@@ -252,8 +252,7 @@ export const IntegrationsMeta: IntegrationMeta[] = [
     id: 4,
     name: 'amazon',
     displayName: 'Amazon Web Services',
-    description:
-      'Comprehensive, evolving cloud computing platform provided by Amazon.',
+    description: 'Discover and scan assets hosted within your AWS organization',
     logo: '/icons/AWS.svg',
     connected: true,
     types: [IntegrationType.AssetDiscovery],
@@ -278,8 +277,7 @@ export const IntegrationsMeta: IntegrationMeta[] = [
     id: 8,
     name: 'ns1',
     displayName: 'NS1',
-    description:
-      'Provides DNS and traffic management solutions with data-driven automation and optimization.',
+    description: 'Discover and scan assets managed within your NS1 tenant',
     logo: '/icons/NS1.svg',
     connected: true,
     types: [IntegrationType.AssetDiscovery],
@@ -312,8 +310,7 @@ export const IntegrationsMeta: IntegrationMeta[] = [
     id: 5,
     name: 'gcp',
     displayName: 'Google Cloud',
-    description:
-      "Extensive suite of cloud computing services running on Google's infrastructure.",
+    description: 'Discover and scan assets hosted within your GCP organization',
     logo: '/icons/GoogleCloud.svg',
     connected: true,
     types: [IntegrationType.AssetDiscovery],
@@ -356,7 +353,8 @@ export const IntegrationsMeta: IntegrationMeta[] = [
     id: 6,
     name: 'azure',
     displayName: 'Azure',
-    description: 'Asset Discovery',
+    description:
+      'Discover and scan assets hosted within your Azure organization',
     logo: '/icons/Azure.svg',
     connected: true,
     types: [IntegrationType.AssetDiscovery],
@@ -394,7 +392,8 @@ export const IntegrationsMeta: IntegrationMeta[] = [
     id: 16,
     name: 'crowdstrike',
     displayName: 'CrowdStrike',
-    description: 'Import your assets from CloudStrike.',
+    description:
+      'Import your assets from CloudStrike and identify policy risks',
     logo: '/icons/Crowdstrike.svg',
     connected: true,
     types: [IntegrationType.AssetDiscovery, IntegrationType.RiskIdentification],
@@ -433,7 +432,7 @@ export const IntegrationsMeta: IntegrationMeta[] = [
     name: 'gitlab',
     displayName: 'GitLab',
     description:
-      'Platform for software development and version control using Git, with collaboration features.',
+      "Discover your GitLab organization's repositories and identify risks",
     logo: '/icons/GitLab.svg',
     connected: true,
     types: [IntegrationType.AssetDiscovery, IntegrationType.RiskIdentification],
