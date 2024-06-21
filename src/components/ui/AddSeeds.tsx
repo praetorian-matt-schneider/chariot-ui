@@ -40,12 +40,7 @@ export const AddSeeds: React.FC<Props> = (props: Props) => {
   const handleFilesDrop = (files: Files<'string'>): void => {
     onClose();
 
-    const concatFiles = files
-      .map(({ content }) => {
-        console.log('content', content);
-        return content;
-      })
-      .join('');
+    const concatFiles = files.map(({ content }) => content).join('');
     const seedsString = GetSeeds(concatFiles, 500);
     const seeds = seedsString.map(seed => ({ asset: seed }));
 
