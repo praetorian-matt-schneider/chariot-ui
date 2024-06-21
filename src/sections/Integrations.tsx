@@ -6,6 +6,7 @@ import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/Button';
 import { Dropdown } from '@/components/Dropdown';
 import { Body } from '@/components/ui/Body';
+import { FilterCounts } from '@/components/ui/FilterCounts';
 import { IntegrationModal } from '@/components/ui/IntegrationModal';
 import { useModifyAccount, useMy } from '@/hooks';
 import { useFilter } from '@/hooks/useFilter';
@@ -153,6 +154,10 @@ const Integrations: React.FC = () => {
               },
               value: integrationTypeFilter,
             }}
+          />
+          <FilterCounts
+            count={filteredIntegrations.length}
+            type="Integrations"
           />
         </div>
       }
