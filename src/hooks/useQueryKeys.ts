@@ -17,4 +17,8 @@ export const getQueryKey = {
     resource,
     ...(compositeKey ? [compositeKey] : []),
   ],
+  getGavatarProfilePicture: (email: string) => [
+    UniqueQueryKeys.GAVATAR_PROFILE_PICTURE,
+    email,
+  ],
 };

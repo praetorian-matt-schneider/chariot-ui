@@ -1,5 +1,10 @@
 import { Snackbar } from '@/components/Snackbar';
+import {
+  PROFILE_PICTURE_ID,
+  useGetProfilePictureUrl,
+} from '@/hooks/profilePicture';
 import { queryClient } from '@/queryclient';
+import { useAuth } from '@/state/auth';
 import { UseExtendQueryOptions, useMutation, useQuery } from '@/utils/api';
 
 import { useAxios } from './useAxios';
@@ -14,9 +19,15 @@ interface UploadFilesProps {
 
 export function useUploadFile() {
   const axios = useAxios();
+  const { me } = useAuth();
 
   const { invalidate: invalidateMyFiles } = useMy(
     { resource: 'file' },
+    { enabled: false }
+  );
+
+  const { invalidate: invalidateProfilePicture } = useGetProfilePictureUrl(
+    { email: me },
     { enabled: false }
   );
 
@@ -34,12 +45,21 @@ export function useUploadFile() {
       queryClient.invalidateQueries({
         queryKey: getQueryKey.getFile({ name: variable.name }),
       });
+      invalidateProfilePicture();
       if (!variable.ignoreSnackbar) {
-        Snackbar({
-          variant: 'success',
-          title: `File "${variable.name}" uploaded successfully`,
-          description: '',
-        });
+        if (variable.name === PROFILE_PICTURE_ID) {
+          Snackbar({
+            variant: 'success',
+            title: `Profile picture uploaded successfully`,
+            description: '',
+          });
+        } else {
+          Snackbar({
+            variant: 'success',
+            title: `File "${variable.name}" uploaded successfully`,
+            description: '',
+          });
+        }
       }
     },
   });

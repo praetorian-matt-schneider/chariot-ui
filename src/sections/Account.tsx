@@ -1,15 +1,24 @@
 import React, { PropsWithChildren, useEffect, useState } from 'react';
+import { XMarkIcon } from '@heroicons/react/20/solid';
 import MD5 from 'crypto-js/md5';
 
 import { Button } from '@/components/Button';
+import { Dropzone, Files } from '@/components/Dropzone';
 import { Input } from '@/components/form/Input';
+import { Loader } from '@/components/Loader';
 import { Paper } from '@/components/Paper';
+import {
+  PROFILE_PICTURE_ID,
+  useGetProfilePictureUrl,
+} from '@/hooks/profilePicture';
 import {
   useGetCollaboratorEmails,
   useGetDisplayName,
   useModifyAccount,
 } from '@/hooks/useAccounts';
+import { useUploadFile } from '@/hooks/useFiles';
 import { useMy } from '@/hooks/useMy';
+import Avatar from '@/sections/topNavBar/Avatar';
 import { useAuth } from '@/state/auth';
 
 import { CollaboratingWith } from './CollaboratingWith';
@@ -33,6 +42,27 @@ const Account: React.FC = () => {
 
   const collaborators = useGetCollaboratorEmails(data);
 
+  const { mutate: uploadFile } = useUploadFile();
+
+  const { data: profilePicture, status: profilePictureStatus } =
+    useGetProfilePictureUrl(
+      { email: friend.email || me },
+      { enabled: !friend.email }
+    );
+
+  const handleFileDrop = (files: Files<'arrayBuffer'>): void => {
+    if (files.length === 1) {
+      const content = files[0].content;
+
+      uploadFile({
+        name: PROFILE_PICTURE_ID,
+        content,
+      });
+    }
+  };
+
+  const showDpDropzone = !profilePicture || profilePicture.isGavatar;
+
   return (
     <div className="flex h-max w-full flex-col gap-8">
       <Section title="Organization Details">
@@ -52,6 +82,49 @@ const Account: React.FC = () => {
             isLoading={status === 'pending'}
             onChange={e => setDisplayName(e.target.value)}
           />
+          {!friend.email && (
+            <>
+              <div className="mt-5 flex items-center gap-1">
+                <label className="block text-sm font-medium leading-6 text-gray-900">
+                  Organization Logo
+                </label>
+              </div>
+              <Loader
+                isLoading={profilePictureStatus === 'pending'}
+                className="mt-2 h-5"
+              >
+                {showDpDropzone && (
+                  <Dropzone
+                    type="arrayBuffer"
+                    onFilesDrop={handleFileDrop}
+                    title="Click or drag and drop your logo image here."
+                    subTitle=""
+                    maxFileSizeInMb={6}
+                  />
+                )}
+                {!showDpDropzone && (
+                  <div className="flex flex-row items-center">
+                    <Avatar
+                      className="mr-2 size-20"
+                      email={friend.email || me}
+                    />
+
+                    <Button
+                      styleType="text"
+                      onClick={() => {
+                        uploadFile({
+                          name: PROFILE_PICTURE_ID,
+                          content: '',
+                        });
+                      }}
+                    >
+                      <XMarkIcon className="size-3" /> Remove
+                    </Button>
+                  </div>
+                )}
+              </Loader>
+            </>
+          )}
           <Button
             style={{
               opacity: isDirty ? '100%' : '0%',
