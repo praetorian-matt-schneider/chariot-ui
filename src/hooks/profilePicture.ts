@@ -4,6 +4,7 @@ import { useAxios } from '@/hooks/useAxios';
 import { getQueryKey } from '@/hooks/useQueryKeys';
 import { useAuth } from '@/state/auth';
 import { UseExtendQueryOptions, useQuery } from '@/utils/api';
+import { checkIsImageUrlValid } from '@/utils/url.util';
 
 export const PROFILE_PICTURE_ID = '#profilePicture#';
 
@@ -41,6 +42,7 @@ export function useGetProfilePictureUrl(
           params: {
             name: PROFILE_PICTURE_ID,
           },
+          responseType: 'arraybuffer',
           headers: {
             common: {
               account: props.email === me ? undefined : props.email,
@@ -48,14 +50,14 @@ export function useGetProfilePictureUrl(
           } as unknown as AxiosHeaders,
         });
 
-        const url = URL.createObjectURL(
-          new Blob([res.data], { type: 'image/jpeg' })
-        );
-        console.log('url', url);
+        if (!isArrayBufferEmpty(res.data)) {
+          const url = URL.createObjectURL(
+            new Blob([res.data], { type: 'image/jpeg' })
+          );
 
-        return { url, isGavatar: false };
+          return { url, isGavatar: false };
+        }
       } catch {
-        console.log('failed');
         // ignore
       }
 
@@ -75,20 +77,13 @@ export function useGetProfilePictureUrl(
   });
 }
 
-async function checkIsImageUrlValid(url: string) {
-  return new Promise(resolve => {
-    const img = new Image();
+function isArrayBufferEmpty(arrayBuffer: ArrayBuffer) {
+  // Convert the ArrayBuffer to a Uint8Array
+  const uint8Array = new Uint8Array(arrayBuffer);
 
-    img.onload = function () {
-      // Image loaded successfully
-      resolve(true);
-    };
+  // Convert the Uint8Array to a string
+  const string = new TextDecoder().decode(uint8Array);
 
-    img.onerror = function () {
-      // An error occurred while loading the image
-      resolve(false);
-    };
-
-    img.src = url;
-  });
+  // Check if the string is empty
+  return string === '' || string === `""`;
 }
