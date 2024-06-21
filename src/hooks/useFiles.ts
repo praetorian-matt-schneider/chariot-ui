@@ -8,7 +8,7 @@ import { getQueryKey } from './useQueryKeys';
 
 interface UploadFilesProps {
   name: string;
-  bytes: Uint8Array;
+  content: string | ArrayBuffer;
   ignoreSnackbar?: boolean;
 }
 
@@ -23,7 +23,7 @@ export function useUploadFile() {
   return useMutation({
     defaultErrorMessage: `Failed to Upload file`,
     mutationFn: (props: UploadFilesProps) => {
-      return axios.put(`/file`, props.bytes, {
+      return axios.put(`/file`, props.content, {
         params: {
           name: props.name,
         },
