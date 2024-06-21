@@ -131,6 +131,10 @@ const Integrations: React.FC = () => {
                 {
                   label: 'All Integrations',
                   value: '',
+                  labelSuffix: Object.keys(integrationCounts).reduce(
+                    (acc, key) => acc + integrationCounts[key],
+                    0
+                  ),
                 },
                 {
                   label: 'Divider',
@@ -140,6 +144,7 @@ const Integrations: React.FC = () => {
                   return {
                     label: integrationType,
                     value: integrationType,
+                    labelSuffix: integrationCounts[integrationType],
                   };
                 }),
               ],
