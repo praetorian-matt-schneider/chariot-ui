@@ -8,22 +8,30 @@ import { mbToBytes } from '@/utils/file.util';
 
 import { Snackbar } from './Snackbar';
 
-export type FileResult = string | ArrayBuffer | null;
+type FileReadType = 'string' | 'arrayBuffer';
 
-export type Files = { result: FileResult; file: File }[];
+export type FileResult<T extends FileReadType> = T extends 'string'
+  ? string
+  : ArrayBuffer;
 
-interface Props extends PropsWithChildren {
-  onFilesDrop: (files: Files) => void;
-  validate?: (result: string | ArrayBuffer | null, file: File) => boolean;
+export type Files<T extends FileReadType> = {
+  content: FileResult<T>;
+  file: File;
+}[];
+
+interface Props<T extends FileReadType> extends PropsWithChildren {
+  onFilesDrop: (files: Files<T>) => void;
+  validate?: (content: FileResult<T>, file: File) => boolean;
   title?: string;
   subTitle?: string;
   maxFileSizeInMb?: number;
   maxFileSizeMessage?: ReactNode;
   maxFileSizeErrorMessage?: ReactNode;
   className?: string;
+  type: T;
 }
 
-export const Dropzone: React.FC<Props> = (props: Props) => {
+export function Dropzone<T extends FileReadType>(props: Props<T>) {
   const {
     onFilesDrop,
     validate,
@@ -42,7 +50,7 @@ export const Dropzone: React.FC<Props> = (props: Props) => {
   const [error, setError] = React.useState<Error | false>(false);
 
   const handleDrop = (files: File[]): void => {
-    const fileValue: Files = [];
+    const fileValue: Files<T> = [];
 
     const totalSize = files.reduce((acc, file) => acc + file.size, 0);
 
@@ -61,10 +69,10 @@ export const Dropzone: React.FC<Props> = (props: Props) => {
       const reader = new FileReader();
 
       reader.onload = () => {
-        const result = reader.result;
-        const isValid = validate ? validate(result, file) : true;
+        const content = reader.result as FileResult<T>;
+        const isValid = validate ? validate(content, file) : true;
         if (isValid) {
-          fileValue.push({ result, file });
+          fileValue.push({ content, file });
         } else {
           handleError();
         }
@@ -74,7 +82,12 @@ export const Dropzone: React.FC<Props> = (props: Props) => {
         }
       };
       reader.onerror = handleError;
-      reader.readAsText(file);
+
+      if (props.type === 'string') {
+        reader.readAsText(file);
+      } else {
+        reader.readAsArrayBuffer(file);
+      }
     });
   };
 
@@ -127,4 +140,4 @@ export const Dropzone: React.FC<Props> = (props: Props) => {
       )}
     </>
   );
-};
+}

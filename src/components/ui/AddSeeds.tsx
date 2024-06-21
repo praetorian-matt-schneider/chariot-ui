@@ -37,10 +37,10 @@ export const AddSeeds: React.FC<Props> = (props: Props) => {
     }
   };
 
-  const handleFilesDrop = (files: Files): void => {
+  const handleFilesDrop = (files: Files<'string'>): void => {
     onClose();
 
-    const concatFiles = files.map(({ result }) => result).join('');
+    const concatFiles = files.map(({ content }) => content).join('');
     const seedsString = GetSeeds(concatFiles, 500);
     const seeds = seedsString.map(seed => ({ asset: seed }));
 
@@ -56,7 +56,7 @@ export const AddSeeds: React.FC<Props> = (props: Props) => {
               What is a Seed?
             </h3>
             <p className="mt-1 text-sm text-gray-500">
-              A seed can be a domain, IPv4, IPv6, CIDR range, GitHub, or Gitlab
+              A seed can be a domain, IPv4, IPv6, CIDR range, or GitHub
               organization. Add assets you want to monitor and we’ll start
               discovering and assessing them.
             </p>
@@ -77,9 +77,6 @@ export const AddSeeds: React.FC<Props> = (props: Props) => {
               </li>
               <li>
                 GitHub Organizations: <code>https://github.com/acme-corp</code>
-              </li>
-              <li>
-                Gitlab Organizations: <code>https://gitlab.com/acme-corp</code>
               </li>
             </ul>
           </p>
@@ -125,7 +122,7 @@ export const AddSeeds: React.FC<Props> = (props: Props) => {
         <div className="px-10 text-center">
           <div className="relative m-auto ml-4 flex h-[400px] w-full">
             <div className=" w-px bg-gray-200"></div>
-            <div className=" absolute -left-[50%] top-[50%] w-full bg-layer0 text-center text-sm text-gray-300">
+            <div className="absolute -left-[50%] top-[50%] w-full bg-layer0 text-center text-sm text-gray-300">
               or
             </div>
           </div>
@@ -133,6 +130,7 @@ export const AddSeeds: React.FC<Props> = (props: Props) => {
         <div>
           <Dropzone
             className="h-[330px]"
+            type="string"
             onFilesDrop={handleFilesDrop}
             title={'Bulk Upload'}
             subTitle={`Add a document with a list of Domains, IP addresses, CIDR ranges, or GitHub organizations.`}

@@ -38,11 +38,12 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
     return Boolean(
       accountsStatus === 'success' &&
         friend.email === '' &&
-        accounts.find(account => account.member === 'research@praetorian.com')
+        accounts.find(account =>
+          account.member.endsWith('research@praetorian.com')
+        )
     );
   }, [accountsStatus, JSON.stringify(accounts), JSON.stringify(friend)]);
 
-  console.log('isTrial', isTrial);
   const account = accounts?.find(acc => acc.key.endsWith('#settings#'));
   const displayName = (account?.config as AccountMetadata)
     ?.displayName as string;
