@@ -100,11 +100,7 @@ const appRoutes = {
       title: 'Documents',
     },
     integrations: {
-      element: (
-        <Body>
-          <Integrations />
-        </Body>
-      ),
+      element: <Integrations />,
       title: 'Integrations',
     },
     '*': <Navigate to="/app/risks" replace />,
