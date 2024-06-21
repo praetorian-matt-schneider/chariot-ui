@@ -106,7 +106,6 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     const prefix = useMemo(() => {
     let prefixValue = '';
     attributes.forEach(attribute => {
-      attribute.dns = dns;
       if (attribute.class === 'SOW') {
         prefixValue = attribute.name + '/';
       }
