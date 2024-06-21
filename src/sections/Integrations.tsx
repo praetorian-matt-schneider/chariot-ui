@@ -108,6 +108,15 @@ const Integrations: React.FC = () => {
     return computeFilteredIntegrations();
   }, [integrationTypeFilter, JSON.stringify(IntegrationsMeta)]);
 
+  const integrationCounts = {} as Record<string, number>;
+  IntegrationsMeta.map(integrationMeta => {
+    integrationMeta.types?.map(type => {
+      integrationCounts[type] = integrationCounts[type]
+        ? integrationCounts[type] + 1
+        : 1;
+    });
+  });
+
   return (
     <div className="flex size-full h-max flex-wrap justify-left gap-5 overflow-x-auto pb-4">
       <TableFilters
@@ -124,6 +133,7 @@ const Integrations: React.FC = () => {
                   {
                     label: 'All Integrations',
                     value: '',
+                    labelSuffix: IntegrationsMeta.length,
                   },
                   {
                     label: 'Divider',
@@ -133,6 +143,7 @@ const Integrations: React.FC = () => {
                     return {
                       label: integrationType,
                       value: integrationType,
+                      labelSuffix: integrationCounts[integrationType] || 0,
                     };
                   }),
                 ],
