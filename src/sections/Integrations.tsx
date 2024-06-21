@@ -132,10 +132,7 @@ const Integrations: React.FC = () => {
                 {
                   label: 'All Integrations',
                   value: '',
-                  labelSuffix: Object.keys(integrationCounts).reduce(
-                    (acc, key) => acc + integrationCounts[key],
-                    0
-                  ),
+                  labelSuffix: filteredIntegrations.length,
                 },
                 {
                   label: 'Divider',
