@@ -4,13 +4,13 @@ import { Link } from 'react-router-dom';
 import { InformationCircleIcon } from '@heroicons/react/24/solid';
 
 import { create as createSeed, useBulkAddSeed } from '@/hooks/useSeeds';
+import { IntegrationType } from '@/types';
 import { AllowedSeedRegex, GetSeeds } from '@/utils/regex.util';
 
 import { Button } from '../Button';
 import { Dropzone, Files } from '../Dropzone';
 import { Modal } from '../Modal';
 import { Tooltip } from '../Tooltip';
-import { IntegrationType } from '@/types';
 
 interface Props {
   isOpen: boolean;
@@ -82,18 +82,22 @@ export const AddSeeds: React.FC<Props> = (props: Props) => {
             </ul>
           </p>
           <p className="mt-1 text-sm text-gray-500">
-            We will monitor these seeds, discover any associated assets you may
-            have missed, and identify risks, enhancing your security by
-            mitigating threats early.
-          </p>
-          <p className="mt-1 text-sm text-gray-500">
-            You can also add seeds by creating asset discovery integrations{' '}
+            Connect with{' '}
+            <i>GitHub, AWS, NS1, Google Cloud, Azure, CrowdStrike,</i>
+            and <i>GitLab</i> through our{' '}
             <Link
               to={'/app/integrations?type=' + IntegrationType.AssetDiscovery}
               className="underline"
             >
-              on the integrations page.
-            </Link>
+              integrations page
+            </Link>{' '}
+            to enhance visibility into your attack surface and improve our risk
+            detection capabilities.
+          </p>
+          <p className="mt-1 text-sm text-gray-500">
+            We will monitor these seeds, discover any associated assets you may
+            have missed, and identify risks, enhancing your security by
+            mitigating threats early.
           </p>
 
           <div className="flex-1"></div>
