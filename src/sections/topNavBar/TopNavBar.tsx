@@ -33,7 +33,7 @@ export function TopNavBar() {
                 {
                   label: 'Seeds',
                   description:
-                    'A seed is a starting point such as a domain or IP for monitoring and discovery.',
+                    'Starting point such as a domain or IP for monitoring and discovery.',
                   helpText: <Shortcuts value="S" />,
                   icon: <SeedsIcon />,
                   to: getRoute(['app', 'seeds']),
@@ -41,7 +41,7 @@ export function TopNavBar() {
                 {
                   label: 'Assets',
                   description:
-                    'An asset is a discovered resource from seeds, like servers, databases, and applications.',
+                    'Discovered resource from seeds, like servers, databases, and applications.',
                   helpText: <Shortcuts value="A" />,
                   icon: <AssetsIcon />,
                   to: getRoute(['app', 'assets']),
@@ -49,7 +49,7 @@ export function TopNavBar() {
                 {
                   label: 'Risks',
                   description:
-                    'A risk is a potential security threat or vulnerability identified within your assets.',
+                    'Potential security threat or vulnerability identified within your assets.',
                   helpText: <Shortcuts value="R" />,
                   icon: <RisksIcon />,
                   to: getRoute(['app', 'risks']),
