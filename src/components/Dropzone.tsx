@@ -8,18 +8,18 @@ import { mbToBytes } from '@/utils/file.util';
 
 import { Snackbar } from './Snackbar';
 
-type FilReadType = 'string' | 'arrayBuffer';
+type FileReadType = 'string' | 'arrayBuffer';
 
-export type FileResult<T extends FilReadType> = T extends 'string'
+export type FileResult<T extends FileReadType> = T extends 'string'
   ? string
   : ArrayBuffer;
 
-export type Files<T extends FilReadType> = {
+export type Files<T extends FileReadType> = {
   content: FileResult<T>;
   file: File;
 }[];
 
-interface Props<T extends FilReadType> extends PropsWithChildren {
+interface Props<T extends FileReadType> extends PropsWithChildren {
   onFilesDrop: (files: Files<T>) => void;
   validate?: (content: FileResult<T>, file: File) => boolean;
   title?: string;
@@ -31,7 +31,7 @@ interface Props<T extends FilReadType> extends PropsWithChildren {
   type: T;
 }
 
-export function Dropzone<T extends FilReadType>(props: Props<T>) {
+export function Dropzone<T extends FileReadType>(props: Props<T>) {
   const {
     onFilesDrop,
     validate,
