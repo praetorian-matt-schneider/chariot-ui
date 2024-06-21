@@ -103,7 +103,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     { enabled: open }
   );
 
-    const prefix = useMemo(() => {
+  const prefix = useMemo(() => {
     let prefixValue = '';
     attributes.forEach(attribute => {
       if (attribute.class === 'SOW') {
