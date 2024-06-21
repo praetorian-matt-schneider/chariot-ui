@@ -1,11 +1,23 @@
 import { capitalize } from '@/utils/lodash.util';
 
-export const FilterCounts = ({
-  count,
-  type,
-}: {
+interface Props {
   count: number;
   type: string;
-}) => (
-  <span className="ml-auto text-2xl font-bold">{`${count.toLocaleString()} ${capitalize(type)} Shown`}</span>
-);
+  total?: number;
+}
+
+export const FilterCounts: React.FC<Props> = ({
+  count,
+  type,
+  total,
+}: Props) => {
+  return (
+    <>
+      {total ? (
+        <span className="ml-auto text-2xl font-bold">{`${count.toLocaleString()} / ${total.toLocaleString()} ${capitalize(type)} Shown`}</span>
+      ) : (
+        <span className="ml-auto text-2xl font-bold">{`${count.toLocaleString()} ${capitalize(type)} Shown`}</span>
+      )}
+    </>
+  );
+};

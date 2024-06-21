@@ -86,7 +86,11 @@ const Integrations: React.FC = () => {
     [integrationList, unlink]
   );
 
-  const [integrationTypeFilter, setIntegrationTypeFilter] = useFilter('');
+  const url = new URL(window.location.href);
+  const initialFilter = url.searchParams.get('type') || '';
+
+  const [integrationTypeFilter, setIntegrationTypeFilter] =
+    useFilter(initialFilter);
   const filteredIntegrations = useMemo(() => {
     const computeFilteredIntegrations = () => {
       if (integrationTypeFilter) {
@@ -103,6 +107,15 @@ const Integrations: React.FC = () => {
     return computeFilteredIntegrations();
   }, [integrationTypeFilter, JSON.stringify(IntegrationsMeta)]);
 
+  const integrationCounts = {} as Record<string, number>;
+  IntegrationsMeta.map(integrationMeta => {
+    integrationMeta.types?.map(type => {
+      integrationCounts[type] = integrationCounts[type]
+        ? integrationCounts[type] + 1
+        : 1;
+    });
+  });
+
   return (
     <Body
       filters={
@@ -118,6 +131,10 @@ const Integrations: React.FC = () => {
                 {
                   label: 'All Integrations',
                   value: '',
+                  labelSuffix: Object.keys(integrationCounts).reduce(
+                    (acc, key) => acc + integrationCounts[key],
+                    0
+                  ),
                 },
                 {
                   label: 'Divider',
@@ -127,6 +144,7 @@ const Integrations: React.FC = () => {
                   return {
                     label: integrationType,
                     value: integrationType,
+                    labelSuffix: integrationCounts[integrationType],
                   };
                 }),
               ],

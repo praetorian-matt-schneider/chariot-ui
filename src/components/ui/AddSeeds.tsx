@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { InformationCircleIcon } from '@heroicons/react/24/solid';
 
 import { create as createSeed, useBulkAddSeed } from '@/hooks/useSeeds';
+import { IntegrationType } from '@/types';
 import { AllowedSeedRegex, GetSeeds } from '@/utils/regex.util';
 
 import { Button } from '../Button';
@@ -79,6 +80,19 @@ export const AddSeeds: React.FC<Props> = (props: Props) => {
                 GitHub Organizations: <code>https://github.com/acme-corp</code>
               </li>
             </ul>
+          </p>
+          <p className="mt-1 text-sm text-gray-500">
+            Connect with{' '}
+            <i>GitHub, AWS, NS1, Google Cloud, Azure, CrowdStrike,</i>
+            and <i>GitLab</i> through our{' '}
+            <Link
+              to={'/app/integrations?type=' + IntegrationType.AssetDiscovery}
+              className="underline"
+            >
+              integrations page
+            </Link>{' '}
+            to enhance visibility into your attack surface and improve our risk
+            detection capabilities.
           </p>
           <p className="mt-1 text-sm text-gray-500">
             We will monitor these seeds, discover any associated assets you may
