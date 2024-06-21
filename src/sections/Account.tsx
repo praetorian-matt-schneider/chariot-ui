@@ -1,10 +1,14 @@
-import React, { PropsWithChildren, useEffect, useMemo, useState } from 'react';
+import React, { PropsWithChildren, useEffect, useState } from 'react';
 import MD5 from 'crypto-js/md5';
 
 import { Button } from '@/components/Button';
 import { Input } from '@/components/form/Input';
 import { Paper } from '@/components/Paper';
-import { useModifyAccount } from '@/hooks/useAccounts';
+import {
+  useGetCollaboratorEmails,
+  useGetDisplayName,
+  useModifyAccount,
+} from '@/hooks/useAccounts';
 import { useMy } from '@/hooks/useMy';
 import { useAuth } from '@/state/auth';
 
@@ -17,33 +21,17 @@ const Account: React.FC = () => {
   const { me, friend } = useAuth();
   const { data, status } = useMy({ resource: 'account' });
   const { mutate: updateAccount } = useModifyAccount('updateSetting');
-  const account = useMemo(
-    () => data?.find(acc => acc.key.endsWith('#settings#')),
-    [data]
-  );
-  const accountDisplayName = account?.config?.displayName || '';
+  const accountDisplayName = useGetDisplayName(data);
   const isDirty = status === 'success' && accountDisplayName !== displayName;
   const header = MD5(friend.email || me).toString();
 
   useEffect(() => {
     if (status === 'success') {
-      setDisplayName((account?.config?.displayName as string) || '');
+      setDisplayName(accountDisplayName);
     }
-  }, [status, account]);
+  }, [status, accountDisplayName]);
 
-  const collaborators = useMemo(
-    () =>
-      data
-        ?.filter(
-          acc =>
-            !acc.key.endsWith('#settings#') && acc?.member === acc?.username
-        )
-        .map(acc => ({
-          email: acc.name,
-          displayName: acc?.config?.displayName ?? acc.name,
-        })),
-    [data]
-  );
+  const collaborators = useGetCollaboratorEmails(data);
 
   return (
     <div className="flex h-max w-full flex-col gap-8">

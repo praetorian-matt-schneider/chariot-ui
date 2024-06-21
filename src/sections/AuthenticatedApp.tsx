@@ -6,6 +6,7 @@ import { BreadCrumbs } from '@/components/BreadCrumbs';
 import { Loader } from '@/components/Loader';
 import { ShortcutsHelper } from '@/components/ui/Shortcuts';
 import { useMy } from '@/hooks';
+import { useGetDisplayName } from '@/hooks/useAccounts';
 import { DetailsDrawer } from '@/sections/detailsDrawer';
 import { NewUserSeedModal } from '@/sections/NewUserSeedModal';
 import { ProofOfExploit } from '@/sections/ProofOfExploit';
@@ -13,7 +14,6 @@ import { TopNavBar } from '@/sections/topNavBar/TopNavBar';
 import { Upgrade } from '@/sections/Upgrade';
 import { useAuth } from '@/state/auth';
 import { useBreadCrumbsContext } from '@/state/breadcrumbs';
-import { AccountMetadata } from '@/types';
 import { cn } from '@/utils/classname';
 import { getRoute } from '@/utils/route.util';
 
@@ -41,9 +41,7 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
     );
   }, [accountsStatus, JSON.stringify(accounts), JSON.stringify(friend)]);
 
-  const account = accounts?.find(acc => acc.key.endsWith('#settings#'));
-  const displayName = (account?.config as AccountMetadata)
-    ?.displayName as string;
+  const displayName = useGetDisplayName(accounts);
 
   const navigate = useNavigate();
   const [shortcutsHelper, setShortcutsHelper] = useState(false);
