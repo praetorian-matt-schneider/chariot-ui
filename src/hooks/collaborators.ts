@@ -30,7 +30,7 @@ export function useGetCollaborators(props?: CollaboratorProps) {
     {
       resource: 'account',
     },
-    { doNotImpersonate: true }
+    { doNotImpersonate: props?.doNotImpersonate }
   );
 
   const collaboratorEmails = useMemo(() => {
