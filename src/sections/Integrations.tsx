@@ -86,7 +86,11 @@ const Integrations: React.FC = () => {
     [integrationList, unlink]
   );
 
-  const [integrationTypeFilter, setIntegrationTypeFilter] = useFilter('');
+  const searchParams = new URLSearchParams(location.search);
+  const initialFilter = searchParams.get('type') || '';
+
+  const [integrationTypeFilter, setIntegrationTypeFilter] =
+    useFilter(initialFilter);
   const filteredIntegrations = useMemo(() => {
     const computeFilteredIntegrations = () => {
       if (integrationTypeFilter) {
@@ -133,6 +137,12 @@ const Integrations: React.FC = () => {
                 ],
                 onClick: value => {
                   setIntegrationTypeFilter(value || '');
+                  if (value) {
+                    searchParams.set('type', value);
+                  } else {
+                    searchParams.delete('type');
+                  }
+                  location.search = searchParams.toString();
                 },
                 value: integrationTypeFilter,
               }}
