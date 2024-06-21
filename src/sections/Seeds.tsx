@@ -18,7 +18,6 @@ import { showBulkSnackbar, Snackbar } from '@/components/Snackbar';
 import { Table } from '@/components/table/Table';
 import { ActionsWithRowSelection, Columns } from '@/components/table/types';
 import { AddSeeds } from '@/components/ui/AddSeeds';
-import { FilterCounts } from '@/components/ui/FilterCounts';
 import { useModifyAccount, useMy } from '@/hooks';
 import { useCounts } from '@/hooks/useCounts';
 import { useFilter } from '@/hooks/useFilter';
@@ -40,6 +39,7 @@ import {
 } from '../types';
 
 import { useOpenDrawer } from './detailsDrawer/useOpenDrawer';
+import FilterCounts from '@/components/ui/FilterCounts';
 
 const isFrozen = (item: Seed) => {
   return item?.status[0] === SeedStatus.Frozen;

@@ -18,6 +18,7 @@ import { Account, IntegrationType } from '../types';
 import { TableFilters } from '@/components/table/TableFilters';
 import { Dropdown } from '@/components/Dropdown';
 import { useFilter } from '@/hooks/useFilter';
+import FilterCounts from '@/components/ui/FilterCounts';
 
 function getButtonText(integration: IntegrationMeta) {
   const { name, connected, issue } = integration;
@@ -146,6 +147,11 @@ const Integrations: React.FC = () => {
                 },
                 value: integrationTypeFilter,
               }}
+            />
+            <FilterCounts
+              count={filteredIntegrations.length}
+              total={IntegrationsMeta.length}
+              type="Integrations"
             />
           </div>
         }
