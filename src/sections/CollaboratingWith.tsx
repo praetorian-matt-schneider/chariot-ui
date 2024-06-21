@@ -3,22 +3,13 @@ import { ArrowDownOnSquareStackIcon } from '@heroicons/react/24/solid';
 
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
-import useAccountDetails from '@/hooks/useAccountDetails';
+import { useGetCollaborators } from '@/hooks/collaborators';
 import useRiskDetails from '@/hooks/useRiskDetails';
 import { useAuth } from '@/state/auth';
 import { exportContent } from '@/utils/download.util';
 
-interface EmailData {
-  email: string;
-  displayName: string;
-}
-
-interface Props {
-  emails: EmailData[];
-}
-
 interface TableData {
-  displayName?: string;
+  displayName: string;
   email: string;
   total: number;
   low: number;
@@ -27,55 +18,53 @@ interface TableData {
   critical: number;
 }
 
-export const CollaboratingWith: React.FC<Props> = ({ emails }) => {
+export const CollaboratingWith = () => {
   const { startImpersonation } = useAuth();
   const fetchRiskDetails = useRiskDetails();
-  const { accountDetails, loading } = useAccountDetails(
-    emails.map(e => e.email)
-  );
+  const { data: collaborators, status } = useGetCollaborators({
+    getRiskCounts: true,
+  });
 
-  const tableData = useMemo(() => {
-    const data: TableData[] = [];
-    Object.keys(accountDetails).forEach(email => {
+  const collaboratorsWithCount = useMemo(() => {
+    return collaborators.map((collaborator): TableData => {
       const counts = { total: 0, low: 0, medium: 0, high: 0, critical: 0 };
-      let displayName = '';
-      Object.keys(accountDetails[email]).forEach(key => {
-        const val = accountDetails[email][key];
-        if (key === 'displayName' && val !== undefined) {
-          displayName = String(val);
-          return;
-        }
 
-        // Hide non-open status and info severity risks
-        // These were deemed not important enough to show in the table
-        if (key[0] !== 'O' || key[1] === 'I') return;
+      if (collaborator.counts) {
+        Object.keys(collaborator.counts).forEach(key => {
+          const val = collaborator.counts![key];
 
-        if (key.length === 2) {
-          counts.total += val;
-        }
-        switch (key[1]) {
-          case 'L':
-            counts.low += val;
-            break;
-          case 'M':
-            counts.medium += val;
-            break;
-          case 'H':
-            counts.high += val;
-            break;
-          case 'C':
-            counts.critical += val;
-            break;
-        }
-      });
-      data.push({
-        email,
-        displayName: displayName || email,
+          // Hide non-open status and info severity risks
+          // These were deemed not important enough to show in the table
+          if (key[0] !== 'O' || key[1] === 'I') return;
+
+          if (key.length === 2) {
+            counts.total += val;
+          }
+
+          switch (key[1]) {
+            case 'L':
+              counts.low += val;
+              break;
+            case 'M':
+              counts.medium += val;
+              break;
+            case 'H':
+              counts.high += val;
+              break;
+            case 'C':
+              counts.critical += val;
+              break;
+          }
+        });
+      }
+
+      return {
+        displayName: collaborator.displayName,
+        email: collaborator.email,
         ...counts,
-      });
+      };
     });
-    return data;
-  }, [accountDetails]);
+  }, [JSON.stringify(collaborators)]);
 
   const downloadRisks = async (email: string, filetype: 'json' | 'csv') => {
     const risks = await fetchRiskDetails(email);
@@ -124,8 +113,8 @@ export const CollaboratingWith: React.FC<Props> = ({ emails }) => {
         className="border-none p-0 shadow-none"
         name="collaborators"
         columns={columns}
-        data={tableData}
-        status={loading ? 'pending' : 'success'}
+        data={collaboratorsWithCount}
+        status={status}
         loadingRowCount={3}
         noData={{
           description: 'No collaborating organizations found.',

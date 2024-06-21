@@ -1,5 +1,3 @@
-import { AxiosHeaders, RawAxiosRequestHeaders } from 'axios';
-
 import { UseExtendQueryOptions, useQuery } from '@/utils/api';
 
 import { GenericResource } from '../types';
@@ -9,17 +7,11 @@ import { useAxios } from './useAxios';
 import { getQueryKey } from './useQueryKeys';
 
 export const useGenericSearch = (
-  {
-    query,
-    headers,
-  }: {
-    query: string;
-    headers?: {
-      common?: RawAxiosRequestHeaders;
-    };
-  },
+  props: { query: string },
   options?: UseExtendQueryOptions<GenericResource>
 ) => {
+  const { query } = props;
+
   const axios = useAxios();
   return useQuery<GenericResource>({
     ...options,
@@ -31,7 +23,6 @@ export const useGenericSearch = (
         params: {
           key: query,
         },
-        headers: (headers as unknown as AxiosHeaders) || undefined,
       });
 
       if (data.assets) {
