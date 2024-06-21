@@ -65,7 +65,7 @@ export const AccountDropdown: React.FC = () => {
             onClick: () => friend?.email && stopImpersonation(),
           },
           ...collaborators.map(collaborator => ({
-            label: collaborator.displayName,
+            label: collaborator.displayName || collaborator.email,
             icon: (
               <Avatar
                 account={String(collaborator.email)}
