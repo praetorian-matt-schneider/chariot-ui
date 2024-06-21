@@ -87,8 +87,8 @@ const Integrations: React.FC = () => {
     [integrationList, unlink]
   );
 
-  const searchParams = new URLSearchParams(location.search);
-  const initialFilter = searchParams.get('type') || '';
+  const url = new URL(window.location.href);
+  const initialFilter = url.searchParams.get('type') || '';
 
   const [integrationTypeFilter, setIntegrationTypeFilter] =
     useFilter(initialFilter);
@@ -139,11 +139,11 @@ const Integrations: React.FC = () => {
                 onClick: value => {
                   setIntegrationTypeFilter(value || '');
                   if (value) {
-                    searchParams.set('type', value);
+                    url.searchParams.set('type', value);
                   } else {
-                    searchParams.delete('type');
+                    url.searchParams.delete('type');
                   }
-                  location.search = searchParams.toString();
+                  window.history.pushState(null, '', url.toString());
                 },
                 value: integrationTypeFilter,
               }}
