@@ -38,9 +38,7 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
     return Boolean(
       accountsStatus === 'success' &&
         friend.email === '' &&
-        accounts.find(account =>
-          account.member.endsWith('research@praetorian.com')
-        )
+        accounts.find(account => account.member.endsWith('praetorian.com'))
     );
   }, [accountsStatus, JSON.stringify(accounts), JSON.stringify(friend)]);
 
