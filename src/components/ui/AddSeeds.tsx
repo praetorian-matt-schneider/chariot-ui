@@ -10,6 +10,7 @@ import { Button } from '../Button';
 import { Dropzone, Files } from '../Dropzone';
 import { Modal } from '../Modal';
 import { Tooltip } from '../Tooltip';
+import { IntegrationType } from '@/types';
 
 interface Props {
   isOpen: boolean;
@@ -84,6 +85,15 @@ export const AddSeeds: React.FC<Props> = (props: Props) => {
             We will monitor these seeds, discover any associated assets you may
             have missed, and identify risks, enhancing your security by
             mitigating threats early.
+          </p>
+          <p className="mt-1 text-sm text-gray-500">
+            You can also add seeds by creating asset discovery integrations{' '}
+            <Link
+              to={'/app/integrations?type=' + IntegrationType.AssetDiscovery}
+              className="underline"
+            >
+              on the integrations page.
+            </Link>
           </p>
 
           <div className="flex-1"></div>
