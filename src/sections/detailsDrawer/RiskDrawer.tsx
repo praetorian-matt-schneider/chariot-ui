@@ -86,7 +86,6 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
 
   const referenceFilter = `#${dns}#${name}`;
   const attributeFilter = `#${dns}#${dns}`;
-  var prefix : string = '';
 
   const [isEditingMarkdown, setIsEditingMarkdown] = useState(false);
   const [markdownValue, setMarkdownValue] = useState('');
@@ -104,11 +103,16 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     { enabled: open }
   );
 
-  attributes.forEach(attribute => {
-    attribute.dns = dns;
-    if (attribute.class == 'SOW')
-      prefix = attribute.name + '/';
-  })
+    const prefix = useMemo(() => {
+    let prefixValue = '';
+    attributes.forEach(attribute => {
+      attribute.dns = dns;
+      if (attribute.class === 'SOW') {
+        prefixValue = attribute.name + '/';
+      }
+    });
+    return prefixValue;
+  }, [attributes, dns]);
 
   const {
     data: risks = [],
