@@ -40,3 +40,21 @@ export function generatePathWithSearch({
     search: searchParams.toString(),
   };
 }
+
+export async function checkIsImageUrlValid(url: string) {
+  return new Promise(resolve => {
+    const img = new Image();
+
+    img.onload = function () {
+      // Image loaded successfully
+      resolve(true);
+    };
+
+    img.onerror = function () {
+      // An error occurred while loading the image
+      resolve(false);
+    };
+
+    img.src = url;
+  });
+}

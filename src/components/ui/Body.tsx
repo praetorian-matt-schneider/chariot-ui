@@ -9,10 +9,10 @@ export const Body = forwardRef(function Paper(
   props: React.DetailedHTMLProps<
     React.HTMLAttributes<HTMLDivElement>,
     HTMLDivElement
-  > & { footer?: boolean; header?: boolean },
+  > & { footer?: boolean; header?: boolean; filters?: JSX.Element },
   ref?: React.Ref<HTMLDivElement>
 ) {
-  const { footer = true, header = true, ...rest } = props;
+  const { footer = true, header = true, filters, ...rest } = props;
 
   return (
     <div
@@ -25,7 +25,7 @@ export const Body = forwardRef(function Paper(
       style={{ overflowAnchor: 'none' }}
     >
       <div>
-        {header && <Header />}
+        {header && <Header filters={filters} />}
         <div
           className={cn(
             'mx-auto w-full max-w-screen-xl rounded-sm',

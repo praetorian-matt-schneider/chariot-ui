@@ -146,7 +146,10 @@ const ImpersonationBanner: React.FC = () => {
   );
 };
 
-export function Header() {
+interface HeaderProps {
+  filters?: JSX.Element;
+}
+export function Header({ filters }: HeaderProps) {
   const { friend } = useAuth();
   const { status: statusAccount } = useMy({ resource: 'account' });
   const { breadcrumbs } = useBreadCrumbsContext();
@@ -175,7 +178,8 @@ export function Header() {
             </Loader>
             <div id="table-buttons" />
           </div>
-          <div id="table-filters" />
+          {!filters && <div id="table-filters" />}
+          {filters && <div className="mb-9">{filters}</div>}
         </div>
       </div>
     </>

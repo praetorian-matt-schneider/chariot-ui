@@ -4,7 +4,7 @@ import { ChevronDownIcon } from '@heroicons/react/20/solid';
 
 import { Dropdown } from '@/components/Dropdown';
 import GlobalSearch from '@/components/GlobalSearch';
-import Hexagon from '@/components/Hexagon';
+import { Hexagon } from '@/components/Hexagon';
 import { AssetsIcon, RisksIcon, SeedsIcon } from '@/components/icons';
 import { LogoIcon } from '@/components/icons/Logo.icon';
 import { Shortcuts } from '@/components/ui/Shortcuts';
