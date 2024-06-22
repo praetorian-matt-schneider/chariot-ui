@@ -314,50 +314,52 @@ const Assets: React.FC = () => {
       <Table
         name="assets"
         filters={
-          <div className="flex gap-4">
-            <Dropdown
-              styleType="header"
-              label={
-                selectedFilter ? AssetLabels[selectedFilter] : 'All Assets'
-              }
-              endIcon={
-                <ChevronDownIcon className="size-3 stroke-[4px] text-header-dark" />
-              }
-              menu={{
-                items: [
-                  {
-                    label: 'All Assets',
-                    labelSuffix: Object.keys(stats)
-                      .reduce((acc, key) => acc + stats[key], 0)
-                      .toLocaleString(),
-                    value: '',
+          <div>
+            <div className="flex gap-4">
+              <Dropdown
+                styleType="header"
+                label={
+                  selectedFilter ? AssetLabels[selectedFilter] : 'All Assets'
+                }
+                endIcon={
+                  <ChevronDownIcon className="size-3 stroke-[4px] text-header-dark" />
+                }
+                menu={{
+                  items: [
+                    {
+                      label: 'All Assets',
+                      labelSuffix: Object.keys(stats)
+                        .reduce((acc, key) => acc + stats[key], 0)
+                        .toLocaleString(),
+                      value: '',
+                    },
+                    {
+                      label: 'Divider',
+                      type: 'divider',
+                    },
+                    ...Object.entries(AssetLabels).map(([key, label]) => {
+                      return {
+                        label,
+                        labelSuffix: stats[key]?.toLocaleString() || 0,
+                        value: key,
+                      };
+                    }),
+                  ],
+                  onClick: value => {
+                    const pathName = getRoute(['app', 'assets']);
+                    if (value === '') {
+                      navigate(pathName);
+                    } else {
+                      const filter = `class:${value}`;
+                      const searchQuery = `?${StorageKey.GENERIC_SEARCH}=${encodeURIComponent(filter)}`;
+                      navigate(`${pathName}${searchQuery}`);
+                    }
                   },
-                  {
-                    label: 'Divider',
-                    type: 'divider',
-                  },
-                  ...Object.entries(AssetLabels).map(([key, label]) => {
-                    return {
-                      label,
-                      labelSuffix: stats[key]?.toLocaleString() || 0,
-                      value: key,
-                    };
-                  }),
-                ],
-                onClick: value => {
-                  const pathName = getRoute(['app', 'assets']);
-                  if (value === '') {
-                    navigate(pathName);
-                  } else {
-                    const filter = `class:${value}`;
-                    const searchQuery = `?${StorageKey.GENERIC_SEARCH}=${encodeURIComponent(filter)}`;
-                    navigate(`${pathName}${searchQuery}`);
-                  }
-                },
-                value: selectedFilter ?? undefined,
-              }}
-            />
-            <FilterCounts count={assets.length} type="Assets" />
+                  value: selectedFilter ?? undefined,
+                }}
+              />
+              <FilterCounts count={assets.length} type="Assets" />
+            </div>
           </div>
         }
         rowActions={{
