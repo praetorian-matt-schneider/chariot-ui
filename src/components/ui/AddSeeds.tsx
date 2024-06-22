@@ -1,5 +1,4 @@
-import React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { InformationCircleIcon } from '@heroicons/react/24/solid';
 
@@ -20,6 +19,7 @@ interface Props {
 export const AddSeeds: React.FC<Props> = (props: Props) => {
   const { isOpen, onClose } = props;
   const [seedInput, setSeedInput] = useState<string>('');
+  const [errorMessage, setErrorMessage] = useState<string>('');
 
   const { mutate: addSeed } = createSeed();
   const { mutate: bulkAddSeed } = useBulkAddSeed();
@@ -29,12 +29,17 @@ export const AddSeeds: React.FC<Props> = (props: Props) => {
       try {
         const asset = seedInput;
         addSeed({ asset });
+        setErrorMessage(''); // Clear error message on successful add
       } catch (error) {
         console.error(error);
       } finally {
         setSeedInput('');
         onClose();
       }
+    } else {
+      setErrorMessage(
+        'Invalid Seed format. Please provide a supported format.'
+      );
     }
   };
 
@@ -120,6 +125,9 @@ export const AddSeeds: React.FC<Props> = (props: Props) => {
                 className="block w-full rounded-l-[2px] border border-gray-300 bg-layer0 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
               />
             </div>
+            {errorMessage && (
+              <div className="text-sm text-red-500">{errorMessage}</div>
+            )}
             <Button
               styleType="primary"
               type="submit"
