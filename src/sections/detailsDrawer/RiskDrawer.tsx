@@ -1,5 +1,6 @@
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ExclamationCircleIcon } from '@heroicons/react/20/solid';
 import { CheckCircleIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import MDEditor from '@uiw/react-md-editor';
 
@@ -142,6 +143,13 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
 
   const { risks: riskOccurrence = [] } = riskNameGenericSearch || {};
 
+  const { data: threats } = useMy({
+    resource: 'threat',
+  });
+  const knownExploitedThreats = useMemo(() => {
+    return threats.map(threat => threat.name);
+  }, [JSON.stringify(threats)]);
+
   const hostRef = references.find(ref => ref.class === 'host');
   const [ip, port] = hostRef?.name?.split(/:(?=[^:]*$)/) ?? '';
   const urlRefs = references.filter(ref => ref.class === 'url');
@@ -264,7 +272,33 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     >
       <Loader isLoading={isInitialLoading} type="spinner">
         <div className="flex h-full flex-col gap-10">
-          <DetailsDrawerHeader title={risk.name} subtitle={risk.dns} />
+          <DetailsDrawerHeader
+            title={risk.name}
+            subtitle={risk.dns}
+            prefix={
+              knownExploitedThreats.includes(risk.name) && (
+                <Tooltip
+                  title={
+                    <span>
+                      This risk was found in the{' '}
+                      <a
+                        href={`https://nvd.nist.gov/vuln/detail/${risk.name}`}
+                        className="underline"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        CISA Known Exploited Vulnerabilities catalog
+                      </a>
+                      , which helps organizations prioritize and manage
+                      vulnerabilities that are actively being exploited.
+                    </span>
+                  }
+                >
+                  <ExclamationCircleIcon className="size-5 text-error" />
+                </Tooltip>
+              )
+            }
+          />
           <HorizontalTimeline
             steps={jobTimeline}
             current={jobTimeline.findIndex(
