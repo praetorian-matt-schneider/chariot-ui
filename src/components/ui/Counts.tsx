@@ -1,8 +1,6 @@
 import React from 'react';
 
-import { QueryStatus } from '@/utils/api';
-import { cn } from '@/utils/classname';
-
+import { Loader } from '@/components/Loader';
 import {
   AssetLabels,
   DisplaySeverities,
@@ -10,8 +8,9 @@ import {
   JobLabels,
   SeedLabels,
   Statistics,
-} from '../../types';
-import { Loader } from '../Loader';
+} from '@/types';
+import { QueryStatus } from '@/utils/api';
+import { cn } from '@/utils/classname';
 
 type CountType = 'risks' | 'assets' | 'jobs' | 'seeds' | 'files';
 
