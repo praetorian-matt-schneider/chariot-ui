@@ -58,9 +58,11 @@ export function runAggregate<T>(
 ): CountData[] {
   const aggregate = aggregates[aggregateName];
   if (!aggregate) {
-    throw new Error(`Aggregate '${aggregateName}' not found`);
+    console.error(`Aggregate '${aggregateName}' not found`);
+    return [];
+  } else {
+    return aggregate.run(items);
   }
-  return aggregate.run(items);
 }
 
 export function getAggregates<T>(

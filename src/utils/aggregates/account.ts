@@ -6,6 +6,7 @@ import { defineAggregate } from './aggregate';
 
 const getDomainFromEmail = (email: string): string => {
   const domain = email.split('@')[1];
+  if (domain === undefined) return '';
   return isFQDN(domain) ? domain : '';
 };
 
