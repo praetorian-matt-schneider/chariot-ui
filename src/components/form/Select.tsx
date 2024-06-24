@@ -105,6 +105,7 @@ export const Select = (props: InputProps & SelectProps) => {
         aria-describedby={error ? `${name}-error` : name}
         onClick={() => setIsOpen(!isOpen)}
         onKeyUp={event => handleKeyEvent(event)}
+        onBlur={() => setIsOpen(false)}
         tabIndex={0}
         onChange={handleChange}
       />
