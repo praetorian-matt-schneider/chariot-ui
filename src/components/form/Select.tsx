@@ -105,6 +105,7 @@ export const Select = (props: InputProps & SelectProps) => {
         aria-describedby={error ? `${name}-error` : name}
         onClick={() => setIsOpen(!isOpen)}
         onKeyUp={event => handleKeyEvent(event)}
+        onBlur={() => setIsOpen(false)}
         tabIndex={0}
         onChange={handleChange}
       />
@@ -191,7 +192,10 @@ const SelectItem = (props: SelectItemProps) => {
       key={value}
       aria-selected={isSelected}
       data-hovered={isHovered}
-      onClick={() => !disabled && handleSelect({ label, value })}
+      onMouseDown={event => {
+        event.stopPropagation();
+        !disabled && handleSelect({ label, value });
+      }}
       onMouseOver={() => !disabled && setHoverIndex(index)}
       ref={ref}
     >
