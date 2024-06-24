@@ -192,7 +192,10 @@ const SelectItem = (props: SelectItemProps) => {
       key={value}
       aria-selected={isSelected}
       data-hovered={isHovered}
-      onClick={() => !disabled && handleSelect({ label, value })}
+      onMouseDown={event => {
+        event.stopPropagation();
+        !disabled && handleSelect({ label, value });
+      }}
       onMouseOver={() => !disabled && setHoverIndex(index)}
       ref={ref}
     >
