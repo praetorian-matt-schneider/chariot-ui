@@ -424,14 +424,14 @@ export function Risks() {
             />
             <Dropdown
               styleType="header"
-              label={getFilterLabel('Sources', sourceFilter, [
+              label={getFilterLabel('Threat Intel', sourceFilter, [
                 { label: 'CISA KEV', value: 'cisa_kev' },
               ])}
               endIcon={DownIcon}
               menu={{
                 items: [
                   {
-                    label: 'All Sources',
+                    label: 'All Threat Intel',
                     labelSuffix: risksExceptSource.length,
                     value: '',
                   },
