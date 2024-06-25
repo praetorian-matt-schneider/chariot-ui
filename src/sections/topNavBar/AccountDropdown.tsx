@@ -1,5 +1,6 @@
 import { Dropdown } from '@/components/Dropdown';
 import { Hexagon } from '@/components/Hexagon';
+import { Tooltip } from '@/components/Tooltip';
 import { useGetCollaborators } from '@/hooks/collaborators';
 import { useGetDisplayName } from '@/hooks/useAccounts';
 import { useMy } from '@/hooks/useMy';
@@ -69,7 +70,11 @@ export const AccountDropdown: React.FC = () => {
             hide:
               collaboratorsStatus === 'error' ||
               (collaboratorsStatus === 'success' && collaborators.length === 0),
-            label: displayName || me,
+            label: displayName ? (
+              <Tooltip title={me}>{displayName}</Tooltip>
+            ) : (
+              me
+            ),
             icon: (
               <Avatar
                 email={me}
@@ -80,7 +85,13 @@ export const AccountDropdown: React.FC = () => {
             onClick: () => friend?.email && stopImpersonation(),
           },
           ...collaborators.map(collaborator => ({
-            label: collaborator.displayName || collaborator.email,
+            label: collaborator.displayName ? (
+              <Tooltip title={collaborator.email}>
+                {collaborator.displayName}
+              </Tooltip>
+            ) : (
+              collaborator.email
+            ),
             icon: (
               <Avatar
                 email={String(collaborator.email)}
