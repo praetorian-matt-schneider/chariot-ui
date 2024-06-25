@@ -16,6 +16,7 @@ import { useAuth } from '@/state/auth';
 import { useBreadCrumbsContext } from '@/state/breadcrumbs';
 import { cn } from '@/utils/classname';
 import { getRoute } from '@/utils/route.util';
+import { Tooltip } from '@/components/Tooltip';
 
 const offsetViewMargin = 16;
 interface AuthenticatedApp {
@@ -136,12 +137,14 @@ const ImpersonationBanner: React.FC = () => {
       >
         <XMarkIcon className="mr-2 size-4" />
       </button>
-      <div>
-        Viewing{' '}
-        <span className="italic">
-          {friend?.displayName?.length > 0 ? friend.displayName : friend.email}
-        </span>
-      </div>
+      <span>Viewing</span>
+      <span className="ml-1">
+        {friend?.displayName?.length > 0 ? (
+          <Tooltip title={friend.email}>{friend.displayName}</Tooltip>
+        ) : (
+          friend.email
+        )}
+      </span>
     </div>
   );
 };
