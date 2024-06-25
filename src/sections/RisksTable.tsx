@@ -182,7 +182,7 @@ export function Risks() {
         label: 'Status',
         id: 'status',
         className: 'text-left',
-        fixedWidth: 212,
+        fixedWidth: 150,
         cell: (risk: Risk, selectedRowsData?: Risk[]) => {
           return (
             <div className="border-1 flex justify-start ">
@@ -198,7 +198,7 @@ export function Risks() {
       {
         label: 'Severity',
         id: 'status',
-        fixedWidth: 120,
+        fixedWidth: 150,
         cell: (risk: Risk, selectedRowsData?: Risk[]) => {
           return (
             <RiskDropdown
