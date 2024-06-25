@@ -55,13 +55,13 @@ const appRoutes = {
       element: <Logout />,
       title: 'logout',
     },
-    intelligence: {
+    widgets: {
       element: (
         <Body>
           <Intelligence />
         </Body>
       ),
-      title: 'Intelligence',
+      title: 'Widgets',
     },
     assets: {
       element: <Assets />,
