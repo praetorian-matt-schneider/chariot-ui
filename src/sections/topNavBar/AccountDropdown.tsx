@@ -1,10 +1,3 @@
-import {
-  ArrowRightCircleIcon,
-  DocumentTextIcon,
-  PuzzlePieceIcon,
-  UserIcon,
-} from '@heroicons/react/24/solid';
-
 import { Dropdown } from '@/components/Dropdown';
 import { Hexagon } from '@/components/Hexagon';
 import { useGetCollaborators } from '@/hooks/collaborators';
@@ -13,7 +6,13 @@ import { useMy } from '@/hooks/useMy';
 import Avatar from '@/sections/topNavBar/Avatar';
 import { useAuth } from '@/state/auth';
 import { getRoute } from '@/utils/route.util';
-import { ChartBarSquareIcon } from '@heroicons/react/24/outline';
+import {
+  ChartBarSquareIcon,
+  DocumentTextIcon,
+  PuzzlePieceIcon,
+  UserIcon,
+  ArrowRightCircleIcon,
+} from '@heroicons/react/24/outline';
 
 export const AccountDropdown: React.FC = () => {
   const { friend, me, startImpersonation, stopImpersonation } = useAuth();
