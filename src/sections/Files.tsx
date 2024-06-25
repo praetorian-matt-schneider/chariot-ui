@@ -108,6 +108,17 @@ const Files: React.FC = () => {
                   <RisksIcon className="size-5" />
                 </button>
               </Tooltip>
+              <Tooltip title="View File">
+                <button
+                  onClick={() => {
+                    setFiletype('text');
+                    setFilename(item.name);
+                  }}
+                  className="mr-2 text-brand"
+                >
+                  <DocumentIcon className="size-5" />
+                </button>
+              </Tooltip>
               {item.name}
             </div>
           );
