@@ -18,7 +18,7 @@ export function TopNavBar() {
   return (
     <div className="flex flex-col items-center justify-between py-3 md:flex-row">
       <div className="flex w-full items-center">
-        <div className="flex w-full items-center">
+        <div className="flex w-full flex-wrap items-center">
           <Link to={getRoute(['app', 'risks'])}>
             <LogoIcon className="mr-4 size-9" />
           </Link>
@@ -56,26 +56,22 @@ export function TopNavBar() {
               ],
             }}
           />
-          <div className="ml-auto flex items-center md:hidden">
-            <Notifications />
+          <div className="ml-auto flex items-center md:order-last md:ml-0">
+            <div className="ml-4">
+              <Hexagon notify={showNotification}>
+                <Notifications
+                  onNotify={shouldShow => {
+                    setShowNotification(shouldShow);
+                  }}
+                  onClick={() => setShowNotification(false)}
+                />
+              </Hexagon>
+            </div>
             <AccountDropdown />
           </div>
-        </div>
-      </div>
-      <div className="flex w-full items-center md:w-auto">
-        <GlobalSearch />
-        <div className="hidden items-center md:flex">
-          <div className="ml-4">
-            <Hexagon notify={showNotification}>
-              <Notifications
-                onNotify={shouldShow => {
-                  setShowNotification(shouldShow);
-                }}
-                onClick={() => setShowNotification(false)}
-              />
-            </Hexagon>
+          <div className="ml-auto mt-2 w-full md:mt-0 md:w-auto">
+            <GlobalSearch />
           </div>
-          <AccountDropdown />
         </div>
       </div>
     </div>
