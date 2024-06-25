@@ -198,7 +198,7 @@ export function Risks() {
       {
         label: 'Severity',
         id: 'status',
-        fixedWidth: 150,
+        fixedWidth: 130,
         cell: (risk: Risk, selectedRowsData?: Risk[]) => {
           return (
             <RiskDropdown
