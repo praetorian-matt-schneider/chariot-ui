@@ -135,7 +135,7 @@ export const RiskDropdown: React.FC<Props> = ({
     return (
       <>
         <Dropdown
-          className={`justify-between rounded-[2px] py-1 ${className} border-1 border border-gray-200`}
+          className={`justify-between rounded-[2px] py-1 ${className} border-1 min-w-32 border border-gray-200`}
           menu={{
             items: riskStatusOptions,
             onClick: value => {
@@ -222,7 +222,7 @@ export const RiskDropdown: React.FC<Props> = ({
 
   return (
     <Dropdown
-      className={`justify-between rounded-[2px] py-1 ${getSeverityClass(riskSeverityKey)} ${className} border-1 border`}
+      className={`justify-between rounded-[2px] py-1 ${getSeverityClass(riskSeverityKey)} ${className} border-1 min-w-28 border pr-2`}
       menu={{
         items: RiskSeverityOptions,
         onClick: value => {
