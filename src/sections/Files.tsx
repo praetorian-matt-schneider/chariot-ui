@@ -56,6 +56,18 @@ const Files: React.FC = () => {
     downloadFile({ name: item.name });
   }
 
+  function getLabel(item: MyFile) {
+    const label = FileLabels[item.class];
+
+    // Remove pluralization
+    if (label.endsWith('s')) {
+      return label.slice(0, -1);
+    } else if (label.length) {
+      return label;
+    }
+    return item.class;
+  }
+
   const columns: Columns<MyFile> = [
     {
       label: 'Document Name',
@@ -67,9 +79,10 @@ const Files: React.FC = () => {
     //   id: 'type',
     // },
     {
-      label: 'Added By',
-      id: 'username',
+      label: 'Class',
+      id: 'class',
       className: 'w-1/2',
+      cell: (item: MyFile) => getLabel(item),
     },
     {
       label: 'Added',
@@ -107,14 +120,14 @@ const Files: React.FC = () => {
           <div className="flex gap-4">
             <Dropdown
               styleType="header"
-              label={filter ? `${FileLabels[filter]}` : 'All Documents'}
+              label={filter ? `${FileLabels[filter]}` : 'All Classes'}
               endIcon={
                 <ChevronDownIcon className="size-3 stroke-[4px] text-header-dark" />
               }
               menu={{
                 items: [
                   {
-                    label: 'All Documents',
+                    label: 'All Classes',
                     labelSuffix: files.length?.toLocaleString(),
                     value: '',
                   },
