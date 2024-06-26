@@ -74,7 +74,6 @@ const ImpersonationBanner: React.FC = () => {
       <span className="ml-1 font-medium">
         {friend.displayName || friend.email}
       </span>
-      {friend.displayName && <span className="ml-1">({friend.email})</span>}
       <div
         className="cursor-move ml-2 hover:bg-brand-dark rounded-b-[4px] p-1 "
         onMouseDown={handleMouseDown}

@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
-import { MinusCircleIcon } from '@heroicons/react/24/outline';
-import { ChevronDownIcon, PlusCircleIcon } from '@heroicons/react/24/solid';
+import { MinusCircleIcon, PlusCircleIcon } from '@heroicons/react/24/outline';
+import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import { twMerge } from 'tailwind-merge';
 
 import { Button } from '@/components/Button';
@@ -204,9 +204,7 @@ const Integrations: React.FC = () => {
                     'grow basis-1/2 py-4 bg-layer0 rounded-none border-t-2 border-gray-100',
                     integration.connected &&
                       'text-red-600 hover:text-red-500 rounded-br-[2px]',
-                    !integration.connected && !isComingSoon
-                      ? 'text-brand hover:text-brand-hover'
-                      : 'cursor-default'
+                    isComingSoon && 'cursor-default text-disabled'
                   )}
                   startIcon={
                     integration.connected ? (
@@ -217,7 +215,7 @@ const Integrations: React.FC = () => {
                   }
                   onClick={() => !isComingSoon && handleCTA(integration)}
                 >
-                  {isLoading ? 'Loading...' : getButtonText(integration)}
+                  {getButtonText(integration)}
                 </Button>
               </div>
             </div>
