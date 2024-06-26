@@ -3,6 +3,7 @@ import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import {
   ArrowDownCircleIcon,
   DocumentIcon,
+  DocumentTextIcon,
   PhotoIcon,
 } from '@heroicons/react/24/outline';
 
@@ -27,7 +28,7 @@ import FileViewer from '@/components/FileViewer';
 
 const Files: React.FC = () => {
   const navigate = useNavigate();
-  const { getRiskDrawerLink } = useOpenDrawer();
+  const { getRiskDrawerLink, getProofOfExploitLink } = useOpenDrawer();
   const [filename, setFilename] = React.useState('');
   const [filetype, setFiletype] = React.useState('');
   const {
@@ -86,23 +87,22 @@ const Files: React.FC = () => {
       const parts = item.name.split('/');
       const dns = parts.shift() ?? '';
       const name = parts.join('/') ?? '';
-      const link = getRiskDrawerLink({ dns, name });
+      const riskDrawerLink = getRiskDrawerLink({ dns, name });
+      const poeLink = getProofOfExploitLink({ dns, name });
+
       return (
         <div className="flex flex-row mr-2">
           <Tooltip title="View Risk">
-            <button onClick={() => navigate(link)} className="p-0 m-0">
+            <button
+              onClick={() => navigate(riskDrawerLink)}
+              className="p-0 m-0"
+            >
               <RisksIcon className="size-5" />
             </button>
           </Tooltip>
-          <Tooltip title="View File">
-            <button
-              onClick={() => {
-                setFiletype('text');
-                setFilename(item.name);
-              }}
-              className="px-1"
-            >
-              <DocumentIcon className="size-5" />
+          <Tooltip title="View Proof">
+            <button onClick={() => navigate(poeLink)} className="px-1">
+              <DocumentTextIcon className="size-5" />
             </button>
           </Tooltip>
         </div>
