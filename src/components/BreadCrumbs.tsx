@@ -26,7 +26,7 @@ const pageTitles = {
 export function BreadCrumbs({ breadcrumbs }: { breadcrumbs: Breadcrumb[] }) {
   const currentPage = breadcrumbs[breadcrumbs.length - 1].label;
   return (
-    <div className="flex flex-col pt-9 pb-5">
+    <div className="flex flex-col py-9">
       <ul className="flex items-center">
         {breadcrumbs.map((breadcrumb, idx) => {
           return (
