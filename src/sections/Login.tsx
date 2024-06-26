@@ -78,10 +78,10 @@ function Login() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center overflow-hidden rounded-[4px] bg-gray-50 font-sans">
+    <div className="flex min-h-screen flex-col items-center justify-center overflow-hidden rounded-[4px] bg-layer2 font-sans">
       <div
         {...dropzoneProps}
-        className={`w-full max-w-md rounded-b-[4px] ${isDragAccept ? 'border-2 border-dashed bg-gray-50' : 'bg-white'} border border-default`}
+        className={`w-full max-w-md rounded-b-[4px] ${isDragAccept ? 'border-2 border-dashed bg-layer2' : 'bg-white'} border border-default`}
       >
         <input {...getInputProps()} />
         <img

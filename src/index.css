@@ -44,6 +44,7 @@
     /*Layers*/
     --layer0: theme('colors.white');
     --layer1: theme('colors.gray.100');
+    --layer2: theme('colors.gray.50');
 
     /*Primary*/
     --brand-lighter: #ece6fc;

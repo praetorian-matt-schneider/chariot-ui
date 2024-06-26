@@ -183,7 +183,7 @@ const Assets: React.FC = () => {
         if (riskSummary && Object.keys(riskSummary)?.length > 0) {
           return (
             <Link
-              className={`rounded-[2px] hover:bg-gray-50`}
+              className={`rounded-[2px] hover:bg-layer2`}
               to={{
                 pathname: getRoute(['app', 'risks']),
                 search: `?${StorageKey.HASH_SEARCH}=${encodeURIComponent('#' + item.dns)}`,

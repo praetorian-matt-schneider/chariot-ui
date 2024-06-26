@@ -72,7 +72,7 @@ export function TableBody<TData>(props: TableBodyProps<TData>) {
     const isExpanded = expandedGroups.includes(GroupName);
     return (
       <tr
-        className="cursor-pointer border-t border-default bg-layer1 text-sm font-semibold"
+        className="cursor-pointer border-t border-default bg-layer2 text-sm font-semibold"
         key={`row-${rowIndex}`}
         style={{
           height: `${virtualRow.size}px`,

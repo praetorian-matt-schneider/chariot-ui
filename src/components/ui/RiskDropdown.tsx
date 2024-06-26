@@ -228,7 +228,7 @@ export const RiskDropdown: React.FC<Props> = ({
               {riskClosedStatusList.map((riskClosedStatus, index) => (
                 <label
                   key={index}
-                  className="flex cursor-pointer items-center rounded-lg bg-gray-50 p-3 transition duration-150 ease-in-out hover:bg-gray-100"
+                  className="flex cursor-pointer items-center rounded-lg bg-layer2 p-3 transition duration-150 ease-in-out hover:bg-gray-100"
                 >
                   <input
                     type="radio"
