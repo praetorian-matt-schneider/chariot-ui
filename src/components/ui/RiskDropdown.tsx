@@ -189,7 +189,7 @@ export const RiskDropdown: React.FC<Props> = ({
           }}
           startIcon={
             riskStatusOptions.find(option => option.value === riskStatusKey)
-              ?.icon ?? <LockClosedIcon className="size-4" />
+              ?.icon ?? <LockClosedIcon className="size-4 stroke-2" />
           }
           endIcon={<ChevronDownIcon className="size-3 text-default-light" />}
           onClick={event => event.stopPropagation()}
