@@ -156,7 +156,7 @@ const Assets: React.FC = () => {
       fixedWidth: 100,
       align: 'center',
       cell: ({ status }: Asset) => (
-        <AssetStatusChip status={status} className={'px-2 py-1'} />
+        <AssetStatusChip status={status} className={'px-2 py-1 w-20'} />
       ),
     },
     {
