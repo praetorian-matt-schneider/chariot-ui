@@ -36,7 +36,7 @@ export const getStatusColor = (status: JobStatus) => {
 
 const ROW_HEIGHT = 44;
 const EMPTY_ROWS_COUNT = 25;
-const ROW_SPACING = 12;
+const ROW_SPACING = 6;
 
 const getStatusText = (status: JobStatus) => {
   const classes = 'px-1 text-xs leading-5 font-medium rounded-full text-center';
@@ -132,18 +132,6 @@ const JobsTable: React.FC = () => {
   return (
     <div className="flex w-full flex-col">
       <Body ref={parentRef}>
-        {/* <Counts
-          stats={stats}
-          onClick={(label: string) => {
-            if (label === filter && label !== '') {
-              setFilter('');
-            } else {
-              setFilter(label);
-            }
-          }}
-          selected={filter}
-          type="jobs"
-        /> */}
         <TableFilters
           filters={
             <div className="flex gap-4">
@@ -198,7 +186,7 @@ const JobsTable: React.FC = () => {
               return (
                 <div
                   key={job.key}
-                  className="flex items-center rounded-[2px] bg-layer0 text-sm shadow"
+                  className="flex items-center rounded-[2px] bg-layer0 text-sm shadow-md"
                   style={{
                     position: 'absolute',
                     top: 0,
