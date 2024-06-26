@@ -112,6 +112,7 @@ export const FileLabels: Record<string, string> = {
   report: 'Reports',
   proof: 'Proof of Exploits',
   manual: 'Manually Uploaded Files',
+  cti: 'Threat Intelligence',
 };
 
 export const AssetLabels: Record<string, string> = {
