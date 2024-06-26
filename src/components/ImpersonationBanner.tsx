@@ -70,7 +70,7 @@ const ImpersonationBanner: React.FC = () => {
       >
         <XMarkIcon className="h-4 w-4" />
       </button>
-      <span className="text-nowrap">Viewing as:</span>
+      <span className="text-nowrap">Viewing:</span>
       <span className="ml-1 font-medium">
         {friend.displayName || friend.email}
       </span>
