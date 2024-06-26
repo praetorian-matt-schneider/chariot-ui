@@ -10,7 +10,7 @@ const ImpersonationBanner: React.FC = () => {
     { key: 'impersonationPosition' },
     {
       x: 0,
-      y: -500,
+      y: 0,
     }
   );
 
