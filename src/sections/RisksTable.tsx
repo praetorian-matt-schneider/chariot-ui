@@ -27,6 +27,7 @@ import { exportContent } from '@/utils/download.util';
 import { Regex } from '@/utils/regex.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
 import { generatePathWithSearch } from '@/utils/url.util';
+import { Tooltip } from '@/components/Tooltip';
 
 const DownIcon = (
   <ChevronDownIcon className="size-3 stroke-[4px] text-header-dark" />
@@ -227,14 +228,16 @@ export function Risks() {
         label: 'Proof',
         id: '',
         cell: risk => (
-          <Link
-            to={generatePathWithSearch({
-              appendSearch: [[StorageKey.POE, `${risk.dns}/${risk.name}`]],
-            })}
-            className="cursor-pointer"
-          >
-            <DocumentTextIcon className="size-5 text-default-light" />
-          </Link>
+          <Tooltip title="View Proof">
+            <Link
+              to={generatePathWithSearch({
+                appendSearch: [[StorageKey.POE, `${risk.dns}/${risk.name}`]],
+              })}
+              className="cursor-pointer"
+            >
+              <DocumentTextIcon className="size-5 text-default-light" />
+            </Link>
+          </Tooltip>
         ),
         align: 'center',
         fixedWidth: 70,
