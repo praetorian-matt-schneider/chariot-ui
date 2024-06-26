@@ -38,6 +38,7 @@ import { useMergeStatus } from '@/utils/api';
 import { exportContent } from '@/utils/download.util';
 import { getRoute } from '@/utils/route.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
+import { Link } from '@/components/Link';
 
 type Severity = 'I' | 'L' | 'M' | 'H' | 'C';
 type SeverityOpenCounts = Partial<Record<Severity, Risk[]>>;
@@ -181,19 +182,21 @@ const Assets: React.FC = () => {
       cell: (item: AssetsWithRisk) => {
         const riskSummary = item.riskSummary;
 
+        // On click of the X mark icon, navigate to /app/risks?hashSearch=#fqdn
         if (riskSummary && Object.keys(riskSummary)?.length > 0) {
           return (
-            <div className="text-center">
-              <button
-                onClick={() => navigate(getRoute(['app', 'risks']))}
-                className={`rounded-[2px] hover:bg-gray-50`}
-              >
-                <XMarkIcon
-                  className={`size-6 stroke-red-600 text-red-600`}
-                  aria-hidden="true"
-                />
-              </button>
-            </div>
+            <Link
+              className={`rounded-[2px] hover:bg-gray-50`}
+              to={{
+                pathname: getRoute(['app', 'risks']),
+                search: `?${StorageKey.HASH_SEARCH}=${encodeURIComponent('#' + item.dns)}`,
+              }}
+            >
+              <XMarkIcon
+                className={`size-6 stroke-red-600 text-red-600`}
+                aria-hidden="true"
+              />
+            </Link>
           );
         } else {
           return (
