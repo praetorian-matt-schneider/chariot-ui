@@ -17,6 +17,7 @@ import {
   RiskDropdown,
   riskStatusFilterOptions,
 } from '@/components/ui/RiskDropdown';
+import { useGetKev } from '@/hooks/kev';
 import { useFilter } from '@/hooks/useFilter';
 import { useMy } from '@/hooks/useMy';
 import { useOpenDrawer } from '@/sections/detailsDrawer/useOpenDrawer';
@@ -50,18 +51,17 @@ const getFilteredRisksByCISA = (
   risks: Risk[],
   knownExploitedThreats?: string[]
 ) => {
-  let filteredRisks = risks;
   if (knownExploitedThreats && knownExploitedThreats.length > 0) {
-    filteredRisks = filteredRisks.filter(risk => {
-      const matchedCVEID = Regex.CVE_ID.exec(risk.name)?.[0];
+    return risks.filter(risk => {
+      const parsedCVEIDFromRisk = Regex.CVE_ID.exec(risk.name)?.[0];
 
       return (
-        (matchedCVEID && knownExploitedThreats.includes(matchedCVEID)) ||
-        knownExploitedThreats.includes(risk.name)
+        parsedCVEIDFromRisk &&
+        knownExploitedThreats.includes(parsedCVEIDFromRisk)
       );
     });
   }
-  return filteredRisks;
+  return [];
 };
 
 const getFilteredRisks = (
@@ -122,9 +122,9 @@ export function Risks() {
   const [classFilter, setClassFilter] = useFilter([''], setSelectedRows);
   const [sourceFilter, setSourceFilter] = useFilter([''], setSelectedRows);
 
-  const { data: threats, status: threatsStatus } = useMy({
-    resource: 'threat',
-  });
+  const { data: knownExploitedThreats = [], status: threatsStatus } =
+    useGetKev();
+
   const {
     data: risks = [],
     status: risksStatus,
@@ -137,10 +137,6 @@ export function Risks() {
   });
 
   const status = useMergeStatus(risksStatus, threatsStatus);
-
-  const knownExploitedThreats = useMemo(() => {
-    return threats.map(threat => threat.name);
-  }, [JSON.stringify(threats)]);
 
   const filteredRisks = useMemo(() => {
     let filteredRisks = risks;

@@ -18,6 +18,7 @@ import { Tooltip } from '@/components/Tooltip';
 import { DetailsListContainer } from '@/components/ui/DetailsListContainer';
 import { RiskDropdown } from '@/components/ui/RiskDropdown';
 import { useMy } from '@/hooks';
+import { useGetKev } from '@/hooks/kev';
 import { useGetFile, useUploadFile } from '@/hooks/useFiles';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useReRunJob } from '@/hooks/useJobs';
@@ -139,15 +140,9 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
   );
   const { data: riskNameGenericSearch, status: riskNameGenericSearchStatus } =
     useGenericSearch({ query: name }, { enabled: open });
+  const { data: knownExploitedThreats = [] } = useGetKev({ enabled: open });
 
   const { risks: riskOccurrence = [] } = riskNameGenericSearch || {};
-
-  const { data: threats } = useMy({
-    resource: 'threat',
-  });
-  const knownExploitedThreats = useMemo(() => {
-    return threats.map(threat => threat.name);
-  }, [JSON.stringify(threats)]);
 
   const hostRef = references.find(ref => ref.class === 'host');
   const [ip, port] = hostRef?.name?.split(/:(?=[^:]*$)/) ?? '';
