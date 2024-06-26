@@ -12,9 +12,9 @@ const pageTitles = {
   Assets:
     'Track and manage discovered assets to ensure comprehensive security scanning and risk assessment.',
   Risks:
-    'Identify, assess, and prioritize risks found in your assets to enhance security.',
+    'Identify, evaluate, and prioritize risks found in your assets to enhance security.',
   Integrations:
-    "Identify, evaluate, and prioritize risks in your assets to safeguard your organization's security posture.",
+    'Configure and manage external service integrations to enhance your security monitoring capabilities.',
   Documents:
     'Store, share, and retrieve all documents, including reports, definitions, proof of exploits, and manually uploaded files.',
   Widgets: 'Create and customize dashboards to gain insights into your data.',

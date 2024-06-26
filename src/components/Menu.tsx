@@ -300,11 +300,7 @@ function Content(props: MenuItemProps & { multiSelect?: boolean }) {
           <CheckboxIcon isChecked={Boolean(isSelected)} />
         </>
       )}
-      {icon && (
-        <div className={`[&>svg]:size-5 [&>svg]:text-default-light`}>
-          {icon}
-        </div>
-      )}
+      {icon && <div>{icon}</div>}
       <div className="w-full overflow-hidden">
         <div className="flex items-center justify-between text-sm">
           <div
