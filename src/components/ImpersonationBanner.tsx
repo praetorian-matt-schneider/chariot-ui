@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/solid';
 import { useAuth } from '@/state/auth';
 import { useStorage } from '@/utils/storage/useStorage.util';
@@ -9,12 +9,22 @@ const ImpersonationBanner: React.FC = () => {
   const [position, setPosition] = useStorage(
     { key: 'impersonationPosition' },
     {
-      x: 0,
+      x: -500, // Default to -500 initially; this will be updated on mount
       y: 0,
     }
   );
 
   const bannerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const banner = bannerRef.current;
+    if (banner && position.x === -500) {
+      const screenWidth = window.innerWidth;
+      const bannerWidth = banner.offsetWidth;
+      const centerPositionX = (screenWidth - bannerWidth) / 2;
+      setPosition({ ...position, x: centerPositionX });
+    }
+  }, [setPosition, bannerRef.current]);
 
   if (!friend || !friend.email) {
     return null;
