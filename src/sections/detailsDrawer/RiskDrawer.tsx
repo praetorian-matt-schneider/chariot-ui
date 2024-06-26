@@ -33,6 +33,7 @@ import { StorageKey } from '@/utils/storage/useStorage.util';
 import { generatePathWithSearch, useSearchParams } from '@/utils/url.util';
 
 import { DRAWER_WIDTH } from '.';
+import { CopyToClipboard } from '@/components/CopyToClipboard';
 
 const getJobTimeline = ({
   status,
@@ -447,15 +448,17 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                         urlsImpacted?.length === 0
                           ? ''
                           : urlsImpacted?.map(url => (
-                              <a
-                                key={url}
-                                href={url}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="cursor-hand block text-brand"
-                              >
-                                {url}
-                              </a>
+                              <CopyToClipboard textToCopy={url}>
+                                <a
+                                  key={url}
+                                  href={url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="cursor-hand block text-brand"
+                                >
+                                  {url}
+                                </a>
+                              </CopyToClipboard>
                             )),
                     },
                     {
