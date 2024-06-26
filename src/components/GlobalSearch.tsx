@@ -115,7 +115,9 @@ const GlobalSearch = () => {
         value={search}
         onChange={handleInputChange}
         placeholder="Search"
-        startIcon={<MagnifyingGlassIcon className="size-4 text-header-dark" />}
+        startIcon={
+          <MagnifyingGlassIcon className="size-4 stroke-header-light" />
+        }
         endIcon={
           search ? (
             <span
