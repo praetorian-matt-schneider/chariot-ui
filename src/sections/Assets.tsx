@@ -2,13 +2,9 @@ import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import {
-  CheckCircleIcon,
   DocumentArrowDownIcon,
-  ExclamationCircleIcon,
-  PauseIcon,
   PlayIcon,
   PlusIcon,
-  QuestionMarkCircleIcon,
 } from '@heroicons/react/24/outline';
 import { CheckIcon, XMarkIcon } from '@heroicons/react/24/solid';
 
@@ -39,6 +35,7 @@ import { exportContent } from '@/utils/download.util';
 import { getRoute } from '@/utils/route.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
 import { Link } from '@/components/Link';
+import { getAssetStatusIcon } from '@/components/icons/AssetStatus.icon';
 
 type Severity = 'I' | 'L' | 'M' | 'H' | 'C';
 type SeverityOpenCounts = Partial<Record<Severity, Risk[]>>;
@@ -263,7 +260,7 @@ const Assets: React.FC = () => {
         submenu: [
           {
             label: 'High Priority',
-            icon: <ExclamationCircleIcon className="size-5" />,
+            icon: getAssetStatusIcon(AssetStatus.ActiveHigh),
             disabled: (assets: Asset[]) =>
               assets.every(asset => asset.status === AssetStatus.ActiveHigh),
             onClick: (assets: Asset[]) => {
@@ -274,15 +271,15 @@ const Assets: React.FC = () => {
           },
           {
             label: 'Standard Priority',
-            icon: <CheckCircleIcon className="size-5" />,
+            icon: getAssetStatusIcon(AssetStatus.Active),
             disabled: (assets: Asset[]) =>
               assets.every(asset => isActive(asset)),
             onClick: (assets: Asset[]) =>
               updateStatus(assets, AssetStatus.Active),
           },
           {
-            label: 'Stop Scanning',
-            icon: <PauseIcon className="size-5" />,
+            label: 'Pause Scan',
+            icon: getAssetStatusIcon(AssetStatus.Frozen),
             disabled: (assets: Asset[]) =>
               assets.every(asset => isFrozen(asset)),
             onClick: (assets: Asset[]) => {
@@ -292,8 +289,8 @@ const Assets: React.FC = () => {
             },
           },
           {
-            label: "I don't recognize this",
-            icon: <QuestionMarkCircleIcon className="size-5" />,
+            label: 'Unknown Asset',
+            icon: getAssetStatusIcon(AssetStatus.Unknown),
             disabled: (assets: Asset[]) =>
               assets.every(asset => isUnknown(asset)),
             onClick: (assets: Asset[]) =>
