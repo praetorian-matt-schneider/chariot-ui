@@ -3,6 +3,7 @@ import { XMarkIcon } from '@heroicons/react/24/solid';
 import { useAuth } from '@/state/auth';
 import { useStorage } from '@/utils/storage/useStorage.util';
 import { Bars3Icon } from '@heroicons/react/20/solid';
+import { Tooltip } from '@/components/Tooltip';
 
 const ImpersonationBanner: React.FC = () => {
   const { friend, stopImpersonation } = useAuth();
@@ -72,7 +73,13 @@ const ImpersonationBanner: React.FC = () => {
       </button>
       <span className="text-nowrap">Viewing:</span>
       <span className="ml-1 font-semibold">
-        {friend.displayName || friend.email}
+        {friend.displayName ? (
+          <Tooltip placement="bottom" title={friend.email}>
+            {friend.displayName}
+          </Tooltip>
+        ) : (
+          friend.email
+        )}
       </span>
       <div
         className="cursor-move ml-2 hover:bg-brand-dark rounded-b-[4px] p-1 "
