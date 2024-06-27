@@ -38,6 +38,7 @@ function ThirdPartyProviders({ children }: { children: React.ReactNode }) {
           autoClose={3000}
           draggablePercent={30}
           draggable
+          limit={3}
         />
         {children}
       </QueryClientProvider>
