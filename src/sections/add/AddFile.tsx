@@ -29,7 +29,7 @@ export const AddFile = () => {
   }
 
   return (
-    <Modal title="Upload Document" open={isOpen} onClose={onClose}>
+    <Modal title="Add Document" open={isOpen} onClose={onClose}>
       <Dropzone
         type="arrayBuffer"
         onFilesDrop={handleFilesDrop}

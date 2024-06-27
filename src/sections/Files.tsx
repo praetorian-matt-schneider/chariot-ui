@@ -6,6 +6,7 @@ import {
   DocumentIcon,
   DocumentTextIcon,
   PhotoIcon,
+  PlusIcon,
 } from '@heroicons/react/24/outline';
 
 import { Button } from '@/components/Button';
@@ -237,7 +238,8 @@ const Files: React.FC = () => {
         }
         primaryAction={() => {
           return {
-            label: 'Upload Document',
+            startIcon: <PlusIcon className="size-5" />,
+            label: 'Add Document',
             onClick: () => {
               setIsUploadFileDialogOpen(true);
             },
