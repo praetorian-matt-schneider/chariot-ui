@@ -324,6 +324,9 @@ const Assets: React.FC = () => {
                 {
                   label: 'High Priority',
                   icon: <ExclamationCircleIcon />,
+                  disabled: assets.every(
+                    asset => asset.status === AssetStatus.ActiveHigh
+                  ),
                   onClick: () => {
                     setSelectedAssets(assets);
                     setShowAssetStatusWarning(true);
@@ -333,6 +336,9 @@ const Assets: React.FC = () => {
                 {
                   label: 'Standard Priority',
                   icon: <CheckCircleIcon />,
+                  disabled: assets.every(
+                    asset => asset.status !== AssetStatus.ActiveHigh
+                  ),
                   onClick: () => updateStatus(assets, AssetStatus.Active),
                 },
                 {

@@ -268,7 +268,7 @@ const Seeds: React.FC = () => {
                 {
                   label: 'Stop Scanning',
                   icon: <PauseIcon />,
-                  disabled: selectedSeeds.length === 0,
+                  disabled: selectedSeeds.every(isFrozen),
                   onClick: () => {
                     selectedSeeds.forEach(seed => {
                       const showBulk = showBulkSnackbar(selectedSeeds.length);
@@ -296,7 +296,7 @@ const Seeds: React.FC = () => {
                 {
                   label: 'Resume Scanning',
                   icon: <PlayIcon />,
-                  disabled: selectedSeeds.length === 0,
+                  disabled: selectedSeeds.every(seed => !isFrozen(seed)),
                   onClick: () => {
                     selectedSeeds.forEach(seed => {
                       const showBulk = showBulkSnackbar(selectedSeeds.length);
