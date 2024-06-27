@@ -22,6 +22,7 @@ import { StorageKey } from '@/utils/storage/useStorage.util';
 import { useSearchParams } from '@/utils/url.util';
 
 import { DRAWER_WIDTH } from '.';
+import { SeedsIcon } from '@/components/icons';
 
 interface Props {
   compositeKey: string;
@@ -126,6 +127,7 @@ export const SeedDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
             title={seed.name}
             subtitle={isLoading ? '' : `${refs?.length} Risks Found`}
             isLoading={isLoading}
+            prefix={<SeedsIcon className="size-5" />}
           />
 
           <HorizontalSplit

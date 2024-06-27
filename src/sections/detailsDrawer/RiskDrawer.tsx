@@ -34,6 +34,7 @@ import { generatePathWithSearch, useSearchParams } from '@/utils/url.util';
 
 import { DRAWER_WIDTH } from '.';
 import { CopyToClipboard } from '@/components/CopyToClipboard';
+import { RisksIcon } from '@/components/icons';
 
 const getJobTimeline = ({
   status,
@@ -271,27 +272,30 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
             title={risk.name}
             subtitle={risk.dns}
             prefix={
-              knownExploitedThreats.includes(risk.name) && (
-                <Tooltip
-                  title={
-                    <span>
-                      This risk was found in the{' '}
-                      <a
-                        href={`https://nvd.nist.gov/vuln/detail/${risk.name}`}
-                        className="underline"
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        CISA Known Exploited Vulnerabilities catalog
-                      </a>
-                      , which helps organizations prioritize and manage
-                      vulnerabilities that are actively being exploited.
-                    </span>
-                  }
-                >
-                  <ExclamationCircleIcon className="size-5 text-error" />
-                </Tooltip>
-              )
+              <div className="flex flex-row space-x-1 items-center">
+                <RisksIcon className="size-5" />
+                {knownExploitedThreats.includes(risk.name) && (
+                  <Tooltip
+                    title={
+                      <span>
+                        This risk was found in the{' '}
+                        <a
+                          href={`https://nvd.nist.gov/vuln/detail/${risk.name}`}
+                          className="underline"
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          CISA Known Exploited Vulnerabilities catalog
+                        </a>
+                        , which helps organizations prioritize and manage
+                        vulnerabilities that are actively being exploited.
+                      </span>
+                    }
+                  >
+                    <ExclamationCircleIcon className="size-5 text-error" />
+                  </Tooltip>
+                )}
+              </div>
             }
           />
           <HorizontalTimeline

@@ -21,6 +21,7 @@ import { StorageKey } from '@/utils/storage/useStorage.util';
 import { useSearchParams } from '@/utils/url.util';
 
 import { DRAWER_WIDTH } from '.';
+import { AssetsIcon } from '@/components/icons';
 
 interface Props {
   compositeKey: string;
@@ -127,7 +128,11 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
     >
       <Loader isLoading={isInitialLoading} type="spinner">
         <div className="flex h-[calc(100%-24px)] flex-col gap-8">
-          <DetailsDrawerHeader title={asset.name} subtitle={asset.dns} />
+          <DetailsDrawerHeader
+            title={asset.name}
+            subtitle={asset.dns}
+            prefix={<AssetsIcon className="size-5" />}
+          />
           <HorizontalSplit
             leftContainer={
               <>
