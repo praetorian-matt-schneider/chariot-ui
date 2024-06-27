@@ -559,7 +559,7 @@ export function Risks() {
                     }),
                 },
                 {
-                  label: 'Info Severity',
+                  label: 'Informational',
                   icon: <ChevronDoubleDownIcon />,
                   onClick: () =>
                     updateRisk({
