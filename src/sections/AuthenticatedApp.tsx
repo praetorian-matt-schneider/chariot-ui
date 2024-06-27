@@ -184,10 +184,12 @@ export function Header() {
           />
         </div>
       ) : (
-        <div
-          id={HeaderPortalSections.EXTRA_CONTENT}
-          className="m-auto max-w-screen-xl [&:has(*)]:pb-9"
-        />
+        <div className=" w-full bg-header pt-4" style={{ zIndex: 1 }}>
+          <div
+            id={HeaderPortalSections.EXTRA_CONTENT}
+            className="m-auto max-w-screen-xl [&:has(*)]:pb-9"
+          />
+        </div>
       )}
     </>
   );
