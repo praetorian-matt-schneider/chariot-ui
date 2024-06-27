@@ -327,7 +327,7 @@ export function Table<TData>(props: TableProps<TData>) {
         <RenderHeaderBreadcrumbSection>
           <Loader styleType="header" className="h-8 w-28" isLoading={isLoading}>
             {rawData.length > 0 && (
-              <span className="ml-auto text-2xl font-bold">{`${rawData.length} Shown`}</span>
+              <span className="ml-auto text-2xl font-bold">{`${rawData.length?.toLocaleString()} Shown`}</span>
             )}
           </Loader>
         </RenderHeaderBreadcrumbSection>
