@@ -173,24 +173,15 @@ export function Header() {
           </div>
         </div>
       </div>
-      {showSticky ? (
+      <div
+        className={cn('w-full bg-header pt-4', showSticky && 'sticky top-0')}
+        style={{ zIndex: 1 }}
+      >
         <div
-          className="sticky top-0 w-full bg-header pt-4"
-          style={{ zIndex: 1 }}
-        >
-          <div
-            id={HeaderPortalSections.EXTRA_CONTENT}
-            className="m-auto max-w-screen-xl [&:has(*)]:pb-9"
-          />
-        </div>
-      ) : (
-        <div className=" w-full bg-header pt-4" style={{ zIndex: 1 }}>
-          <div
-            id={HeaderPortalSections.EXTRA_CONTENT}
-            className="m-auto max-w-screen-xl [&:has(*)]:pb-9"
-          />
-        </div>
-      )}
+          id={HeaderPortalSections.EXTRA_CONTENT}
+          className="m-auto max-w-screen-xl [&:has(*)]:pb-9"
+        />
+      </div>
     </>
   );
 }
