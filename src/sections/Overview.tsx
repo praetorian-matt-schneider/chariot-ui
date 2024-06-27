@@ -16,7 +16,6 @@ import { useAggregateCounts } from '@/hooks/useAggregateCounts';
 import { getReportSections } from '@/sections/overview/constants';
 import { cn } from '@/utils/classname';
 import { addDays, subtractDays } from '@/utils/date.util';
-import { useAuth } from '@/state/auth';
 import { useGetFile } from '@/hooks/useFiles';
 
 function classNames(...classes: string[]) {
@@ -28,14 +27,13 @@ const formatDate = (date: Date): string => date.toISOString().split('T')[0];
 const TODAY = formatDate(new Date());
 
 export const Overview = () => {
-  const { me } = useAuth();
   const client_short = 'Acme Corp.';
   const [showDetails, setShowDetails] = useState(false);
   const { counts } = useAggregateCounts();
   const jobsRunning = counts.jobsRunning;
 
   const { data: fileContent, status } = useGetFile({
-    name: `#${me}/reports/report.latest`,
+    name: `reports/report.latest`,
   });
 
   const reportReady = status === 'success' && fileContent;
