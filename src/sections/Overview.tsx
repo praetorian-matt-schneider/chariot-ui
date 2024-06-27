@@ -17,6 +17,9 @@ import { getReportSections } from '@/sections/overview/constants';
 import { cn } from '@/utils/classname';
 import { addDays, subtractDays } from '@/utils/date.util';
 import { useGetFile } from '@/hooks/useFiles';
+import { useGetDisplayName } from '@/hooks/useAccounts';
+import { useAuth } from '@/state/auth';
+import { useMy } from '@/hooks/useMy';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
@@ -27,7 +30,13 @@ const formatDate = (date: Date): string => date.toISOString().split('T')[0];
 const TODAY = formatDate(new Date());
 
 export const Overview = () => {
-  const client_short = 'Acme Corp.';
+  const { me, friend } = useAuth();
+  const { data: accounts } = useMy({
+    resource: 'account',
+  });
+
+  const client_short =
+    useGetDisplayName(accounts) || friend.displayName || friend.email || me;
   const [showDetails, setShowDetails] = useState(false);
   const { counts } = useAggregateCounts();
   const jobsRunning = counts.jobsRunning;
