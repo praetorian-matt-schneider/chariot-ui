@@ -222,7 +222,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
             menu={{
               items: [
                 {
-                  label: 'Show References',
+                  label: 'References',
                   to: {
                     pathname: getRoute(['app', 'references']),
                     search: `?${StorageKey.HASH_SEARCH}=${encodeURIComponent(referenceFilter)}`,
