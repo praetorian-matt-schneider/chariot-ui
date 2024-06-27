@@ -12,7 +12,6 @@ import { useCounts } from '@/hooks/useCounts';
 import { useFilter } from '@/hooks/useFilter';
 import { RenderHeaderExtraContentSection } from '@/sections/AuthenticatedApp';
 import { Job, JobLabels, JobStatus } from '@/types';
-import { useMergeStatus } from '@/utils/api';
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -55,20 +54,18 @@ const getStatusText = (status: JobStatus) => {
 const JobsTable: React.FC = () => {
   const location = useLocation();
 
-  const { data: stats = {}, status: statsStatus } = useCounts({
+  const { data: stats = {} } = useCounts({
     resource: 'job',
     filterByGlobalSearch: true,
   });
   const {
     data: jobs = [],
     refetch,
-    status: jobStatus,
+    status,
   } = useMy({
     resource: 'job',
     filterByGlobalSearch: true,
   });
-
-  const status = useMergeStatus(statsStatus, jobStatus);
 
   const searchParams = new URLSearchParams(location.search);
   const initialFilter = searchParams.get('status') || '';

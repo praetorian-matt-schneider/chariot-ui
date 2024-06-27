@@ -78,7 +78,7 @@ const Assets: React.FC = () => {
     },
   } = useGlobalState();
 
-  const { data: stats = {}, status: countsStatus } = useCounts({
+  const { data: stats = {} } = useCounts({
     resource: 'asset',
     filterByGlobalSearch: false,
   });
@@ -96,7 +96,7 @@ const Assets: React.FC = () => {
   });
   const { data: risks = [], status: riskStatus } = useMy({ resource: 'risk' });
 
-  const status = useMergeStatus(riskStatus, assetsStatus, countsStatus);
+  const status = useMergeStatus(riskStatus, assetsStatus);
 
   const { getAssetDrawerLink } = useOpenDrawer();
   const openRiskDataset = useMemo(

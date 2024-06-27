@@ -56,7 +56,7 @@ const Seeds: React.FC = () => {
     resource: 'account',
   });
 
-  const status = useMergeStatus(riskStatus, countsStatus, accountStatus);
+  const status = useMergeStatus(riskStatus, accountStatus);
 
   // Count clouds
   stats.cloud =
