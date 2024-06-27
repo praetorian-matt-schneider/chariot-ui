@@ -106,7 +106,7 @@ const useBulkUpdateRiskHook = () => {
     mutationFn: async (risks: RiskTemplate[]) => {
       const response = await Promise.all(
         risks
-          .map(async risk => await axios.post(`/risk`, risk))
+          .map(async risk => await axios.put(`/risk`, risk))
           // Note: Catch error so we can continue updating risk even if some fail
           .map(p => p.catch(e => e))
       );
