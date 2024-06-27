@@ -1,79 +1,74 @@
 import React from 'react';
 
+import { AssetsIcon, RisksIcon, SeedsIcon } from '@/components/icons';
+import { AnimatedArrowIcon } from '@/components/icons/AnimatedArrow.icon';
 import { Loader } from '@/components/Loader';
-import {
-  AssetLabels,
-  DisplaySeverities,
-  FileLabels,
-  JobLabels,
-  SeedLabels,
-  Statistics,
-} from '@/types';
+import { OverviewLabels, Statistics } from '@/types';
 import { QueryStatus } from '@/utils/api';
-import { cn } from '@/utils/classname';
 
-type CountType = 'risks' | 'assets' | 'jobs' | 'seeds' | 'files';
+const countsLabel = OverviewLabels;
 
-const countsLabel: Record<CountType, Record<string, string>> = {
-  risks: DisplaySeverities,
-  assets: AssetLabels,
-  jobs: JobLabels,
-  seeds: SeedLabels,
-  files: FileLabels,
+const countsDefinition: Record<string, React.ReactNode> = {
+  seeds: `Seeds are starting points like domains or IP addresses. They initiate scans that detect assets.`,
+  assets: `Assets are elements found from seeds, such as servers or databases. We analyze these assets to identify risks.`,
+  risks: `Risks are security threats detected in assets. We assess these to offer clear, actionable recommendations in your report.`,
 };
 
 interface CountsProps {
-  type: CountType;
   stats: Statistics;
-  onClick?: (label: string) => void;
-  selected?: string;
   status?: QueryStatus;
 }
 
-const Counts: React.FC<CountsProps> = ({
-  stats,
-  onClick,
-  selected,
-  type,
-  status,
-}) => {
-  const countsObject: Record<string, { label: string; count: number }> =
-    Object.entries(countsLabel[type]).reduce((acc, [key, label]) => {
-      return {
-        ...acc,
-        [key]: {
-          label,
-          count: stats[key] || 0,
-        },
-      };
-    }, {});
+const icons: Record<string, React.ReactNode> = {
+  seeds: <SeedsIcon className="mb-1 mr-1 inline size-4 text-gray-500" />,
+  assets: <AssetsIcon className="mb-1 mr-1 inline size-4 text-gray-500" />,
+  risks: <RisksIcon className="mb-0.5 mr-1 inline size-4 text-gray-500" />,
+};
+
+const Counts: React.FC<CountsProps> = ({ stats, status }) => {
+  const countsObject: Record<
+    string,
+    { label: string; count: number; definition: React.ReactNode }
+  > = Object.entries(countsLabel).reduce(
+    (acc, [key, label]) => ({
+      ...acc,
+      [key]: {
+        label,
+        count: stats[key] || 0,
+        definition: countsDefinition[key],
+      },
+    }),
+    {}
+  );
 
   return (
-    <div className="mx-auto mb-4 w-full max-w-screen-xl">
-      <div className="flex flex-nowrap justify-stretch gap-x-5">
-        {Object.entries(countsObject).map(([key, { label, count }]) => (
-          <button
-            key={key}
-            disabled={onClick === undefined}
-            className={cn(
-              'flex w-full flex-col bg-layer0 border-b-4 px-4 py-2 rounded-[2px] shadow-sm',
-              selected === key ? 'border-brand' : 'border-transparent'
-            )}
-            onClick={() => {
-              if (onClick) {
-                onClick(key);
-              }
-            }}
-          >
-            <Loader isLoading={status === 'pending'} className="my-3 h-2">
-              <div className="text-2xl font-semibold">
-                {count?.toLocaleString()}
+    <div className="flex flex-col items-center justify-between md:flex-row">
+      {Object.entries(countsObject).map(
+        ([key, { label, count, definition }], index, array) => (
+          <React.Fragment key={key}>
+            <div className="relative h-28 w-full rounded-[2px] bg-white p-4 shadow-sm md:w-1/3">
+              <Loader isLoading={status === 'pending'}>
+                <span className="mt-2 text-2xl font-semibold">
+                  {count.toLocaleString()}
+                </span>
+                <span className="ml-2 text-center text-sm text-gray-600">
+                  {label}
+                </span>
+                <div className="absolute right-1 top-1">{icons[key]}</div>
+              </Loader>
+              <div className="pt-1 text-xs text-gray-500">{definition}</div>
+            </div>
+            {index < array.length - 1 && (
+              <div className="mx-3">
+                <AnimatedArrowIcon
+                  className="rotate-90 md:rotate-0 "
+                  delay={index + 1 + 's'}
+                />
               </div>
-            </Loader>
-            <div className="text-xs font-medium">{label}</div>
-          </button>
-        ))}
-      </div>
+            )}
+          </React.Fragment>
+        )
+      )}
     </div>
   );
 };

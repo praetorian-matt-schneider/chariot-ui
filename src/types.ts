@@ -1,3 +1,5 @@
+import { join } from 'path';
+
 export enum RiskScanMessage {
   Stop = 'Risk scanning will stop.',
   Start = 'Risk scanning will start automatically.',
@@ -126,6 +128,12 @@ export const JobLabels: Record<string, string> = {
   JP: 'Completed',
   JQ: 'Queued',
   JR: 'Running',
+};
+
+export const OverviewLabels: Record<string, string> = {
+  seeds: 'Seeds',
+  assets: 'Assets',
+  risks: 'Risks',
 };
 
 interface AccountTemplate {

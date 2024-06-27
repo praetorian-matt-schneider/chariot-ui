@@ -14,6 +14,7 @@ import Intelligence from '@/sections/Intelligence';
 import Jobs from '@/sections/Jobs';
 import Login from '@/sections/Login';
 import Logout from '@/sections/Logout';
+import { Overview } from '@/sections/Overview';
 import { References } from '@/sections/References';
 import { Risks } from '@/sections/RisksTable';
 import Seeds from '@/sections/Seeds';
@@ -102,6 +103,14 @@ const appRoutes = {
     integrations: {
       element: <Integrations />,
       title: 'Integrations',
+    },
+    overview: {
+      element: (
+        <Body>
+          <Overview />
+        </Body>
+      ),
+      title: 'Overview',
     },
     '*': <Navigate to="/app/risks" replace />,
   },
