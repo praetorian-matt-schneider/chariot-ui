@@ -48,7 +48,11 @@ export const Overview = () => {
   const reportReady = status === 'success' && fileContent;
 
   const reportSections = useMemo(
-    () => getReportSections({ report: fileContent, data: { client_short } }),
+    () =>
+      getReportSections({
+        report: fileContent,
+        data: { client_short, client_possessive: `${client_short}'s` },
+      }),
     [fileContent]
   );
 
