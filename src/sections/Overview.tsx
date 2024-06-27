@@ -57,6 +57,15 @@ export const Overview = () => {
 
   if (status === 'pending') return <></>;
 
+  const downloadFileContent = () => {
+    const element = document.createElement('a');
+    const file = new Blob([fileContent], { type: 'text/plain' });
+    element.href = URL.createObjectURL(file);
+    element.download = 'report.md';
+    document.body.appendChild(element); // Required for this to work in FireFox
+    element.click();
+  };
+
   return (
     <div className="flex min-h-screen flex-col">
       <Counts
@@ -72,8 +81,8 @@ export const Overview = () => {
         <div className="flex ">
           <h1 className="center-align mb-1 mt-6 flex items-center text-2xl font-light text-gray-500">
             Daily Report
-            <Tooltip title="Download PDF" placement="right">
-              <Button onClick={() => {}} styleType="none">
+            <Tooltip title="Download Markdown" placement="right">
+              <Button onClick={() => downloadFileContent()} styleType="none">
                 <DocumentArrowDownIcon className="size-6" />
               </Button>
             </Tooltip>
