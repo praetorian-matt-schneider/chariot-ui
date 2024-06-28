@@ -22,6 +22,8 @@ const pageTitles = {
   Attributes: 'Manage additional metadata associated with assets.',
   References: 'Manage external references linked to your risks.',
   Jobs: 'Track the status and results of recent security scans from the past 24 hours.',
+  Overview:
+    "Monitor your organization's attack surface and review daily reports with critical findings and recommendations.",
 };
 
 export function BreadCrumbs({ breadcrumbs }: { breadcrumbs: Breadcrumb[] }) {
