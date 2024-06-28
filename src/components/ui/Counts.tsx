@@ -51,7 +51,7 @@ const Counts: React.FC<CountsProps> = ({ stats, status }) => {
                 <span className="mt-2 text-2xl font-semibold">
                   {count.toLocaleString()}
                 </span>
-                <span className="ml-2 text-center text-sm text-gray-600">
+                <span className="ml-2 text-center text-2xl font-extralight text-gray-500">
                   {label}
                 </span>
                 <div className="absolute right-1 top-1">{icons[key]}</div>
