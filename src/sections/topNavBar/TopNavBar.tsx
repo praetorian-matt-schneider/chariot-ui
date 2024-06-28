@@ -24,15 +24,7 @@ export function TopNavBar() {
           <Link to={getRoute(['app', 'risks'])}>
             <LogoIcon className="mr-4 size-9" />
           </Link>
-          <Button
-            styleType="header"
-            onClick={() => {
-              navigate(getRoute(['app', 'overview']));
-            }}
-            className="header bg-header text-medium"
-          >
-            Overview
-          </Button>
+
           <Dropdown
             label="Attack Surface"
             styleType="none"
@@ -79,6 +71,18 @@ export function TopNavBar() {
               ],
             }}
           />
+          <Button
+            styleType="header"
+            onClick={() => {
+              navigate(getRoute(['app', 'overview']));
+            }}
+            className="header bg-header text-medium flex flex-row space-x-1"
+          >
+            <p>Overview</p>
+            <p className="rounded-[4px] border border-header text-xs capitalize px-1 text-[#5a5a7a]">
+              Beta
+            </p>
+          </Button>
           <div className="ml-auto flex items-center md:order-last md:ml-0">
             <div className="ml-4">
               <Hexagon notify={showNotification}>
