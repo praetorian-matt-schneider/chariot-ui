@@ -6,6 +6,7 @@ import { Modal } from '@/components/Modal';
 import { useCreateAttribute } from '@/hooks/useAttribute';
 import { SearchAndSelectTypes } from '@/sections/SearchByType';
 import { useGlobalState } from '@/state/global.state';
+import { IdentificationIcon } from '@heroicons/react/24/outline';
 
 const DEFAULT_FORM_VALUE = {
   class: '',
@@ -41,7 +42,13 @@ export function AddAttribute() {
   }, [open]);
 
   return (
-    <Modal title="Add Attribute" open={open} onClose={onClose} size="xl">
+    <Modal
+      title="Add Attribute"
+      icon={<IdentificationIcon className="size-6 text-default-light" />}
+      open={open}
+      onClose={onClose}
+      size="xl"
+    >
       <div className="flex flex-row flex-nowrap p-2">
         <div className="flex flex-1 flex-col space-y-4 p-2">
           <div>

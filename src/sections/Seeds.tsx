@@ -31,6 +31,7 @@ import {
   AvailableIntegrations,
   IntegrationsMeta,
 } from '@/utils/availableIntegrations';
+import { PlusIcon } from '@heroicons/react/24/solid';
 
 const isFrozen = (item: Seed) => {
   return item?.status[0] === SeedStatus.Frozen;
@@ -256,6 +257,7 @@ const Seeds: React.FC = () => {
           return {
             label: 'Add Seed',
             icon: <SeedsIcon className="size-5" />,
+            startIcon: <PlusIcon className="size-5" />,
             onClick: () => {
               setIsAddSeedsDialogOpen(true);
             },

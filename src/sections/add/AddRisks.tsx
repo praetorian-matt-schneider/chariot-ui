@@ -12,6 +12,7 @@ import { useCreateRisk } from '@/hooks/useRisks';
 import { SearchAndSelectTypes } from '@/sections/SearchByType';
 import { useGlobalState } from '@/state/global.state';
 import { RiskCombinedStatus } from '@/types';
+import { RisksIcon } from '@/components/icons';
 
 const DEFAULT_FORM_VALUE = {
   key: '',
@@ -110,6 +111,7 @@ export const AddRisks = () => {
     <>
       <Modal
         title={'Add Risk'}
+        icon={<RisksIcon className="size-6 text-default-light" />}
         open={isOpen}
         onClose={onClose}
         size="xl"

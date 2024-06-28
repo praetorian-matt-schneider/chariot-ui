@@ -4,6 +4,7 @@ import {
   ChevronDownIcon,
   DocumentTextIcon,
   LockOpenIcon,
+  PlusIcon,
 } from '@heroicons/react/24/outline';
 import {
   AdjustmentsHorizontalIcon,
@@ -471,6 +472,7 @@ export function Risks() {
         primaryAction={() => {
           return {
             label: 'Add Risk',
+            startIcon: <PlusIcon className="size-5" />,
             icon: <RisksIcon className="size-5" />,
             onClick: () => {
               risk.onOpenChange(true);

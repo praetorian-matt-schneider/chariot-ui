@@ -10,6 +10,7 @@ import { create as createSeed, useBulkAddSeed } from '@/hooks/useSeeds';
 import { useGlobalState } from '@/state/global.state';
 import { IntegrationType } from '@/types';
 import { AllowedSeedRegex, GetSeeds } from '@/utils/regex.util';
+import { SeedsIcon } from '@/components/icons';
 
 export const AddSeeds = () => {
   const {
@@ -58,7 +59,13 @@ export const AddSeeds = () => {
   }
 
   return (
-    <Modal title="Add Seeds" open={isOpen} onClose={onClose} size="xl">
+    <Modal
+      title="Add Seeds"
+      icon={<SeedsIcon className="size-6 text-default-light" />}
+      open={isOpen}
+      onClose={onClose}
+      size="xl"
+    >
       <div className="flex flex-row space-y-6 p-2">
         <div className="flex flex-col space-y-4">
           <div>

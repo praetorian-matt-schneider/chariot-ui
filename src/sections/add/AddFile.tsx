@@ -4,6 +4,7 @@ import { Dropzone, Files } from '@/components/Dropzone';
 import { Modal } from '@/components/Modal';
 import { useUploadFile } from '@/hooks';
 import { useGlobalState } from '@/state/global.state';
+import { DocumentIcon } from '@heroicons/react/24/outline';
 
 export const AddFile = () => {
   const {
@@ -29,7 +30,12 @@ export const AddFile = () => {
   }
 
   return (
-    <Modal title="Add Document" open={isOpen} onClose={onClose}>
+    <Modal
+      title="Add Document"
+      open={isOpen}
+      onClose={onClose}
+      icon={<DocumentIcon className="size-6 text-default-light" />}
+    >
       <Dropzone
         type="arrayBuffer"
         onFilesDrop={handleFilesDrop}

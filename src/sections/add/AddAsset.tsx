@@ -5,6 +5,7 @@ import { Inputs } from '@/components/form/Inputs';
 import { Modal } from '@/components/Modal';
 import { useCreateAsset } from '@/hooks/useAssets';
 import { useGlobalState } from '@/state/global.state';
+import { AssetsIcon } from '@/components/icons';
 
 export function AddAsset() {
   const {
@@ -23,7 +24,13 @@ export function AddAsset() {
   }
 
   return (
-    <Modal title="Add Asset" open={open} onClose={onClose} size="lg">
+    <Modal
+      title="Add Asset"
+      open={open}
+      onClose={onClose}
+      size="lg"
+      icon={<AssetsIcon className="size-6 text-default-light" />}
+    >
       <div className="flex flex-col space-y-4 p-2">
         <div>
           <h3 className="text-xl font-medium text-gray-700">

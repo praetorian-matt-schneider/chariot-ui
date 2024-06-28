@@ -5,6 +5,7 @@ import {
   CheckCircleIcon,
   ExclamationCircleIcon,
   PauseIcon,
+  PlusIcon,
   QuestionMarkCircleIcon,
 } from '@heroicons/react/24/outline';
 import { CheckIcon, XMarkIcon } from '@heroicons/react/24/solid';
@@ -303,6 +304,7 @@ const Assets: React.FC = () => {
           return {
             label: 'Add Asset',
             icon: <AssetsIcon className="size-5" />,
+            startIcon: <PlusIcon className="size-5" />,
             onClick: () => {
               setShowAddAsset(true);
             },
