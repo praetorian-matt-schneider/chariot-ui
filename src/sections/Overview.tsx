@@ -92,7 +92,7 @@ export const Overview = () => {
 
       {reportReady && (
         <div className="flex ">
-          <h1 className="center-align mb-1 mt-6 flex items-center text-2xl font-light text-gray-500">
+          <h1 className="center-align mt-6 flex items-center text-2xl font-light text-gray-500">
             Daily Report
             <Tooltip title="Download Markdown" placement="right">
               <Button onClick={() => downloadFileContent()} styleType="none">
@@ -104,8 +104,7 @@ export const Overview = () => {
       )}
       <div
         className={cn(
-          'mt-6 flex flex-col space-y-6 rounded-[2px] bg-white p-2 shadow-sm',
-          reportReady && 'mt-3'
+          'flex flex-col space-y-6 rounded-[2px] bg-white p-2 shadow-sm'
         )}
       >
         {reportReady ? (
