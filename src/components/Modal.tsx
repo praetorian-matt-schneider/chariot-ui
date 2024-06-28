@@ -89,7 +89,7 @@ export const Modal: React.FC<Props> = props => {
               />
             )}
             {icon && (
-              <div className="mr-2 flex size-10 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">
+              <div className="flex size-10 shrink-0 items-center justify-center">
                 {icon}
               </div>
             )}
