@@ -22,6 +22,7 @@ import { StorageKey } from '@/utils/storage/useStorage.util';
 import { useSearchParams } from '@/utils/url.util';
 
 import { DRAWER_WIDTH } from '.';
+import { IdentificationIcon } from '@heroicons/react/24/outline';
 
 interface Props {
   compositeKey: string;
@@ -120,8 +121,12 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
             search: `?${StorageKey.HASH_SEARCH}=${encodeURIComponent(attributeFilter)}`,
           }}
         >
-          <Button className="ml-auto hover:bg-layer0" styleType="secondary">
-            Show Attributes
+          <Button
+            startIcon={<IdentificationIcon className="size-5" />}
+            className="ml-auto hover:bg-layer0"
+            styleType="secondary"
+          >
+            Attributes
           </Button>
         </Link>
       }

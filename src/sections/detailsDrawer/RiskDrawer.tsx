@@ -8,7 +8,6 @@ import { Accordian } from '@/components/Accordian';
 import { Button } from '@/components/Button';
 import { CopyToClipboard } from '@/components/CopyToClipboard';
 import { Drawer } from '@/components/Drawer';
-import { Dropdown } from '@/components/Dropdown';
 import { HorizontalSplit } from '@/components/HorizontalSplit';
 import { HorizontalTimeline } from '@/components/HorizontalTimeline';
 import { RisksIcon } from '@/components/icons';
@@ -35,6 +34,12 @@ import { StorageKey } from '@/utils/storage/useStorage.util';
 import { generatePathWithSearch, useSearchParams } from '@/utils/url.util';
 
 import { DRAWER_WIDTH } from '.';
+import { Link } from '@/components/Link';
+import {
+  ArrowPathIcon,
+  DocumentTextIcon,
+  IdentificationIcon,
+} from '@heroicons/react/24/outline';
 
 const getJobTimeline = ({
   status,
@@ -218,28 +223,32 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
       className={DRAWER_WIDTH}
       footer={
         <div className="flex gap-2">
-          <Dropdown
-            menu={{
-              items: [
-                {
-                  label: 'References',
-                  to: {
-                    pathname: getRoute(['app', 'references']),
-                    search: `?${StorageKey.HASH_SEARCH}=${encodeURIComponent(referenceFilter)}`,
-                  },
-                },
-                {
-                  label: 'Proof of Exploit',
-                  to: generatePathWithSearch({
-                    appendSearch: [[StorageKey.POE, `${dns}/${name}`]],
-                  }),
-                },
-              ],
+          <Button
+            startIcon={<IdentificationIcon className="size-5" />}
+            onClick={() => {
+              navigate({
+                pathname: getRoute(['app', 'references']),
+                search: `?${StorageKey.HASH_SEARCH}=${encodeURIComponent(referenceFilter)}`,
+              });
             }}
-            label="Actions"
-            className="ml-auto hover:bg-layer0"
             styleType="secondary"
-          />
+            className="ml-auto"
+          >
+            References
+          </Button>
+          <Button
+            startIcon={<DocumentTextIcon className="size-5" />}
+            onClick={() => {
+              navigate(
+                generatePathWithSearch({
+                  appendSearch: [[StorageKey.POE, `${dns}/${name}`]],
+                })
+              );
+            }}
+            styleType="secondary"
+          >
+            Proof of Exploit
+          </Button>
           <Tooltip
             title={
               risk.source
@@ -250,6 +259,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
             }
           >
             <Button
+              startIcon={<ArrowPathIcon className="size-5" />}
               styleType="primary"
               disabled={!risk.source || Boolean(isJobRunningForThisRisk)}
               isLoading={
