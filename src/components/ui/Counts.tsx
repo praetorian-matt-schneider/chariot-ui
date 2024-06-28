@@ -20,9 +20,9 @@ interface CountsProps {
 }
 
 const icons: Record<string, React.ReactNode> = {
-  seeds: <SeedsIcon className="mb-1 mr-1 inline size-4 text-gray-500" />,
-  assets: <AssetsIcon className="mb-1 mr-1 inline size-4 text-gray-500" />,
-  risks: <RisksIcon className="mb-0.5 mr-1 inline size-4 text-gray-500" />,
+  seeds: <SeedsIcon className="m-1 size-4 text-disabled" />,
+  assets: <AssetsIcon className="m-1 size-4 text-disabled" />,
+  risks: <RisksIcon className="m-1 size-4 text-disabled" />,
 };
 
 const Counts: React.FC<CountsProps> = ({ stats, status }) => {
