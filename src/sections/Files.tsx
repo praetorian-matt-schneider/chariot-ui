@@ -89,7 +89,7 @@ const Files: React.FC = () => {
     return item.class;
   }
 
-  const getAdditionaActions = (item: MyFile) => {
+  const getAdditionalActions = (item: MyFile) => {
     if (item.class === 'proof') {
       const parts = item.name.split('/');
       const dns = parts.shift() ?? '';
@@ -98,7 +98,7 @@ const Files: React.FC = () => {
       const poeLink = getProofOfExploitLink({ dns, name });
 
       return (
-        <div className="mr-2 flex flex-row">
+        <div className="flex flex-row justify-end space-x-1">
           <Tooltip title="View Risk">
             <button
               onClick={() => navigate(riskDrawerLink)}
@@ -108,7 +108,7 @@ const Files: React.FC = () => {
             </button>
           </Tooltip>
           <Tooltip title="View Proof">
-            <button onClick={() => navigate(poeLink)} className="px-1">
+            <button onClick={() => navigate(poeLink)}>
               <DocumentTextIcon className="size-5" />
             </button>
           </Tooltip>
@@ -116,7 +116,7 @@ const Files: React.FC = () => {
       );
     } else if (item.name.endsWith('png') || item.name.endsWith('jpg')) {
       return (
-        <div className="mr-2 flex flex-row">
+        <div className="flex flex-row justify-end">
           <Tooltip title="Preview Image">
             <button
               onClick={() => {
@@ -131,7 +131,7 @@ const Files: React.FC = () => {
       );
     } else {
       return (
-        <div className="mr-2 flex flex-row">
+        <div className="flex flex-row justify-end">
           <Tooltip title="View File">
             <button
               onClick={() => {
@@ -155,17 +155,15 @@ const Files: React.FC = () => {
       cell: (item: MyFile) => getLabel(item),
     },
     {
+      label: 'Preview',
+      id: 'class',
+      className: 'w-20',
+      cell: (item: MyFile) => getAdditionalActions(item),
+    },
+    {
       label: 'Document Name',
       id: 'name',
       className: 'w-full',
-      cell: (item: MyFile) => {
-        return (
-          <div className="flex flex-row">
-            {getAdditionaActions(item)}
-            <span>{item.name}</span>
-          </div>
-        );
-      },
     },
     {
       label: 'Added',
