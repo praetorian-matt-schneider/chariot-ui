@@ -45,7 +45,7 @@ export function AddAsset() {
             <li>
               Host Assets:{' '}
               <code className="font-extrabold">server1.acme.com</code>,{' '}
-              <code>workstation5.acme.com</code>
+              <code className="font-extrabold">workstation5.acme.com</code>
             </li>
             <li>
               Application Assets:{' '}

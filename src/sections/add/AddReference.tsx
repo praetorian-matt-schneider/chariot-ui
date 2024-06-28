@@ -58,10 +58,13 @@ export function AddReference() {
             include:
             <ul className="mt-1 list-disc pl-5 text-sm text-gray-500">
               <li>
-                Class: <code>Impacted System</code>
+                Class: <code className="font-extrabold">Impacted System</code>
               </li>
               <li>
-                Name: <code>Payment Processing Server</code>
+                Name:{' '}
+                <code className="font-extrabold">
+                  Payment Processing Server
+                </code>
               </li>
             </ul>
           </p>

@@ -136,13 +136,14 @@ export const AddRisks = () => {
               include:
               <ul className="mt-1 list-disc pl-5 text-sm text-gray-500">
                 <li>
-                  Asset: <code>123.45.6.78</code>
+                  Asset: <code className="font-extrabold">123.45.6.78</code>
                 </li>
                 <li>
-                  Finding: <code>CVE-2021-34527</code>
+                  Finding:{' '}
+                  <code className="font-extrabold">CVE-2021-34527</code>
                 </li>
                 <li>
-                  Severity: <code>High</code>
+                  Severity: <code className="font-extrabold">High</code>
                 </li>
               </ul>
             </p>
@@ -192,13 +193,13 @@ export const AddRisks = () => {
                         <Button
                           startIcon={<PlusIcon className="size-5" />}
                           styleType="textPrimary"
-                          label="Add Proof of Exploit"
+                          label="Proof of Exploit"
                           onClick={() => setIsPOEOpen(true)}
                         />
                         <Button
                           startIcon={<PlusIcon className="size-5" />}
                           styleType="textPrimary"
-                          label="Add Description & Remediation"
+                          label="Description & Remediation"
                           onClick={() => setIsDefinitionOpen(true)}
                         />
                       </div>

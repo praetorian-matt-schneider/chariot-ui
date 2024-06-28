@@ -59,10 +59,11 @@ export function AddAttribute() {
             include:
             <ul className="mt-1 list-disc pl-5 text-sm text-gray-500">
               <li>
-                Class: <code>Operating System</code>
+                Class: <code className="font-extrabold">Operating System</code>
               </li>
               <li>
-                Name: <code>Windows Server 2019</code>
+                Name:{' '}
+                <code className="font-extrabold">Windows Server 2019</code>
               </li>
             </ul>
           </p>
