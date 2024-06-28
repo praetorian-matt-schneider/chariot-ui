@@ -93,7 +93,9 @@ export const AccountDropdown: React.FC = () => {
                   {collaborator.displayName}
                 </Tooltip>
               ) : (
-                <span>{collaborator.email}</span>
+                <span className="text-nowrap text-ellipsis overflow-hidden">
+                  {collaborator.email}
+                </span>
               ),
             icon: (
               <Avatar
