@@ -86,17 +86,13 @@ export const AccountDropdown: React.FC = () => {
             onClick: () => friend?.email && stopImpersonation(),
           },
           ...collaborators.map(collaborator => ({
-            label:
-              collaborator.displayName &&
-              collaborator.displayName?.length > 0 ? (
-                <Tooltip title={collaborator.email}>
-                  {collaborator.displayName}
-                </Tooltip>
-              ) : (
+            label: (
+              <Tooltip title={collaborator.email}>
                 <span className="text-nowrap text-ellipsis overflow-hidden">
-                  {collaborator.email}
+                  {collaborator.displayName || collaborator.email}
                 </span>
-              ),
+              </Tooltip>
+            ),
             icon: (
               <Avatar
                 email={String(collaborator.email)}
