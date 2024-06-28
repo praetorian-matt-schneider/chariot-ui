@@ -6,17 +6,31 @@ const useRiskDetails = () => {
   const { token } = useAuth();
   const axios = useAxios();
 
-  const fetchRiskDetails = async (email: string): Promise<Risk[]> => {
-    const riskResponse = await axios({
+  const fetchRiskDetails = async (email: string): Promise<string> => {
+    return await axios({
       method: 'get',
-      url: '/my?key=%23risk',
+      url: '/risk/export',
       headers: {
         Authorization: token ? `Bearer ${token}` : '',
         account: email,
       },
-    }).then(response => response.data.risks);
-
-    return riskResponse;
+    })
+      .then(
+        async response =>
+          await axios({
+            method: 'get',
+            url: '/file',
+            headers: {
+              Authorization: token ? `Bearer ${token}` : '',
+              account: email,
+            },
+            params: {
+              name: response.data.file,
+            },
+            responseType: 'blob',
+          })
+      )
+      .then(response => response.data);
   };
 
   return fetchRiskDetails;

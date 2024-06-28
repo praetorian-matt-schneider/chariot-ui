@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   ArrowDownCircleIcon,
   ArrowDownIcon,
@@ -12,6 +12,7 @@ import { useAuth } from '@/state/auth';
 import { exportContent } from '@/utils/download.util';
 import { Modal } from '@/components/Modal';
 import { Button } from '@/components/Button';
+import { useGetFile } from '@/hooks/useFiles';
 
 interface TableData {
   displayName: string;
@@ -24,8 +25,8 @@ interface TableData {
 }
 
 export const CollaboratingWith = () => {
-  const [email, setEmail] = React.useState<string>('');
-  const [exportType, setExportType] = React.useState<'json' | 'csv'>('json');
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [collaborator, setCollaborator] = React.useState<TableData>();
   const [showModal, setShowModal] = React.useState(false);
   const { startImpersonation } = useAuth();
   const fetchRiskDetails = useRiskDetails();
@@ -74,10 +75,19 @@ export const CollaboratingWith = () => {
     });
   }, [JSON.stringify(collaborators)]);
 
-  const downloadRisks = async (email: string, filetype: 'json' | 'csv') => {
-    const risks = await fetchRiskDetails(email);
-    const filteredRisks = risks.filter(risk => risk.status[0] === 'O');
-    exportContent(filteredRisks, `risk-detail-${email}.${filetype}`, filetype);
+  const exportRisks = async (email: string) => {
+    setIsDownloading(true);
+    const fileBlob = await fetchRiskDetails(email);
+    const url = window.URL.createObjectURL(
+      new Blob([fileBlob], { type: 'application/zip' })
+    );
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `export-${email}.zip`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setIsDownloading(false);
   };
 
   const columns: Columns<TableData> = [
@@ -120,7 +130,7 @@ export const CollaboratingWith = () => {
       cell: (row: TableData) => (
         <button
           onClick={() => {
-            setEmail(row.email);
+            setCollaborator(row);
             setShowModal(true);
           }}
         >
@@ -150,7 +160,9 @@ export const CollaboratingWith = () => {
       <Modal
         open={showModal}
         onClose={() => setShowModal(false)}
-        title="Export Risks"
+        title={
+          <div>{collaborator?.displayName || collaborator?.email}'s Export</div>
+        }
         icon={<ArrowDownCircleIcon className="size-5" />}
         size="md"
       >
@@ -182,23 +194,11 @@ export const CollaboratingWith = () => {
           <div className="flex flex-row space-x-2">
             <Button
               styleType="primary"
-              onClick={() => {
-                setExportType('json');
-                downloadRisks(email, 'json');
-              }}
+              onClick={() => collaborator && exportRisks(collaborator.email)}
               className="w-full"
+              disabled={isDownloading ?? false}
             >
-              Export as JSON
-            </Button>
-            <Button
-              styleType="secondary"
-              onClick={() => {
-                setExportType('csv');
-                downloadRisks(email, 'csv');
-              }}
-              className="w-full"
-            >
-              Export as CSV
+              Export Risks
             </Button>
           </div>
         </div>
