@@ -71,8 +71,9 @@ export const getReportSections = ({
       const header = section.split('## ')[1];
       const content = report.slice(startIndex, endIndex).trim();
       const contentWithData = content.replace(
-        /{{(.*?)}}/g,
-        (current, key) => data?.[key] || current
+        /{{(.*?)}}|{(.*?)}/g,
+        (current, doubleKey, singleKey) =>
+          data?.[doubleKey || singleKey] || current
       );
 
       const subContent = getReportSections({
