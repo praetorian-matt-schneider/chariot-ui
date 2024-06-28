@@ -1,5 +1,5 @@
 import {
-  ArrowRightCircleIcon,
+  ArrowRightStartOnRectangleIcon,
   ChartBarSquareIcon,
   DocumentTextIcon,
   PuzzlePieceIcon,
@@ -115,7 +115,7 @@ export const AccountDropdown: React.FC = () => {
           },
           {
             label: 'Log Out',
-            icon: <ArrowRightCircleIcon />,
+            icon: <ArrowRightStartOnRectangleIcon />,
             to: getRoute(['app', 'logout']),
           },
         ],
