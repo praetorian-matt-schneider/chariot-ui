@@ -9,9 +9,9 @@ export interface Breadcrumb {
 const pageTitles = {
   Seeds: 'Manage entry points to identify and monitor assets for scans.',
   Assets:
-    'Track and manage discovered assets to ensure comprehensive security scanning and risk assessment.',
+    'Track discovered assets to ensure thorough security scans and risk assessment.',
   Risks:
-    'Identify, evaluate, and prioritize risks in your assets to protect your organization.',
+    'Identify and prioritize risks in assets to protect your organization.',
   Integrations:
     'Configure and manage external service integrations to enhance your security monitoring capabilities.',
   Documents:
@@ -22,7 +22,7 @@ const pageTitles = {
   References: 'Manage external references linked to your risks.',
   Jobs: 'Track the status and results of recent security scans from the past 24 hours.',
   Overview:
-    "Monitor your organization's attack surface and review daily reports with critical findings and recommendations.",
+    'Monitor your attack surface and review daily reports with critical findings and recommendations.',
 };
 
 export function BreadCrumbs({ breadcrumbs }: { breadcrumbs: Breadcrumb[] }) {

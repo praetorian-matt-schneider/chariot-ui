@@ -47,7 +47,7 @@ export function TopNavBar() {
                 {
                   label: 'Assets',
                   description:
-                    'Track and manage discovered assets to ensure comprehensive scanning.',
+                    'Track discovered assets to ensure thorough security scans and risk assessment.',
                   helpText: <Shortcuts value="A" />,
                   icon: (
                     <div>
@@ -59,7 +59,7 @@ export function TopNavBar() {
                 {
                   label: 'Risks',
                   description:
-                    'Identify, evaluate, and prioritize risks in your assets to protect your organization.',
+                    'Identify and prioritize risks in assets to protect your organization.',
                   helpText: <Shortcuts value="R" />,
                   icon: (
                     <div>
