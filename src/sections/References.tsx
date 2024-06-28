@@ -103,7 +103,7 @@ export function References() {
           onClick: () => {
             reference.onOpenChange(true);
           },
-          icon: <PlusIcon className="size-5" />,
+          startIcon: <PlusIcon className="size-5" />,
         };
       }}
       status={status}
