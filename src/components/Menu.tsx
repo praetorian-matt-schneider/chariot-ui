@@ -329,22 +329,13 @@ function Content(props: MenuItemProps & { multiSelect?: boolean }) {
           <div
             className={`flex w-full justify-between gap-8 overflow-hidden text-ellipsis ${labelText ? '' : 'font-semibold'} leading-8 ${disabled ? 'italic text-default-light' : ''} ${label === 'View All' && 'm-auto'}`}
           >
-            <div className="flex flex-row items-center space-x-1">
-              {typeof label === 'string' && (
-                <OverflowText text={label} placement="left" />
-              )}
-              {isSelected && !multiSelect && (
-                <div className="text-default-light">
-                  <CheckCircleIcon className="size-4 text-brand" />
-                </div>
-              )}
-            </div>
-
+            {typeof label === 'string' && (
+              <OverflowText text={label} placement="left" />
+            )}
             {typeof label !== 'string' && label}
             {labelSuffix}
           </div>
         </div>
-
         {(description || helpText) && (
           <div
             className={`flex w-full gap-1 text-xs  ${disabled ? 'italic text-disabled' : 'text-default-light'}`}
@@ -354,6 +345,11 @@ function Content(props: MenuItemProps & { multiSelect?: boolean }) {
           </div>
         )}
       </div>
+      {isSelected && !multiSelect && (
+        <div className="text-default-light">
+          <CheckCircleIcon className="size-4 text-brand" />
+        </div>
+      )}
     </div>
   );
 }
