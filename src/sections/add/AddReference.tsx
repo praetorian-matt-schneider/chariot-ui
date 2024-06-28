@@ -41,22 +41,19 @@ export function AddReference() {
 
   return (
     <Modal title="Add Reference" open={open} onClose={onClose} size="xl">
-      <div className="flex flex-row space-y-6 p-6 flex-nowrap">
-        <div className="flex-1">
-          <h3 className="text-sm font-medium text-gray-700">
-            What is a Reference?
-          </h3>
-          <p className="mt-1 text-sm text-gray-500">
-            A reference refers to metadata that provides additional information
-            about your risks. References help in categorizing and describing
-            risks more precisely.
-          </p>
-          <p className="mt-3 text-sm text-gray-500">
-            To add a reference, you will need to provide the class and name
-            fields, which describe the type and value of the reference,
-            respectively.
-          </p>
-          <p className="mt-3 text-sm text-gray-500">
+      <div className="flex flex-row flex-nowrap p-2">
+        <div className="flex flex-1 flex-col space-y-4 p-2">
+          <div>
+            <h3 className="text-xl font-medium text-gray-700">
+              What is a Reference?
+            </h3>
+            <p className="mt-1 text-md text-gray-500">
+              A reference refers to metadata that provides additional
+              information about your risks. References help in categorizing and
+              describing risks more precisely.
+            </p>
+          </div>
+          <p className="mt-1 text-sm text-gray-500 bg-layer1 p-4 rounded-sm">
             For example, if you work for Acme Corporation, a reference might
             include:
             <ul className="mt-1 list-disc pl-5 text-sm text-gray-500">

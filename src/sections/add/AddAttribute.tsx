@@ -42,35 +42,30 @@ export function AddAttribute() {
 
   return (
     <Modal title="Add Attribute" open={open} onClose={onClose} size="xl">
-      <div className="flex flex-row space-y-6 p-6 flex-nowrap">
-        <div className="flex-1">
+      <div className="flex flex-row flex-nowrap p-2">
+        <div className="flex flex-1 flex-col space-y-4 p-2">
           <div>
-            <h3 className="text-sm font-medium text-gray-700">
+            <h3 className="text-xl font-medium text-gray-700">
               What is an Attribute?
             </h3>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-md text-gray-500">
               An attribute refers to metadata that provides additional
               information about your assets. Attributes help in categorizing and
               describing assets more precisely.
             </p>
-            <p className="mt-3 text-sm text-gray-500">
-              To add an attribute, you will need to provide the class and name
-              fields, which describe the type and value of the attribute,
-              respectively.
-            </p>
-            <p className="mt-3 text-sm text-gray-500">
-              For example, if you work for Acme Corporation, an attribute might
-              include:
-              <ul className="mt-1 list-disc pl-5 text-sm text-gray-500">
-                <li>
-                  Class: <code>Operating System</code>
-                </li>
-                <li>
-                  Name: <code>Windows Server 2019</code>
-                </li>
-              </ul>
-            </p>
           </div>
+          <p className="mt-1 text-sm text-gray-500 bg-layer1 p-4 rounded-sm">
+            For example, if you work for Acme Corporation, an attribute might
+            include:
+            <ul className="mt-1 list-disc pl-5 text-sm text-gray-500">
+              <li>
+                Class: <code>Operating System</code>
+              </li>
+              <li>
+                Name: <code>Windows Server 2019</code>
+              </li>
+            </ul>
+          </p>
         </div>
         <div className="px-10 text-center">
           <div className="relative m-auto ml-4 flex h-[400px] w-full">

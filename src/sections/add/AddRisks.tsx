@@ -118,36 +118,34 @@ export const AddRisks = () => {
           onClick: handleSubmit,
         }}
       >
-        <div className="flex flex-row flex-nowrap space-y-6 p-6">
-          <div className="flex-1">
+        <div className="flex flex-row flex-nowrap p-2">
+          <div className="flex flex-1 flex-col space-y-4 p-2">
             <div>
-              <h3 className="text-sm font-medium text-gray-700">
+              <h3 className="text-xl font-medium text-gray-700">
                 What is a Risk?
               </h3>
-              <p className="mt-1 text-sm text-gray-500">
-                {`A risk refers to any potential threat or vulnerability within your organization's IT infrastructure that could be exploited by attackers. Risks are identified through various security scans and assessments.`}
-              </p>
-              <p className="mt-3 text-sm text-gray-500">
-                To add a risk, you will need to provide the asset name, the
-                finding name (typically a CVE identifier), the severity, and
-                optionally upload proof of concept and a definition.
-              </p>
-              <p className="mt-3 text-sm text-gray-500">
-                For example, if you work for Acme Corporation, a risk might
-                include:
-                <ul className="mt-1 list-disc pl-5 text-sm text-gray-500">
-                  <li>
-                    Asset Name: <code>123.45.6.78</code>
-                  </li>
-                  <li>
-                    Finding Name: <code>CVE-2021-34527</code>
-                  </li>
-                  <li>
-                    Severity: <code>High</code>
-                  </li>
-                </ul>
+              <p className="mt-1 text-md text-gray-500">
+                A risk refers to any potential threat or vulnerability within
+                your organization's IT infrastructure that could be exploited by
+                attackers. Risks are identified through various security scans
+                and assessments.
               </p>
             </div>
+            <p className="mt-1 text-sm text-gray-500 bg-layer1 p-4 rounded-sm">
+              For example, if you work for Acme Corporation, a risk might
+              include:
+              <ul className="mt-1 list-disc pl-5 text-sm text-gray-500">
+                <li>
+                  Asset: <code>123.45.6.78</code>
+                </li>
+                <li>
+                  Finding: <code>CVE-2021-34527</code>
+                </li>
+                <li>
+                  Severity: <code>High</code>
+                </li>
+              </ul>
+            </p>
           </div>
           <div className="px-10 text-center">
             <div className="relative m-auto ml-4 flex h-[400px] w-full">
@@ -200,7 +198,7 @@ export const AddRisks = () => {
                         <Button
                           startIcon={<PlusIcon className="size-5" />}
                           styleType="textPrimary"
-                          label="Add Definition"
+                          label="Add Description & Remediation"
                           onClick={() => setIsDefinitionOpen(true)}
                         />
                       </div>

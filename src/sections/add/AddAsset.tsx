@@ -24,35 +24,41 @@ export function AddAsset() {
 
   return (
     <Modal title="Add Asset" open={open} onClose={onClose} size="lg">
-      <div className="flex flex-col space-y-4 p-6">
+      <div className="flex flex-col space-y-4 p-2">
         <div>
-          <h3 className="text-sm font-medium text-gray-700">
+          <h3 className="text-xl font-medium text-gray-700">
             What is an Asset?
           </h3>
-          <p className="mt-1 text-sm text-gray-500">
-            {`An asset refers to any single component of your organization's IT infrastructure that could be a target for cyberattacks. Assets are the actual items we assess for risks.`}
+          <p className="mt-1 text-md text-gray-500">
+            An asset refers to any single component of your organization's IT
+            infrastructure that could be a target for cyberattacks. Assets are
+            the actual items we assess for risks.
           </p>
         </div>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-gray-500 bg-layer1 p-4 rounded-sm">
           For example, if you work for Acme Corporation, your assets might
           include:
           <ul className="mt-1 list-disc pl-5 text-sm text-gray-500">
             <li>
-              Network Assets: <code>8.8.8.8</code>
+              Network Assets: <code className="font-extrabold">8.8.8.8</code>
             </li>
             <li>
-              Host Assets: <code>server1.acme.com</code>,{' '}
+              Host Assets:{' '}
+              <code className="font-extrabold">server1.acme.com</code>,{' '}
               <code>workstation5.acme.com</code>
             </li>
             <li>
-              Application Assets: <code>app.acme.com</code>
+              Application Assets:{' '}
+              <code className="font-extrabold">app.acme.com</code>
             </li>
             <li>
-              Data Assets: <code>db.acme.com</code>
+              Data Assets: <code className="font-extrabold">db.acme.com</code>
             </li>
             <li>
               Cloud Assets:{' '}
-              <code>ec2-203-0-113-25.compute-1.amazonaws.com</code>
+              <code className="font-extrabold">
+                ec2-203-0-113-25.compute-1.amazonaws.com
+              </code>
             </li>
           </ul>
         </p>

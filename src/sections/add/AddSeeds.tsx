@@ -59,46 +59,50 @@ export const AddSeeds = () => {
 
   return (
     <Modal title="Add Seeds" open={isOpen} onClose={onClose} size="xl">
-      <div className="flex flex-row space-y-6 p-6">
+      <div className="flex flex-row space-y-6 p-2">
         <div className="flex flex-col space-y-4">
           <div>
-            <h3 className="text-sm font-medium text-gray-700">
+            <h3 className="text-xl font-medium text-gray-700">
               What is a Seed?
             </h3>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-md text-gray-500">
               A seed can be a domain, IP address, CIDR range, GitHub
               organization, or integration. Add seeds directly, through
               integrations, or via file upload to start monitoring and
               discovering assets.
             </p>
-            <p className="mt-3 text-sm text-gray-500">
-              For example, if you work for Acme Corporation, you might add seeds
-              such as:
-              <ul className="mt-1 list-disc pl-5 text-sm text-gray-500">
-                <li>
-                  Domains: <code>acme.com</code>, <code>mail.acme.com</code>
-                </li>
-                <li>
-                  IP Addresses: <code>8.8.8.8</code>
-                </li>
-                <li>
-                  CIDR Ranges: <code>8.8.8.0/24</code>
-                </li>
-                <li>
-                  GitHub Organizations:{' '}
-                  <code>https://github.com/acme-corp</code>
-                </li>
-                <li>
-                  Integrations: <code>NS1</code>, <code>AWS</code>
-                </li>
-              </ul>
-            </p>
-            <p className="mt-3 text-sm text-gray-500">
-              We will monitor these seeds, discover any associated assets you
-              may have missed, and identify risks, enhancing your security by
-              mitigating threats early.
-            </p>
           </div>
+          <p className="mt-1 text-sm text-gray-500 bg-layer1 p-4 rounded-sm">
+            For example, if you work for Acme Corporation, you might add seeds
+            such as:
+            <ul className="mt-1 list-disc pl-5 text-sm text-gray-500">
+              <li>
+                Domains: <code className="font-extrabold">acme.com</code>,{' '}
+                <code className="font-extrabold">mail.acme.com</code>
+              </li>
+              <li>
+                IP Addresses: <code className="font-extrabold">8.8.8.8</code>
+              </li>
+              <li>
+                CIDR Ranges: <code className="font-extrabold">8.8.8.0/24</code>
+              </li>
+              <li>
+                GitHub Organizations:{' '}
+                <code className="font-extrabold">
+                  https://github.com/acme-corp
+                </code>
+              </li>
+              <li>
+                Integrations: <code className="font-extrabold">NS1</code>,{' '}
+                <code className="font-extrabold">AWS</code>
+              </li>
+            </ul>
+          </p>
+          <p className="mt-3 text-sm text-gray-500">
+            We will monitor these seeds, discover any associated assets you may
+            have missed, and identify risks, enhancing your security by
+            mitigating threats early.
+          </p>
 
           <div className="flex-1"></div>
 
