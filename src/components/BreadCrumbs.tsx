@@ -7,8 +7,7 @@ export interface Breadcrumb {
 }
 
 const pageTitles = {
-  Seeds:
-    'Manage entry points to discover and monitor assets for security scans.',
+  Seeds: 'Manage entry points to identify and monitor assets for scans.',
   Assets:
     'Track and manage discovered assets to ensure comprehensive security scanning and risk assessment.',
   Risks:

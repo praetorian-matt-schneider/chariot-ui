@@ -35,7 +35,7 @@ export function TopNavBar() {
                 {
                   label: 'Seeds',
                   description:
-                    'Manage entry points to discover and monitor assets for scanning.',
+                    'Manage entry points to identify and monitor assets for scans.',
                   helpText: <Shortcuts value="S" />,
                   icon: (
                     <div>
