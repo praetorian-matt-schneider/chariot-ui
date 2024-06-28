@@ -1,5 +1,8 @@
 import React, { useMemo } from 'react';
-import { ArrowDownOnSquareStackIcon } from '@heroicons/react/24/solid';
+import {
+  ArrowDownCircleIcon,
+  ArrowDownIcon,
+} from '@heroicons/react/24/outline';
 
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
@@ -7,6 +10,8 @@ import { useGetCollaborators } from '@/hooks/collaborators';
 import useRiskDetails from '@/hooks/useRiskDetails';
 import { useAuth } from '@/state/auth';
 import { exportContent } from '@/utils/download.util';
+import { Modal } from '@/components/Modal';
+import { Button } from '@/components/Button';
 
 interface TableData {
   displayName: string;
@@ -19,6 +24,9 @@ interface TableData {
 }
 
 export const CollaboratingWith = () => {
+  const [email, setEmail] = React.useState<string>('');
+  const [exportType, setExportType] = React.useState<'json' | 'csv'>('json');
+  const [showModal, setShowModal] = React.useState(false);
   const { startImpersonation } = useAuth();
   const fetchRiskDetails = useRiskDetails();
   const { data: collaborators, status } = useGetCollaborators({
@@ -105,45 +113,96 @@ export const CollaboratingWith = () => {
       id: 'critical',
       fixedWidth: 80,
     },
+    {
+      label: 'Export',
+      id: 'total',
+      fixedWidth: 100,
+      cell: (row: TableData) => (
+        <button
+          onClick={() => {
+            setEmail(row.email);
+            setShowModal(true);
+          }}
+        >
+          <ArrowDownCircleIcon className="size-5" />
+        </button>
+      ),
+    },
   ];
 
   return (
-    <div className="flex w-full flex-col">
-      <Table
-        className="border-none p-0 shadow-none"
-        name="collaborators"
-        columns={columns}
-        data={collaboratorsWithCount}
-        status={status}
-        loadingRowCount={3}
-        noData={{
-          description: 'No collaborating organizations found.',
-        }}
-        isTableView={false}
-        error={null}
-        rowActions={(data: TableData) => {
-          return {
-            menu: {
-              items: [
-                {
-                  label: 'Export',
-                  onClick: () => {
-                    downloadRisks(data.email, 'json');
-                  },
-                  icon: <ArrowDownOnSquareStackIcon />,
-                },
-                {
-                  label: 'Export (as csv)',
-                  onClick: () => {
-                    downloadRisks(data.email, 'csv');
-                  },
-                  icon: <ArrowDownOnSquareStackIcon />,
-                },
-              ],
-            },
-          };
-        }}
-      />
-    </div>
+    <>
+      <div className="flex w-full flex-col">
+        <Table
+          className="border-none p-0 shadow-none"
+          name="collaborators"
+          columns={columns}
+          data={collaboratorsWithCount}
+          status={status}
+          loadingRowCount={3}
+          noData={{
+            description: 'No collaborating organizations found.',
+          }}
+          isTableView={false}
+          error={null}
+        />
+      </div>
+      <Modal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        title="Export Risks"
+        icon={<ArrowDownCircleIcon className="size-5" />}
+        size="md"
+      >
+        <div className="flex flex-col space-y-4 p-4">
+          <p className="text-xl text-gray-700 font-semibold">
+            Simplify your export process
+          </p>
+          <p className="text-md text-gray-700 mb-3">
+            For a smoother experience, try our command line tool. You can
+            install it with
+            <code className="bg-gray-200 p-1 rounded ml-1 inline-block py-0.5">
+              pip install praetorian-cli
+            </code>
+            . For more details, check the
+            <a
+              href="https://github.com/praetorian-inc/praetorian-cli"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-brand hover:underline ml-1"
+            >
+              README
+            </a>
+            .
+          </p>
+          <div />
+          <p className="text-sm text-gray-700">
+            Click below to download all open risks for this organization.
+          </p>
+          <div className="flex flex-row space-x-2">
+            <Button
+              styleType="primary"
+              onClick={() => {
+                setExportType('json');
+                downloadRisks(email, 'json');
+              }}
+              className="w-full"
+            >
+              Export as JSON
+            </Button>
+            <Button
+              styleType="secondary"
+              onClick={() => {
+                setExportType('csv');
+                downloadRisks(email, 'csv');
+              }}
+              className="w-full"
+            >
+              Export as CSV
+            </Button>
+          </div>
+        </div>
+      </Modal>
+    </>
   );
 };
