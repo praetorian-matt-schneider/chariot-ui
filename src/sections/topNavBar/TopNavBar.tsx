@@ -71,18 +71,17 @@ export function TopNavBar() {
               ],
             }}
           />
-          <Button
-            styleType="header"
+          <button
             onClick={() => {
               navigate(getRoute(['app', 'overview']));
             }}
-            className="header bg-header text-medium flex flex-row space-x-1"
+            className="ml-2 font-normal text-sm flex flex-row space-x-1"
           >
-            <p>Overview</p>
-            <p className="rounded-[4px] border border-header text-xs capitalize px-1 text-[#5a5a7a]">
+            <p className="mr-1">Overview</p>
+            <p className="rounded-[4px] font-medium border border-header text-xs capitalize px-1 text-[#5a5a7a]">
               Beta
             </p>
-          </Button>
+          </button>
           <div className="ml-auto flex items-center md:order-last md:ml-0">
             <div className="ml-4">
               <Hexagon notify={showNotification}>
