@@ -98,7 +98,7 @@ export const Overview = () => {
         <div className="flex ">
           <h1 className="center-align mt-6 flex items-center text-2xl font-light text-gray-500">
             Daily Report
-            <Tooltip title="Download Markdown" placement="right">
+            <Tooltip title="Download Report" placement="right">
               <Button onClick={() => downloadFileContent()} styleType="none">
                 <DocumentArrowDownIcon className="size-6" />
               </Button>
