@@ -83,14 +83,14 @@ const Account: React.FC = () => {
           />
 
           <>
-            <div className="mt-5 flex items-center gap-1">
+            <div className="mt-5 flex items-center">
               <label className="block text-sm font-medium leading-6 text-gray-900">
                 Organization Logo
               </label>
             </div>
             <Loader
               isLoading={profilePictureStatus === 'pending'}
-              className="mt-2 h-5"
+              className="h-5 m-0"
             >
               {showDpDropzone && (
                 <Dropzone
@@ -99,6 +99,7 @@ const Account: React.FC = () => {
                   title="Click or drag and drop your logo image here."
                   subTitle=""
                   maxFileSizeInMb={6}
+                  className="mt-1"
                 />
               )}
               {!showDpDropzone && (
