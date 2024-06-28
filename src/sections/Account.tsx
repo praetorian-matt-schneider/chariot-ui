@@ -81,49 +81,46 @@ const Account: React.FC = () => {
             isLoading={status === 'pending'}
             onChange={e => setDisplayName(e.target.value)}
           />
-          {!friend.email && (
-            <>
-              <div className="mt-5 flex items-center gap-1">
-                <label className="block text-sm font-medium leading-6 text-gray-900">
-                  Organization Logo
-                </label>
-              </div>
-              <Loader
-                isLoading={profilePictureStatus === 'pending'}
-                className="mt-2 h-5"
-              >
-                {showDpDropzone && (
-                  <Dropzone
-                    type="arrayBuffer"
-                    onFilesDrop={handleFileDrop}
-                    title="Click or drag and drop your logo image here."
-                    subTitle=""
-                    maxFileSizeInMb={6}
-                  />
-                )}
-                {!showDpDropzone && (
-                  <div className="flex flex-row items-center">
-                    <Avatar
-                      className="mr-2 size-20"
-                      email={friend.email || me}
-                    />
 
-                    <Button
-                      styleType="text"
-                      onClick={() => {
-                        uploadFile({
-                          name: PROFILE_PICTURE_ID,
-                          content: '',
-                        });
-                      }}
-                    >
-                      <XMarkIcon className="size-3" /> Remove
-                    </Button>
-                  </div>
-                )}
-              </Loader>
-            </>
-          )}
+          <>
+            <div className="mt-5 flex items-center gap-1">
+              <label className="block text-sm font-medium leading-6 text-gray-900">
+                Organization Logo
+              </label>
+            </div>
+            <Loader
+              isLoading={profilePictureStatus === 'pending'}
+              className="mt-2 h-5"
+            >
+              {showDpDropzone && (
+                <Dropzone
+                  type="arrayBuffer"
+                  onFilesDrop={handleFileDrop}
+                  title="Click or drag and drop your logo image here."
+                  subTitle=""
+                  maxFileSizeInMb={6}
+                />
+              )}
+              {!showDpDropzone && (
+                <div className="flex flex-row items-center">
+                  <Avatar className="mr-2 size-20" email={friend.email || me} />
+
+                  <Button
+                    styleType="text"
+                    onClick={() => {
+                      uploadFile({
+                        name: PROFILE_PICTURE_ID,
+                        content: '',
+                      });
+                    }}
+                  >
+                    <XMarkIcon className="size-3" /> Remove
+                  </Button>
+                </div>
+              )}
+            </Loader>
+          </>
+
           <Button
             style={{
               opacity: isDirty ? '100%' : '0%',
