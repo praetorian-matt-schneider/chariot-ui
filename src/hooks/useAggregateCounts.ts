@@ -1,5 +1,6 @@
 import { useCounts } from '@/hooks/useCounts';
 import { JobStatus } from '@/types';
+import { useMemo } from 'react';
 
 export const useAggregateCounts = (): {
   isPending: boolean;
@@ -38,10 +39,21 @@ export const useAggregateCounts = (): {
   const getTotal = (stats: Record<string, number>) =>
     Object.values(stats).reduce((acc, val) => acc + val, 0);
 
+  // Only count open risks
+  const openRiskStats = useMemo(() => {
+    const allStats = { ...riskStats };
+    for (const key in allStats) {
+      if (!key.startsWith('O')) {
+        delete allStats[key];
+      }
+    }
+    return allStats;
+  }, [riskStats]);
+
   const counts = {
     seeds: getTotal(seedStats),
     assets: getTotal(assetStats),
-    risks: getTotal(riskStats),
+    risks: getTotal(openRiskStats),
     jobs: getTotal(jobStats),
     jobsRunning: jobStats[JobStatus.Running] || 0,
   };
