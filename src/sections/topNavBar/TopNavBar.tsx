@@ -39,7 +39,7 @@ export function TopNavBar() {
                   helpText: <Shortcuts value="S" />,
                   icon: (
                     <div>
-                      <SeedsIcon className="-ml-2 size-7 stroke-1" />
+                      <SeedsIcon className="-ml-2 size-7 stroke-1 text-default-light" />
                     </div>
                   ),
                   to: getRoute(['app', 'seeds']),
@@ -51,7 +51,7 @@ export function TopNavBar() {
                   helpText: <Shortcuts value="A" />,
                   icon: (
                     <div>
-                      <AssetsIcon className="-ml-2 size-7 stroke-1" />
+                      <AssetsIcon className="-ml-2 size-7 stroke-1 text-default-light" />
                     </div>
                   ),
                   to: getRoute(['app', 'assets']),
@@ -63,7 +63,7 @@ export function TopNavBar() {
                   helpText: <Shortcuts value="R" />,
                   icon: (
                     <div>
-                      <RisksIcon className="-ml-2 size-7 stroke-1" />
+                      <RisksIcon className="-ml-2 size-7 stroke-1 text-default-light" />
                     </div>
                   ),
                   to: getRoute(['app', 'risks']),
