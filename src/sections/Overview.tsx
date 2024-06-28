@@ -96,12 +96,12 @@ export const Overview = () => {
 
       {reportReady && (
         <div className="flex ">
-          <h1 className="center-align mt-6 flex items-center text-2xl font-light text-gray-500">
+          <h1 className="center-align mb-2 mt-9 flex items-center text-2xl font-light text-gray-500">
             Daily Report
             <Tooltip title="Download Report" placement="right">
-              <Button onClick={() => downloadFileContent()} styleType="none">
+              <button onClick={() => downloadFileContent()} className="ml-1">
                 <DocumentArrowDownIcon className="size-6" />
-              </Button>
+              </button>
             </Tooltip>
           </h1>
         </div>

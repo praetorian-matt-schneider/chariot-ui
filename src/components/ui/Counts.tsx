@@ -9,9 +9,9 @@ import { QueryStatus } from '@/utils/api';
 const countsLabel = OverviewLabels;
 
 const countsDefinition: Record<string, React.ReactNode> = {
-  seeds: `Seeds are starting points like domains or IP addresses. They initiate scans that detect assets.`,
-  assets: `Assets are elements found from seeds, such as servers or databases. We analyze these assets to identify risks.`,
-  risks: `Risks are security threats detected in assets. We assess these to offer clear, actionable recommendations in your report.`,
+  seeds: `Starting points which initiate asset discovery.`,
+  assets: `Elements found from seeds analyzed to identify risks.`,
+  risks: `Security threats assessed to provide recommendations.`,
 };
 
 interface CountsProps {
@@ -46,7 +46,7 @@ const Counts: React.FC<CountsProps> = ({ stats, status }) => {
       {Object.entries(countsObject).map(
         ([key, { label, count, definition }], index, array) => (
           <React.Fragment key={key}>
-            <div className="relative h-28 w-full rounded-[2px] bg-white p-4 shadow-sm md:w-1/3">
+            <div className="relative w-full rounded-[2px] bg-white p-4 shadow-sm md:w-1/3">
               <Loader isLoading={status === 'pending'}>
                 <span className="mt-2 text-2xl font-semibold">
                   {count.toLocaleString()}
@@ -56,7 +56,7 @@ const Counts: React.FC<CountsProps> = ({ stats, status }) => {
                 </span>
                 <div className="absolute right-1 top-1">{icons[key]}</div>
               </Loader>
-              <div className="pt-1 text-xs text-gray-500">{definition}</div>
+              <div className="pt-3 text-xs text-gray-500">{definition}</div>
             </div>
             {index < array.length - 1 && (
               <div className="mx-3">
