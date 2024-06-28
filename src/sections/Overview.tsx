@@ -35,7 +35,7 @@ export const Overview = () => {
     resource: 'account',
   });
 
-  const client_short =
+  const client =
     useGetDisplayName(accounts) || friend.displayName || friend.email || me;
   const [showDetails, setShowDetails] = useState(false);
   const { counts } = useAggregateCounts();
@@ -51,7 +51,11 @@ export const Overview = () => {
     () =>
       getReportSections({
         report: fileContent,
-        data: { client_short, client_possessive: `${client_short}'s` },
+        data: {
+          client,
+          client_short: client,
+          client_possessive: `${client}'s`,
+        },
       }),
     [fileContent]
   );
