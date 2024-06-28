@@ -114,38 +114,36 @@ const Files: React.FC = () => {
           </Tooltip>
         </div>
       );
-    } else if (item.class === 'manual') {
-      if (item.name.endsWith('png') || item.name.endsWith('jpg')) {
-        return (
-          <div className="mr-2 flex flex-row">
-            <Tooltip title="Preview Image">
-              <button
-                onClick={() => {
-                  setFiletype('image');
-                  setFilename(item.name);
-                }}
-              >
-                <PhotoIcon className="size-5" />
-              </button>
-            </Tooltip>
-          </div>
-        );
-      } else {
-        return (
-          <div className="mr-2 flex flex-row">
-            <Tooltip title="View File">
-              <button
-                onClick={() => {
-                  setFiletype('text');
-                  setFilename(item.name);
-                }}
-              >
-                <DocumentIcon className="size-5" />
-              </button>
-            </Tooltip>
-          </div>
-        );
-      }
+    } else if (item.name.endsWith('png') || item.name.endsWith('jpg')) {
+      return (
+        <div className="mr-2 flex flex-row">
+          <Tooltip title="Preview Image">
+            <button
+              onClick={() => {
+                setFiletype('image');
+                setFilename(item.name);
+              }}
+            >
+              <PhotoIcon className="size-5" />
+            </button>
+          </Tooltip>
+        </div>
+      );
+    } else {
+      return (
+        <div className="mr-2 flex flex-row">
+          <Tooltip title="View File">
+            <button
+              onClick={() => {
+                setFiletype('text');
+                setFilename(item.name);
+              }}
+            >
+              <DocumentIcon className="size-5" />
+            </button>
+          </Tooltip>
+        </div>
+      );
     }
   };
 
