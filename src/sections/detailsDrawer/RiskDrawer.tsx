@@ -40,6 +40,7 @@ import {
   DocumentTextIcon,
   IdentificationIcon,
 } from '@heroicons/react/24/outline';
+import { useOpenDrawer } from '@/sections/detailsDrawer/useOpenDrawer';
 
 const getJobTimeline = ({
   status,
@@ -89,6 +90,7 @@ interface RiskDrawerProps {
 
 export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
   const navigate = useNavigate();
+  const { getAssetDrawerLink } = useOpenDrawer();
   const { removeSearchParams } = useSearchParams();
 
   const [, dns, name] = compositeKey.split('#');
@@ -280,7 +282,18 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
         <div className="flex h-full flex-col gap-10">
           <DetailsDrawerHeader
             title={risk.name}
-            subtitle={risk.dns}
+            subtitle={
+              <button
+                className="text-brand"
+                onClick={() =>
+                  navigate(
+                    getAssetDrawerLink({ dns: risk.dns, name: risk.dns })
+                  )
+                }
+              >
+                {risk.dns}
+              </button>
+            }
             prefix={
               <div className="flex flex-row items-center space-x-1">
                 <RisksIcon className="size-5" />
@@ -454,8 +467,16 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                       value: formatDate(risk.updated),
                       tooltip: risk.updated,
                     },
-                    { label: 'Asset', value: ip || '' },
-                    { label: 'Port', value: port || '' },
+                    {
+                      label: 'IP',
+                      value: ip,
+                      to: getAssetDrawerLink({ dns: ip, name: ip }),
+                    },
+                    {
+                      label: 'Port',
+                      value: port || '',
+                      to: `/app/attributes?q=${port}`,
+                    },
                     {
                       label: `URL${urlsImpacted?.length > 1 ? 's' : ''} Impacted`,
                       value:
