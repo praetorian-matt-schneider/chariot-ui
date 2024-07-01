@@ -7,7 +7,7 @@ import { cn } from '@/utils/classname';
 
 interface Props {
   title: string;
-  subtitle: JSX.Element | string;
+  subtitle: string;
   isLoading?: boolean;
   onClick?: () => void;
   prefix?: React.ReactNode;

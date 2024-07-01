@@ -282,18 +282,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
         <div className="flex h-full flex-col gap-10">
           <DetailsDrawerHeader
             title={risk.name}
-            subtitle={
-              <button
-                className="text-brand"
-                onClick={() =>
-                  navigate(
-                    getAssetDrawerLink({ dns: risk.dns, name: risk.dns })
-                  )
-                }
-              >
-                {risk.dns}
-              </button>
-            }
+            subtitle={risk.dns}
             prefix={
               <div className="flex flex-row items-center space-x-1">
                 <RisksIcon className="size-5" />
@@ -470,7 +459,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                     {
                       label: 'IP',
                       value: ip,
-                      to: getAssetDrawerLink({ dns: ip, name: ip }),
+                      to: getAssetDrawerLink({ dns: risk.dns, name: ip }),
                     },
                     {
                       label: 'Port',
