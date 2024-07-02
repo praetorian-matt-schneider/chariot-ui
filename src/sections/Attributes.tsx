@@ -9,6 +9,7 @@ import { useOpenDrawer } from '@/sections/detailsDrawer/useOpenDrawer';
 import { useGlobalState } from '@/state/global.state';
 import { Attribute } from '@/types';
 import { prettyPrint } from '@/utils/prettyPrint.util';
+import { useNavigate } from 'react-router-dom';
 
 export function Attributes() {
   const {
@@ -19,6 +20,7 @@ export function Attributes() {
     fetchNextPage,
   } = useMy({ resource: 'attribute', filterByGlobalSearch: true });
   const { getAssetDrawerLink } = useOpenDrawer();
+  const navigate = useNavigate();
 
   const {
     modal: { attribute },
@@ -33,9 +35,11 @@ export function Attributes() {
       cell: item => {
         const ip = item.key.split('#')[3];
         return (
-          <Link
-            to={getAssetDrawerLink({ dns: item.dns, name: ip })}
-            className="cursor-pointer truncate font-medium"
+          <button
+            className="cursor-pointer truncate font-medium text-brand"
+            onClick={() => {
+              navigate(getAssetDrawerLink({ dns: item.dns, name: ip }));
+            }}
           >
             {ip !== item.dns ? (
               <span>
@@ -44,14 +48,14 @@ export function Attributes() {
             ) : (
               item.dns
             )}
-          </Link>
+          </button>
         );
       },
     },
     {
       label: 'Class',
       id: 'class',
-      className: 'w-[120px]',
+      className: 'w-[220px]',
       copy: true,
       cell: item => {
         if (Number.isNaN(Number.parseInt(item.class))) {
