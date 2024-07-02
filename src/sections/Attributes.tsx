@@ -104,6 +104,7 @@ export function Attributes() {
       }}
       status={status}
       error={error}
+      skipHeader
     />
   );
 }

@@ -33,6 +33,7 @@ export interface TableProps<TData> {
     label: string;
     filter: (data: TData) => boolean;
   }[];
+  skipHeader?: boolean;
 }
 
 export interface Column<TData> {

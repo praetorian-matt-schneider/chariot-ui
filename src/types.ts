@@ -111,7 +111,7 @@ export const FileLabels: Record<string, string> = {
   definition: 'Risk Definitions',
   report: 'Reports',
   proof: 'Proof of Exploits',
-  manual: 'Manually Uploaded Files',
+  manual: 'Uploaded',
   cti: 'Threat Intelligence',
 };
 

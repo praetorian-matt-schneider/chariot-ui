@@ -39,6 +39,7 @@ import { StorageKey } from '@/utils/storage/useStorage.util';
 import { generatePathWithSearch, useSearchParams } from '@/utils/url.util';
 
 import { DRAWER_WIDTH } from '.';
+import { useOpenDrawer } from '@/sections/detailsDrawer/useOpenDrawer';
 
 const getJobTimeline = ({
   status,
@@ -88,6 +89,7 @@ interface RiskDrawerProps {
 
 export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
   const navigate = useNavigate();
+  const { getAssetDrawerLink } = useOpenDrawer();
   const { removeSearchParams } = useSearchParams();
 
   const [, dns, name] = compositeKey.split('#');
@@ -453,8 +455,16 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                       value: formatDate(risk.updated),
                       tooltip: risk.updated,
                     },
-                    { label: 'Asset', value: ip || '' },
-                    { label: 'Port', value: port || '' },
+                    {
+                      label: 'IP',
+                      value: ip,
+                      to: getAssetDrawerLink({ dns: risk.dns, name: ip }),
+                    },
+                    {
+                      label: 'Port',
+                      value: port || '',
+                      to: `/app/attributes?q=${port}`,
+                    },
                     {
                       label: `URL${urlsImpacted?.length > 1 ? 's' : ''} Impacted`,
                       value:

@@ -51,6 +51,7 @@ export function Table<TData>(props: TableProps<TData>) {
     loadingRowCount = 25,
     isTableView = true,
     primaryAction,
+    skipHeader,
   } = props;
 
   const [expandedGroups, setExpandedGroups] = useState(
@@ -360,7 +361,10 @@ export function Table<TData>(props: TableProps<TData>) {
           )}
         >
           <thead
-            className={cn('sticky bg-layer0', isTableView ? 'top-20' : 'top-0')}
+            className={cn(
+              'sticky bg-layer0',
+              isTableView && !skipHeader ? 'top-20' : 'top-0'
+            )}
             style={{ zIndex: 1 }}
           >
             <tr>
