@@ -80,23 +80,10 @@ export function AddAttribute() {
             </h3>
             <p className="text-md mt-1 text-gray-500">
               An attribute refers to metadata that provides additional
-              information about your assets. Attributes help in categorizing and
-              describing assets more precisely.
+              information about your assets or risks. Attributes help in
+              categorizing and describing your attack surface more precisely.
             </p>
           </div>
-          <p className="mt-1 rounded-sm bg-layer1 p-4 text-sm text-gray-500">
-            For example, if you work for Acme Corporation, an attribute might
-            include:
-            <ul className="mt-1 list-disc pl-5 text-sm text-gray-500">
-              <li>
-                Class: <code className="font-extrabold">Operating System</code>
-              </li>
-              <li>
-                Name:{' '}
-                <code className="font-extrabold">Windows Server 2019</code>
-              </li>
-            </ul>
-          </p>
         </div>
         <div className="px-10 text-center">
           <div className="relative m-auto ml-4 flex h-[400px] w-full">
@@ -133,7 +120,7 @@ export function AddAttribute() {
                   onClick={() => setSelectedType(tab as AttributeType)}
                   className={({ selected }) =>
                     cn(
-                      'w-full py-4 px-2 text-sm font-semibold leading-5 hover:bg-gray-50 focus:outline-0',
+                      'capitalize w-full py-4 px-2 text-sm font-semibold leading-5 hover:bg-gray-50 focus:outline-0',
                       selected ? 'border-b-4 border-brand text-brand' : '',
                       !selected ? 'border-b-2 border-gray-100 bg-layer0' : ''
                     )
@@ -158,7 +145,7 @@ export function AddAttribute() {
                 onSelectedRisksChange(updatedValue.risks || []);
               }
             }}
-            placeholder={isAttribute ? '8.8.8.8' : 'CVE-2017-5487'}
+            placeholder={isAttribute ? 'payroll.acme.com' : 'CVE-2017-5487'}
           />
           <Inputs
             inputs={[

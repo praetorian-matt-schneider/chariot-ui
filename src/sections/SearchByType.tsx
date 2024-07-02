@@ -218,7 +218,7 @@ function Select<IsMultiSelect extends boolean>(
       asChild
     >
       <div>
-        <FormGroup label={props.label} name={props.label || ''}>
+        <FormGroup label={''} name={props.label || ''}>
           <div className="relative">
             <input
               ref={fakeInput}
