@@ -32,22 +32,36 @@ import { cn } from '@/utils/classname';
 const PUBLIC_ASSET = 'publicAsset';
 
 const AddAssetMessage = () => (
-  <div className="flex flex-col space-y-4 p-2">
+  <div className="flex flex-col space-y-2">
     <div>
       <h3 className="mt-0 text-xl font-medium text-gray-700">
         What is an Asset?
       </h3>
       <p className="mb-0 text-sm text-gray-500">
-        {`An asset refers to any single component of your organization's IT
-            infrastructure that could be a target for cyberattacks. Assets are
-            the actual items we assess for risks.`}
+        An asset refers to any single component of your organization's IT
+        infrastructure that could be a target for cyberattacks. Assets are the
+        actual items we assess for risks.
+      </p>
+      <p className="mb-0 text-sm text-gray-500">
+        For example, if you work for Acme Corporation, you might add:
+        <ul className="list-disc pl-5 text-sm ">
+          <li>
+            Domains: <span className="font-semibold">acme.com</span>,{' '}
+            <span className="font-semibold">mail.acme.com</span>
+          </li>
+          <li>
+            IP Addresses: <span className="font-semibold">8.8.8.8</span>
+          </li>
+          <li>
+            CIDR Ranges: <span className="font-semibold">8.8.8.0/24</span>
+          </li>
+          <li>
+            GitHub Organizations:{' '}
+            <span className="font-semibold">https://github.com/acme-corp</span>
+          </li>
+        </ul>
       </p>
     </div>
-
-    <p className="mt-1 text-sm text-gray-500">
-      We will monitor these assets, identify risks, and provide insights to
-      enhance your security.
-    </p>
   </div>
 );
 
@@ -180,7 +194,7 @@ export function AddAsset() {
       icon={<AssetsIcon className="size-6 text-default-light" />}
     >
       <TabGroup className="flex h-full gap-6" onChange={setSelectedIndex}>
-        <TabList className="w-44 shrink-0 overflow-auto border-r-2 border-default p-1 pr-4">
+        <TabList className="w-44 shrink-0 overflow-auto border border-1 border-l-0 border-y-0 border-layer1 p-1 pr-4">
           {Tabs.map(({ id, displayName, logo, connected, name }, index) => {
             const isConnected = connected && isIntegrationConnected(name);
             const selected = index === selectedIndex;

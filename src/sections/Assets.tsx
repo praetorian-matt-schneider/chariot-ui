@@ -104,7 +104,7 @@ const Assets: React.FC = () => {
 
   const status = useMergeStatus(riskStatus, assetsStatus);
 
-  const { getAssetDrawerLink, getSeedDrawerLink } = useOpenDrawer();
+  const { getAssetDrawerLink } = useOpenDrawer();
   const openRiskDataset = useMemo(
     () => buildOpenRiskDataset(risks as Risk[]),
     [risks]
@@ -147,8 +147,7 @@ const Assets: React.FC = () => {
       label: 'Asset Name',
       id: 'name',
       className: 'w-full',
-      to: item =>
-        item.seed ? getSeedDrawerLink(item) : getAssetDrawerLink(item),
+      to: item => getAssetDrawerLink(item),
       copy: true,
       cell: (asset: Asset) => {
         const integration = isIntegration(asset);
