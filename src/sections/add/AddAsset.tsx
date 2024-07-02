@@ -11,8 +11,10 @@ import { Input } from '@/components/form/Input';
 import { Inputs, Values } from '@/components/form/Inputs';
 import { AssetsIcon } from '@/components/icons';
 import { Modal } from '@/components/Modal';
+import { useModifyAccount } from '@/hooks';
+import { useCreateAsset } from '@/hooks/useAssets';
 import { useGlobalState } from '@/state/global.state';
-import { IntegrationType } from '@/types';
+import { IntegrationType, LinkAccount } from '@/types';
 import {
   IntegrationMeta,
   IntegrationsMeta,
@@ -76,7 +78,7 @@ const Tabs: IntegrationMeta[] = [
     inputs: [
       {
         name: 'username',
-        value: 'asset',
+        value: 'domain',
         hidden: true,
       },
       {
@@ -113,15 +115,25 @@ export function AddAsset() {
   // eslint-disable-next-line
   const [formData, setFormData] = useState<Values[]>([]);
 
-  // const { mutateAsync: createAsset, status: creatingAsset } = useCreateAsset();
+  const { mutateAsync: createAsset, status: creatingAsset } = useCreateAsset();
+  const { mutate: link } = useModifyAccount('link');
 
   function onClose() {
     onOpenChange(false);
   }
 
-  function handleAddAsset() {
-    // event.preventDefault();
-    // await createAsset({ name: formData.asset, seed: formData.seed });
+  async function handleAddAsset() {
+    // if domain is selected
+    if (formData[0].username === 'domain') {
+      await createAsset({
+        name: String(formData[0].asset),
+        seed: Boolean(formData[0].seed),
+      });
+    } else {
+      // if other integrations are selected
+      formData.map(data => link(data as unknown as LinkAccount));
+    }
+
     onClose();
   }
 
@@ -131,6 +143,7 @@ export function AddAsset() {
       open={open}
       onClose={onClose}
       footer={{
+        isLoading: creatingAsset === 'pending',
         text: 'Add',
         onClick: handleAddAsset,
       }}
@@ -200,14 +213,6 @@ const TabPanelContent = (props: TabPanelContentProps) => {
 
   const showInputs = inputs?.some(input => !input.hidden);
 
-  const handleLink = () => {
-    // event.preventDefault();
-    // if (formData) {
-    //   formData.map(formValue => link(formValue as unknown as LinkAccount));
-    //   handleClose();
-    // }
-  };
-
   useEffect(() => {
     onChange(formData);
   }, [formData]);
@@ -219,7 +224,7 @@ const TabPanelContent = (props: TabPanelContentProps) => {
       )}
       {description && <div className="text-sm">{description}</div>}
       {message && <div>{message}</div>}
-      <form id="new-asset" className="mt-4" onSubmit={handleLink}>
+      <form id="new-asset" className="mt-4">
         <div className={cn('space-y-4', description && 'cx-5')}>
           {markup && (
             <div className="relative space-y-2 rounded border-2 border-default bg-layer1 px-5 py-6">
