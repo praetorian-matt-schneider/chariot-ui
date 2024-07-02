@@ -8,22 +8,26 @@ import {
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 
 import { Button } from '@/components/Button';
-import { Dropzone, Files } from '@/components/Dropzone';
 import { Input } from '@/components/form/Input';
 import { Inputs, Values } from '@/components/form/Inputs';
 import { AssetsIcon } from '@/components/icons';
 import { Modal } from '@/components/Modal';
 import { useModifyAccount } from '@/hooks';
-import { useBulkAddAsset, useCreateAsset } from '@/hooks/useAssets';
+import { useCreateAsset } from '@/hooks/useAssets';
 import { useIntegration } from '@/hooks/useIntegration';
 import { useGlobalState } from '@/state/global.state';
-import { Asset, AssetStatus, IntegrationType, LinkAccount } from '@/types';
+import {
+  Account,
+  Asset,
+  AssetStatus,
+  IntegrationType,
+  LinkAccount,
+} from '@/types';
 import {
   IntegrationMeta,
   IntegrationsMeta,
 } from '@/utils/availableIntegrations';
 import { cn } from '@/utils/classname';
-import { GetSeeds } from '@/utils/regex.util';
 
 const PUBLIC_ASSET = 'publicAsset';
 
@@ -51,7 +55,7 @@ const Tabs: IntegrationMeta[] = [
   {
     id: 0,
     name: PUBLIC_ASSET,
-    displayName: 'Public Asset',
+    displayName: 'Add Asset',
     description: '',
     logo: '',
     connected: true,
@@ -63,7 +67,7 @@ const Tabs: IntegrationMeta[] = [
         hidden: true,
       },
       {
-        label: 'Public Asset',
+        label: 'Add Asset',
         value: '',
         placeholder: 'acme.com',
         name: 'asset',
@@ -108,14 +112,19 @@ export function AddAsset() {
     },
   } = useGlobalState();
   // eslint-disable-next-line
+  const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [formData, setFormData] = useState<Values[]>([]);
-
+  const { isIntegrationConnected, getConnectedIntegration } = useIntegration();
   const { mutateAsync: createAsset, status: creatingAsset } = useCreateAsset();
   const { mutate: link } = useModifyAccount('link');
-  const { isIntegrationConnected } = useIntegration();
+  const { mutate: unlink, status: unlinkStatus } = useModifyAccount('unlink');
+
+  const selectedIntegration =
+    selectedIndex > 0 ? getConnectedIntegration(Tabs[selectedIndex].name) : [];
 
   function onClose() {
     onOpenChange(false);
+    setSelectedIndex(0);
   }
 
   async function handleAddAsset() {
@@ -133,69 +142,87 @@ export function AddAsset() {
     onClose();
   }
 
+  async function handleDisconnect() {
+    if (selectedIntegration.length > 0) {
+      selectedIntegration.forEach(account =>
+        unlink({
+          username: account.member,
+          member: account.member,
+          config: account.config,
+          value: account.value,
+          key: account.key,
+        })
+      );
+      onClose();
+    }
+  }
+
   return (
     <Modal
-      title="Add Asset"
+      title="Configure"
       className="h-[60vh] px-0 pl-6"
       open={open}
       onClose={onClose}
       footer={{
         isLoading: creatingAsset === 'pending',
-        text: 'Add',
+        text: selectedIntegration.length ? 'Update' : 'Add',
         onClick: handleAddAsset,
+        secondary: selectedIntegration.length
+          ? {
+              text: 'Disconnect',
+              onClick: handleDisconnect,
+              isLoading: unlinkStatus === 'pending',
+            }
+          : undefined,
       }}
       size="lg"
       closeOnOutsideClick={false}
       icon={<AssetsIcon className="size-6 text-default-light" />}
     >
-      <TabGroup className="flex h-full gap-6">
+      <TabGroup className="flex h-full gap-6" onChange={setSelectedIndex}>
         <TabList className="w-44 shrink-0 overflow-auto border-r-2 border-default p-1 pr-4">
-          {Tabs.map(({ id, displayName, logo, connected, name }) => {
+          {Tabs.map(({ id, displayName, logo, connected, name }, index) => {
             const isConnected = connected && isIntegrationConnected(name);
+            const selected = index === selectedIndex;
             return (
               <Tab
                 key={id}
-                className={({ selected }) =>
-                  cn(
-                    'w-full py-4 px-2 text-sm font-semibold leading-5 hover:bg-gray-50 focus:outline-0 border-b-2 border-gray-100 bg-layer0',
-                    selected && 'bg-layer1'
-                  )
-                }
-              >
-                {({ selected }) => (
-                  <div className="relative flex items-center justify-center">
-                    {isConnected && (
-                      <CheckCircleIcon className="absolute left-0 size-5 text-green-500" />
-                    )}
-                    {logo && (
-                      <img
-                        className="h-4"
-                        src={logo || ''}
-                        alt={displayName || ''}
-                      />
-                    )}
-                    {!logo && displayName && <span>{displayName}</span>}
-                    {selected && (
-                      <ChevronRightIcon className="absolute right-0 size-4" />
-                    )}
-                  </div>
+                className={cn(
+                  'w-full py-4 px-2 text-sm font-semibold leading-5 hover:bg-gray-50 focus:outline-0 border-b-2 border-gray-100 bg-layer0',
+                  selected && 'bg-layer1'
                 )}
+              >
+                <div className="relative flex items-center justify-center">
+                  {isConnected && (
+                    <CheckCircleIcon className="absolute left-0 size-5 text-green-500" />
+                  )}
+                  {logo && (
+                    <img
+                      className="h-4"
+                      src={logo || ''}
+                      alt={displayName || ''}
+                    />
+                  )}
+                  {!logo && displayName && <span>{displayName}</span>}
+                  {selected && (
+                    <ChevronRightIcon className="absolute right-0 size-4" />
+                  )}
+                </div>
               </Tab>
             );
           })}
         </TabList>
         <TabPanels className="size-full overflow-auto pr-6">
           {Tabs.map(tab => {
-            const isConnected =
-              tab?.connected && isIntegrationConnected(tab.name);
-
+            const connectedIntegration: Account[] = getConnectedIntegration(
+              tab.name
+            );
             return (
               <TabPanelContent
-                isConnected={isConnected}
+                connectedIntegration={connectedIntegration}
                 key={tab.id}
                 onChange={setFormData}
                 tab={tab}
-                onClose={onClose}
               />
             );
           })}
@@ -206,14 +233,13 @@ export function AddAsset() {
 }
 
 interface TabPanelContentProps {
-  isConnected: boolean;
   onChange: Dispatch<SetStateAction<Values[]>>;
   tab: IntegrationMeta;
-  onClose: () => void;
+  connectedIntegration: Account[];
 }
 
 const TabPanelContent = (props: TabPanelContentProps) => {
-  const { isConnected, tab, onChange, onClose } = props;
+  const { tab, onChange, connectedIntegration } = props;
   const {
     description = '',
     markup = '',
@@ -225,9 +251,10 @@ const TabPanelContent = (props: TabPanelContentProps) => {
     message = '',
     warning = false,
   } = tab;
-  const [count, setCount] = useState<number>(1);
+
+  const isConnected = connectedIntegration.length > 0;
+  const [count, setCount] = useState<number>(connectedIntegration.length || 1);
   const [formData, setFormData] = useState<Values[]>([]);
-  const { mutate: bulkAddAsset } = useBulkAddAsset();
 
   const showInputs = inputs?.some(input => !input.hidden);
 
@@ -235,14 +262,9 @@ const TabPanelContent = (props: TabPanelContentProps) => {
     onChange(formData);
   }, [formData]);
 
-  const handleFilesDrop = (files: Files<'string'>): void => {
-    onClose();
-
-    const concatFiles = files.map(({ content }) => content).join('');
-    const assets = GetSeeds(concatFiles, 500);
-
-    bulkAddAsset(assets);
-  };
+  useEffect(() => {
+    setCount(connectedIntegration.length || 1);
+  }, [connectedIntegration.length]);
 
   return (
     <TabPanel className="prose max-w-none">
@@ -288,7 +310,19 @@ const TabPanelContent = (props: TabPanelContentProps) => {
                   <Inputs
                     inputs={(inputs || []).map(input => ({
                       ...input,
-                      value: input.value,
+                      value: String(
+                        input.value ||
+                          connectedIntegration[index]?.[
+                            input.name as keyof LinkAccount
+                          ] ||
+                          (
+                            connectedIntegration[index]?.config as Record<
+                              string,
+                              string
+                            >
+                          )?.[input.name] ||
+                          ''
+                      ),
                     }))}
                     onChange={newValues =>
                       setFormData(values => {
@@ -329,13 +363,18 @@ const TabPanelContent = (props: TabPanelContentProps) => {
         </form>
       </div>
       {name === PUBLIC_ASSET && (
-        <Dropzone
-          type="string"
-          className="block h-auto w-fit border-none bg-transparent px-4 text-brand"
-          onFilesDrop={handleFilesDrop}
-        >
-          + Add Bulk Assets
-        </Dropzone>
+        <p className="GA rounded bg-yellow-100 p-2 text-sm text-yellow-600">
+          <ExclamationTriangleIcon className="mr-2 inline size-5 text-yellow-700" />
+          <a
+            href="https://github.com/praetorian-inc/praetorian-cli"
+            target={'_blank'}
+            rel={'noreferrer'}
+            className="inline p-0 text-yellow-900 no-underline"
+          >
+            Praetorian CLI
+          </a>{' '}
+          is available for bulk asset addition.
+        </p>
       )}
     </TabPanel>
   );

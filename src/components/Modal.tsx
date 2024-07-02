@@ -23,6 +23,12 @@ interface Props extends PropsWithChildren {
     isLoading?: boolean;
     startIcon?: React.ReactNode;
     disabled?: boolean;
+    secondary?: {
+      text?: string;
+      onClick?: () => void;
+      disabled?: boolean;
+      isLoading?: boolean;
+    };
   };
   logo?: string;
   icon?: React.ReactNode;
@@ -137,6 +143,17 @@ export const Modal: React.FC<Props> = props => {
             >
               Cancel
             </Button>
+            {footer?.secondary && (
+              <Button
+                onClick={footer?.secondary?.onClick}
+                styleType="primaryLight"
+                className={cn('ml-2 w-24', footer?.className)}
+                isLoading={footer?.secondary?.isLoading}
+                disabled={footer?.secondary?.disabled}
+              >
+                {footer?.secondary?.text}
+              </Button>
+            )}
             {footer?.text && (
               <Button
                 onClick={footer?.onClick}
