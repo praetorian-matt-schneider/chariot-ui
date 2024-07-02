@@ -43,6 +43,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
   const attributeFilter = `#${dns}#${name}`;
 
   const [assetsLimit, setAssetsLimit] = useState(TABLE_LIMIT);
+  const [riskLimit, setRiskLimit] = useState(TABLE_LIMIT);
 
   const { getRiskDrawerLink, getAssetDrawerLink } = useOpenDrawer();
   const { removeSearchParams } = useSearchParams();
@@ -97,6 +98,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
   ) as unknown as Risk[];
 
   const showMoreAssets = associatedAssets.length > TABLE_LIMIT;
+  const showMoreRisks = associatedRisks.length > TABLE_LIMIT;
 
   const seed = attributes.find(attribute => attribute.class === 'seed');
   const asset: Asset = assets[0] || {};
@@ -238,7 +240,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
                       tableClassName="border-none p-0 shadow-none [&_.th-top-border]:hidden"
                       name="Associated Risks"
                       status="success"
-                      data={associatedRisks.slice(0, TABLE_LIMIT)}
+                      data={associatedRisks.slice(0, riskLimit)}
                       columns={[
                         {
                           label: 'Name',
@@ -267,19 +269,23 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
                       error={null}
                       isTableView={false}
                     />
-                    {risks.length - TABLE_LIMIT > 0 && (
+                    {showMoreRisks && (
                       <div className="flex w-full">
-                        <Link
+                        <Button
                           className="ml-auto"
-                          to={{
-                            pathname: getRoute(['app', 'risks']),
-                            search: `?${StorageKey.HASH_SEARCH}=${encodeURIComponent(`#${asset.name}`)}`,
-                          }}
+                          styleType="textPrimary"
+                          onClick={() =>
+                            setRiskLimit(limit =>
+                              limit === assets.length
+                                ? TABLE_LIMIT
+                                : assets.length
+                            )
+                          }
                         >
-                          <Button styleType="textPrimary">
-                            and {risks.length - TABLE_LIMIT} more
-                          </Button>
-                        </Link>
+                          {assetsLimit === assets.length
+                            ? 'View Less'
+                            : `and ${assets.length - assetsLimit} more`}
+                        </Button>
                       </div>
                     )}
                   </Accordian>
