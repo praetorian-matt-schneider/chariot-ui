@@ -72,7 +72,7 @@ const Tabs: IntegrationMeta[] = [
   {
     id: 0,
     name: 'domain',
-    displayName: 'Domain/IP',
+    displayName: 'Public Asset',
     description: '',
     logo: '',
     connected: true,
@@ -84,7 +84,7 @@ const Tabs: IntegrationMeta[] = [
         hidden: true,
       },
       {
-        label: 'Domain/IP',
+        label: 'Public Asset',
         value: '',
         placeholder: 'acme.com',
         name: 'asset',
@@ -157,6 +157,7 @@ export function AddAsset() {
   return (
     <Modal
       title="Add Asset"
+      className="h-[72vh] px-0 pl-6"
       open={open}
       onClose={onClose}
       footer={{
@@ -168,8 +169,8 @@ export function AddAsset() {
       closeOnOutsideClick={false}
       icon={<AssetsIcon className="size-6 text-default-light" />}
     >
-      <TabGroup className="flex gap-6">
-        <TabList className="w-44 shrink-0 overflow-auto border-r-2 border-default p-1 pr-4">
+      <TabGroup className="flex h-full gap-6">
+        <TabList className="w-44 shrink-0 border-r-2 border-default p-1 pr-4">
           {Tabs.map(({ id, displayName, logo, connected, name }) => {
             const isConnected = connected && isIntegrationConnected(name);
             return (
@@ -204,7 +205,7 @@ export function AddAsset() {
             );
           })}
         </TabList>
-        <TabPanels className="w-full">
+        <TabPanels className="h-[300px] w-full overflow-auto pr-6">
           {Tabs.map(tab => {
             const isConnected =
               tab?.connected && isIntegrationConnected(tab.name);
