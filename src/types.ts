@@ -42,6 +42,7 @@ export enum SeedStatus {
 }
 export enum AssetStatus {
   ActiveHigh = 'AH',
+  ActiveLow = 'AL',
   Active = 'A',
   Frozen = 'F',
   Unknown = 'U',

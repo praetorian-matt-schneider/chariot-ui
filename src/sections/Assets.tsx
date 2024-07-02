@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import {
   CheckCircleIcon,
+  ChevronDoubleDownIcon,
   ExclamationCircleIcon,
   PauseIcon,
   PlusIcon,
@@ -353,9 +354,17 @@ const Assets: React.FC = () => {
                   label: 'Standard Priority',
                   icon: <CheckCircleIcon />,
                   disabled: assets.every(
-                    asset => asset.status !== AssetStatus.ActiveHigh
+                    asset => asset.status === AssetStatus.Active
                   ),
                   onClick: () => updateStatus(assets, AssetStatus.Active),
+                },
+                {
+                  label: 'Low Priority',
+                  icon: <ChevronDoubleDownIcon />,
+                  disabled: assets.every(
+                    asset => asset.status === AssetStatus.ActiveLow
+                  ),
+                  onClick: () => updateStatus(assets, AssetStatus.ActiveLow),
                 },
                 {
                   label: 'Stop Scanning',
@@ -385,7 +394,11 @@ const Assets: React.FC = () => {
           },
           {
             label: 'Standard Priority',
-            filter: asset => asset.status !== AssetStatus.ActiveHigh,
+            filter: asset => asset.status === AssetStatus.Active,
+          },
+          {
+            label: 'Low Priority',
+            filter: asset => asset.status === AssetStatus.ActiveLow,
           },
         ]}
         error={error}

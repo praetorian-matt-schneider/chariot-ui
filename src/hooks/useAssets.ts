@@ -17,6 +17,7 @@ export const AssetsSnackbarTitle = {
   [AssetStatus.Active]: 'will resume scanning',
   [AssetStatus.ActiveHigh]: 'will be marked as high priority',
   [AssetStatus.Frozen]: 'will be removed',
+  [AssetStatus.ActiveLow]: 'will be marked as low priority',
 };
 
 export const useUpdateAsset = () => {
@@ -79,7 +80,7 @@ export const useUpdateAsset = () => {
 };
 
 export function mapAssetStataus(asset: Asset) {
-  if (asset.status === AssetStatus.ActiveHigh) {
+  if ([AssetStatus.ActiveHigh, AssetStatus.ActiveLow].includes(asset.status)) {
     return asset.status;
   }
   return (
@@ -98,13 +99,13 @@ export const useCreateAsset = () => {
     { enabled: false }
   );
 
-  return useMutation<Asset, Error, Pick<Asset, 'name'>>({
+  return useMutation<Asset, Error, Pick<Asset, 'name' | 'status'>>({
     defaultErrorMessage: `Failed to add seed`,
     mutationFn: async asset => {
       const { data } = await axios.post(`/asset`, {
         dns: asset.name,
         name: asset.name,
-        status: AssetStatus.Active,
+        status: asset.status || AssetStatus.Active,
       });
 
       Snackbar({

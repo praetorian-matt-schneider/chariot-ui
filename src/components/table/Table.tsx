@@ -30,6 +30,7 @@ import {
 import { cn } from '@/utils/classname';
 import { useStorage } from '@/utils/storage/useStorage.util';
 
+// eslint-disable-next-line complexity
 export function Table<TData>(props: TableProps<TData>) {
   const {
     className,
@@ -71,6 +72,7 @@ export function Table<TData>(props: TableProps<TData>) {
       groupBy && status === 'success'
         ? groupBy.reduce((acc, group) => {
             const filteredData = indexedData.filter(item => group.filter(item));
+            console.log(indexedData, group.label);
             // Add the group label only when there is filtered data available
             const newData =
               filteredData.length > 0

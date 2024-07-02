@@ -8,6 +8,7 @@ import {
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 
 import { Button } from '@/components/Button';
+import { Input } from '@/components/form/Input';
 import { Inputs, Values } from '@/components/form/Inputs';
 import { AssetsIcon } from '@/components/icons';
 import { Modal } from '@/components/Modal';
@@ -15,7 +16,7 @@ import { useModifyAccount } from '@/hooks';
 import { useCreateAsset } from '@/hooks/useAssets';
 import { useIntegration } from '@/hooks/useIntegration';
 import { useGlobalState } from '@/state/global.state';
-import { IntegrationType, LinkAccount } from '@/types';
+import { Asset, AssetStatus, IntegrationType, LinkAccount } from '@/types';
 import {
   IntegrationMeta,
   IntegrationsMeta,
@@ -90,6 +91,29 @@ const Tabs: IntegrationMeta[] = [
         required: true,
         className: 'h-11',
       },
+      {
+        label: 'Priority',
+        value: AssetStatus.Active,
+        type: Input.Type.SELECT,
+        placeholder: 'Select Priority',
+        name: 'status',
+        options: [
+          {
+            label: 'High Priority',
+            value: AssetStatus.ActiveHigh,
+          },
+          {
+            label: 'Standard Priority',
+            value: AssetStatus.Active,
+          },
+          {
+            label: 'Low Priority',
+            value: AssetStatus.ActiveLow,
+          },
+        ],
+        required: true,
+        className: 'h-11',
+      },
     ],
     message: <AddAssetMessage />,
   },
@@ -120,6 +144,7 @@ export function AddAsset() {
     if (formData[0].username === 'domain') {
       await createAsset({
         name: String(formData[0].asset),
+        status: formData[0].status as Asset['status'],
       });
     } else {
       // if other integrations are selected
