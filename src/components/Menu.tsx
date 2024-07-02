@@ -315,7 +315,12 @@ function Content(props: MenuItemProps & { multiSelect?: boolean }) {
     <div className="flex w-full items-center gap-2">
       {multiSelect && (
         <>
-          <input type="checkbox" className="hidden" checked={isSelected} />
+          <input
+            type="checkbox"
+            className="hidden"
+            checked={isSelected}
+            onChange={() => {}}
+          />
           <CheckboxIcon isChecked={Boolean(isSelected)} />
         </>
       )}

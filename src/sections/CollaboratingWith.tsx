@@ -1,18 +1,13 @@
 import React, { useMemo, useState } from 'react';
-import {
-  ArrowDownCircleIcon,
-  ArrowDownIcon,
-} from '@heroicons/react/24/outline';
+import { ArrowDownCircleIcon } from '@heroicons/react/24/outline';
 
+import { Button } from '@/components/Button';
+import { Modal } from '@/components/Modal';
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
 import { useGetCollaborators } from '@/hooks/collaborators';
 import useRiskDetails from '@/hooks/useRiskDetails';
 import { useAuth } from '@/state/auth';
-import { exportContent } from '@/utils/download.util';
-import { Modal } from '@/components/Modal';
-import { Button } from '@/components/Button';
-import { useGetFile } from '@/hooks/useFiles';
 
 interface TableData {
   displayName: string;
@@ -167,13 +162,13 @@ export const CollaboratingWith = () => {
         size="md"
       >
         <div className="flex flex-col space-y-4 p-4">
-          <p className="text-xl text-gray-700 font-semibold">
+          <p className="text-xl font-semibold text-gray-700">
             Simplify your export process
           </p>
-          <p className="text-md text-gray-700 mb-3">
+          <p className="text-md mb-3 text-gray-700">
             For a smoother experience, try our command line tool. You can
             install it with
-            <code className="bg-gray-200 p-1 rounded ml-1 inline-block py-0.5">
+            <code className="ml-1 inline-block rounded bg-gray-200 p-1 py-0.5">
               pip install praetorian-cli
             </code>
             . For more details, check the
@@ -181,7 +176,7 @@ export const CollaboratingWith = () => {
               href="https://github.com/praetorian-inc/praetorian-cli"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-brand hover:underline ml-1"
+              className="ml-1 text-brand hover:underline"
             >
               README
             </a>

@@ -1,5 +1,3 @@
-import { join } from 'path';
-
 export enum RiskScanMessage {
   Stop = 'Risk scanning will stop.',
   Start = 'Risk scanning will start automatically.',
@@ -367,7 +365,6 @@ export interface MyResource {
   account: Account[];
   risk: Risk[];
   asset: Asset[];
-  ref: Reference[];
   job: Job[];
   seed: Seed[];
   attribute: Attribute[];
@@ -378,7 +375,6 @@ export interface GenericResource {
   accounts: Account[];
   risks: Risk[];
   assets: Asset[];
-  refs: Attribute[];
   jobs: Job[];
   seeds: Seed[];
   attributes: Attribute[];

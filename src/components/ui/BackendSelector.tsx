@@ -10,10 +10,6 @@ import {
 
 import { cn } from '@/utils/classname';
 
-function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(' ');
-}
-
 const displayBackends = [
   {
     name: 'United States - East',
@@ -70,7 +66,7 @@ export default function BackendSelector() {
                   <button
                     type="button"
                     disabled={!backend.available}
-                    className={classNames(
+                    className={cn(
                       focus ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                       'block w-full px-6 py-2 text-center disabled:grayscale'
                     )}

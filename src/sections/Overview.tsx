@@ -7,23 +7,18 @@ import {
 } from '@heroicons/react/24/outline';
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 
-import { Button } from '@/components/Button';
 import CircularProgressBar from '@/components/CircularProgressBar';
 import { Input } from '@/components/form/Input';
 import { Tooltip } from '@/components/Tooltip';
 import Counts from '@/components/ui/Counts';
+import { useGetDisplayName } from '@/hooks/useAccounts';
 import { useAggregateCounts } from '@/hooks/useAggregateCounts';
+import { useGetFile } from '@/hooks/useFiles';
+import { useMy } from '@/hooks/useMy';
 import { getReportSections } from '@/sections/overview/constants';
+import { useAuth } from '@/state/auth';
 import { cn } from '@/utils/classname';
 import { addDays, subtractDays } from '@/utils/date.util';
-import { useGetFile } from '@/hooks/useFiles';
-import { useGetDisplayName } from '@/hooks/useAccounts';
-import { useAuth } from '@/state/auth';
-import { useMy } from '@/hooks/useMy';
-
-function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(' ');
-}
 
 const formatDate = (date: Date): string => date.toISOString().split('T')[0];
 
@@ -118,7 +113,7 @@ export const Overview = () => {
                 <Tab
                   key={tab}
                   className={({ selected }) =>
-                    classNames(
+                    cn(
                       'w-full py-4 px-2 text-sm font-semibold leading-5 hover:bg-gray-50 focus:outline-0',
                       selected ? 'border-b-4 border-brand text-brand' : '',
                       !selected ? 'border-b-2 border-gray-100 bg-layer0' : ''

@@ -159,9 +159,11 @@ export const AddRisks = () => {
           <div className="flex flex-1 flex-col justify-center p-2">
             <form id="addRisk" onSubmit={handleSubmit} className="space-y-4">
               <SearchAndSelectTypes
-                type="assets"
-                value={selectedAssets}
-                onChange={onSelectedAssetsChange}
+                types={['assets']}
+                value={{ assets: selectedAssets }}
+                onChange={updatedValue => {
+                  onSelectedAssetsChange(updatedValue.assets || []);
+                }}
                 placeholder="8.8.8.8"
               />
               <Inputs

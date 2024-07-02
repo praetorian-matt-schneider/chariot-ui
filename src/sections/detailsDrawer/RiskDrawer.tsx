@@ -1,6 +1,11 @@
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ExclamationCircleIcon } from '@heroicons/react/20/solid';
+import {
+  ArrowPathIcon,
+  DocumentTextIcon,
+  IdentificationIcon,
+} from '@heroicons/react/24/outline';
 import { CheckCircleIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import MDEditor from '@uiw/react-md-editor';
 
@@ -34,12 +39,6 @@ import { StorageKey } from '@/utils/storage/useStorage.util';
 import { generatePathWithSearch, useSearchParams } from '@/utils/url.util';
 
 import { DRAWER_WIDTH } from '.';
-import { Link } from '@/components/Link';
-import {
-  ArrowPathIcon,
-  DocumentTextIcon,
-  IdentificationIcon,
-} from '@heroicons/react/24/outline';
 
 const getJobTimeline = ({
   status,
@@ -125,9 +124,9 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     },
     { enabled: open }
   );
-  const { data: references } = useMy(
+  const { data: attributes } = useMy(
     {
-      resource: 'ref',
+      resource: 'attribute',
       query: `#${dns}#${name}`,
     },
     {
@@ -151,9 +150,9 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
 
   const { risks: riskOccurrence = [] } = riskNameGenericSearch || {};
 
-  const hostRef = references.find(ref => ref.class === 'host');
+  const hostRef = attributes.find(ref => ref.class === 'host');
   const [ip, port] = hostRef?.name?.split(/:(?=[^:]*$)/) ?? '';
-  const urlRefs = references.filter(ref => ref.class === 'url');
+  const urlRefs = attributes.filter(ref => ref.class === 'url');
   const urlsImpacted = urlRefs.map(ref => ref.name);
 
   const definitionsFileValue =
@@ -227,14 +226,14 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
             startIcon={<IdentificationIcon className="size-5" />}
             onClick={() => {
               navigate({
-                pathname: getRoute(['app', 'references']),
+                pathname: getRoute(['app', 'account']),
                 search: `?${StorageKey.HASH_SEARCH}=${encodeURIComponent(referenceFilter)}`,
               });
             }}
             styleType="secondary"
             className="ml-auto"
           >
-            References
+            Attributes
           </Button>
           <Button
             startIcon={<DocumentTextIcon className="size-5" />}

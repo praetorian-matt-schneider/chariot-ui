@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ChevronRightIcon } from '@heroicons/react/24/outline';
 import { XMarkIcon } from '@heroicons/react/24/solid';
 
@@ -14,19 +14,20 @@ import { depluralize } from '@/utils/depluralize.util';
 import { capitalize } from '@/utils/lodash.util';
 import { useStorage } from '@/utils/storage/useStorage.util';
 
-export interface SearchTypeProps<T extends keyof GenericResource> {
-  type: T;
+export interface SearchTypeProps {
+  types: (keyof GenericResource)[];
   label?: string;
-  onClick?: (type: GenericResource[T][number]) => void;
+  onClick?: (
+    type: keyof GenericResource,
+    value: GenericResource[keyof GenericResource][number]
+  ) => void;
   multiSelect?: boolean;
   value?: string[];
   placeholder?: string;
   required?: boolean;
 }
 
-export function SearchByType<T extends keyof GenericResource>(
-  props: SearchTypeProps<T>
-) {
+export function SearchByType(props: SearchTypeProps) {
   const [search, setSearch] = useState('');
 
   const { data: genericSearch, status: genericSearchStatus } = useGenericSearch(
@@ -36,16 +37,16 @@ export function SearchByType<T extends keyof GenericResource>(
 
   const genericSearchOptions = genericSearch
     ? Object.keys(genericSearch).flatMap(key => {
-        if (props.type && props.type !== key) return [];
-
         const genericSearchKey = key as keyof GenericResource;
 
-        const typeResults = genericSearch?.[genericSearchKey];
-        const typeOptions = getTypeOptions<keyof GenericResource>(
-          genericSearchKey,
-          typeResults,
-          props.onClick
-        );
+        if (!props.types.includes(genericSearchKey)) return [];
+
+        const typeOptions = genericSearch?.[genericSearchKey].map(result => ({
+          ...getTypeOption(genericSearchKey, result),
+          onClick: () => {
+            props?.onClick?.(genericSearchKey, result);
+          },
+        }));
 
         return [
           { label: capitalize(genericSearchKey), type: 'label' },
@@ -78,61 +79,74 @@ export function SearchByType<T extends keyof GenericResource>(
   );
 }
 
-export interface SearchAndSelectTypes<T extends keyof GenericResource> {
+export interface SearchAndSelectTypes {
   placeholder?: string;
-  type: T;
-  value: GenericResource[T];
-  onChange: (updated: GenericResource[T]) => void;
+  types: SearchTypeProps['types'];
+  value: Partial<GenericResource>;
+  onChange: (updatedValue: Partial<GenericResource>) => void;
 }
 
-export function SearchAndSelectTypes<T extends keyof GenericResource>(
-  props: SearchAndSelectTypes<T>
-) {
-  const [selectedOptions, setSelectedOptions] = useStorage<GenericResource[T]>(
-    { parentState: props.value, onParentStateChange: props.onChange },
-    []
-  );
+export function SearchAndSelectTypes(props: SearchAndSelectTypes) {
+  const [selectedTypes, setSelectedTypes] = useStorage<
+    SearchAndSelectTypes['value']
+  >({ parentState: props.value, onParentStateChange: props.onChange }, {});
 
   return (
     <div>
       <div className="flex flex-col gap-2 [&:has(*)]:pb-2">
-        {selectedOptions.map((option, index) => {
-          return (
-            <Button key={index} className="flex w-full justify-between">
-              {getTypeOption(props.type, option).label}
-              <Button
-                aria-label="CloseIcon"
-                onClick={() => {
-                  setSelectedOptions(prevOption => {
-                    return prevOption.filter(
-                      selectedOption => selectedOption !== option
-                    ) as GenericResource[T];
-                  });
-                }}
-                className="p-0"
-                styleType="none"
-              >
-                <XMarkIcon className="size-5" />
+        {Object.keys(selectedTypes).map(type => {
+          const genericType = type as keyof GenericResource;
+          const selectedOptions = selectedTypes[genericType];
+
+          return selectedOptions?.map((option, index) => {
+            return (
+              <Button key={index} className="flex w-full justify-between">
+                {getTypeOption(genericType, option).label}
+                <Button
+                  aria-label="CloseIcon"
+                  onClick={() => {
+                    setSelectedTypes(prevOption => {
+                      return {
+                        ...prevOption,
+                        [genericType]: prevOption?.[genericType]?.filter(o => {
+                          return o.key !== option.key;
+                        }),
+                      };
+                    });
+                  }}
+                  className="p-0"
+                  styleType="none"
+                >
+                  <XMarkIcon className="size-5" />
+                </Button>
               </Button>
-            </Button>
-          );
+            );
+          });
         })}
       </div>
       <SearchByType
         required
-        type={props.type}
+        types={props.types}
         multiSelect
         placeholder={props.placeholder}
-        label={depluralize(capitalize(props.type))}
-        value={selectedOptions.map(option => option.key)}
-        onClick={option => {
-          setSelectedOptions(prevOption => {
-            if (prevOption.find(o => o.key === option.key)) {
-              return prevOption.filter(o => {
-                return o.key !== option.key;
-              }) as GenericResource[T];
+        label={depluralize(capitalize(props.types.join(',')))}
+        value={Object.values(selectedTypes).flatMap(typeOption => {
+          return typeOption.map(option => option.key);
+        })}
+        onClick={(genericType, option) => {
+          setSelectedTypes(prevOption => {
+            if (selectedTypes?.[genericType]?.find(o => o.key === option.key)) {
+              return {
+                ...prevOption,
+                [genericType]: prevOption?.[genericType]?.filter(o => {
+                  return o.key !== option.key;
+                }),
+              };
             } else {
-              return [...prevOption, option] as GenericResource[T];
+              return {
+                ...prevOption,
+                [genericType]: [...(prevOption?.[genericType] || []), option],
+              };
             }
           });
         }}
@@ -161,6 +175,7 @@ interface SelectProps<IsMultiSelect extends boolean> {
 function Select<IsMultiSelect extends boolean>(
   props: SelectProps<IsMultiSelect>
 ) {
+  const fakeInput = useRef<HTMLInputElement>(null);
   const [search, setSearch] = useStorage(
     { parentState: props.search, onParentStateChange: props.onSearchChange },
     ''
@@ -172,6 +187,17 @@ function Select<IsMultiSelect extends boolean>(
     },
     (props.multiSelect ? [] : '') as Value<IsMultiSelect>
   );
+
+  useEffect(() => {
+    if (fakeInput.current) {
+      const isEmpty = Array.isArray(value) ? value.length === 0 : !value;
+      if (isEmpty) {
+        fakeInput.current.setCustomValidity('Search and select a value');
+      } else {
+        fakeInput.current.setCustomValidity('');
+      }
+    }
+  }, [JSON.stringify(value)]);
 
   return (
     <Dropdown
@@ -195,15 +221,11 @@ function Select<IsMultiSelect extends boolean>(
         <FormGroup label={props.label} name={props.label || ''}>
           <div className="relative">
             <input
+              ref={fakeInput}
               value={Array.isArray(value) ? value.join(',') : value}
+              onChange={() => {}}
               className="absolute bottom-0 h-px w-full"
               style={{ opacity: '0' }}
-              required={props.required}
-              onInvalid={(e: React.FormEvent<HTMLInputElement>) => {
-                (e.target as HTMLInputElement).setCustomValidity(
-                  'Search and select a value'
-                );
-              }}
             />
             <InputText
               name=""
@@ -218,19 +240,6 @@ function Select<IsMultiSelect extends boolean>(
       </div>
     </Dropdown>
   );
-}
-
-function getTypeOptions<T extends keyof GenericResource>(
-  type: T,
-  results: GenericResource[T],
-  onClick?: (result: GenericResource[T][number]) => void
-): DropdownMenu['items'] {
-  return results.map(result => ({
-    ...getTypeOption(type, result),
-    onClick: () => {
-      onClick?.(result as GenericResource[T][number]);
-    },
-  }));
 }
 
 function getTypeOption<T extends keyof GenericResource>(

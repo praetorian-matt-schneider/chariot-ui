@@ -22,8 +22,7 @@ interface GlobalState {
     seed: UseModalState;
     risk: UseModalState & SelectedAssets;
     asset: UseModalState;
-    attribute: UseModalState & SelectedAssets;
-    reference: UseModalState & SelectedRisks;
+    attribute: UseModalState & SelectedAssets & SelectedRisks;
     file: UseModalState;
   };
 }
@@ -45,7 +44,6 @@ export const GlobalStateProvider: React.FC<{ children: React.ReactNode }> = ({
   const [riskOpen, setRiskOpen] = useState(false);
   const [assetOpen, setAssetOpen] = useState(false);
   const [attributeOpen, setAttributeOpen] = useState(false);
-  const [referenceOpen, setReferenceOpen] = useState(false);
   const [fileOpen, setFileOpen] = useState(false);
 
   const [selectedAssets, setSelectedAssets] = useState<Asset[]>([]);
@@ -68,10 +66,6 @@ export const GlobalStateProvider: React.FC<{ children: React.ReactNode }> = ({
             onOpenChange: setAttributeOpen,
             selectedAssets,
             onSelectedAssetsChange: setSelectedAssets,
-          },
-          reference: {
-            open: referenceOpen,
-            onOpenChange: setReferenceOpen,
             selectedRisks,
             onSelectedRisksChange: setSelectedRisks,
           },

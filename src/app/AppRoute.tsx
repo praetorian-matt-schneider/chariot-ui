@@ -15,7 +15,6 @@ import Jobs from '@/sections/Jobs';
 import Login from '@/sections/Login';
 import Logout from '@/sections/Logout';
 import { Overview } from '@/sections/Overview';
-import { References } from '@/sections/References';
 import { Risks } from '@/sections/RisksTable';
 import Seeds from '@/sections/Seeds';
 import { useAuth } from '@/state/auth';
@@ -91,10 +90,6 @@ const appRoutes = {
     attributes: {
       element: <Attributes />,
       title: 'Attributes',
-    },
-    references: {
-      element: <References />,
-      title: 'References',
     },
     files: {
       element: <Files />,
