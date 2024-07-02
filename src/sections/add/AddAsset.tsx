@@ -170,7 +170,7 @@ export function AddAsset() {
       icon={<AssetsIcon className="size-6 text-default-light" />}
     >
       <TabGroup className="flex h-full gap-6">
-        <TabList className="w-44 shrink-0 border-r-2 border-default p-1 pr-4">
+        <TabList className="w-44 shrink-0 overflow-auto border-r-2 border-default p-1 pr-4">
           {Tabs.map(({ id, displayName, logo, connected, name }) => {
             const isConnected = connected && isIntegrationConnected(name);
             return (
@@ -205,7 +205,7 @@ export function AddAsset() {
             );
           })}
         </TabList>
-        <TabPanels className="h-[300px] w-full overflow-auto pr-6">
+        <TabPanels className="size-full overflow-auto pr-6">
           {Tabs.map(tab => {
             const isConnected =
               tab?.connected && isIntegrationConnected(tab.name);
