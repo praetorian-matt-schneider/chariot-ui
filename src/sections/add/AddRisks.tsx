@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { FormEvent, useEffect, useState } from 'react';
 import { PlusIcon } from '@heroicons/react/24/solid';
 import MDEditor from '@uiw/react-md-editor';
 
@@ -45,7 +45,8 @@ export const AddRisks = () => {
   const { mutateAsync: addRisk } = useCreateRisk();
   const { mutateAsync: uploadFile } = useUploadFile();
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const allPromise: Promise<any>[] = selectedAssets?.flatMap(asset => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
