@@ -6,11 +6,7 @@ import {
 
 import { InputEvent, InputProps } from '@/components/form/Input';
 
-export interface CheckboxProps {
-  max?: string;
-}
-
-export const Checkbox = (props: CheckboxProps & InputProps) => {
+export const Checkbox = (props: InputProps) => {
   const { value, onChange, name, label } = props;
   const [isChecked, setIsChecked] = useState<boolean>(value === 'true');
 

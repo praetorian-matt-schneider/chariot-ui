@@ -3,7 +3,6 @@ import {
   CheckCircleIcon,
   ChevronRightIcon,
   ExclamationTriangleIcon,
-  InformationCircleIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
@@ -13,9 +12,7 @@ import { Dropzone, Files } from '@/components/Dropzone';
 import { Input } from '@/components/form/Input';
 import { Inputs, Values } from '@/components/form/Inputs';
 import { AssetsIcon } from '@/components/icons';
-import { Link } from '@/components/Link';
 import { Modal } from '@/components/Modal';
-import { Tooltip } from '@/components/Tooltip';
 import { useModifyAccount } from '@/hooks';
 import { useBulkAddAsset, useCreateAsset } from '@/hooks/useAssets';
 import { useIntegration } from '@/hooks/useIntegration';
@@ -42,31 +39,6 @@ const AddAssetMessage = () => (
             the actual items we assess for risks.`}
       </p>
     </div>
-    <p className=" rounded-sm bg-layer1 p-4 text-sm text-gray-500">
-      For example, if you work for Acme Corporation, your assets might include:
-      <ul className="mt-1 list-disc pl-5 text-sm text-gray-500">
-        <li>
-          Network Assets: <code className="font-extrabold">8.8.8.8</code>
-        </li>
-        <li>
-          Host Assets: <code className="font-extrabold">server1.acme.com</code>,{' '}
-          <code className="font-extrabold">workstation5.acme.com</code>
-        </li>
-        <li>
-          Application Assets:{' '}
-          <code className="font-extrabold">app.acme.com</code>
-        </li>
-        <li>
-          Data Assets: <code className="font-extrabold">db.acme.com</code>
-        </li>
-        <li>
-          Cloud Assets:{' '}
-          <code className="font-extrabold">
-            ec2-203-0-113-25.compute-1.amazonaws.com
-          </code>
-        </li>
-      </ul>
-    </p>
 
     <p className="mt-1 text-sm text-gray-500">
       We will monitor these assets, identify risks, and provide insights to
@@ -164,7 +136,7 @@ export function AddAsset() {
   return (
     <Modal
       title="Add Asset"
-      className="h-[82vh] px-0 pl-6"
+      className="h-[60vh] px-0 pl-6"
       open={open}
       onClose={onClose}
       footer={{
@@ -172,12 +144,12 @@ export function AddAsset() {
         text: 'Add',
         onClick: handleAddAsset,
       }}
-      size="xl"
+      size="lg"
       closeOnOutsideClick={false}
       icon={<AssetsIcon className="size-6 text-default-light" />}
     >
       <TabGroup className="flex h-full gap-6">
-        <TabList className="w-60 shrink-0 overflow-auto border-r-2 border-default p-1 pr-4">
+        <TabList className="w-44 shrink-0 overflow-auto border-r-2 border-default p-1 pr-4">
           {Tabs.map(({ id, displayName, logo, connected, name }) => {
             const isConnected = connected && isIntegrationConnected(name);
             return (
@@ -355,73 +327,16 @@ const TabPanelContent = (props: TabPanelContentProps) => {
             </p>
           )}
         </form>
-        {name === PUBLIC_ASSET && (
-          <>
-            <div className="px-10 text-center">
-              <div className="relative m-auto ml-4 flex h-[400px] w-full">
-                <div className=" w-px bg-gray-200"></div>
-                <div className="absolute -left-[50%] top-[50%] w-full bg-layer0 text-center text-sm text-gray-300">
-                  or
-                </div>
-              </div>
-            </div>
-            <div>
-              <Dropzone
-                className="h-[330px]"
-                type="string"
-                onFilesDrop={handleFilesDrop}
-                title={'Bulk Upload'}
-                subTitle={`Add a document with a list of Domains, IP addresses, CIDR ranges, or GitHub organizations.`}
-                maxFileSizeInMb={6}
-                maxFileSizeMessage={
-                  <div className="flex items-center justify-center gap-1 text-xs italic text-gray-500">
-                    Uploads are limited to 500 assets and 6MB.
-                    <Tooltip
-                      title={
-                        <div className="max-w-xs p-4">
-                          The Chariot frontend allows 500 Seeds to be added at
-                          once. For larger uploads, please use the{' '}
-                          <Link
-                            to={
-                              'https://github.com/praetorian-inc/praetorian-cli/blob/main/README.md'
-                            }
-                            target={'_blank'}
-                            rel={'noreferrer'}
-                            className="underline"
-                          >
-                            Praetorian CLI
-                          </Link>
-                          .
-                        </div>
-                      }
-                      placement="top"
-                    >
-                      <Button styleType="none" className="p-0">
-                        <InformationCircleIcon className="size-5 text-gray-400" />
-                      </Button>
-                    </Tooltip>
-                  </div>
-                }
-                maxFileSizeErrorMessage={
-                  <span>
-                    Bulk uploads cannot exceed 500 Seeds or 6MB in file size.
-                    Get help{' '}
-                    <a
-                      onClick={e => e.stopPropagation()}
-                      href="https://docs.praetorian.com/hc/en-us/articles/25814362281627-Adding-and-Managing-Seeds"
-                      className="cursor-pointer text-indigo-600"
-                      target={'_blank'}
-                      rel="noreferrer"
-                    >
-                      formatting your Seed File.
-                    </a>
-                  </span>
-                }
-              />
-            </div>
-          </>
-        )}
       </div>
+      {name === PUBLIC_ASSET && (
+        <Dropzone
+          type="string"
+          className="block h-auto w-fit border-none bg-transparent px-4 text-brand"
+          onFilesDrop={handleFilesDrop}
+        >
+          + Add Bulk Assets
+        </Dropzone>
+      )}
     </TabPanel>
   );
 };
