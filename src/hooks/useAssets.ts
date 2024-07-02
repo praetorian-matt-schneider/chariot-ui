@@ -1,6 +1,7 @@
 import { Snackbar } from '@/components/Snackbar';
 import { useAxios } from '@/hooks/useAxios';
 import { useMy } from '@/hooks/useMy';
+import { startMessage } from '@/hooks/useSeeds';
 import { Asset, AssetStatus, RiskScanMessage } from '@/types';
 import { useMutation } from '@/utils/api';
 
@@ -118,6 +119,62 @@ export const useCreateAsset = () => {
       invalidateAssets();
 
       return data;
+    },
+  });
+};
+
+export const useBulkAddAsset = () => {
+  const axios = useAxios();
+  const { invalidate: invalidateJob } = useMy(
+    { resource: 'job' },
+    { enabled: false }
+  );
+  const { invalidate: invalidateAsset } = useMy(
+    { resource: 'asset' },
+    { enabled: false }
+  );
+
+  return useMutation<void, Error, string[]>({
+    defaultErrorMessage: 'Failed to bulk add seed',
+    errorByStatusCode: {
+      402: 'License is required to add more seeds',
+    },
+    mutationFn: async (assets: string[]) => {
+      const response = await Promise.all(
+        assets
+          .map(async asset => {
+            await axios.post(`/asset`, {
+              dns: asset,
+              status: AssetStatus.Active,
+            });
+          })
+          // Note: Catch error so we can continue adding seeds even if some fail
+          .map(p => p.catch(e => e))
+      );
+
+      const validResults = response.filter(
+        result => !(result instanceof Error)
+      );
+
+      if (validResults.length > 0) {
+        Snackbar({
+          title: `Added ${validResults.length} assets`,
+          description: startMessage,
+          variant: 'success',
+        });
+
+        invalidateJob();
+        invalidateAsset();
+      }
+
+      if (validResults.length !== assets.length) {
+        const firstError = response.find(result => result instanceof Error);
+        // Note: Some seeds failed to add, so throwing the first error, and useMutation will handle the error toast
+
+        throw firstError;
+      }
+
+      return;
     },
   });
 };
