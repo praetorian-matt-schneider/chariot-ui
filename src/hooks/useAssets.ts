@@ -98,13 +98,12 @@ export const useCreateAsset = () => {
     { enabled: false }
   );
 
-  return useMutation<Asset, Error, Pick<Asset, 'name' | 'seed'>>({
+  return useMutation<Asset, Error, Pick<Asset, 'name'>>({
     defaultErrorMessage: `Failed to add seed`,
     mutationFn: async asset => {
       const { data } = await axios.post(`/asset`, {
         dns: asset.name,
         name: asset.name,
-        seed: asset.seed,
         status: AssetStatus.Active,
       });
 

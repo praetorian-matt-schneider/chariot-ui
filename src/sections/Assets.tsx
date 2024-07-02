@@ -20,11 +20,11 @@ import { OverflowText } from '@/components/OverflowText';
 import { showBulkSnackbar, Snackbar } from '@/components/Snackbar';
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
-import { Tooltip } from '@/components/Tooltip';
 import { AssetStatusChip } from '@/components/ui/AssetStatusChip';
 import { useMy } from '@/hooks';
 import { AssetsSnackbarTitle, useUpdateAsset } from '@/hooks/useAssets';
 import { useCounts } from '@/hooks/useCounts';
+import { useIntegration } from '@/hooks/useIntegration';
 import { AssetStatusWarning } from '@/sections/AssetStatusWarning';
 import { useOpenDrawer } from '@/sections/detailsDrawer/useOpenDrawer';
 import { useGlobalState } from '@/state/global.state';
@@ -85,6 +85,7 @@ const Assets: React.FC = () => {
     resource: 'asset',
     filterByGlobalSearch: false,
   });
+
   const {
     isLoading,
     status: assetsStatus,
@@ -98,6 +99,7 @@ const Assets: React.FC = () => {
     filterByGlobalSearch: true,
   });
   const { data: risks = [], status: riskStatus } = useMy({ resource: 'risk' });
+  const { isIntegration } = useIntegration();
 
   const status = useMergeStatus(riskStatus, assetsStatus);
 
@@ -147,14 +149,12 @@ const Assets: React.FC = () => {
       to: item => getAssetDrawerLink(item),
       copy: true,
       cell: (asset: Asset) => {
+        const integration = isIntegration(asset);
         return (
           <div className="flex gap-2">
             <span>{asset.name}</span>
-            {asset.seed && (
-              <Tooltip title="Seed" placement="top">
-                <Chip style="primary">Seed</Chip>
-              </Tooltip>
-            )}
+            {asset.seed && !integration && <Chip style="primary">Seed</Chip>}
+            {integration && <Chip style="primary">Integration</Chip>}
           </div>
         );
       },

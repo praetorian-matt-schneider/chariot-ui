@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import {
+  CheckCircleIcon,
   ChevronRightIcon,
   ExclamationTriangleIcon,
   XMarkIcon,
@@ -7,12 +8,12 @@ import {
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 
 import { Button } from '@/components/Button';
-import { Input } from '@/components/form/Input';
 import { Inputs, Values } from '@/components/form/Inputs';
 import { AssetsIcon } from '@/components/icons';
 import { Modal } from '@/components/Modal';
 import { useModifyAccount } from '@/hooks';
 import { useCreateAsset } from '@/hooks/useAssets';
+import { useIntegration } from '@/hooks/useIntegration';
 import { useGlobalState } from '@/state/global.state';
 import { IntegrationType, LinkAccount } from '@/types';
 import {
@@ -89,15 +90,6 @@ const Tabs: IntegrationMeta[] = [
         required: true,
         className: 'h-11',
       },
-      {
-        label: 'Add as Seed',
-        value: 'false',
-        placeholder: '',
-        name: 'seed',
-        type: Input.Type.CHECKBOX,
-        required: true,
-        className: 'h-11',
-      },
     ],
     message: <AddAssetMessage />,
   },
@@ -117,6 +109,7 @@ export function AddAsset() {
 
   const { mutateAsync: createAsset, status: creatingAsset } = useCreateAsset();
   const { mutate: link } = useModifyAccount('link');
+  const { isIntegrationConnected } = useIntegration();
 
   function onClose() {
     onOpenChange(false);
@@ -127,7 +120,6 @@ export function AddAsset() {
     if (formData[0].username === 'domain') {
       await createAsset({
         name: String(formData[0].asset),
-        seed: Boolean(formData[0].seed),
       });
     } else {
       // if other integrations are selected
@@ -153,38 +145,54 @@ export function AddAsset() {
     >
       <TabGroup className="flex gap-6">
         <TabList className="w-44 shrink-0 overflow-auto border-r-2 border-default p-1 pr-4">
-          {Tabs.map(({ id, displayName, logo }) => (
-            <Tab
-              key={id}
-              className={({ selected }) =>
-                cn(
-                  'w-full py-4 px-2 text-sm font-semibold leading-5 hover:bg-gray-50 focus:outline-0 border-b-2 border-gray-100 bg-layer0',
-                  selected && 'bg-layer1'
-                )
-              }
-            >
-              {({ selected }) => (
-                <div className="relative flex items-center justify-center">
-                  {logo && (
-                    <img
-                      className="h-4"
-                      src={logo || ''}
-                      alt={displayName || ''}
-                    />
-                  )}
-                  {!logo && displayName && <span>{displayName}</span>}
-                  {selected && (
-                    <ChevronRightIcon className="absolute right-0 size-4" />
-                  )}
-                </div>
-              )}
-            </Tab>
-          ))}
+          {Tabs.map(({ id, displayName, logo, connected, name }) => {
+            const isConnected = connected && isIntegrationConnected(name);
+            return (
+              <Tab
+                key={id}
+                className={({ selected }) =>
+                  cn(
+                    'w-full py-4 px-2 text-sm font-semibold leading-5 hover:bg-gray-50 focus:outline-0 border-b-2 border-gray-100 bg-layer0',
+                    selected && 'bg-layer1'
+                  )
+                }
+              >
+                {({ selected }) => (
+                  <div className="relative flex items-center justify-center">
+                    {isConnected && (
+                      <CheckCircleIcon className="absolute left-0 size-5 text-green-500" />
+                    )}
+                    {logo && (
+                      <img
+                        className="h-4"
+                        src={logo || ''}
+                        alt={displayName || ''}
+                      />
+                    )}
+                    {!logo && displayName && <span>{displayName}</span>}
+                    {selected && (
+                      <ChevronRightIcon className="absolute right-0 size-4" />
+                    )}
+                  </div>
+                )}
+              </Tab>
+            );
+          })}
         </TabList>
         <TabPanels className="w-full">
-          {Tabs.map(tab => (
-            <TabPanelContent tab={tab} key={tab.id} onChange={setFormData} />
-          ))}
+          {Tabs.map(tab => {
+            const isConnected =
+              tab?.connected && isIntegrationConnected(tab.name);
+
+            return (
+              <TabPanelContent
+                isConnected={isConnected}
+                key={tab.id}
+                onChange={setFormData}
+                tab={tab}
+              />
+            );
+          })}
         </TabPanels>
       </TabGroup>
     </Modal>
@@ -192,12 +200,13 @@ export function AddAsset() {
 }
 
 interface TabPanelContentProps {
-  tab: IntegrationMeta;
+  isConnected: boolean;
   onChange: Dispatch<SetStateAction<Values[]>>;
+  tab: IntegrationMeta;
 }
 
 const TabPanelContent = (props: TabPanelContentProps) => {
-  const { tab, onChange } = props;
+  const { isConnected, tab, onChange } = props;
   const {
     description = '',
     markup = '',
@@ -219,9 +228,12 @@ const TabPanelContent = (props: TabPanelContentProps) => {
 
   return (
     <TabPanel className="prose max-w-none">
-      {logo && (
-        <img className="mt-4 h-6" src={logo || ''} alt={displayName || ''} />
-      )}
+      <div className="flex items-center gap-2">
+        {isConnected && <CheckCircleIcon className="size-6 text-green-500" />}
+        {logo && (
+          <img className="h-6" src={logo || ''} alt={displayName || ''} />
+        )}
+      </div>
       {description && <div className="text-sm">{description}</div>}
       {message && <div>{message}</div>}
       <form id="new-asset" className="mt-4">

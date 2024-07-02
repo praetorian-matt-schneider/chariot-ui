@@ -1,7 +1,9 @@
 import { Link, useNavigate } from 'react-router-dom';
+import { IdentificationIcon } from '@heroicons/react/24/outline';
 
 import { Accordian } from '@/components/Accordian';
 import { Button } from '@/components/Button';
+import { Chip } from '@/components/Chip';
 import { Drawer } from '@/components/Drawer';
 import { HorizontalSplit } from '@/components/HorizontalSplit';
 import { AssetsIcon } from '@/components/icons';
@@ -12,6 +14,7 @@ import { DetailsListContainer } from '@/components/ui/DetailsListContainer';
 import { useMy } from '@/hooks';
 import { useUpdateAsset } from '@/hooks/useAssets';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
+import { useIntegration } from '@/hooks/useIntegration';
 import { Comment } from '@/sections/detailsDrawer/Comment';
 import { DetailsDrawerHeader } from '@/sections/detailsDrawer/DetailsDrawerHeader';
 import { useOpenDrawer } from '@/sections/detailsDrawer/useOpenDrawer';
@@ -22,7 +25,6 @@ import { StorageKey } from '@/utils/storage/useStorage.util';
 import { useSearchParams } from '@/utils/url.util';
 
 import { DRAWER_WIDTH } from '.';
-import { IdentificationIcon } from '@heroicons/react/24/outline';
 
 interface Props {
   compositeKey: string;
@@ -38,6 +40,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
   const { getAssetDrawerLink } = useOpenDrawer();
   const { removeSearchParams } = useSearchParams();
   const navigate = useNavigate();
+  const { isIntegration } = useIntegration();
 
   const { mutateAsync: updateAsset } = useUpdateAsset();
 
@@ -137,6 +140,13 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
             title={asset.name}
             subtitle={asset.dns}
             prefix={<AssetsIcon className="size-5" />}
+            tag={
+              isIntegration(asset) ? (
+                <Chip>Integration</Chip>
+              ) : asset.seed ? (
+                <Chip>Seed</Chip>
+              ) : null
+            }
           />
           <HorizontalSplit
             leftContainer={
