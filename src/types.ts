@@ -1,5 +1,3 @@
-import { join } from 'path';
-
 export enum RiskScanMessage {
   Stop = 'Risk scanning will stop.',
   Start = 'Risk scanning will start automatically.',
@@ -170,6 +168,7 @@ export interface Asset {
   config: unknown;
   created: string;
   dns: string;
+  seed: boolean;
   history: unknown;
   key: string;
   name: string;

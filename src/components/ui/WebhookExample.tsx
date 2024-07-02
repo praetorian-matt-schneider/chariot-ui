@@ -27,7 +27,7 @@ const WebhookExample: React.FC<Props> = ({ defaultPin }) => {
       comment: (
         <p>
           Finding is a regex pattern that matches{' '}
-          <pre className="inline rounded-[2px] bg-gray-200 p-1 text-xs">
+          <pre className="inline rounded-[2px] bg-gray-200 p-1 text-xs text-default">
             {`/^\\S+$/`}
           </pre>
         </p>
@@ -54,7 +54,7 @@ const WebhookExample: React.FC<Props> = ({ defaultPin }) => {
             {sample.id} Payload Example
           </span>
           {sample.comment && <p className="mb-2 text-xs">{sample.comment}</p>}
-          <pre className="overflow-x-auto whitespace-pre-wrap rounded bg-gray-100 text-xs">
+          <pre className="overflow-x-auto whitespace-pre-wrap rounded bg-gray-100 text-xs text-default">
             {sample.payload}
           </pre>
         </div>

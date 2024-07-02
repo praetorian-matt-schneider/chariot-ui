@@ -10,6 +10,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { CheckIcon, XMarkIcon } from '@heroicons/react/24/solid';
 
+import { Chip } from '@/components/Chip';
 import { CopyToClipboard } from '@/components/CopyToClipboard';
 import { Dropdown } from '@/components/Dropdown';
 import { AssetsIcon, RisksIcon } from '@/components/icons';
@@ -19,6 +20,7 @@ import { OverflowText } from '@/components/OverflowText';
 import { showBulkSnackbar, Snackbar } from '@/components/Snackbar';
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
+import { Tooltip } from '@/components/Tooltip';
 import { AssetStatusChip } from '@/components/ui/AssetStatusChip';
 import { useMy } from '@/hooks';
 import { AssetsSnackbarTitle, useUpdateAsset } from '@/hooks/useAssets';
@@ -144,6 +146,18 @@ const Assets: React.FC = () => {
       className: 'w-full',
       to: item => getAssetDrawerLink(item),
       copy: true,
+      cell: (asset: Asset) => {
+        return (
+          <div className="flex gap-2">
+            <span>{asset.name}</span>
+            {asset.seed && (
+              <Tooltip title="Seed" placement="top">
+                <Chip style="primary">Seed</Chip>
+              </Tooltip>
+            )}
+          </div>
+        );
+      },
     },
     {
       label: 'DNS',
