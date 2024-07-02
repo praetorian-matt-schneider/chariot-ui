@@ -13,7 +13,7 @@ export interface FormInfo {
 }
 
 interface FormGroupProps extends PropsWithChildren {
-  label?: string;
+  label?: JSX.Element | string;
   error?: string;
   startIcon?: React.ReactNode;
   endIcon?: React.ReactNode;

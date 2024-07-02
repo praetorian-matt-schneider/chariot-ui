@@ -21,7 +21,7 @@ export type InputEvent = React.ChangeEvent<
 
 export interface InputProps extends SelectProps, DateProps {
   className?: string;
-  label?: string;
+  label?: JSX.Element | string;
   value: string | number;
   onChange: (e: InputEvent) => void;
   type?: Type;

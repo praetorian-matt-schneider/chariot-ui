@@ -28,23 +28,24 @@ import {
   IntegrationsMeta,
 } from '@/utils/availableIntegrations';
 import { cn } from '@/utils/classname';
+import { InformationCircleIcon } from '@heroicons/react/24/solid';
+import { Tooltip } from '@/components/Tooltip';
 
 const PUBLIC_ASSET = 'publicAsset';
 
 const AddAssetMessage = () => (
-  <div className="flex flex-col space-y-2">
+  <div className="flex flex-col">
     <div>
       <h3 className="mt-0 text-xl font-medium text-gray-700">
         What is an Asset?
       </h3>
       <p className="mb-0 text-sm text-gray-500">
         An asset refers to any single component of your organization's IT
-        infrastructure that could be a target for cyberattacks. Assets are the
-        actual items we assess for risks.
+        infrastructure that could be a target for cyberattacks.
       </p>
       <p className="mb-0 text-sm text-gray-500">
         For example, if you work for Acme Corporation, you might add:
-        <ul className="list-disc pl-5 text-sm ">
+        <ul className="list-disc mt-0 mb-0 pl-5 text-sm ">
           <li>
             Domains: <span className="font-semibold">acme.com</span>,{' '}
             <span className="font-semibold">mail.acme.com</span>
@@ -89,10 +90,35 @@ const Tabs: IntegrationMeta[] = [
         className: 'h-11',
       },
       {
-        label: 'Priority',
+        label: (
+          <div className="flex space-x-1 text-center justify-center">
+            Priority{' '}
+            <Tooltip
+              title={
+                <div className="flex flex-col space-y-1">
+                  <p>
+                    <span className="font-semibold">High Priority:</span>{' '}
+                    Discovers Assets, Finds Risks (Aggressive Scan)
+                  </p>
+                  <p>
+                    <span className="font-semibold">Standard Priority:</span>{' '}
+                    Discovers Assets, Finds Risks
+                  </p>
+                  <p>
+                    <span className="font-semibold">Low Priority:</span>{' '}
+                    Discovers Assets
+                  </p>
+                </div>
+              }
+            >
+              <InformationCircleIcon className="size-5 text-gray-500" />
+            </Tooltip>
+          </div>
+        ),
         value: AssetStatus.Active,
         type: Input.Type.SELECT,
         placeholder: 'Select Priority',
+
         name: 'status',
         options: [
           {
