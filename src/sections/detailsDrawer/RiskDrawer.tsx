@@ -228,7 +228,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
             startIcon={<IdentificationIcon className="size-5" />}
             onClick={() => {
               navigate({
-                pathname: getRoute(['app', 'account']),
+                pathname: getRoute(['app', 'attributes']),
                 search: `?${StorageKey.HASH_SEARCH}=${encodeURIComponent(referenceFilter)}`,
               });
             }}
