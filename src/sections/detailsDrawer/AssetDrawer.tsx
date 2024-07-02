@@ -176,7 +176,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
           <HorizontalSplit
             leftContainer={
               <>
-                {assetType === 'seed' && (
+                {['seed', 'integration'].includes(assetType) && (
                   <Accordian title="Associated Assets" contentClassName="pt-0">
                     <Table
                       tableClassName="border-none p-0 shadow-none [&_.th-top-border]:hidden"
@@ -234,7 +234,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
                     )}
                   </Accordian>
                 )}
-                {assetType === 'seed' && (
+                {['seed', 'integration'].includes(assetType) && (
                   <Accordian title="Associated Risks" contentClassName="pt-0">
                     <Table
                       tableClassName="border-none p-0 shadow-none [&_.th-top-border]:hidden"
