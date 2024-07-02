@@ -154,8 +154,8 @@ const Assets: React.FC = () => {
         return (
           <div className="flex gap-2">
             <span>{asset.name}</span>
-            {asset.seed && !integration && <Chip style="primary">Seed</Chip>}
-            {integration && <Chip style="primary">Integration</Chip>}
+            {asset.seed && !integration && <Chip>Seed</Chip>}
+            {integration && <Chip>Integration</Chip>}
           </div>
         );
       },

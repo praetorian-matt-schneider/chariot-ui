@@ -101,7 +101,7 @@ export const useCreateAsset = () => {
   );
 
   return useMutation<Asset, Error, Pick<Asset, 'name' | 'status'>>({
-    defaultErrorMessage: `Failed to add seed`,
+    defaultErrorMessage: `Failed to add asset`,
     mutationFn: async asset => {
       const { data } = await axios.post(`/asset`, {
         dns: asset.name,
@@ -135,9 +135,9 @@ export const useBulkAddAsset = () => {
   );
 
   return useMutation<void, Error, string[]>({
-    defaultErrorMessage: 'Failed to bulk add seed',
+    defaultErrorMessage: 'Failed to bulk add assets',
     errorByStatusCode: {
-      402: 'License is required to add more seeds',
+      402: 'License is required to add more assets',
     },
     mutationFn: async (assets: string[]) => {
       const response = await Promise.all(
@@ -148,7 +148,7 @@ export const useBulkAddAsset = () => {
               status: AssetStatus.Active,
             });
           })
-          // Note: Catch error so we can continue adding seeds even if some fail
+          // Note: Catch error so we can continue adding assets even if some fail
           .map(p => p.catch(e => e))
       );
 
@@ -169,7 +169,7 @@ export const useBulkAddAsset = () => {
 
       if (validResults.length !== assets.length) {
         const firstError = response.find(result => result instanceof Error);
-        // Note: Some seeds failed to add, so throwing the first error, and useMutation will handle the error toast
+        // Note: Some assets failed to add, so throwing the first error, and useMutation will handle the error toast
 
         throw firstError;
       }
