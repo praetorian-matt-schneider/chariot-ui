@@ -171,7 +171,11 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
                 : asset.dns
             }
             prefix={<AssetsIcon className="size-5" />}
-            tag={assetType !== 'asset' && <Chip>{capitalize(assetType)}</Chip>}
+            tag={
+              assetType === 'integration' && (
+                <Chip>{capitalize(assetType)}</Chip>
+              )
+            }
           />
           <HorizontalSplit
             leftContainer={
@@ -402,11 +406,11 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
                       tooltip: asset.updated,
                     },
                     {
-                      label: 'Seed',
+                      label: 'Discovered From',
                       value: seed?.name,
                       to: {
                         pathname: window.location.pathname,
-                        search: `?${StorageKey.DRAWER_COMPOSITE_KEY}=${encodeURIComponent(`#seed#${seed?.name}`)}`,
+                        search: `?${StorageKey.DRAWER_COMPOSITE_KEY}=${encodeURIComponent(`#asset#${seed?.name}#${seed?.name}`)}`,
                       },
                     },
                     ...(assetType === 'asset'
