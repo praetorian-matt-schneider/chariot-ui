@@ -14,7 +14,6 @@ interface AccordianProps {
   className?: string;
   contentClassName?: string;
   fixed?: boolean;
-  hide?: boolean;
 }
 
 export function Accordian(props: AccordianProps) {
@@ -23,10 +22,8 @@ export function Accordian(props: AccordianProps) {
     props.defaultOpen ?? true
   );
 
-  if (props.hide) return props.children;
-
   return (
-    <div className="py-8">
+    <div className="pb-8">
       <div className={cn('flex items-center gap-2', props.className)}>
         <div
           className={cn('flex gap-2', !props.fixed && 'cursor-pointer')}

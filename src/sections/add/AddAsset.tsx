@@ -39,10 +39,10 @@ const AddAssetMessage = () => (
       <h3 className="m-0 text-xl font-medium text-gray-700">
         What is an Asset?
       </h3>
-      <p className="mb-2 text-md text-gray-500">
+      <p className="text-md mb-2 text-gray-500">
         Any component of your IT infrastructure at risk of cyberattacks.
       </p>
-      <p className="mt-0 text-sm text-gray-500 bg-layer1 p-4 rounded-sm">
+      <p className="mt-0 rounded-sm bg-layer1 p-4 text-sm text-gray-500">
         For example, at Acme Corporation, an asset could be:
         <ul className="my-0 list-disc pl-5 text-sm ">
           <li>
@@ -89,8 +89,8 @@ const Tabs: IntegrationMeta[] = [
       },
       {
         label: (
-          <div className="flex items-center justify-center space-x-1 text-center">
-            <span>Priority</span>
+          <div className="flex justify-center space-x-1 text-center">
+            Priority{' '}
             <Tooltip
               title={
                 <div className="flex flex-col space-y-1">
@@ -386,7 +386,7 @@ export const TabPanelContent = (props: TabPanelContentProps) => {
             </Button>
           )}
           {warning && (
-            <p className="rounded bg-yellow-100 p-2 mt-5 text-sm text-yellow-600">
+            <p className="mt-5 rounded bg-yellow-100 p-2 text-sm text-yellow-600">
               <ExclamationTriangleIcon className="inline size-5 text-yellow-700" />
               {warning}
             </p>
