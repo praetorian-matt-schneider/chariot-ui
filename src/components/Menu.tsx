@@ -158,8 +158,7 @@ const MenuItem: React.FC<
     return (
       <li
         className={cn(
-          'p-3 pb-0 text-xs font-medium text-default-light',
-          menuMarginClassName,
+          'pt-5 pb-2 px-3 text-xs font-medium text-default-light top-0 sticky bg-layer0 z-10 mx-2',
           className
         )}
       >
@@ -315,7 +314,12 @@ function Content(props: MenuItemProps & { multiSelect?: boolean }) {
     <div className="flex w-full items-center gap-2">
       {multiSelect && (
         <>
-          <input type="checkbox" className="hidden" checked={isSelected} />
+          <input
+            type="checkbox"
+            className="hidden"
+            checked={isSelected}
+            onChange={() => {}}
+          />
           <CheckboxIcon isChecked={Boolean(isSelected)} />
         </>
       )}

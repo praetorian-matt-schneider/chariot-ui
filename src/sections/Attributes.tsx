@@ -1,14 +1,13 @@
 import { PlusIcon } from '@heroicons/react/24/outline';
 
-import { Link } from '@/components/Link';
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
 import { useMy } from '@/hooks';
-import { useOpenDrawer } from '@/sections/detailsDrawer/useOpenDrawer';
+import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { useGlobalState } from '@/state/global.state';
 import { Attribute } from '@/types';
-import { prettyPrint } from '@/utils/prettyPrint.util';
+import { capitalize } from '@/utils/lodash.util';
 
 export function Attributes() {
   const {
@@ -18,7 +17,6 @@ export function Attributes() {
     isFetchingNextPage,
     fetchNextPage,
   } = useMy({ resource: 'attribute', filterByGlobalSearch: true });
-  const { getAssetDrawerLink } = useOpenDrawer();
 
   const {
     modal: { attribute },
@@ -26,43 +24,27 @@ export function Attributes() {
 
   const columns: Columns<Attribute> = [
     {
-      label: 'Asset',
+      label: 'Name',
       id: 'name',
       className: 'w-full',
-      copy: false,
-      cell: item => {
-        const ip = item.key.split('#')[3];
-        return (
-          <Link
-            to={getAssetDrawerLink({ dns: item.dns, name: ip })}
-            className="cursor-pointer truncate font-medium"
-          >
-            {ip !== item.dns ? (
-              <span>
-                {item.dns} ({ip})
-              </span>
-            ) : (
-              item.dns
-            )}
-          </Link>
-        );
-      },
+      copy: true,
+      cell: item => getAttributeDetails(item).parsedName,
+      to: item => getAttributeDetails(item).url,
+    },
+    {
+      label: 'Type',
+      id: '',
+      fixedWidth: 80,
+      cell: item => capitalize(getAttributeDetails(item).attributeType),
     },
     {
       label: 'Class',
       id: 'class',
-      className: 'w-[120px]',
+      fixedWidth: 220,
       copy: true,
-      cell: item => {
-        if (Number.isNaN(Number.parseInt(item.class))) {
-          return prettyPrint(item.class);
-        } else {
-          return item.class;
-        }
-      },
     },
     {
-      label: 'Name',
+      label: 'Value',
       id: 'name',
       className: 'w-[190px]',
       copy: true,
@@ -107,4 +89,22 @@ export function Attributes() {
       skipHeader
     />
   );
+}
+
+export function getAttributeDetails(attribute: Attribute) {
+  const [, , attributeType, dns, name] = attribute.key.split('#');
+
+  const url =
+    attributeType === 'asset'
+      ? getDrawerLink().getAssetDrawerLink({ dns, name })
+      : getDrawerLink().getRiskDrawerLink({ dns, name });
+
+  return {
+    attributeType,
+    dns,
+    name,
+    parsedName: `${dns} (${name})`,
+    class: attribute.class,
+    url: url,
+  };
 }

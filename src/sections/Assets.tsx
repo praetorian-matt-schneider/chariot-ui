@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import {
   CheckCircleIcon,
+  ChevronDoubleDownIcon,
   ExclamationCircleIcon,
   PauseIcon,
   PlusIcon,
@@ -10,7 +11,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { CheckIcon, XMarkIcon } from '@heroicons/react/24/solid';
 
-import { CopyToClipboard } from '@/components/CopyToClipboard';
+import { Chip } from '@/components/Chip';
 import { Dropdown } from '@/components/Dropdown';
 import { AssetsIcon, RisksIcon } from '@/components/icons';
 import { SpinnerIcon } from '@/components/icons/Spinner.icon';
@@ -23,8 +24,9 @@ import { AssetStatusChip } from '@/components/ui/AssetStatusChip';
 import { useMy } from '@/hooks';
 import { AssetsSnackbarTitle, useUpdateAsset } from '@/hooks/useAssets';
 import { useCounts } from '@/hooks/useCounts';
+import { useIntegration } from '@/hooks/useIntegration';
 import { AssetStatusWarning } from '@/sections/AssetStatusWarning';
-import { useOpenDrawer } from '@/sections/detailsDrawer/useOpenDrawer';
+import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { useGlobalState } from '@/state/global.state';
 import {
   Asset,
@@ -83,6 +85,7 @@ const Assets: React.FC = () => {
     resource: 'asset',
     filterByGlobalSearch: false,
   });
+
   const {
     isLoading,
     status: assetsStatus,
@@ -96,10 +99,11 @@ const Assets: React.FC = () => {
     filterByGlobalSearch: true,
   });
   const { data: risks = [], status: riskStatus } = useMy({ resource: 'risk' });
+  const { isIntegration } = useIntegration();
 
   const status = useMergeStatus(riskStatus, assetsStatus);
 
-  const { getAssetDrawerLink } = useOpenDrawer();
+  const { getAssetDrawerLink } = getDrawerLink();
   const openRiskDataset = useMemo(
     () => buildOpenRiskDataset(risks as Risk[]),
     [risks]
@@ -144,19 +148,25 @@ const Assets: React.FC = () => {
       className: 'w-full',
       to: item => getAssetDrawerLink(item),
       copy: true,
+      cell: (asset: Asset) => {
+        const integration = isIntegration(asset);
+        return (
+          <div className="flex gap-2">
+            <span>{asset.name}</span>
+            {/* {asset.seed && <Chip>Seed</Chip>} */}
+            {integration && <Chip>Integration</Chip>}
+          </div>
+        );
+      },
     },
     {
       label: 'DNS',
       id: 'dns',
       className: 'w-full hidden md:table-cell',
       cell: (asset: Asset) => {
-        return (
-          <CopyToClipboard textToCopy={asset.dns}>
-            <OverflowText text={asset.dns} truncateType="center" />
-          </CopyToClipboard>
-        );
+        return <OverflowText text={asset.dns} truncateType="center" />;
       },
-      copy: false,
+      copy: true,
     },
     {
       label: 'Status',
@@ -260,7 +270,11 @@ const Assets: React.FC = () => {
         filters={
           <Dropdown
             styleType="header"
-            label={selectedFilter ? AssetLabels[selectedFilter] : 'All Assets'}
+            label={
+              selectedFilter && AssetLabels[selectedFilter]
+                ? AssetLabels[selectedFilter]
+                : 'All Assets'
+            }
             endIcon={
               <ChevronDownIcon className="size-3 stroke-[4px] text-header-dark" />
             }
@@ -302,7 +316,7 @@ const Assets: React.FC = () => {
         selection={{}}
         primaryAction={() => {
           return {
-            label: 'Add Asset',
+            label: 'Configure',
             icon: <AssetsIcon className="size-5" />,
             startIcon: <PlusIcon className="size-5" />,
             onClick: () => {
@@ -339,9 +353,17 @@ const Assets: React.FC = () => {
                   label: 'Standard Priority',
                   icon: <CheckCircleIcon />,
                   disabled: assets.every(
-                    asset => asset.status !== AssetStatus.ActiveHigh
+                    asset => asset.status === AssetStatus.Active
                   ),
                   onClick: () => updateStatus(assets, AssetStatus.Active),
+                },
+                {
+                  label: 'Low Priority',
+                  icon: <ChevronDoubleDownIcon />,
+                  disabled: assets.every(
+                    asset => asset.status === AssetStatus.ActiveLow
+                  ),
+                  onClick: () => updateStatus(assets, AssetStatus.ActiveLow),
                 },
                 {
                   label: 'Stop Scanning',
@@ -371,7 +393,12 @@ const Assets: React.FC = () => {
           },
           {
             label: 'Standard Priority',
-            filter: asset => asset.status !== AssetStatus.ActiveHigh,
+            filter: asset =>
+              [AssetStatus.Active, AssetStatus.Frozen].includes(asset.status),
+          },
+          {
+            label: 'Low Priority',
+            filter: asset => asset.status === AssetStatus.ActiveLow,
           },
         ]}
         error={error}

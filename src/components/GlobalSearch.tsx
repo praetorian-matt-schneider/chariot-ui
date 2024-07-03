@@ -16,16 +16,12 @@ import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import { Menu } from '@headlessui/react';
 
 import { Input, InputEvent } from '@/components/form/Input';
-import {
-  AssetsIcon,
-  AttributesIcon,
-  RisksIcon,
-  SeedsIcon,
-} from '@/components/icons';
+import { AssetsIcon, AttributesIcon, RisksIcon } from '@/components/icons';
 import { Loader } from '@/components/Loader';
 import { RiskDropdown } from '@/components/ui/RiskDropdown';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
-import { useOpenDrawer } from '@/sections/detailsDrawer/useOpenDrawer';
+import { getAttributeDetails } from '@/sections/Attributes';
+import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { useSearchContext } from '@/state/search';
 import {
   Account,
@@ -38,7 +34,6 @@ import {
   RiskCombinedStatus,
   RiskSeverity,
   Search,
-  Seed,
   SeverityDef,
 } from '@/types';
 import { cn } from '@/utils/classname';
@@ -188,8 +183,7 @@ const SearchResultDropdown: React.FC<Search> = ({
 }) => {
   const navigate = useNavigate();
 
-  const { getSeedDrawerLink, getRiskDrawerLink, getAssetDrawerLink } =
-    useOpenDrawer();
+  const { getRiskDrawerLink, getAssetDrawerLink } = getDrawerLink();
 
   const { search } = useSearchContext();
   const isEmpty =
@@ -228,22 +222,31 @@ const SearchResultDropdown: React.FC<Search> = ({
             <SearchResultDropdownSeaction<Attribute>
               title="Attributes"
               items={attributes}
-              Icon={AssetsIcon}
               onSelect={() => onSelect('attribute')}
               onClick={item => {
-                const dns = item.key.split('#')[2];
-                const name = item.key.split('#')[3];
-                navigate(getAssetDrawerLink({ dns, name }));
+                navigate(getAttributeDetails(item).url);
               }}
-              row={item => (
-                <div className="flex items-center space-x-2">
-                  <span className="text-nowrap">
-                    {item.name} ({item.class})
-                  </span>
-                  <ChevronRightIcon className="size-2" />
-                  <span className="text-nowrap">{item.key.split('#')[3]}</span>
-                </div>
-              )}
+              row={item => {
+                const attDetail = getAttributeDetails(item);
+
+                const icon =
+                  attDetail.attributeType === 'asset' ? (
+                    <AssetsIcon className="mr-2 size-4 text-gray-400" />
+                  ) : (
+                    <RisksIcon className="mr-2 size-4 text-gray-400" />
+                  );
+
+                return (
+                  <div className="flex items-center space-x-2">
+                    {icon}
+                    <span className="text-nowrap">
+                      {attDetail.name} ({attDetail.class})
+                    </span>
+                    <ChevronRightIcon className="size-2" />
+                    <span className="text-nowrap">{attDetail.dns}</span>
+                  </div>
+                );
+              }}
             />
             <SearchResultDropdownSeaction<Asset>
               title="Assets"
@@ -260,16 +263,6 @@ const SearchResultDropdown: React.FC<Search> = ({
                   <span className="text-nowrap">{item.dns}</span>
                 </div>
               )}
-            />
-            <SearchResultDropdownSeaction<Seed>
-              title="Seeds"
-              items={seeds}
-              onSelect={() => onSelect('seed')}
-              Icon={SeedsIcon}
-              onClick={item => {
-                navigate(getSeedDrawerLink(item));
-              }}
-              row={item => item.name}
             />
             <SearchResultDropdownSeaction<Risk>
               title="Risks"
@@ -304,19 +297,20 @@ const SearchResultDropdown: React.FC<Search> = ({
               items={attribute}
               Icon={AttributesIcon}
               onClick={item => {
-                const dns = item.key.split('#')[2];
-                const name = item.key.split('#')[3];
-
-                navigate(getAssetDrawerLink({ dns, name }));
+                navigate(getAttributeDetails(item).url);
               }}
-              row={item => (
-                <div className="flex flex-nowrap items-center space-x-2">
-                  <span className="text-nowrap">{item.name}</span>
-                  <span className="text-nowrap">({item.class})</span>
-                  <ChevronRightIcon className="size-2" />
-                  <span className="text-nowrap">{item.dns}</span>
-                </div>
-              )}
+              row={item => {
+                const attDetail = getAttributeDetails(item);
+
+                return (
+                  <div className="flex flex-nowrap items-center space-x-2">
+                    <span className="text-nowrap">{attDetail.name}</span>
+                    <span className="text-nowrap">({attDetail.class})</span>
+                    <ChevronRightIcon className="size-2" />
+                    <span className="text-nowrap">{attDetail.dns}</span>
+                  </div>
+                );
+              }}
             />
             <SearchResultDropdownSeaction<Job>
               title="Jobs"
@@ -344,7 +338,7 @@ interface SearchResultDropdownSeactionInterface<TData> {
   items: TData[];
   onSelect?: () => void;
   row: (item: TData) => JSX.Element | string;
-  Icon: ElementType;
+  Icon?: ElementType;
   onClick?: (item: TData) => void;
 }
 
@@ -377,9 +371,11 @@ function SearchResultDropdownSeaction<TData extends { key: string }>({
               onClick && 'cursor-pointer hover:bg-gray-100'
             )}
           >
-            <div>
-              <Icon className="mr-2 size-4 text-gray-400" />
-            </div>
+            {Icon && (
+              <div>
+                <Icon className="mr-2 size-4 text-gray-400" />
+              </div>
+            )}
             <span className="text-gray-600">{row(item)}</span>
           </div>
         </Menu.Item>

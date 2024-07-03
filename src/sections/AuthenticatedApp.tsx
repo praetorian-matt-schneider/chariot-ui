@@ -11,7 +11,6 @@ import { useGetDisplayName } from '@/hooks/useAccounts';
 import { AddAsset } from '@/sections/add/AddAsset';
 import { AddAttribute } from '@/sections/add/AddAttribute';
 import { AddFile } from '@/sections/add/AddFile';
-import { AddReference } from '@/sections/add/AddReference';
 import { AddRisks } from '@/sections/add/AddRisks';
 import { AddSeeds } from '@/sections/add/AddSeeds';
 import { DetailsDrawer } from '@/sections/detailsDrawer';
@@ -60,10 +59,6 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
       resetShortcuts();
       if (event.ctrlKey && event.key) {
         switch (event.key) {
-          case 's':
-          case 'S':
-            navigate(getRoute(['app', 'seeds']));
-            break;
           case 'a':
           case 'A':
             navigate(getRoute(['app', 'assets']));
@@ -71,10 +66,6 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
           case 'r':
           case 'R':
             navigate(getRoute(['app', 'risks']));
-            break;
-          case 'i':
-          case 'I':
-            navigate(getRoute(['app', 'integrations']));
             break;
           case 'j':
           case 'J':
@@ -108,7 +99,7 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
 
   return (
     <div
-      className={'bg-layer1 flex h-full flex-col items-center overflow-hidden'}
+      className={'flex h-full flex-col items-center overflow-hidden bg-layer1'}
     >
       <div
         className="grow-1 flex size-full justify-center"
@@ -130,7 +121,6 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
       <AddAsset />
       <AddFile />
       <AddAttribute />
-      <AddReference />
       {accountsStatus === 'success' && showUpgrade && <Upgrade />}
     </div>
   );
@@ -160,7 +150,7 @@ export function Header() {
       >
         <div className="w-full max-w-screen-xl">
           <TopNavBar />
-          <hr className="bg-layer0 h-px opacity-15" />
+          <hr className="h-px bg-layer0 opacity-15" />
           <div className={cn('flex items-center justify-between gap-2')}>
             <Loader
               styleType="header"

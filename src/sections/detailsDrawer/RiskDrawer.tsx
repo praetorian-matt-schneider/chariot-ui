@@ -1,6 +1,11 @@
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ExclamationCircleIcon } from '@heroicons/react/20/solid';
+import {
+  ArrowPathIcon,
+  DocumentTextIcon,
+  IdentificationIcon,
+} from '@heroicons/react/24/outline';
 import { CheckCircleIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import MDEditor from '@uiw/react-md-editor';
 
@@ -26,6 +31,7 @@ import { useReRunJob } from '@/hooks/useJobs';
 import { useReportRisk, useUpdateRisk } from '@/hooks/useRisks';
 import { Comment } from '@/sections/detailsDrawer/Comment';
 import { DetailsDrawerHeader } from '@/sections/detailsDrawer/DetailsDrawerHeader';
+import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { JobStatus, Risk, RiskCombinedStatus, RiskHistory } from '@/types';
 import { formatDate } from '@/utils/date.util';
 import { sToMs } from '@/utils/date.util';
@@ -34,13 +40,6 @@ import { StorageKey } from '@/utils/storage/useStorage.util';
 import { generatePathWithSearch, useSearchParams } from '@/utils/url.util';
 
 import { DRAWER_WIDTH } from '.';
-import { Link } from '@/components/Link';
-import {
-  ArrowPathIcon,
-  DocumentTextIcon,
-  IdentificationIcon,
-} from '@heroicons/react/24/outline';
-import { useOpenDrawer } from '@/sections/detailsDrawer/useOpenDrawer';
 
 const getJobTimeline = ({
   status,
@@ -90,12 +89,12 @@ interface RiskDrawerProps {
 
 export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
   const navigate = useNavigate();
-  const { getAssetDrawerLink } = useOpenDrawer();
+  const { getAssetDrawerLink } = getDrawerLink();
   const { removeSearchParams } = useSearchParams();
 
   const [, dns, name] = compositeKey.split('#');
 
-  const referenceFilter = `#${dns}#${name}`;
+  const referenceFilter = `#risk#${dns}#${name}`;
 
   const [isEditingMarkdown, setIsEditingMarkdown] = useState(false);
   const [markdownValue, setMarkdownValue] = useState('');
@@ -127,10 +126,10 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     },
     { enabled: open }
   );
-  const { data: references } = useMy(
+  const { data: attributes } = useMy(
     {
-      resource: 'ref',
-      query: `#${dns}#${name}`,
+      resource: 'attribute',
+      query: referenceFilter,
     },
     {
       enabled: open,
@@ -153,9 +152,9 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
 
   const { risks: riskOccurrence = [] } = riskNameGenericSearch || {};
 
-  const hostRef = references.find(ref => ref.class === 'host');
+  const hostRef = attributes.find(ref => ref.class === 'host');
   const [ip, port] = hostRef?.name?.split(/:(?=[^:]*$)/) ?? '';
-  const urlRefs = references.filter(ref => ref.class === 'url');
+  const urlRefs = attributes.filter(ref => ref.class === 'url');
   const urlsImpacted = urlRefs.map(ref => ref.name);
 
   const definitionsFileValue =
@@ -229,14 +228,14 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
             startIcon={<IdentificationIcon className="size-5" />}
             onClick={() => {
               navigate({
-                pathname: getRoute(['app', 'references']),
+                pathname: getRoute(['app', 'attributes']),
                 search: `?${StorageKey.HASH_SEARCH}=${encodeURIComponent(referenceFilter)}`,
               });
             }}
             styleType="secondary"
             className="ml-auto"
           >
-            References
+            Risk Attributes
           </Button>
           <Button
             startIcon={<DocumentTextIcon className="size-5" />}

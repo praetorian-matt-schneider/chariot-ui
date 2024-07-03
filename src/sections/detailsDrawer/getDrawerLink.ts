@@ -4,7 +4,7 @@ import { Asset, Risk, Seed } from '@/types';
 import { StorageKey } from '@/utils/storage/useStorage.util';
 import { generatePathWithSearch } from '@/utils/url.util';
 
-export function useOpenDrawer() {
+export function getDrawerLink() {
   return {
     getAssetDrawerLink: (asset: Pick<Asset, 'dns' | 'name'>): To => {
       return generatePathWithSearch({
@@ -30,7 +30,9 @@ export function useOpenDrawer() {
     },
     getSeedDrawerLink: (seed: Pick<Seed, 'name'>): To => {
       return generatePathWithSearch({
-        appendSearch: [[StorageKey.DRAWER_COMPOSITE_KEY, `#seed#${seed.name}`]],
+        appendSearch: [
+          [StorageKey.DRAWER_COMPOSITE_KEY, `#seed#${seed.name}#${seed.name}`],
+        ],
       });
     },
   };

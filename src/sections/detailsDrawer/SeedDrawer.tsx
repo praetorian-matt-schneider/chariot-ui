@@ -1,12 +1,11 @@
 import { useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { Accordian } from '@/components/Accordian';
 import { Button } from '@/components/Button';
 import { Chip } from '@/components/Chip';
 import { Drawer } from '@/components/Drawer';
 import { HorizontalSplit } from '@/components/HorizontalSplit';
-import { SeedsIcon } from '@/components/icons';
 import { Loader } from '@/components/Loader';
 import { OverflowText } from '@/components/OverflowText';
 import { Table } from '@/components/table/Table';
@@ -14,11 +13,9 @@ import { DetailsListContainer } from '@/components/ui/DetailsListContainer';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { change as changeSeed } from '@/hooks/useSeeds';
 import { Comment } from '@/sections/detailsDrawer/Comment';
-import { DetailsDrawerHeader } from '@/sections/detailsDrawer/DetailsDrawerHeader';
-import { useOpenDrawer } from '@/sections/detailsDrawer/useOpenDrawer';
-import { Asset, Attribute, Risk, Seed, SeedStatus } from '@/types';
+import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
+import { Asset, Attribute, Seed, SeedStatus } from '@/types';
 import { formatDate } from '@/utils/date.util';
-import { getRoute } from '@/utils/route.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
 import { useSearchParams } from '@/utils/url.util';
 
@@ -32,7 +29,7 @@ interface Props {
 const TABLE_LIMIT = 10;
 
 export const SeedDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
-  const { getRiskDrawerLink, getAssetDrawerLink } = useOpenDrawer();
+  const { getAssetDrawerLink } = getDrawerLink();
   const {
     data: seedObj,
     isLoading,
@@ -47,7 +44,7 @@ export const SeedDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
     }
   );
   const { mutateAsync: updateSeed } = changeSeed();
-  const { seeds = [], refs = [], attributes = [] } = seedObj || {};
+  const { seeds = [], attributes = [] } = seedObj || {};
   const seed: Seed = seeds[0] || {};
   const assets = attributes.filter(
     (attribute: Attribute) => attribute.class === 'seed'
@@ -112,8 +109,6 @@ export const SeedDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
     [seed, attributes]
   );
 
-  const risks = refs as unknown as Risk[];
-
   return (
     <Drawer
       open={open}
@@ -123,13 +118,6 @@ export const SeedDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
     >
       <Loader isLoading={isLoading} type="spinner">
         <div className="flex h-[calc(100%-24px)] flex-col gap-8">
-          <DetailsDrawerHeader
-            title={seed.name}
-            subtitle={isLoading ? '' : `${refs?.length} Risks Found`}
-            isLoading={isLoading}
-            prefix={<SeedsIcon className="size-5" />}
-          />
-
           <HorizontalSplit
             leftContainer={
               <>
@@ -186,55 +174,6 @@ export const SeedDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
                           ? 'View Less'
                           : `and ${assets.length - assetsLimit} more`}
                       </Button>
-                    </div>
-                  )}
-                </Accordian>
-
-                <Accordian title="Associated Risks" contentClassName="pt-0">
-                  <Table
-                    tableClassName="border-none p-0 shadow-none [&_.th-top-border]:hidden"
-                    name="Associated Risks"
-                    status="success"
-                    data={risks.slice(0, TABLE_LIMIT)}
-                    columns={[
-                      {
-                        label: 'Name',
-                        id: 'name',
-                        className: 'w-full cursor-pointer pl-0',
-                        cell: (item: Risk) => (
-                          <div className="w-full font-medium text-brand">
-                            <OverflowText text={`${item.key.split('#')[3]}`} />
-                          </div>
-                        ),
-                        copy: true,
-                        to: (item: Risk) => {
-                          const dns = item.key.split('#')[2];
-                          const name = item.key.split('#')[3];
-                          return getRiskDrawerLink({ dns, name });
-                        },
-                      },
-                      {
-                        label: 'Last Seen',
-                        id: 'updated',
-                        cell: 'date',
-                      },
-                    ]}
-                    error={null}
-                    isTableView={false}
-                  />
-                  {risks.length - TABLE_LIMIT > 0 && (
-                    <div className="flex w-full">
-                      <Link
-                        className="ml-auto"
-                        to={{
-                          pathname: getRoute(['app', 'risks']),
-                          search: `?${StorageKey.HASH_SEARCH}=${encodeURIComponent(`#${seed.name}`)}`,
-                        }}
-                      >
-                        <Button styleType="textPrimary">
-                          and {risks.length - TABLE_LIMIT} more
-                        </Button>
-                      </Link>
                     </div>
                   )}
                 </Accordian>
