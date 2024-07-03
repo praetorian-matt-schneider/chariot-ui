@@ -34,21 +34,19 @@ import { cn } from '@/utils/classname';
 const PUBLIC_ASSET = 'publicAsset';
 
 const AddAssetMessage = () => (
-  <div className="flex flex-col">
+  <div>
     <div>
-      <h3 className="mt-0 text-xl font-medium text-gray-700">
+      <h3 className="m-0 text-xl font-medium text-gray-700">
         What is an Asset?
       </h3>
-      <p className="mb-0 text-sm text-gray-500">
-        {`An asset refers to any single component of your organization's IT
-        infrastructure that could be a target for cyberattacks.`}
+      <p className="mb-2 text-md text-gray-500">
+        Any component of your IT infrastructure at risk of cyberattacks.
       </p>
-      <p className="mb-0 text-sm text-gray-500">
-        For example, if you work for Acme Corporation, you might add:
+      <p className="mt-0 text-sm text-gray-500 bg-layer1 p-4 rounded-sm">
+        For example, at Acme Corporation, an asset could be:
         <ul className="my-0 list-disc pl-5 text-sm ">
           <li>
-            Domains: <span className="font-semibold">acme.com</span>,{' '}
-            <span className="font-semibold">mail.acme.com</span>
+            Domains: <span className="font-semibold">acme.com</span>
           </li>
           <li>
             IP Addresses: <span className="font-semibold">8.8.8.8</span>
@@ -82,7 +80,7 @@ const Tabs: IntegrationMeta[] = [
         hidden: true,
       },
       {
-        label: 'Add Asset',
+        label: 'Asset',
         value: '',
         placeholder: 'acme.com',
         name: 'asset',
@@ -307,29 +305,22 @@ export const TabPanelContent = (props: TabPanelContentProps) => {
   }, [connectedIntegration.length]);
 
   return (
-    <TabPanel className="prose max-w-none">
+    <TabPanel className="mt-4">
       <div className="flex items-center gap-2">
-        {isConnected && <CheckCircleIcon className="size-6 text-green-500" />}
         {logo && (
-          <img className="h-6" src={logo || ''} alt={displayName || ''} />
+          <h3 className="text-xl font-medium text-gray-700">{displayName}</h3>
         )}
+        {isConnected && <CheckCircleIcon className="size-6 text-green-500" />}
       </div>
-      {description && <div className="text-sm">{description}</div>}
-      {message && <div>{message}</div>}
-      <div className="flex">
-        <form id="new-asset" className="mt-4 w-full">
-          <div className={cn('space-y-4', description && 'cx-5')}>
-            {markup && (
-              <div className="relative space-y-2 rounded border-2 border-default bg-layer1 px-5 py-6">
-                {markup}
-              </div>
-            )}
+      {description && <p className="text-md text-gray-500">{description}</p>}
+      {message && <div className=" text-gray-500">{message}</div>}
+      <div className="mt-4 flex">
+        <form id="new-asset" className="w-full">
+          <div>
+            {markup && <div className="relative">{markup}</div>}
             {showInputs &&
               [...Array(count).keys()].map(index => (
-                <div
-                  key={index}
-                  className="relative space-y-2 rounded border-2 border-default bg-layer1 px-5 py-6"
-                >
+                <div key={index} className="relative space-y-4">
                   {index > 0 && (
                     <Button
                       aria-label="CloseIcon"
@@ -395,7 +386,7 @@ export const TabPanelContent = (props: TabPanelContentProps) => {
             </Button>
           )}
           {warning && (
-            <p className="rounded bg-yellow-100 p-2 text-sm text-yellow-600">
+            <p className="rounded bg-yellow-100 p-2 mt-5 text-sm text-yellow-600">
               <ExclamationTriangleIcon className="inline size-5 text-yellow-700" />
               {warning}
             </p>
@@ -403,7 +394,7 @@ export const TabPanelContent = (props: TabPanelContentProps) => {
         </form>
       </div>
       {name === PUBLIC_ASSET && (
-        <p className="GA rounded bg-yellow-100 p-2 text-sm text-yellow-600">
+        <p className="mt-4 rounded bg-yellow-100 p-2 text-sm text-yellow-600">
           <ExclamationTriangleIcon className="mr-2 inline size-5 text-yellow-700" />
           <a
             href="https://github.com/praetorian-inc/praetorian-cli"

@@ -223,38 +223,35 @@ export const AddRisks = () => {
           </TabList>
           <TabPanels className="size-full overflow-auto pr-6">
             <TabPanel>
-              <div className="p-2">
-                <div className="flex flex-1 flex-col space-y-4 p-2">
+              <div>
+                <div className="flex flex-1 flex-col space-y-4">
                   <div>
-                    <h3 className="text-xl font-medium text-gray-700">
+                    <h3 className="text-xl font-medium mt-4 text-gray-700">
                       What is a Risk?
                     </h3>
-                    <p className="text-md mt-1 text-gray-500">
-                      {`A risk refers to any potential threat or vulnerability
-                      within your organization's IT infrastructure that could be
-                      exploited by attackers. Risks are identified through
-                      various security scans and assessments.`}
+                    <p className="text-md text-gray-500">
+                      Any exploitable threat or vulnerability in your IT
+                      infrastructure.
                     </p>
                   </div>
-                  <p className="mt-1 rounded-sm bg-layer1 p-4 text-sm text-gray-500">
-                    For example, if you work for Acme Corporation, a risk might
-                    include:
-                    <ul className="mt-1 list-disc pl-5 text-sm text-gray-500">
+                  <p className="mt-0 text-sm text-gray-500 bg-layer1 p-4 rounded-sm">
+                    For example, at Acme Corporation, a risk could be:
+                    <ul className="my-0 list-disc pl-5 text-sm ">
                       <li>
                         Asset:{' '}
-                        <code className="font-extrabold">123.45.6.78</code>
+                        <span className="font-semibold">123.45.6.78</span>
                       </li>
                       <li>
                         Finding:{' '}
-                        <code className="font-extrabold">CVE-2021-34527</code>
+                        <span className="font-semibold">CVE-2021-34527</span>
                       </li>
                       <li>
-                        Severity: <code className="font-extrabold">High</code>
+                        Severity: <span className="font-semibold">High</span>
                       </li>
                     </ul>
                   </p>
                 </div>
-                <div className="flex flex-1 flex-col justify-center p-2">
+                <div className="flex mt-4 flex-1 flex-col justify-center">
                   <form
                     id="addRisk"
                     onSubmit={handleSubmit}
@@ -269,7 +266,7 @@ export const AddRisks = () => {
                     <Inputs
                       inputs={[
                         {
-                          label: 'Finding',
+                          label: 'Risk Name',
                           value: '',
                           placeholder: 'CVE-2021-1234',
                           name: 'name',
@@ -293,7 +290,7 @@ export const AddRisks = () => {
                           name: '',
                           value: '',
                           children: (
-                            <div className="flex justify-around gap-2">
+                            <div className="flex justify-around">
                               <Button
                                 startIcon={<PlusIcon className="size-5" />}
                                 styleType="textPrimary"

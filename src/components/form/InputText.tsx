@@ -32,7 +32,7 @@ export const InputText = (props: InputProps) => {
 
   return type === Type.TEXT_AREA ? (
     <textarea
-      rows={5}
+      rows={2}
       style={{
         textSecurity: password ? 'disc' : 'none',
         WebkitTextSecurity: password ? 'disc' : 'none',
