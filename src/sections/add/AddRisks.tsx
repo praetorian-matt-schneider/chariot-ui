@@ -160,7 +160,7 @@ export const AddRisks = () => {
     <>
       <Modal
         className="h-[72vh]"
-        title={'Add Risk'}
+        title={'Configure'}
         icon={<RisksIcon className="size-6 text-default-light" />}
         open={isOpen}
         onClose={onClose}
@@ -226,7 +226,7 @@ export const AddRisks = () => {
               <div>
                 <div className="flex flex-1 flex-col space-y-4">
                   <div>
-                    <h3 className="text-xl font-medium mt-4 text-gray-700">
+                    <h3 className="mt-4 text-xl font-medium text-gray-700">
                       What is a Risk?
                     </h3>
                     <p className="text-md text-gray-500">
@@ -234,7 +234,7 @@ export const AddRisks = () => {
                       infrastructure.
                     </p>
                   </div>
-                  <p className="mt-0 text-sm text-gray-500 bg-layer1 p-4 rounded-sm">
+                  <p className="mt-0 rounded-sm bg-layer1 p-4 text-sm text-gray-500">
                     For example, at Acme Corporation, a risk could be:
                     <ul className="my-0 list-disc pl-5 text-sm ">
                       <li>
@@ -251,7 +251,7 @@ export const AddRisks = () => {
                     </ul>
                   </p>
                 </div>
-                <div className="flex mt-4 flex-1 flex-col justify-center">
+                <div className="mt-4 flex flex-1 flex-col justify-center">
                   <form
                     id="addRisk"
                     onSubmit={handleSubmit}
