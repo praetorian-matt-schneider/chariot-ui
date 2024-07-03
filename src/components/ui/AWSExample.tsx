@@ -1,7 +1,7 @@
 function AWSExample() {
   return (
     <div>
-      <p className="mb-4 text-sm">
+      <p className="my-4 text-sm">
         In addition to providing your account ID, add{' '}
         <a
           href="/templates/aws-permissions-template.yaml"
