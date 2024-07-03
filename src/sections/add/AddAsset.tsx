@@ -5,6 +5,7 @@ import {
   ExclamationTriangleIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
+import { InformationCircleIcon } from '@heroicons/react/24/solid';
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 
 import { Button } from '@/components/Button';
@@ -12,6 +13,7 @@ import { Input } from '@/components/form/Input';
 import { Inputs, Values } from '@/components/form/Inputs';
 import { AssetsIcon } from '@/components/icons';
 import { Modal } from '@/components/Modal';
+import { Tooltip } from '@/components/Tooltip';
 import { useModifyAccount } from '@/hooks';
 import { useCreateAsset } from '@/hooks/useAssets';
 import { useIntegration } from '@/hooks/useIntegration';
@@ -28,8 +30,6 @@ import {
   IntegrationsMeta,
 } from '@/utils/availableIntegrations';
 import { cn } from '@/utils/classname';
-import { InformationCircleIcon } from '@heroicons/react/24/solid';
-import { Tooltip } from '@/components/Tooltip';
 
 const PUBLIC_ASSET = 'publicAsset';
 
@@ -45,7 +45,7 @@ const AddAssetMessage = () => (
       </p>
       <p className="mb-0 text-sm text-gray-500">
         For example, if you work for Acme Corporation, you might add:
-        <ul className="list-disc mt-0 mb-0 pl-5 text-sm ">
+        <ul className="my-0 list-disc pl-5 text-sm ">
           <li>
             Domains: <span className="font-semibold">acme.com</span>,{' '}
             <span className="font-semibold">mail.acme.com</span>
@@ -91,8 +91,8 @@ const Tabs: IntegrationMeta[] = [
       },
       {
         label: (
-          <div className="flex space-x-1 text-center justify-center">
-            Priority{' '}
+          <div className="flex items-center justify-center space-x-1 text-center">
+            <span>Priority</span>
             <Tooltip
               title={
                 <div className="flex flex-col space-y-1">
@@ -220,7 +220,7 @@ export function AddAsset() {
       icon={<AssetsIcon className="size-6 text-default-light" />}
     >
       <TabGroup className="flex h-full gap-6" onChange={setSelectedIndex}>
-        <TabList className="w-44 shrink-0 overflow-auto border border-1 border-l-0 border-y-0 border-layer1 p-1 pr-4">
+        <TabList className="border-1 w-44 shrink-0 overflow-auto border border-y-0 border-l-0 border-layer1 p-1 pr-4">
           {Tabs.map(({ id, displayName, logo, connected, name }, index) => {
             const isConnected = connected && isIntegrationConnected(name);
             const selected = index === selectedIndex;

@@ -7,6 +7,7 @@ import { Loader } from '@/components/Loader';
 import { Tooltip } from '@/components/Tooltip';
 
 interface DetailsContainerProps {
+  hideAccordion?: boolean;
   list: {
     label: string;
     value: ReactNode;
@@ -19,7 +20,7 @@ interface DetailsContainerProps {
 }
 export function DetailsListContainer(props: DetailsContainerProps) {
   return (
-    <Accordian title={props.title} fixed>
+    <Accordian title={props.title} fixed hide={props.hideAccordion}>
       <div className="flex flex-col gap-8">
         {props.list.map(({ label, value, to, onClick, tooltip }, index) => {
           return (
