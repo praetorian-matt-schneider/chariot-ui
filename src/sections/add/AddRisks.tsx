@@ -239,22 +239,6 @@ export const AddRisks = () => {
                       infrastructure.
                     </p>
                   </div>
-                  <p className="mt-0 rounded-sm bg-layer1 p-4 text-sm text-gray-500">
-                    For example, at Acme Corporation, a risk could be:
-                    <ul className="my-0 marker:text-gray-300 list-disc pl-5 text-sm ">
-                      <li>
-                        Asset:{' '}
-                        <span className="font-semibold">123.45.6.78</span>
-                      </li>
-                      <li>
-                        Finding:{' '}
-                        <span className="font-semibold">CVE-2021-34527</span>
-                      </li>
-                      <li>
-                        Severity: <span className="font-semibold">High</span>
-                      </li>
-                    </ul>
-                  </p>
                 </div>
                 <div className="mt-4 flex flex-1 flex-col justify-center">
                   <form
