@@ -160,7 +160,7 @@ export const AddRisks = () => {
     <>
       <Modal
         className="h-[72vh]"
-        title={'Configure'}
+        title="Configure Risks"
         icon={<RisksIcon className="size-6 text-default-light" />}
         open={isOpen}
         onClose={onClose}

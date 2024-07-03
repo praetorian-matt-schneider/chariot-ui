@@ -197,7 +197,7 @@ export function AddAsset() {
 
   return (
     <Modal
-      title="Configure"
+      title="Configure Asset Discovery"
       className="h-[60vh] px-0 pl-6"
       open={open}
       onClose={onClose}
