@@ -40,8 +40,8 @@ const AddAssetMessage = () => (
         What is an Asset?
       </h3>
       <p className="mb-0 text-sm text-gray-500">
-        An asset refers to any single component of your organization's IT
-        infrastructure that could be a target for cyberattacks.
+        {`An asset refers to any single component of your organization's IT
+        infrastructure that could be a target for cyberattacks.`}
       </p>
       <p className="mb-0 text-sm text-gray-500">
         For example, if you work for Acme Corporation, you might add:
@@ -219,7 +219,7 @@ export function AddAsset() {
       closeOnOutsideClick={false}
       icon={<AssetsIcon className="size-6 text-default-light" />}
     >
-      <TabGroup className="flex h-full gap-6" onChange={setSelectedIndex}>
+      <TabGroup className="flex h-full gap-6 " onChange={setSelectedIndex}>
         <TabList className="border-1 w-44 shrink-0 overflow-auto border border-y-0 border-l-0 border-layer1 p-1 pr-4">
           {Tabs.map(({ id, displayName, logo, connected, name }, index) => {
             const isConnected = connected && isIntegrationConnected(name);
@@ -278,7 +278,7 @@ interface TabPanelContentProps {
   connectedIntegration: Account[];
 }
 
-const TabPanelContent = (props: TabPanelContentProps) => {
+export const TabPanelContent = (props: TabPanelContentProps) => {
   const { tab, onChange, connectedIntegration } = props;
   const {
     description = '',
