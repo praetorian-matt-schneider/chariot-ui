@@ -184,11 +184,16 @@ export const AddRisks = () => {
           <TabList className="border-1 w-44 shrink-0 overflow-auto border border-y-0 border-l-0 border-layer1 p-1 pr-4">
             <Tab
               className={cn(
-                'w-full py-4 px-2 text-sm font-semibold leading-5 hover:bg-gray-50 focus:outline-0 border-b-2 border-gray-100 bg-layer0',
+                'relative w-full py-4 px-2 text-sm font-semibold leading-5 hover:bg-gray-50 focus:outline-0 border-b-2 border-gray-100 bg-layer0',
                 selectedIndex === 0 && 'bg-layer1'
               )}
             >
-              Add Risk
+              <div className="relative flex items-center justify-center">
+                Add Risk
+                {selectedIndex === 0 && (
+                  <ChevronRightIcon className="absolute right-0 size-4" />
+                )}
+              </div>
             </Tab>
             {Tabs.map(({ id, displayName, logo, connected, name }, index) => {
               const isConnected = connected && isIntegrationConnected(name);
@@ -236,7 +241,7 @@ export const AddRisks = () => {
                   </div>
                   <p className="mt-0 rounded-sm bg-layer1 p-4 text-sm text-gray-500">
                     For example, at Acme Corporation, a risk could be:
-                    <ul className="my-0 list-disc pl-5 text-sm ">
+                    <ul className="my-0 marker:text-gray-300 list-disc pl-5 text-sm ">
                       <li>
                         Asset:{' '}
                         <span className="font-semibold">123.45.6.78</span>

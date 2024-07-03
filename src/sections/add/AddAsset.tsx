@@ -44,7 +44,7 @@ const AddAssetMessage = () => (
       </p>
       <p className="mt-0 rounded-sm bg-layer1 p-4 text-sm text-gray-500">
         For example, at Acme Corporation, an asset could be:
-        <ul className="my-0 list-disc pl-5 text-sm ">
+        <ul className="my-0 marker:text-gray-300 list-disc pl-5 text-sm ">
           <li>
             Domains: <span className="font-semibold">acme.com</span>
           </li>
