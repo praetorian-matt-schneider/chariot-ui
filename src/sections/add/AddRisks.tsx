@@ -188,7 +188,7 @@ export const AddRisks = () => {
                 selectedIndex === 0 && 'bg-layer1'
               )}
             >
-              Add Risks
+              Add Risk
             </Tab>
             {Tabs.map(({ id, displayName, logo, connected, name }, index) => {
               const isConnected = connected && isIntegrationConnected(name);
