@@ -59,7 +59,7 @@ export const AssetStatusText: React.FC<{
     <div className={cn('flex items-center flex-row space-x-1', className)}>
       {text}{' '}
       {detail && (
-        <div className="flex space-x-1 items-center bg-layer1 p-2 text-gray-600 font-medium text-xs rounded-sm ml-2">
+        <div className="flex space-x-1 items-center p-2 text-gray-600 font-medium text-xs rounded-sm ml-2">
           {showIcon && getAssetStatusIcon(status)}
           <p>{detail}</p>
         </div>
