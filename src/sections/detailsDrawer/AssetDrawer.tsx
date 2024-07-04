@@ -272,15 +272,15 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
                           styleType="textPrimary"
                           onClick={() =>
                             setRiskLimit(limit =>
-                              limit === assets.length
+                              limit === associatedRisks.length
                                 ? TABLE_LIMIT
-                                : assets.length
+                                : associatedRisks.length
                             )
                           }
                         >
-                          {assetsLimit >= assets.length
+                          {riskLimit === associatedRisks.length
                             ? 'View Less'
-                            : `and ${assets.length - assetsLimit} more`}
+                            : `and ${associatedRisks.length - riskLimit} more`}
                         </Button>
                       </div>
                     )}
