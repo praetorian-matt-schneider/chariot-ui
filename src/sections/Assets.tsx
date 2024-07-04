@@ -378,7 +378,7 @@ const Assets: React.FC = () => {
                   label: (
                     <span>
                       Freeze
-                      <span className="text-xs bg-layer1 p-2 ml-2 rounded-md">
+                      <span className="text-xs text-gray-600 bg-layer1 p-2 ml-2 rounded-md">
                         Unknown Asset
                       </span>
                     </span>
