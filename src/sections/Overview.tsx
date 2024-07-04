@@ -82,7 +82,6 @@ export const Overview = () => {
     <div className="flex min-h-screen flex-col">
       <Counts
         stats={{
-          seeds: counts.seeds,
           assets: counts.assets,
           risks: counts.risks,
           jobs: counts.jobs,

@@ -130,7 +130,6 @@ export const JobLabels: Record<string, string> = {
 };
 
 export const OverviewLabels: Record<string, string> = {
-  seeds: 'Seeds',
   assets: 'Assets',
   risks: 'Risks',
 };

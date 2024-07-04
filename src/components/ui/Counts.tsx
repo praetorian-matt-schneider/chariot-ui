@@ -9,9 +9,8 @@ import { QueryStatus } from '@/utils/api';
 const countsLabel = OverviewLabels;
 
 const countsDefinition: Record<string, React.ReactNode> = {
-  seeds: `Starting points which initiate asset discovery.`,
-  assets: `Elements found from seeds analyzed to identify risks.`,
-  risks: `Security threats assessed to provide recommendations.`,
+  assets: `Entities such as servers, applications, and databases that have been discovered and are being continuously monitored by the platform to ensure their security and integrity.`,
+  risks: `Potential security threats and vulnerabilities identified by the platform within your monitored assets, highlighting areas that require attention and remediation.`,
 };
 
 interface CountsProps {
@@ -20,7 +19,6 @@ interface CountsProps {
 }
 
 const icons: Record<string, React.ReactNode> = {
-  seeds: <SeedsIcon className="m-1 size-4 text-disabled" />,
   assets: <AssetsIcon className="m-1 size-4 text-disabled" />,
   risks: <RisksIcon className="m-1 size-4 text-disabled" />,
 };
@@ -46,7 +44,7 @@ const Counts: React.FC<CountsProps> = ({ stats, status }) => {
       {Object.entries(countsObject).map(
         ([key, { label, count, definition }], index, array) => (
           <React.Fragment key={key}>
-            <div className="relative w-full rounded-[2px] bg-white p-4 shadow-sm md:w-1/3">
+            <div className="relative w-full rounded-[2px] bg-white p-4 shadow-sm md:w-1/2">
               <Loader isLoading={status === 'pending'}>
                 <span className="mt-2 text-2xl font-semibold">
                   {count.toLocaleString()}
