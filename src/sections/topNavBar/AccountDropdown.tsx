@@ -46,6 +46,7 @@ export const AccountDropdown: React.FC = () => {
             type: 'divider',
           },
           {
+            className: 'bg-layer2',
             isLoading:
               collaboratorsStatus === 'pending' || accountsStatus === 'pending',
             hide:
