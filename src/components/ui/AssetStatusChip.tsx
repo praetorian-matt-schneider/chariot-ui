@@ -16,7 +16,7 @@ export const AssetStatusChip: React.FC<{
   };
 
   const chipText = {
-    [AssetStatus.Frozen]: 'Frozen',
+    [AssetStatus.Frozen]: 'Paused',
     [AssetStatus.Unknown]: 'Unknown',
     [AssetStatus.Active]: 'Active',
     [AssetStatus.ActiveHigh]: 'Active',
