@@ -382,8 +382,8 @@ export function Risks() {
                     type: 'divider',
                   },
                   ...getRiskStausOptionWithCount([
-                    RiskStatus.Opened,
                     RiskStatus.Triaged,
+                    RiskStatus.Opened,
                   ]),
                   {
                     label: 'Divider',
@@ -501,7 +501,7 @@ export function Risks() {
                   type: 'label',
                 },
                 {
-                  label: 'Triage',
+                  label: RiskStatusLabel[RiskStatus.Triaged],
                   icon: <AdjustmentsHorizontalIcon />,
                   onClick: () =>
                     updateRisk({
@@ -510,7 +510,7 @@ export function Risks() {
                     }),
                 },
                 {
-                  label: 'Open',
+                  label: RiskStatusLabel[RiskStatus.Opened],
                   icon: <LockOpenIcon />,
                   onClick: () =>
                     updateRisk({

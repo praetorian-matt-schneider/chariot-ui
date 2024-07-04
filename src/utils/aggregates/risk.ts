@@ -1,4 +1,4 @@
-import { Risk } from '@/types';
+import { Risk, RiskStatus, RiskStatusLabel } from '@/types';
 import {
   AggregateCollection,
   defineAggregate,
@@ -16,14 +16,14 @@ const getDateFromISO = (isoDate: string): string => {
 const riskStatus = (status: string): string => {
   switch (status[0]) {
     case 'O':
-      return 'Open';
+      return RiskStatusLabel[RiskStatus.Opened];
     case 'C':
-      if (status[2] === 'R') return 'Rejected';
-      if (status[2] === 'F') return 'False Positive';
-      return 'Resolved';
+      if (status[2] === 'R') return RiskStatusLabel[RiskStatus.Rejected];
+      if (status[2] === 'F') return RiskStatusLabel[RiskStatus.FalsePositive];
+      return RiskStatusLabel[RiskStatus.Resolved];
     case 'T':
     default:
-      return 'Triage';
+      return RiskStatusLabel[RiskStatus.Triaged];
   }
 };
 

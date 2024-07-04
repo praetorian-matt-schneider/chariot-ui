@@ -34,7 +34,7 @@ interface Props {
 
 const riskStatusOptions = [
   {
-    label: 'Triage',
+    label: RiskStatusLabel[RiskStatus.Triaged],
     value: RiskStatus.Triaged,
     icon: <AdjustmentsHorizontalIcon className="size-4 stroke-2" />,
   },

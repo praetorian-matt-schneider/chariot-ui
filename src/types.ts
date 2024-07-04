@@ -49,7 +49,7 @@ export enum AssetStatus {
 }
 
 export const RiskStatusLabel: Record<RiskStatus, string> = {
-  T: 'Triage',
+  T: 'Pending Triage',
   O: 'Open',
   C: 'Resolved',
   CR: 'Rejected',
