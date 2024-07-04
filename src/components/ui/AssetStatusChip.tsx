@@ -3,11 +3,8 @@ import { getAssetStatusIcon } from '@/components/icons/AssetStatus.icon';
 import { AssetStatus } from '@/types';
 import { cn } from '@/utils/classname';
 
-export const AssetStatusChip: React.FC<{
-  className?: string;
-  status: AssetStatus;
-}> = ({ className, status }) => {
-  const chipStyle: Record<AssetStatus, ChipProps['style']> = {
+const getStatusProperties = (status: AssetStatus) => {
+  const styles: Record<AssetStatus, ChipProps['style']> = {
     [AssetStatus.Frozen]: 'error',
     [AssetStatus.Unknown]: 'secondary',
     [AssetStatus.Active]: 'primary',
@@ -15,17 +12,38 @@ export const AssetStatusChip: React.FC<{
     [AssetStatus.ActiveLow]: 'primary',
   };
 
-  const chipText = {
+  const texts: Record<AssetStatus, string> = {
     [AssetStatus.Frozen]: 'Frozen',
-    [AssetStatus.Unknown]: 'Unknown',
+    [AssetStatus.Unknown]: 'Frozen',
     [AssetStatus.Active]: 'Active',
     [AssetStatus.ActiveHigh]: 'Active',
     [AssetStatus.ActiveLow]: 'Active',
   };
 
+  const details: Record<AssetStatus, string | undefined> = {
+    [AssetStatus.Frozen]: undefined,
+    [AssetStatus.Unknown]: 'Unknown Asset',
+    [AssetStatus.Active]: 'Standard Priority',
+    [AssetStatus.ActiveHigh]: 'High Priority',
+    [AssetStatus.ActiveLow]: 'Low Priority',
+  };
+
+  return {
+    style: styles[status],
+    text: texts[status],
+    detail: details[status],
+  };
+};
+
+export const AssetStatusChip: React.FC<{
+  className?: string;
+  status: AssetStatus;
+}> = ({ className, status }) => {
+  const { style, text } = getStatusProperties(status);
+
   return (
-    <Chip className={className} style={chipStyle[status]}>
-      {chipText[status]}
+    <Chip className={className} style={style}>
+      {text}
     </Chip>
   );
 };
@@ -35,17 +53,19 @@ export const AssetStatusText: React.FC<{
   status: AssetStatus;
   showIcon?: boolean;
 }> = ({ className, status, showIcon }) => {
-  const text = {
-    [AssetStatus.Frozen]: 'Frozen',
-    [AssetStatus.Unknown]: 'Unknown',
-    [AssetStatus.Active]: 'Standard Priority',
-    [AssetStatus.ActiveHigh]: 'High Priority',
-    [AssetStatus.ActiveLow]: 'Low Priority',
-  };
+  const { text, detail } = getStatusProperties(status);
 
   return (
     <div className={cn('flex items-center flex-row space-x-1', className)}>
-      {showIcon && getAssetStatusIcon(status)} <p>{text[status]}</p>
+      {showIcon && getAssetStatusIcon(status)}
+      <p>
+        {text}{' '}
+        {detail && (
+          <span className="bg-layer1 p-2 text-gray-600 font-medium text-xs rounded-sm ml-2">
+            {detail}
+          </span>
+        )}
+      </p>
     </div>
   );
 };
