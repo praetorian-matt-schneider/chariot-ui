@@ -364,7 +364,7 @@ const Assets: React.FC = () => {
                   onClick: () => updateStatus(assets, AssetStatus.ActiveLow),
                 },
                 {
-                  label: 'Stop Scanning',
+                  label: 'Pause Scanning',
                   icon: <PauseIcon />,
                   onClick: () => {
                     setSelectedAssets(assets);
