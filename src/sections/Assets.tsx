@@ -363,8 +363,9 @@ const Assets: React.FC = () => {
                   ),
                   onClick: () => updateStatus(assets, AssetStatus.ActiveLow),
                 },
+                { type: 'divider', label: 'Divider' },
                 {
-                  label: 'Pause Scanning',
+                  label: 'Freeze Asset',
                   icon: <PauseIcon />,
                   onClick: () => {
                     setSelectedAssets(assets);
@@ -372,10 +373,17 @@ const Assets: React.FC = () => {
                     setAssetStatus(AssetStatus.Frozen);
                   },
                 },
-                { type: 'divider', label: 'Divider' },
+
                 {
-                  label: "I don't recognize this",
-                  icon: <QuestionMarkCircleIcon />,
+                  label: (
+                    <span>
+                      Freeze
+                      <span className="text-xs bg-layer1 p-2 ml-2 rounded-md">
+                        Unknown Asset
+                      </span>
+                    </span>
+                  ),
+                  icon: <PauseIcon />,
                   onClick: () => updateStatus(assets, AssetStatus.Unknown),
                 },
               ],

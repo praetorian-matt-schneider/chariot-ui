@@ -16,7 +16,7 @@ export const AssetStatusChip: React.FC<{
   };
 
   const chipText = {
-    [AssetStatus.Frozen]: 'Paused',
+    [AssetStatus.Frozen]: 'Frozen',
     [AssetStatus.Unknown]: 'Unknown',
     [AssetStatus.Active]: 'Active',
     [AssetStatus.ActiveHigh]: 'Active',
@@ -36,8 +36,8 @@ export const AssetStatusText: React.FC<{
   showIcon?: boolean;
 }> = ({ className, status, showIcon }) => {
   const text = {
-    [AssetStatus.Frozen]: 'Paused',
-    [AssetStatus.Unknown]: 'Paused',
+    [AssetStatus.Frozen]: 'Frozen',
+    [AssetStatus.Unknown]: 'Unknown',
     [AssetStatus.Active]: 'Standard Priority',
     [AssetStatus.ActiveHigh]: 'High Priority',
     [AssetStatus.ActiveLow]: 'Low Priority',
