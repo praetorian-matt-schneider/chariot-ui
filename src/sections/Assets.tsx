@@ -392,7 +392,11 @@ const Assets: React.FC = () => {
           {
             label: 'Standard Priority',
             filter: asset =>
-              [AssetStatus.Active, AssetStatus.Frozen].includes(asset.status),
+              [
+                AssetStatus.Active,
+                AssetStatus.Frozen,
+                AssetStatus.Unknown,
+              ].includes(asset.status),
           },
           {
             label: 'Low Priority',
