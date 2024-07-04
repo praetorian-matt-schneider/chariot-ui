@@ -7,19 +7,15 @@ export interface Breadcrumb {
 }
 
 const pageTitles = {
-  Seeds: 'Manage entry points to identify and monitor assets for scans.',
   Assets:
-    'Track discovered assets to ensure thorough security scans and risk assessment.',
+    'Configure and track discovered assets to ensure thorough security scans and risk assessment.',
   Risks:
     'Identify and prioritize risks in assets to protect your organization.',
-  Integrations:
-    'Configure and manage external service integrations to enhance your security monitoring capabilities.',
   Documents:
     'Store, share, and retrieve all documents, including reports, definitions, proof of exploits, and manually uploaded files.',
   Widgets: 'Create and customize dashboards to gain insights into your data.',
   'Organization Settings': 'Adjust settings specific to your organization.',
-  Attributes: 'Manage additional metadata associated with assets.',
-  References: 'Manage external references linked to your risks.',
+  Attributes: 'Manage additional metadata associated with assets and risks.',
   Jobs: 'Track the status and results of recent security scans from the past 24 hours.',
   Overview:
     'Monitor your attack surface and review daily reports with critical findings and recommendations.',
