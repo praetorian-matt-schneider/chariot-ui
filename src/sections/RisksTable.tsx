@@ -139,11 +139,24 @@ export function Risks() {
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [statusFilter, setStatusesFilter] = useFilter<RiskStatus[]>(
     [RiskStatus.Opened],
+    'risk-status',
     setSelectedRows
   );
-  const [severityFilter, setSeverityFilter] = useFilter([''], setSelectedRows);
-  const [classFilter, setClassFilter] = useFilter([''], setSelectedRows);
-  const [sourceFilter, setSourceFilter] = useFilter([''], setSelectedRows);
+  const [severityFilter, setSeverityFilter] = useFilter(
+    [''],
+    'risk-severity',
+    setSelectedRows
+  );
+  const [classFilter, setClassFilter] = useFilter(
+    [''],
+    'risk-class',
+    setSelectedRows
+  );
+  const [sourceFilter, setSourceFilter] = useFilter(
+    [''],
+    'risk-source',
+    setSelectedRows
+  );
 
   const [isClosedSubStateModalOpen, setIsClosedSubStateModalOpen] =
     useState(false);

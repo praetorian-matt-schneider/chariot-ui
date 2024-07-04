@@ -65,10 +65,6 @@ const appRoutes = {
       element: <Assets />,
       title: 'Assets',
     },
-    // seeds: {
-    //   element: <Seeds />,
-    //   title: 'Seeds',
-    // },
     risks: {
       element: <Risks />,
       title: 'Risks',
@@ -93,10 +89,6 @@ const appRoutes = {
       element: <Files />,
       title: 'Documents',
     },
-    // integrations: {
-    //   element: <Integrations />,
-    //   title: 'Integrations',
-    // },
     overview: {
       element: (
         <Body>

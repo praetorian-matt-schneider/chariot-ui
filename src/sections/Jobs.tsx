@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import { format } from 'date-fns';
 
@@ -64,10 +64,8 @@ const Jobs: React.FC = () => {
     filterByGlobalSearch: true,
   });
 
-  const searchParams = new URLSearchParams(location.search);
-  const initialFilter = searchParams.get('status') || '';
-
-  const [filter, setFilter] = useFilter(initialFilter);
+  const [filter, setFilter] = useFilter('', 'job-status');
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const filteredJobs: Job[] = useMemo(() => {
     if (filter?.length > 0) {
@@ -87,7 +85,7 @@ const Jobs: React.FC = () => {
   useEffect(() => {
     const newFilter = searchParams.get('status') || '';
     setFilter(newFilter);
-  }, [location.search, setFilter]);
+  }, [location.search]);
 
   const designedDate = (date: string) => {
     const parts = date.split('@');
@@ -188,7 +186,15 @@ const Jobs: React.FC = () => {
                   };
                 }),
               ],
-              onClick: value => setFilter(value || ''),
+              onClick: value => {
+                if (value === '' || !value) {
+                  searchParams.delete('status');
+                } else {
+                  searchParams.set('status', value ?? '');
+                }
+                setSearchParams(searchParams);
+                setFilter(value || '');
+              },
               value: filter,
             }}
           />

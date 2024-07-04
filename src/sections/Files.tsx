@@ -48,7 +48,7 @@ const Files: React.FC = () => {
 
   const status = useMergeStatus(fileStatus, statsStatus);
 
-  const [filter, setFilter] = useFilter('');
+  const [filter, setFilter] = useFilter('', 'file-class');
 
   const filteredFiles = useMemo(() => {
     if (filter) {
