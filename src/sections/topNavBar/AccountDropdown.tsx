@@ -36,25 +36,6 @@ export const AccountDropdown: React.FC = () => {
       menu={{
         className: 'w-64',
         items: [
-          // {
-          //   label: 'Integrations',
-          //   icon: <PuzzlePieceIcon />,
-          //   to: getRoute(['app', 'integrations']),
-          // },
-          {
-            label: 'Documents',
-            icon: <DocumentTextIcon />,
-            to: getRoute(['app', 'files']),
-          },
-          {
-            label: 'Widgets',
-            icon: <ChartBarSquareIcon />,
-            to: getRoute(['app', 'widgets']),
-          },
-          {
-            label: 'Divider',
-            type: 'divider',
-          },
           {
             label: 'Organization Settings',
             icon: <UserIcon />,
@@ -109,6 +90,20 @@ export const AccountDropdown: React.FC = () => {
             label: 'Divider',
             type: 'divider',
             hide: collaborators.length === 0,
+          },
+          {
+            label: 'Documents',
+            icon: <DocumentTextIcon />,
+            to: getRoute(['app', 'files']),
+          },
+          {
+            label: 'Widgets',
+            icon: <ChartBarSquareIcon />,
+            to: getRoute(['app', 'widgets']),
+          },
+          {
+            label: 'Divider',
+            type: 'divider',
           },
           {
             label: 'Log Out',
