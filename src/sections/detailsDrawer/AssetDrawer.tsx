@@ -383,7 +383,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
                       value: (
                         <AssetStatusText
                           status={asset.status}
-                          showIcon={false}
+                          showIcon={true}
                         />
                       ),
                     },

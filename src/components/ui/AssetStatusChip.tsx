@@ -14,7 +14,7 @@ const getStatusProperties = (status: AssetStatus) => {
 
   const texts: Record<AssetStatus, string> = {
     [AssetStatus.Frozen]: 'Frozen',
-    [AssetStatus.Unknown]: 'Frozen',
+    [AssetStatus.Unknown]: 'Unknown',
     [AssetStatus.Active]: 'Active',
     [AssetStatus.ActiveHigh]: 'Active',
     [AssetStatus.ActiveLow]: 'Active',
@@ -57,15 +57,13 @@ export const AssetStatusText: React.FC<{
 
   return (
     <div className={cn('flex items-center flex-row space-x-1', className)}>
-      {showIcon && getAssetStatusIcon(status)}
-      <p>
-        {text}{' '}
-        {detail && (
-          <span className="bg-layer1 p-2 text-gray-600 font-medium text-xs rounded-sm ml-2">
-            {detail}
-          </span>
-        )}
-      </p>
+      {text}{' '}
+      {detail && (
+        <div className="flex space-x-1 items-center bg-layer1 p-2 text-gray-600 font-medium text-xs rounded-sm ml-2">
+          {showIcon && getAssetStatusIcon(status)}
+          <p>{detail}</p>
+        </div>
+      )}
     </div>
   );
 };
