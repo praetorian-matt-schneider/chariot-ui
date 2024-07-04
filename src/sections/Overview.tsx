@@ -103,7 +103,7 @@ export const Overview = () => {
       )}
       <div
         className={cn(
-          'flex flex-col space-y-6 rounded-[2px] bg-white p-2 shadow-sm'
+          'mt-6 flex flex-col space-y-6 rounded-[2px] bg-white p-2 shadow-sm'
         )}
       >
         {reportReady ? (
