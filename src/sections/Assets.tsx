@@ -2,9 +2,6 @@ import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import {
-  CheckCircleIcon,
-  ChevronDoubleDownIcon,
-  ExclamationCircleIcon,
   PauseIcon,
   PlusIcon,
   QuestionMarkCircleIcon,
@@ -38,6 +35,7 @@ import {
 import { useMergeStatus } from '@/utils/api';
 import { getRoute } from '@/utils/route.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
+import { getAssetStatusIcon } from '@/components/icons/AssetStatus.icon';
 
 type Severity = 'I' | 'L' | 'M' | 'H' | 'C';
 type SeverityOpenCounts = Partial<Record<Severity, Risk[]>>;
@@ -339,7 +337,7 @@ const Assets: React.FC = () => {
                 { type: 'divider', label: 'Divider' },
                 {
                   label: 'High Priority',
-                  icon: <ExclamationCircleIcon />,
+                  icon: getAssetStatusIcon(AssetStatus.ActiveHigh),
                   disabled: assets.every(
                     asset => asset.status === AssetStatus.ActiveHigh
                   ),
@@ -351,7 +349,7 @@ const Assets: React.FC = () => {
                 },
                 {
                   label: 'Standard Priority',
-                  icon: <CheckCircleIcon />,
+                  icon: getAssetStatusIcon(AssetStatus.Active),
                   disabled: assets.every(
                     asset => asset.status === AssetStatus.Active
                   ),
@@ -359,7 +357,7 @@ const Assets: React.FC = () => {
                 },
                 {
                   label: 'Low Priority',
-                  icon: <ChevronDoubleDownIcon />,
+                  icon: getAssetStatusIcon(AssetStatus.ActiveLow),
                   disabled: assets.every(
                     asset => asset.status === AssetStatus.ActiveLow
                   ),
