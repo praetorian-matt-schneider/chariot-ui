@@ -409,7 +409,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                     </>
                   </Loader>
                 </Accordian>
-                <Accordian title="Risk History" contentClassName="pt-0">
+                <Accordian title="Risk History" contentClassName="pt-0 text-sm">
                   <Timeline
                     items={[
                       ...(history
