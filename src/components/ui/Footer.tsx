@@ -14,7 +14,7 @@ const Footer = () => {
           </div>
           <div className="w-1/3 flex space-x-4 font-semibold">
             <a
-              href="https://github.com/praetorian-inc/chariot-ui/Terms_Of_Service.md"
+              href="https://github.com/praetorian-inc/chariot-ui/blob/main/Terms_Of_Service.md"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:underline"
