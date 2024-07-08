@@ -72,17 +72,23 @@ export const CollaboratingWith = () => {
 
   const exportRisks = async (email: string) => {
     setIsDownloading(true);
-    const fileBlob = await fetchRiskDetails(email);
-    const url = window.URL.createObjectURL(
-      new Blob([fileBlob], { type: 'application/zip' })
-    );
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `export-${email}.zip`);
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    setIsDownloading(false);
+
+    try {
+      const { filename, fileData } = await fetchRiskDetails(email);
+      const url = window.URL.createObjectURL(
+        new Blob([fileData], { type: 'text/csv' })
+      );
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error('Error exporting risks:', error);
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   const columns: Columns<TableData> = [
