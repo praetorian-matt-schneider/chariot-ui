@@ -2,8 +2,8 @@
 
 # Chariot Offensive Security Platform
 
-[![Node Version](https://img.shields.io/badge/node-v20.14.0-339933)](https://nodejs.org/)
-[![NPM Version](https://img.shields.io/badge/npm-v10.7.0-CB3837)](https://www.npmjs.com/)
+[![Node Version](https://img.shields.io/badge/node-v20.15.0-339933)](https://nodejs.org/)
+[![NPM Version](https://img.shields.io/badge/npm-v10.8.1-CB3837)](https://www.npmjs.com/)
 [![License](https://img.shields.io/badge/license-MIT-007EC6.svg)](LICENSE)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-007EC6.svg)](CODE_OF_CONDUCT.md)
 [![Open Source Libraries](https://img.shields.io/badge/open--source-%F0%9F%92%9A-28a745)](https://opensource.org/)
@@ -45,8 +45,8 @@ Chariot is an expert-driven, all-in-one offensive security platform that helps o
 
 ### Prerequisites
 
-- Node.js (v20.14.0)
-- npm (10.7.0)
+- Node.js (v20.15.0)
+- npm (10.8.1)
 - `mkcert` (for creating local HTTPS certificates)
 
 ### Installation
