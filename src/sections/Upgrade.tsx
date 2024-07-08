@@ -124,7 +124,8 @@ const UpgradeModal = ({ isOpen, setIsOpen }: UpgradeModalProps) => {
           </div>
         </div>
         <p className="text-md text-gray-600 text-right mt-12">
-          We will contact you to confirm before starting your trial.
+          Our team will contact you within 24 hours to start your managed
+          service trial.
         </p>
       </div>
     </Modal>
