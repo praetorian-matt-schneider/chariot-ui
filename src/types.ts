@@ -197,6 +197,7 @@ export interface Job {
 export interface RiskTemplate {
   key: string;
   name: string;
+  label: string;
   comment: string;
   status: RiskCombinedStatus;
 }

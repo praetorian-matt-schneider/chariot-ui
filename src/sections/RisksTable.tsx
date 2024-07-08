@@ -208,9 +208,10 @@ export function Risks() {
     () => [
       {
         label: 'Risk Name',
-        id: 'name',
+        id: '',
         to: (item: Risk) => getRiskDrawerLink(item),
         className: 'w-full',
+        cell: risk => risk.label || risk.name,
         copy: true,
       },
       {

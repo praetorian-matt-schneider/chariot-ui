@@ -176,10 +176,9 @@ export function useBulkUpdateRisk() {
           newStatus = `${newStatus[0]}${severity}${newStatus?.[2] || ''}`;
         }
         return {
-          key: item.key,
+          ...item,
           name: finding,
           status: newStatus,
-          comment: item.comment,
         };
       })
     );

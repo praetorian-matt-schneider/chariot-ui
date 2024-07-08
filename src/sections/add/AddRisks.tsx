@@ -30,7 +30,7 @@ import { cn } from '@/utils/classname';
 
 const DEFAULT_FORM_VALUE = {
   key: '',
-  name: '',
+  label: '',
   status: 'T',
   severity: 'I',
   comment: '',
@@ -74,6 +74,8 @@ export const AddRisks = () => {
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
+    const riskName = formData.label.replaceAll(' ', '_');
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const allPromise: Promise<any>[] = selectedAssets?.flatMap(asset => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -81,6 +83,7 @@ export const AddRisks = () => {
         addRisk({
           ...formData,
           key: asset.key,
+          name: riskName,
           status:
             `${formData.status}${formData.severity}` as RiskCombinedStatus,
         }),
@@ -90,7 +93,7 @@ export const AddRisks = () => {
         api.push(
           uploadFile({
             ignoreSnackbar: true,
-            name: `${asset.dns}/${formData.name}`,
+            name: `${asset.dns}/${riskName}`,
             content: poe,
           })
         );
@@ -103,7 +106,7 @@ export const AddRisks = () => {
       allPromise.push(
         uploadFile({
           ignoreSnackbar: true,
-          name: `definitions/${formData.name}`,
+          name: `definitions/${riskName}`,
           content: definition,
         })
       );
@@ -262,7 +265,7 @@ export const AddRisks = () => {
                           label: 'Risk Name',
                           value: '',
                           placeholder: 'CVE-2021-1234',
-                          name: 'name',
+                          name: 'label',
                           required: true,
                         },
                         {

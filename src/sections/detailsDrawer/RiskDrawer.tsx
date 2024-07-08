@@ -209,10 +209,8 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
 
   async function handleUpdateComment(comment = '') {
     await updateRisk({
+      ...risk,
       comment,
-      key: risk.key,
-      name: risk.name,
-      status: risk.status,
     });
   }
 
@@ -280,7 +278,14 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
       <Loader isLoading={isInitialLoading} type="spinner">
         <div className="flex h-full flex-col gap-10">
           <DetailsDrawerHeader
-            title={risk.name}
+            isTitleEditable
+            onTitleSubmit={async updatedTitle => {
+              updateRisk({
+                ...risk,
+                label: updatedTitle,
+              });
+            }}
+            title={risk.label || risk.name}
             subtitle={risk.dns}
             prefix={
               <div className="flex flex-row items-center space-x-1">
