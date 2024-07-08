@@ -26,6 +26,7 @@
   - [Adding New Charts](#adding-new-charts)
 - [Support](#support)
 - [License](#license)
+- [Terms of Service](./Terms_Of_Service.md)
 
 ## Description
 
