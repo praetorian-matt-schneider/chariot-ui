@@ -26,7 +26,7 @@
   - [Adding New Charts](#adding-new-charts)
 - [Support](#support)
 - [License](#license)
-- [Terms of Service](./Terms_Of_Service.md)
+- [Terms of Service](https://www.praetorian.com/terms-of-service/)
 
 ## Description
 

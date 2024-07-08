@@ -114,7 +114,7 @@ function Login() {
           <p className="w-[400px] text-center text-xs text-gray-500">
             By logging in, you agree to our{' '}
             <a
-              href="https://github.com/praetorian-inc/chariot-ui/blob/main/Terms_Of_Service.md"
+              href="https://www.praetorian.com/terms-of-service/"
               target="_blank"
               rel="noopener noreferrer"
               className="underline"
