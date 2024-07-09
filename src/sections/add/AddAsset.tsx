@@ -1,4 +1,5 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   CheckCircleIcon,
   ChevronRightIcon,
@@ -30,6 +31,7 @@ import {
   IntegrationsMeta,
 } from '@/utils/availableIntegrations';
 import { cn } from '@/utils/classname';
+import { getRoute } from '@/utils/route.util';
 
 const PUBLIC_ASSET = 'publicAsset';
 
@@ -156,6 +158,7 @@ export function AddAsset() {
   const { mutateAsync: createAsset, status: creatingAsset } = useCreateAsset();
   const { mutate: link } = useModifyAccount('link');
   const { mutate: unlink, status: unlinkStatus } = useModifyAccount('unlink');
+  const navigate = useNavigate();
 
   const selectedIntegration =
     selectedIndex > 0 ? getConnectedIntegration(Tabs[selectedIndex].name) : [];
@@ -202,6 +205,20 @@ export function AddAsset() {
       open={open}
       onClose={onClose}
       footer={{
+        left:
+          selectedIntegration.length > 0 ? (
+            <Button
+              onClick={() => {
+                onClose();
+                navigate({
+                  pathname: getRoute(['app', 'jobs']),
+                  search: `?hashSearch=${encodeURIComponent(`#${selectedIntegration[0].member}`)}`,
+                });
+              }}
+            >
+              Recent Activity
+            </Button>
+          ) : undefined,
         isLoading: creatingAsset === 'pending',
         text: selectedIntegration.length ? 'Update' : 'Add',
         onClick: handleAddAsset,
