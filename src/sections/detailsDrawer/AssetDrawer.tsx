@@ -169,7 +169,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
       <Loader isLoading={isInitialLoading} type="spinner">
         <div className="flex h-[calc(100%-24px)] flex-col gap-8">
           <DetailsDrawerHeader
-            title={asset.name}
+            name={asset.name}
             subtitle={
               assetType === 'seed'
                 ? `${associatedRisks?.length} Risks Found`

@@ -285,7 +285,8 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                 label: updatedTitle,
               });
             }}
-            title={risk.label || risk.name}
+            name={risk.name}
+            label={risk.label}
             subtitle={risk.dns}
             prefix={
               <div className="flex flex-row items-center space-x-1">

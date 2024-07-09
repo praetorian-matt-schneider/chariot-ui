@@ -1,3 +1,4 @@
+import { forwardRef } from 'react';
 import { twMerge } from 'tailwind-merge';
 
 import {
@@ -15,7 +16,10 @@ declare module 'csstype' {
   }
 }
 
-export const InputText = (props: InputProps) => {
+export const InputText = forwardRef(function InputText(
+  props: InputProps,
+  ref: React.Ref<HTMLInputElement>
+) {
   const { className = '', error = '', name, type, password, ...rest } = props;
   const inputProps = {
     name,
@@ -45,8 +49,9 @@ export const InputText = (props: InputProps) => {
     <input
       type={props.type === Type.PASSWORD ? 'password' : ''}
       pattern={props?.pattern}
+      ref={ref}
       {...inputProps}
       {...rest}
     />
   );
-};
+});

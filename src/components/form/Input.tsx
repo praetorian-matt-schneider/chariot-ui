@@ -40,6 +40,8 @@ export interface InputProps extends SelectProps, DateProps {
   onBlur?: (event: React.FocusEvent) => void;
   pattern?: string;
   isLoading?: boolean;
+  autoFocus?: boolean;
+  style?: React.CSSProperties;
 }
 
 export function Input(props: InputProps) {
