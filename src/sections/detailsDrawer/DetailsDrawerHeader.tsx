@@ -104,6 +104,7 @@ export const DetailsDrawerHeader: React.FC<Props> = ({
                       setIsTitleFocused(false);
                     }}
                     placeholder="Risk Label"
+                    required
                   />
                   {isLabelExist && !isTitleEditing && (
                     <Tooltip title={name} placement="top">
