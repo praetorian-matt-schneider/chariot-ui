@@ -134,6 +134,20 @@ add-zsh-hook chpwd load-nvmrc
 load-nvmrc
 ```
 
+When you change directories into the project, `nvm` will automatically detect the required Node.js version specified in the `.nvmrc` file and switch to it. Here is an example of what you might see:
+
+```sh
+*[main][~/repos/sample]$ cd ../chariot-ui
+git pull
+Found '/Users/username/repos/chariot-ui/.nvmrc' with version <lts/*>
+Downloading and installing node v20.15.1...
+Downloading https://nodejs.org/dist/v20.15.1/node-v20.15.1-darwin-x64.tar.xz...
+######################################################################################## 100.0%
+Computing checksum with sha256sum
+Checksums matched!
+Now using node v20.15.1 (npm v10.7.0)
+```
+
 ## Adding New Charts
 
 To add new charts to the Chariot platform, contributors will need to define a new aggregate within the `AggregateCollection`. This process involves configuring a new `defineAggregate` instance, which shapes how data is processed and visualized within the chart.
