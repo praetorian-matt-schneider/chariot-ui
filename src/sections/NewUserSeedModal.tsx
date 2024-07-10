@@ -6,8 +6,20 @@ import { ModalWrapper } from '@/components/Modal';
 import { useMy } from '@/hooks';
 import { useCreateAsset } from '@/hooks/useAssets';
 import { AssetStatus } from '@/types';
+import { cn } from '@/utils/classname';
 import { AllowedSeedRegex } from '@/utils/regex.util';
 import { StorageKey, useStorage } from '@/utils/storage/useStorage.util';
+
+const options = [
+  {
+    label: 'Discover assets',
+    value: AssetStatus.ActiveLow,
+  },
+  {
+    label: 'Discover assets and scan for risks',
+    value: AssetStatus.Active,
+  },
+];
 
 export const NewUserSeedModal = () => {
   const { data: assets = [], status } = useMy({
@@ -16,6 +28,8 @@ export const NewUserSeedModal = () => {
 
   const [open, setOpen] = useState(false);
   const [seedInput, setSeedInput] = useState<string>('');
+  const [assetStatus, setAssetStatus] = useState<AssetStatus>(options[0].value);
+
   const { mutate: createAsset } = useCreateAsset();
   const [newUserSeedModal, setNewUserSeedModal] = useStorage(
     { key: StorageKey.SHOW_NEW_USER_SEED_MODAL },
@@ -23,7 +37,7 @@ export const NewUserSeedModal = () => {
   );
 
   useEffect(() => {
-    if (status === 'success' && assets.length === 0 && newUserSeedModal) {
+    if (status === 'success' && assets.length > 0) {
       setOpen(true);
     }
   }, [assets, status, newUserSeedModal]);
@@ -37,7 +51,7 @@ export const NewUserSeedModal = () => {
     if (seedInput.match(AllowedSeedRegex)) {
       try {
         const asset = seedInput;
-        createAsset({ name: asset, status: AssetStatus.Active });
+        createAsset({ name: asset, status: assetStatus });
       } catch (error) {
         console.error(error);
       } finally {
@@ -51,7 +65,7 @@ export const NewUserSeedModal = () => {
     <ModalWrapper
       open={open}
       onClose={handleClose}
-      size="lg"
+      size="xl"
       className="border-none"
     >
       <div className="bg-header">
@@ -78,18 +92,38 @@ export const NewUserSeedModal = () => {
               handleSubmitSeed();
             }}
           >
-            <input
-              required
-              type="text"
-              placeholder="domain.com"
-              value={seedInput}
-              onChange={e => setSeedInput(e.target.value)}
-              className="block h-16 w-full rounded-l-[2px] bg-layer0 px-3 py-2 text-xl font-bold shadow-sm focus:outline-none"
-            />
+            <div className="relative w-full">
+              <input
+                required
+                type="text"
+                placeholder="domain.com"
+                value={seedInput}
+                onChange={e => setSeedInput(e.target.value)}
+                className="block h-16 w-full rounded-l-[2px] bg-layer0 px-3 py-2 pr-[400px] text-xl font-bold shadow-sm focus:outline-none"
+              />
+              <div className="text-md absolute right-2 top-2 flex w-fit items-center gap-1 rounded-full bg-header-light p-2 font-medium text-header-light">
+                {options.map((option, index) => {
+                  return (
+                    <div
+                      key={index}
+                      className={cn(
+                        'transition-all duration-100 ease-in-out rounded-full px-3 py-1 cursor-pointer',
+                        assetStatus === option.value && 'bg-primary',
+                        index === 0 ? 'rounded-r-none' : 'rounded-l-none'
+                      )}
+                      onClick={() => {
+                        setAssetStatus(option.value);
+                      }}
+                    >
+                      {option.label}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
             <Button
               styleType="primary"
               type="submit"
-              disabled={!seedInput}
               style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
               className="hover:bg-brand-hover text-md block h-16 w-[150px] items-center rounded-r-[2px] border border-none border-brand bg-brand  px-6 py-2.5 text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 disabled:bg-brand-light disabled:text-white"
             >
