@@ -48,10 +48,10 @@ export enum AssetStatus {
 }
 
 export const AssetStatusLabel: Record<AssetStatus, string> = {
-  [AssetStatus.ActiveHigh]: 'Aggressive',
-  [AssetStatus.Active]: 'Normal Priority',
+  [AssetStatus.ActiveHigh]: 'Comprehensive Scan',
+  [AssetStatus.Active]: 'Standard Scan',
   [AssetStatus.ActiveLow]: 'Asset Discovery',
-  [AssetStatus.Frozen]: 'Frozen Asset',
+  [AssetStatus.Frozen]: 'Exclude Asset',
 };
 
 export const RiskStatusLabel: Record<RiskStatus, string> = {

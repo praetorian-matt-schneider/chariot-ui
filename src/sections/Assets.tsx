@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
-import { PauseIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { PlusIcon } from '@heroicons/react/24/outline';
 import { CheckIcon, XMarkIcon } from '@heroicons/react/24/solid';
 
 import { Chip } from '@/components/Chip';
@@ -361,8 +361,8 @@ const Assets: React.FC = () => {
                   onClick: () => updateStatus(assets, AssetStatus.ActiveLow),
                 },
                 {
-                  label: 'Freeze Asset',
-                  icon: <PauseIcon />,
+                  label: AssetStatusLabel[AssetStatus.Frozen],
+                  icon: getAssetStatusIcon(AssetStatus.Frozen),
                   onClick: () => {
                     setSelectedAssets(assets);
                     setShowAssetStatusWarning(true);

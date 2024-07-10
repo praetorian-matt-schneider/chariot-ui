@@ -1,23 +1,22 @@
 import {
-  BoltIcon,
-  ChevronDoubleDownIcon,
-  ClockIcon,
-  PauseIcon,
+  MagnifyingGlassCircleIcon,
+  MagnifyingGlassIcon,
+  NoSymbolIcon,
+  ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
 
 import { AssetStatus } from '@/types';
 
 export const getAssetStatusIcon = (status: AssetStatus) => {
   switch (status) {
-    case AssetStatus.Frozen:
-      return <PauseIcon className="size-5" />;
-    case AssetStatus.Active:
-      return <ClockIcon className="size-5" />;
     case AssetStatus.ActiveHigh:
-      return <BoltIcon className="size-5" />;
+      return <ShieldCheckIcon className="size-5" />;
+    case AssetStatus.Active:
+      return <MagnifyingGlassCircleIcon className="size-5" />;
     case AssetStatus.ActiveLow:
-      return <ChevronDoubleDownIcon className="size-5" />;
+      return <MagnifyingGlassIcon className="size-5" />;
+    case AssetStatus.Frozen:
     default:
-      return <PauseIcon className="size-5" />;
+      return <NoSymbolIcon className="size-5" />;
   }
 };
