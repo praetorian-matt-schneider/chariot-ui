@@ -40,7 +40,6 @@ export const DetailsDrawerHeader: React.FC<Props> = ({
   const [width, setWidth] = useState(100);
   const [title, setTitle] = useState(initialTitle);
   const [isTitleEditing, setIsTitleEditing] = useState(false);
-  const [isTitleFocused, setIsTitleFocused] = useState(false);
 
   const isTitleEdited = title !== initialTitle;
 
@@ -98,10 +97,6 @@ export const DetailsDrawerHeader: React.FC<Props> = ({
                     value={title}
                     onFocus={() => {
                       setIsTitleEditing(true);
-                      setIsTitleFocused(true);
-                    }}
-                    onBlur={() => {
-                      setIsTitleFocused(false);
                     }}
                     placeholder="Risk Label"
                     required
