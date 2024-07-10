@@ -84,14 +84,13 @@ When you change directories into the project, `nvm` will automatically detect th
 
 ```sh
 *[main][~/repos/sample]$ cd ../chariot-ui
-git pull
 Found '/Users/username/repos/chariot-ui/.nvmrc' with version <lts/*>
 Downloading and installing node v20.15.1...
 Downloading https://nodejs.org/dist/v20.15.1/node-v20.15.1-darwin-x64.tar.xz...
 ######################################################################################## 100.0%
 Computing checksum with sha256sum
 Checksums matched!
-Now using node v20.15.1 (npm v10.7.0)
+Now using node v20.15.1 (npm v10.8.1)
 ```
 
 ### Installation
