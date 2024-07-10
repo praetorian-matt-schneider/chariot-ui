@@ -46,9 +46,10 @@ Chariot is an expert-driven, all-in-one offensive security platform that helps o
 
 ### Prerequisites
 
-- Node.js (v20.15.1)
+- Node.js (LTS)
 - npm (10.8.1)
 - `mkcert` (for creating local HTTPS certificates)
+- `nvm` (optional, for managing Node.js versions)
 
 ### Configuring Node Version
 
