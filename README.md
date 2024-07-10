@@ -19,11 +19,11 @@
 - [Key Features](#key-features)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
+  - [Configuring Node Version](#configuring-node-version)
   - [Installation](#installation)
   - [Running the Development Server](#running-the-development-server)
   - [Building the Project](#building-the-project)
 - [Contributing](#contributing)
-  - [Configuring Node Version](#configuring-node-version)
   - [Adding New Charts](#adding-new-charts)
 - [Support](#support)
 - [License](#license)
@@ -49,6 +49,49 @@ Chariot is an expert-driven, all-in-one offensive security platform that helps o
 - Node.js (v20.15.1)
 - npm (10.8.1)
 - `mkcert` (for creating local HTTPS certificates)
+
+### Configuring Node Version
+
+_Note: This step is optional. If you use other tools to manage Node.js versions, please refer to their documentation._
+
+To ensure your Node.js version is on LTS when contributing or running the project locally using `nvm`, add the following script to your `.zshrc` file.
+
+```sh
+load-nvmrc() {
+  [[ -a .nvmrc ]] || return
+  local node_version="$(nvm version)"
+  local nvmrc_path="$(nvm_find_nvmrc)"
+
+  if [ -n "$nvmrc_path" ]; then
+    local nvmrc_node_version=$(nvm version "$(cat "${nvmrc_path}")")
+
+    if [ "$nvmrc_node_version" = "N/A" ]; then
+      nvm install
+    elif [ "$nvmrc_node_version" != "$node_version" ]; then
+      nvm use
+    fi
+  elif [ "$node_version" != "$(nvm version default)" ]; then
+    echo "Reverting to nvm default version"
+    nvm use default
+  fi
+}
+add-zsh-hook chpwd load-nvmrc
+load-nvmrc
+```
+
+When you change directories into the project, `nvm` will automatically detect the required Node.js version specified in the `.nvmrc` file and switch to it. Here is an example of what you might see:
+
+```sh
+*[main][~/repos/sample]$ cd ../chariot-ui
+git pull
+Found '/Users/username/repos/chariot-ui/.nvmrc' with version <lts/*>
+Downloading and installing node v20.15.1...
+Downloading https://nodejs.org/dist/v20.15.1/node-v20.15.1-darwin-x64.tar.xz...
+######################################################################################## 100.0%
+Computing checksum with sha256sum
+Checksums matched!
+Now using node v20.15.1 (npm v10.7.0)
+```
 
 ### Installation
 
@@ -106,47 +149,6 @@ We welcome contributions from the community. To contribute:
 6. Open a pull request.
 
 Please read our [Code of Conduct](CODE_OF_CONDUCT.md) before contributing.
-
-### Configuring Node Version
-
-To ensure your Node.js version is on LTS when contributing or running the project locally using `nvm`, add the following script to your `.zshrc` file. If you use other tools to manage Node.js versions, please refer to their documentation.
-
-```sh
-load-nvmrc() {
-  [[ -a .nvmrc ]] || return
-  local node_version="$(nvm version)"
-  local nvmrc_path="$(nvm_find_nvmrc)"
-
-  if [ -n "$nvmrc_path" ]; then
-    local nvmrc_node_version=$(nvm version "$(cat "${nvmrc_path}")")
-
-    if [ "$nvmrc_node_version" = "N/A" ]; then
-      nvm install
-    elif [ "$nvmrc_node_version" != "$node_version" ]; then
-      nvm use
-    fi
-  elif [ "$node_version" != "$(nvm version default)" ]; then
-    echo "Reverting to nvm default version"
-    nvm use default
-  fi
-}
-add-zsh-hook chpwd load-nvmrc
-load-nvmrc
-```
-
-When you change directories into the project, `nvm` will automatically detect the required Node.js version specified in the `.nvmrc` file and switch to it. Here is an example of what you might see:
-
-```sh
-*[main][~/repos/sample]$ cd ../chariot-ui
-git pull
-Found '/Users/username/repos/chariot-ui/.nvmrc' with version <lts/*>
-Downloading and installing node v20.15.1...
-Downloading https://nodejs.org/dist/v20.15.1/node-v20.15.1-darwin-x64.tar.xz...
-######################################################################################## 100.0%
-Computing checksum with sha256sum
-Checksums matched!
-Now using node v20.15.1 (npm v10.7.0)
-```
 
 ## Adding New Charts
 
