@@ -26,6 +26,7 @@ import {
   Asset,
   AssetLabels,
   AssetStatus,
+  AssetStatusLabel,
   Risk,
   RiskScanMessage,
 } from '@/types';
@@ -332,7 +333,7 @@ const Assets: React.FC = () => {
                 },
                 { type: 'divider', label: 'Divider' },
                 {
-                  label: 'High Priority',
+                  label: AssetStatusLabel[AssetStatus.ActiveHigh],
                   icon: getAssetStatusIcon(AssetStatus.ActiveHigh),
                   disabled: assets.every(
                     asset => asset.status === AssetStatus.ActiveHigh
@@ -344,7 +345,7 @@ const Assets: React.FC = () => {
                   },
                 },
                 {
-                  label: 'Standard Priority',
+                  label: AssetStatusLabel[AssetStatus.Active],
                   icon: getAssetStatusIcon(AssetStatus.Active),
                   disabled: assets.every(
                     asset => asset.status === AssetStatus.Active
@@ -352,14 +353,13 @@ const Assets: React.FC = () => {
                   onClick: () => updateStatus(assets, AssetStatus.Active),
                 },
                 {
-                  label: 'Low Priority',
+                  label: AssetStatusLabel[AssetStatus.ActiveLow],
                   icon: getAssetStatusIcon(AssetStatus.ActiveLow),
                   disabled: assets.every(
                     asset => asset.status === AssetStatus.ActiveLow
                   ),
                   onClick: () => updateStatus(assets, AssetStatus.ActiveLow),
                 },
-                { type: 'divider', label: 'Divider' },
                 {
                   label: 'Freeze Asset',
                   icon: <PauseIcon />,
@@ -369,19 +369,6 @@ const Assets: React.FC = () => {
                     setAssetStatus(AssetStatus.Frozen);
                   },
                 },
-
-                {
-                  label: (
-                    <span>
-                      Freeze
-                      <span className="ml-2 rounded-md bg-layer1 p-2 text-xs text-gray-600">
-                        Unknown Asset
-                      </span>
-                    </span>
-                  ),
-                  icon: <PauseIcon />,
-                  onClick: () => updateStatus(assets, AssetStatus.Unknown),
-                },
               ],
             },
           };
@@ -390,21 +377,20 @@ const Assets: React.FC = () => {
         data={assetsWithRisk}
         groupBy={[
           {
-            label: 'High Priority',
+            label: AssetStatusLabel[AssetStatus.ActiveHigh],
             filter: asset => asset.status === AssetStatus.ActiveHigh,
+            icon: getAssetStatusIcon(AssetStatus.ActiveHigh),
           },
           {
-            label: 'Standard Priority',
+            label: AssetStatusLabel[AssetStatus.Active],
             filter: asset =>
-              [
-                AssetStatus.Active,
-                AssetStatus.Frozen,
-                AssetStatus.Unknown,
-              ].includes(asset.status),
+              [AssetStatus.Active, AssetStatus.Frozen].includes(asset.status),
+            icon: getAssetStatusIcon(AssetStatus.Active),
           },
           {
-            label: 'Low Priority',
+            label: AssetStatusLabel[AssetStatus.ActiveLow],
             filter: asset => asset.status === AssetStatus.ActiveLow,
+            icon: getAssetStatusIcon(AssetStatus.ActiveLow),
           },
         ]}
         error={error}
