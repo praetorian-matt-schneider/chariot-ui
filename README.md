@@ -55,7 +55,7 @@ Chariot is an expert-driven, all-in-one offensive security platform that helps o
 
 _Note: This step is optional. If you use other tools to manage Node.js versions, please refer to their documentation._
 
-To ensure your Node.js version is on LTS when contributing or running the project locally using `nvm`, add the following script to your `.zshrc` file.
+To ensure your Node.js version is on LTS when contributing or running the project locally using `nvm`, add the following script to your `~/.zshrc` file.
 
 ```sh
 load-nvmrc() {
@@ -83,7 +83,7 @@ load-nvmrc
 When you change directories into the project, `nvm` will automatically detect the required Node.js version specified in the `.nvmrc` file and switch to it. Here is an example of what you might see:
 
 ```sh
-*[main][~/repos/sample]$ cd ../chariot-ui
+[~]$ cd ./repos/chariot-ui
 Found '/Users/username/repos/chariot-ui/.nvmrc' with version <lts/*>
 Downloading and installing node v20.15.1...
 Downloading https://nodejs.org/dist/v20.15.1/node-v20.15.1-darwin-x64.tar.xz...
