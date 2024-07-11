@@ -5,6 +5,7 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { ConditionalRender } from '@/components/ConditionalRender';
 import { CopyToClipboard } from '@/components/CopyToClipboard';
 import { Link } from '@/components/Link';
+import { Tooltip } from '@/components/Tooltip';
 import { NoData } from '@/components/ui/NoData';
 import { formatDate } from '@/utils/date.util';
 
@@ -82,7 +83,11 @@ export const DrawerList = (props: Props) => {
                     );
                   }}
                 >
-                  <div className="text-lg font-semibold">{value}</div>
+                  <Tooltip title={value}>
+                    <div className="w-full truncate text-lg font-semibold">
+                      {value}
+                    </div>
+                  </Tooltip>
                 </ConditionalRender>
               </CopyToClipboard>
             </li>
