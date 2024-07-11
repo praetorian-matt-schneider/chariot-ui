@@ -32,7 +32,7 @@ import { useMergeStatus } from '@/utils/api';
 type Severity = 'I' | 'L' | 'M' | 'H' | 'C';
 type SeverityOpenCounts = Partial<Record<Severity, Risk[]>>;
 
-function buildOpenRiskDataset(
+export function buildOpenRiskDataset(
   risks: Risk[]
 ): Record<string, SeverityOpenCounts> {
   return risks.reduce(

@@ -1,16 +1,21 @@
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { EyeIcon } from '@heroicons/react/24/outline';
 import { TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 
 import { Chip } from '@/components/Chip';
 import { Drawer } from '@/components/Drawer';
-import { AssetsIcon } from '@/components/icons';
+import { AssetsIcon, RisksIcon } from '@/components/icons';
+import { getAssetStatusIcon } from '@/components/icons/AssetStatus.icon';
 import { Loader } from '@/components/Loader';
+import { Tooltip } from '@/components/Tooltip';
 import { AssetStatusDropdown } from '@/components/ui/AssetPriorityDropdown';
+import { getAssetStatusProperties } from '@/components/ui/AssetStatusChip';
 import { TabWrapper } from '@/components/ui/TabWrapper';
 import { useMy } from '@/hooks';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useIntegration } from '@/hooks/useIntegration';
+import { buildOpenRiskDataset } from '@/sections/Assets';
 import { getAttributeDetails } from '@/sections/Attributes';
 import { DRAWER_WIDTH } from '@/sections/detailsDrawer';
 import { AddAttribute } from '@/sections/detailsDrawer/AddAttribute';
@@ -18,7 +23,7 @@ import { DetailsDrawerHeader } from '@/sections/detailsDrawer/DetailsDrawerHeade
 import { DrawerList } from '@/sections/detailsDrawer/DrawerList';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { getStatus } from '@/sections/RisksTable';
-import { Asset, RiskStatus } from '@/types';
+import { Asset, Risk, RiskStatus } from '@/types';
 import { formatDate } from '@/utils/date.util';
 import { capitalize } from '@/utils/lodash.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
@@ -76,6 +81,11 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
     assets: rawLinkedHostnamesIncludingSelf = [],
     attributes: genericAttributes = [],
   } = assetNameGenericSearch || {};
+
+  const openRiskDataset = useMemo(
+    () => buildOpenRiskDataset(risks as Risk[]),
+    [risks]
+  );
 
   const associatedAssets = genericAttributes.filter(
     attribute =>
@@ -172,18 +182,61 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
               {isTypeAsset && (
                 <DrawerList
                   items={[
-                    ...linkedHostnames.map(data => ({
-                      label: data.name,
-                      value: data.dns,
-                      updated: data.updated,
-                      to: getAssetDrawerLink(data),
-                    })),
-                    ...linkedIps.map(data => ({
-                      label: data.dns,
-                      value: data.name,
-                      updated: data.updated,
-                      to: getAssetDrawerLink(data),
-                    })),
+                    ...linkedHostnames.map(data => {
+                      const { detail } = getAssetStatusProperties(asset.status);
+                      const containsRisks = openRiskDataset[data.dns];
+
+                      const icons = [
+                        <Tooltip key="status" title={detail || 'Closed'}>
+                          {getAssetStatusIcon(asset.status)}
+                        </Tooltip>,
+                      ];
+
+                      if (containsRisks) {
+                        icons.push(
+                          <Tooltip key="risks" title="Contains Open Risks">
+                            <RisksIcon className="size-5" />
+                          </Tooltip>
+                        );
+                      }
+
+                      return {
+                        prefix: (
+                          <div className="flex flex-row space-x-2">{icons}</div>
+                        ),
+                        label: data.name,
+                        value: data.dns,
+                        updated: data.updated,
+                        to: getAssetDrawerLink(data),
+                      };
+                    }),
+                    ...linkedIps.map(data => {
+                      const { detail } = getAssetStatusProperties(asset.status);
+                      const containsRisks = openRiskDataset[data.dns];
+
+                      const icons = [
+                        <Tooltip key="status" title={detail || 'Closed'}>
+                          {getAssetStatusIcon(asset.status)}
+                        </Tooltip>,
+                      ];
+
+                      if (containsRisks) {
+                        icons.push(
+                          <Tooltip key="risks" title="Contains Open Risks">
+                            <RisksIcon className="size-5" />
+                          </Tooltip>
+                        );
+                      }
+                      return {
+                        prefix: (
+                          <div className="flex flex-row space-x-2">{icons}</div>
+                        ),
+                        label: data.dns,
+                        value: data.name,
+                        updated: data.updated,
+                        to: getAssetDrawerLink(data),
+                      };
+                    }),
                   ]}
                 />
               )}
