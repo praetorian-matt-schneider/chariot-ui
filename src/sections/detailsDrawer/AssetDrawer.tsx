@@ -7,6 +7,8 @@ import { Chip } from '@/components/Chip';
 import { Drawer } from '@/components/Drawer';
 import { AssetsIcon, RisksIcon } from '@/components/icons';
 import { getAssetStatusIcon } from '@/components/icons/AssetStatus.icon';
+import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
+import { getRiskStatusIcon } from '@/components/icons/RiskStatus.icon';
 import { Loader } from '@/components/Loader';
 import { Tooltip } from '@/components/Tooltip';
 import { AssetStatusDropdown } from '@/components/ui/AssetPriorityDropdown';
@@ -23,7 +25,14 @@ import { DetailsDrawerHeader } from '@/sections/detailsDrawer/DetailsDrawerHeade
 import { DrawerList } from '@/sections/detailsDrawer/DrawerList';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { getStatus } from '@/sections/RisksTable';
-import { Asset, Risk, RiskStatus } from '@/types';
+import {
+  Asset,
+  Risk,
+  RiskSeverity,
+  RiskStatus,
+  RiskStatusLabel,
+  SeverityDef,
+} from '@/types';
 import { formatDate } from '@/utils/date.util';
 import { capitalize } from '@/utils/lodash.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
@@ -154,8 +163,29 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
           <TabPanels className="size-full h-[calc(100%-150px)] overflow-auto">
             <TabPanel className="h-full">
               <DrawerList
-                items={openRisks.map(({ dns, name, updated }) => {
+                items={openRisks.map(({ dns, name, status, updated }) => {
+                  const riskStatusKey =
+                    `${status?.[0]}${status?.[2] || ''}` as RiskStatus;
+                  const riskSeverityKey = status?.[1] as RiskSeverity;
+
+                  const statusIcon = getRiskStatusIcon(riskStatusKey);
+                  const severityIcon = getRiskSeverityIcon(riskSeverityKey);
+
+                  const icons = (
+                    <div className="flex items-center gap-2 text-default">
+                      <Tooltip
+                        title={RiskStatusLabel[riskStatusKey] || 'Closed'}
+                      >
+                        {statusIcon}
+                      </Tooltip>
+                      <Tooltip title={SeverityDef[riskSeverityKey]}>
+                        {severityIcon}
+                      </Tooltip>
+                    </div>
+                  );
+
                   return {
+                    prefix: icons,
                     label: dns,
                     value: name,
                     date: updated,
