@@ -83,13 +83,11 @@ const getFilteredRisks = (
   {
     statusFilter = [],
     severityFilter = [],
-    classFilter = [],
     sourceFilter = [],
     knownExploitedThreats,
   }: {
     statusFilter?: string[];
     severityFilter?: string[];
-    classFilter?: string[];
     sourceFilter?: string[];
     knownExploitedThreats?: string[];
   }
@@ -105,11 +103,7 @@ const getFilteredRisks = (
       severityFilter?.includes(risk.status[1])
     );
   }
-  if (classFilter?.filter(Boolean).length > 0) {
-    filteredRisks = filteredRisks.filter(risk =>
-      classFilter?.includes(risk.class)
-    );
-  }
+
   if (
     sourceFilter.length > 0 &&
     sourceFilter[0] === 'cisa_kev' &&
@@ -143,11 +137,7 @@ export function Risks() {
     'risk-severity',
     setSelectedRows
   );
-  const [classFilter, setClassFilter] = useFilter(
-    [''],
-    'risk-class',
-    setSelectedRows
-  );
+
   const [sourceFilter, setSourceFilter] = useFilter(
     [''],
     'risk-source',
@@ -178,7 +168,6 @@ export function Risks() {
     filteredRisks = getFilteredRisks(risks, {
       statusFilter,
       severityFilter,
-      classFilter,
       sourceFilter,
       knownExploitedThreats,
     });
@@ -194,7 +183,6 @@ export function Risks() {
   }, [
     severityFilter,
     statusFilter,
-    classFilter,
     sourceFilter,
     JSON.stringify(risks),
     JSON.stringify(knownExploitedThreats),
@@ -330,36 +318,6 @@ export function Risks() {
     [risks, severityFilter, statusFilter]
   );
 
-  const classRisks = useMemo(
-    () =>
-      risksExceptSource.reduce(
-        (acc, risk) => {
-          acc[risk.class] = (acc[risk.class] || 0) + 1;
-          return acc;
-        },
-        {} as Record<string, number>
-      ),
-    [risksExceptSource]
-  );
-
-  const classOptions = [
-    {
-      label: 'Weakness',
-      value: 'weakness',
-      labelSuffix: classRisks.weakness ?? 0,
-    },
-    {
-      label: 'Exposure',
-      value: 'exposure',
-      labelSuffix: classRisks.exposure ?? 0,
-    },
-    {
-      label: 'Misconfiguration',
-      value: 'misconfiguration',
-      labelSuffix: classRisks.misconfiguration ?? 0,
-    },
-  ];
-
   function getRiskStausOptionWithCount(riskStatus: RiskStatus[]) {
     return riskStatus.map(riskStatus => {
       return {
@@ -443,28 +401,6 @@ export function Risks() {
                 ],
                 onSelect: selectedRows => setSeverityFilter(selectedRows),
                 value: severityFilter,
-                multiSelect: true,
-              }}
-            />
-            <Dropdown
-              styleType="header"
-              label={getFilterLabel('Classes', classFilter, classOptions)}
-              endIcon={DownIcon}
-              menu={{
-                items: [
-                  {
-                    label: 'All Classes',
-                    labelSuffix: risksExceptSeverity.length,
-                    value: '',
-                  },
-                  {
-                    label: 'Divider',
-                    type: 'divider',
-                  },
-                  ...classOptions,
-                ],
-                onSelect: selectedRows => setClassFilter(selectedRows),
-                value: classFilter,
                 multiSelect: true,
               }}
             />
