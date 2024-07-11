@@ -183,12 +183,12 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
                 <DrawerList
                   items={[
                     ...linkedHostnames.map(data => {
-                      const { detail } = getAssetStatusProperties(asset.status);
+                      const { detail } = getAssetStatusProperties(data.status);
                       const containsRisks = openRiskDataset[data.dns];
 
                       const icons = [
-                        <Tooltip key="status" title={detail || 'Closed'}>
-                          {getAssetStatusIcon(asset.status)}
+                        <Tooltip key="status" title={detail}>
+                          {getAssetStatusIcon(data.status)}
                         </Tooltip>,
                       ];
 
@@ -211,12 +211,12 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
                       };
                     }),
                     ...linkedIps.map(data => {
-                      const { detail } = getAssetStatusProperties(asset.status);
+                      const { detail } = getAssetStatusProperties(data.status);
                       const containsRisks = openRiskDataset[data.dns];
 
                       const icons = [
-                        <Tooltip key="status" title={detail || 'Closed'}>
-                          {getAssetStatusIcon(asset.status)}
+                        <Tooltip key="status" title={detail}>
+                          {getAssetStatusIcon(data.status)}
                         </Tooltip>,
                       ];
 
