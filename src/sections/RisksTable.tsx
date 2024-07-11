@@ -3,31 +3,27 @@ import { Link } from 'react-router-dom';
 import {
   ChevronDownIcon,
   DocumentTextIcon,
-  LockOpenIcon,
   PlusIcon,
 } from '@heroicons/react/24/outline';
 import {
-  AdjustmentsHorizontalIcon,
   Bars2Icon,
   ChevronDoubleDownIcon,
   ChevronDoubleUpIcon,
   ChevronUpIcon,
-  LockClosedIcon,
 } from '@heroicons/react/24/outline';
 
 import { Dropdown } from '@/components/Dropdown';
 import { RisksIcon } from '@/components/icons';
 import { HorseIcon } from '@/components/icons/Horse.icon';
+import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
+import { getRiskStatusIcon } from '@/components/icons/RiskStatus.icon';
 import { SpinnerIcon } from '@/components/icons/Spinner.icon';
 import { MenuItemProps } from '@/components/Menu';
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
 import { ClosedStateModal } from '@/components/ui/ClosedStateModal';
-import {
-  RiskDropdown,
-  riskStatusFilterOptions,
-} from '@/components/ui/RiskDropdown';
+import { riskStatusFilterOptions } from '@/components/ui/RiskDropdown';
 import { useGetKev } from '@/hooks/kev';
 import { useFilter } from '@/hooks/useFilter';
 import { useMy } from '@/hooks/useMy';
@@ -212,28 +208,50 @@ export function Risks() {
         to: (item: Risk) => getRiskDrawerLink(item),
         className: 'w-full',
         copy: true,
-      },
-      {
-        label: 'Status',
-        id: 'status',
-        className: 'text-left',
-        fixedWidth: 200,
         cell: (risk: Risk) => {
+          const riskStatusKey =
+            `${risk.status?.[0]}${risk.status?.[2] || ''}` as RiskStatus;
+          const riskSeverityKey = risk.status?.[1] as RiskSeverity;
+
+          const statusIcon = getRiskStatusIcon(riskStatusKey);
+          const severityIcon = getRiskSeverityIcon(riskSeverityKey);
+
           return (
-            <RiskDropdown type="status" risk={risk} className="w-[170px]" />
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 text-default">
+                <Tooltip title={RiskStatusLabel[riskStatusKey] || 'Cloed'}>
+                  {statusIcon}
+                </Tooltip>
+                <Tooltip title={SeverityDef[riskSeverityKey]}>
+                  {severityIcon}
+                </Tooltip>
+              </div>
+              <span>{risk.name}</span>
+            </div>
           );
         },
       },
-      {
-        label: 'Severity',
-        id: 'status',
-        fixedWidth: 140,
-        cell: (risk: Risk) => {
-          return (
-            <RiskDropdown type="severity" risk={risk} className="w-[120px]" />
-          );
-        },
-      },
+      // {
+      //   label: 'Status',
+      //   id: 'status',
+      //   className: 'text-left',
+      //   fixedWidth: 200,
+      //   cell: (risk: Risk) => {
+      //     return (
+      //       <RiskDropdown type="status" risk={risk} className="w-[170px]" />
+      //     );
+      //   },
+      // },
+      // {
+      //   label: 'Severity',
+      //   id: 'status',
+      //   fixedWidth: 140,
+      //   cell: (risk: Risk) => {
+      //     return (
+      //       <RiskDropdown type="severity" risk={risk} className="w-[120px]" />
+      //     );
+      //   },
+      // },
       {
         label: 'Asset',
         id: 'dns',
@@ -503,7 +521,7 @@ export function Risks() {
                 },
                 {
                   label: RiskStatusLabel[RiskStatus.Triaged],
-                  icon: <AdjustmentsHorizontalIcon />,
+                  icon: getRiskStatusIcon(RiskStatus.Triaged),
                   onClick: () =>
                     updateRisk({
                       selectedRows,
@@ -512,7 +530,7 @@ export function Risks() {
                 },
                 {
                   label: RiskStatusLabel[RiskStatus.Opened],
-                  icon: <LockOpenIcon />,
+                  icon: getRiskStatusIcon(RiskStatus.Opened),
                   onClick: () =>
                     updateRisk({
                       selectedRows,
@@ -521,7 +539,7 @@ export function Risks() {
                 },
                 {
                   label: 'Closed',
-                  icon: <LockClosedIcon />,
+                  icon: getRiskStatusIcon(RiskStatus.Resolved),
                   onClick: () => {
                     setIsClosedSubStateModalOpen(true);
                   },
