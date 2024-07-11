@@ -54,7 +54,7 @@ export const DrawerList = (props: Props) => {
           return (
             <li
               key={virtualItem.key}
-              className="absolute left-0 top-0 w-full border-b border-default px-4 py-2 first:border-t odd:bg-default-light"
+              className="absolute left-0 top-0 w-full border-b border-default px-4 py-2 first:border-t odd:bg-gray-50"
               style={{
                 height: `${virtualItem.size}px`,
                 transform: `translateY(${virtualItem.start}px)`,
