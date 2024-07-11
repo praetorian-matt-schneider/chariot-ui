@@ -219,17 +219,17 @@ export function Risks() {
           );
         },
       },
-      // {
-      //   label: 'Status',
-      //   id: 'status',
-      //   className: 'text-left',
-      //   fixedWidth: 200,
-      //   cell: (risk: Risk) => {
-      //     return (
-      //       <RiskDropdown type="status" risk={risk} className="w-[170px]" />
-      //     );
-      //   },
-      // },
+      {
+        label: 'Status',
+        id: 'status',
+        className: 'text-left',
+        fixedWidth: 200,
+        cell: (risk: Risk) => {
+          const riskStatusKey =
+            `${risk.status?.[0]}${risk.status?.[2] || ''}` as RiskStatus;
+          return <span>{RiskStatusLabel[riskStatusKey]}</span>;
+        },
+      },
       // {
       //   label: 'Severity',
       //   id: 'status',
