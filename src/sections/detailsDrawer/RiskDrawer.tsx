@@ -26,6 +26,7 @@ import { TabWrapper } from '@/components/ui/TabWrapper';
 import { useMy } from '@/hooks';
 import { useGetKev } from '@/hooks/kev';
 import { useGetFile, useUploadFile } from '@/hooks/useFiles';
+import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useReRunJob } from '@/hooks/useJobs';
 import { useReportRisk, useUpdateRisk } from '@/hooks/useRisks';
 import { DRAWER_WIDTH } from '@/sections/detailsDrawer';
@@ -33,6 +34,7 @@ import { AddAttribute } from '@/sections/detailsDrawer/AddAttribute';
 import { Comment } from '@/sections/detailsDrawer/Comment';
 import { DetailsDrawerHeader } from '@/sections/detailsDrawer/DetailsDrawerHeader';
 import { DrawerList } from '@/sections/detailsDrawer/DrawerList';
+import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { JobStatus, Risk, RiskCombinedStatus, RiskHistory } from '@/types';
 import { formatDate } from '@/utils/date.util';
 import { sToMs } from '@/utils/date.util';
@@ -88,6 +90,7 @@ interface RiskDrawerProps {
 export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
   const navigate = useNavigate();
   const { removeSearchParams } = useSearchParams();
+  const { getRiskDrawerLink } = getDrawerLink();
 
   const [, dns, name] = compositeKey.split('#');
 
@@ -141,6 +144,11 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     { enabled: open, refetchInterval: sToMs(10) }
   );
   const { data: knownExploitedThreats = [] } = useGetKev({ enabled: open });
+  const { data: riskNameGenericSearch } = useGenericSearch(
+    { query: name },
+    { enabled: open }
+  );
+  const { risks: riskOccurrence = [] } = riskNameGenericSearch || {};
 
   const definitionsFileValue =
     typeof definitionsFile === 'string'
@@ -301,7 +309,13 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
 
           <TabGroup className="h-full">
             <TabList className="flex overflow-x-auto">
-              {['Description', 'Attributes', 'Comment', 'History'].map(tab => (
+              {[
+                'Description',
+                'Occurrences',
+                'Attributes',
+                'Comment',
+                'History',
+              ].map(tab => (
                 <TabWrapper key={tab}>{tab}</TabWrapper>
               ))}
             </TabList>
@@ -391,6 +405,16 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                     Edit
                   </Button>
                 </Loader>
+              </TabPanel>
+              <TabPanel className="h-full">
+                <DrawerList
+                  items={riskOccurrence.map(data => ({
+                    label: data.name,
+                    value: data.dns,
+                    updated: data.updated,
+                    to: getRiskDrawerLink(data),
+                  }))}
+                />
               </TabPanel>
               <TabPanel className="h-full">
                 <AddAttribute resourceKey={risk.key} />
