@@ -15,10 +15,7 @@ import { showBulkSnackbar, Snackbar } from '@/components/Snackbar';
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
-import {
-  AssetStatusChip,
-  getAssetStatusProperties,
-} from '@/components/ui/AssetStatusChip';
+import { getAssetStatusProperties } from '@/components/ui/AssetStatusChip';
 import { useMy } from '@/hooks';
 import { AssetsSnackbarTitle, useUpdateAsset } from '@/hooks/useAssets';
 import { useCounts } from '@/hooks/useCounts';
@@ -195,15 +192,6 @@ const Assets: React.FC = () => {
         return <OverflowText text={asset.dns} truncateType="center" />;
       },
       copy: true,
-    },
-    {
-      label: 'Status',
-      id: 'status',
-      fixedWidth: 150,
-      align: 'center',
-      cell: ({ status }: Asset) => (
-        <AssetStatusChip status={status} className={'w-20 px-2 py-1'} />
-      ),
     },
     {
       label: 'First Seen',
