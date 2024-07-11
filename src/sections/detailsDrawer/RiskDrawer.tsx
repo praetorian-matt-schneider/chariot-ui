@@ -90,7 +90,7 @@ interface RiskDrawerProps {
 export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
   const navigate = useNavigate();
   const { removeSearchParams } = useSearchParams();
-  const { getAssetDrawerLink } = getDrawerLink();
+  const { getRiskDrawerLink } = getDrawerLink();
 
   const [, dns, name] = compositeKey.split('#');
 
@@ -412,10 +412,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                     label: data.name,
                     value: data.dns,
                     updated: data.updated,
-                    to: getAssetDrawerLink({
-                      dns: data.dns,
-                      name: data.dns,
-                    }),
+                    to: getRiskDrawerLink(data),
                   }))}
                 />
               </TabPanel>

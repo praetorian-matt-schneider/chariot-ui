@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   CheckCircleIcon,
@@ -20,6 +20,7 @@ import { useIntegration } from '@/hooks/useIntegration';
 import { useGlobalState } from '@/state/global.state';
 import {
   Account,
+  AccountMetadata,
   Asset,
   AssetStatus,
   AssetStatusLabel,
@@ -134,8 +135,22 @@ export function AddAsset() {
   const { mutate: unlink, status: unlinkStatus } = useModifyAccount('unlink');
   const navigate = useNavigate();
 
-  const selectedIntegration =
-    selectedIndex > 0 ? getConnectedIntegration(Tabs[selectedIndex].name) : [];
+  // Modify selectedIntegration.config object values if they are empty to a series of asterisks
+  const selectedIntegration = useMemo(() => {
+    if (selectedIndex === 0) return [];
+
+    const integrations = getConnectedIntegration(Tabs[selectedIndex].name);
+    return integrations.map(integration => {
+      if (integration.config) {
+        Object.keys(integration.config).forEach((key: string) => {
+          if (integration.config[key as keyof AccountMetadata] === '') {
+            integration.config[key as keyof AccountMetadata] = '********';
+          }
+        });
+      }
+      return integration;
+    });
+  }, [selectedIndex]);
 
   function onClose() {
     onOpenChange(false);
