@@ -18,7 +18,6 @@ import { useMy } from '@/hooks';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useIntegration } from '@/hooks/useIntegration';
 import { buildOpenRiskDataset } from '@/sections/Assets';
-import { getAttributeDetails } from '@/sections/Attributes';
 import { DRAWER_WIDTH } from '@/sections/detailsDrawer';
 import { AddAttribute } from '@/sections/detailsDrawer/AddAttribute';
 import { DetailsDrawerHeader } from '@/sections/detailsDrawer/DetailsDrawerHeader';
@@ -86,19 +85,12 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
   const { data: assetNameGenericSearch, status: assetNameGenericSearchStatus } =
     useGenericSearch({ query: name }, { enabled: open });
 
-  const {
-    assets: rawLinkedHostnamesIncludingSelf = [],
-    attributes: genericAttributes = [],
-  } = assetNameGenericSearch || {};
+  const { assets: rawLinkedHostnamesIncludingSelf = [] } =
+    assetNameGenericSearch || {};
 
   const openRiskDataset = useMemo(
     () => buildOpenRiskDataset(risks as Risk[]),
     [risks]
-  );
-
-  const associatedAssets = genericAttributes.filter(
-    attribute =>
-      attribute.class === 'seed' && attribute.key.startsWith('#attribute#asset')
   );
 
   const asset: Asset = assets[0] || {};
@@ -122,8 +114,6 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
     linkedIpsStatus === 'pending' ||
     attributesStatus === 'pending' ||
     assetNameGenericSearchStatus === 'pending';
-
-  const isTypeAsset = assetType === 'asset';
 
   return (
     <Drawer
@@ -196,80 +186,65 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
             </TabPanel>
 
             <TabPanel className="h-full">
-              {!isTypeAsset && (
-                <DrawerList
-                  items={associatedAssets.map(data => {
-                    const { name, dns, url } = getAttributeDetails(data);
+              <DrawerList
+                items={[
+                  ...linkedHostnames.map(data => {
+                    const { detail } = getAssetStatusProperties(data.status);
+                    const containsRisks = openRiskDataset[data.dns];
+
+                    const icons = [
+                      <Tooltip key="status" title={detail}>
+                        {getAssetStatusIcon(data.status)}
+                      </Tooltip>,
+                    ];
+
+                    if (containsRisks) {
+                      icons.push(
+                        <Tooltip key="risks" title="Contains Open Risks">
+                          <RisksIcon className="size-5" />
+                        </Tooltip>
+                      );
+                    }
+
                     return {
-                      label: name,
-                      value: dns,
-                      date: data.updated,
-                      to: url,
+                      prefix: (
+                        <div className="flex flex-row space-x-2">{icons}</div>
+                      ),
+                      label: data.name,
+                      value: data.dns,
+                      updated: data.updated,
+                      to: getAssetDrawerLink(data),
                     };
-                  })}
-                />
-              )}
-              {isTypeAsset && (
-                <DrawerList
-                  items={[
-                    ...linkedHostnames.map(data => {
-                      const { detail } = getAssetStatusProperties(data.status);
-                      const containsRisks = openRiskDataset[data.dns];
+                  }),
+                  ...linkedIps.map(data => {
+                    const { detail } = getAssetStatusProperties(data.status);
+                    const containsRisks = openRiskDataset[data.dns];
 
-                      const icons = [
-                        <Tooltip key="status" title={detail}>
-                          {getAssetStatusIcon(data.status)}
-                        </Tooltip>,
-                      ];
+                    const icons = [
+                      <Tooltip key="status" title={detail}>
+                        {getAssetStatusIcon(data.status)}
+                      </Tooltip>,
+                    ];
 
-                      if (containsRisks) {
-                        icons.push(
-                          <Tooltip key="risks" title="Contains Open Risks">
-                            <RisksIcon className="size-5" />
-                          </Tooltip>
-                        );
-                      }
-
-                      return {
-                        prefix: (
-                          <div className="flex flex-row space-x-2">{icons}</div>
-                        ),
-                        label: data.name,
-                        value: data.dns,
-                        updated: data.updated,
-                        to: getAssetDrawerLink(data),
-                      };
-                    }),
-                    ...linkedIps.map(data => {
-                      const { detail } = getAssetStatusProperties(data.status);
-                      const containsRisks = openRiskDataset[data.dns];
-
-                      const icons = [
-                        <Tooltip key="status" title={detail}>
-                          {getAssetStatusIcon(data.status)}
-                        </Tooltip>,
-                      ];
-
-                      if (containsRisks) {
-                        icons.push(
-                          <Tooltip key="risks" title="Contains Open Risks">
-                            <RisksIcon className="size-5" />
-                          </Tooltip>
-                        );
-                      }
-                      return {
-                        prefix: (
-                          <div className="flex flex-row space-x-2">{icons}</div>
-                        ),
-                        label: data.dns,
-                        value: data.name,
-                        updated: data.updated,
-                        to: getAssetDrawerLink(data),
-                      };
-                    }),
-                  ]}
-                />
-              )}
+                    if (containsRisks) {
+                      icons.push(
+                        <Tooltip key="risks" title="Contains Open Risks">
+                          <RisksIcon className="size-5" />
+                        </Tooltip>
+                      );
+                    }
+                    return {
+                      prefix: (
+                        <div className="flex flex-row space-x-2">{icons}</div>
+                      ),
+                      label: data.dns,
+                      value: data.name,
+                      updated: data.updated,
+                      to: getAssetDrawerLink(data),
+                    };
+                  }),
+                ]}
+              />
             </TabPanel>
             <TabPanel className="h-full">
               <AddAttribute resourceKey={asset.key} />
