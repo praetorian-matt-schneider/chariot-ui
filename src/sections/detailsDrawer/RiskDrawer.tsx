@@ -27,9 +27,10 @@ import { useMy } from '@/hooks';
 import { useGetKev } from '@/hooks/kev';
 import { useGetFile, useUploadFile } from '@/hooks/useFiles';
 import { useReRunJob } from '@/hooks/useJobs';
-import { useReportRisk } from '@/hooks/useRisks';
+import { useReportRisk, useUpdateRisk } from '@/hooks/useRisks';
 import { DRAWER_WIDTH } from '@/sections/detailsDrawer';
 import { AddAttribute } from '@/sections/detailsDrawer/AddAttribute';
+import { Comment } from '@/sections/detailsDrawer/Comment';
 import { DetailsDrawerHeader } from '@/sections/detailsDrawer/DetailsDrawerHeader';
 import { DrawerList } from '@/sections/detailsDrawer/DrawerList';
 import { JobStatus, Risk, RiskCombinedStatus, RiskHistory } from '@/types';
@@ -96,6 +97,8 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
   const [markdownValue, setMarkdownValue] = useState('');
 
   const { mutateAsync: reRunJob, status: reRunJobStatus } = useReRunJob();
+  const { mutateAsync: updateRisk, isPending: isRiskFetching } =
+    useUpdateRisk();
   const { mutateAsync: updateFile, status: updateFileStatus } = useUploadFile();
   const { mutateAsync: reportRisk, status: reportRiskStatus } = useReportRisk();
 
@@ -186,6 +189,15 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
 
     return [firstTrackedHistory, ...riskHistory];
   }, [JSON.stringify(risk.history)]);
+
+  async function handleUpdateComment(comment = '') {
+    await updateRisk({
+      comment,
+      key: risk.key,
+      name: risk.name,
+      status: risk.status,
+    });
+  }
 
   return (
     <Drawer
@@ -289,7 +301,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
 
           <TabGroup className="h-full">
             <TabList className="flex overflow-x-auto">
-              {['Description', 'Attributes', 'History'].map(tab => (
+              {['Description', 'Attributes', 'Comment', 'History'].map(tab => (
                 <TabWrapper key={tab}>{tab}</TabWrapper>
               ))}
             </TabList>
@@ -392,6 +404,13 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                     }))}
                   />
                 </div>
+              </TabPanel>
+              <TabPanel className="h-full p-6">
+                <Comment
+                  comment={risk.comment}
+                  isLoading={isRiskFetching}
+                  onSave={handleUpdateComment}
+                />
               </TabPanel>
               <TabPanel className="h-full px-6">
                 <Timeline

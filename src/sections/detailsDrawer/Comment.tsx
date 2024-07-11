@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react';
-import { ChevronRightIcon } from '@heroicons/react/24/solid';
+import { PencilSquareIcon } from '@heroicons/react/24/outline';
 import { Editor } from '@monaco-editor/react';
 
-import { Accordian } from '@/components/Accordian';
 import { Button } from '@/components/Button';
 import { Loader } from '@/components/Loader';
 import { Modal } from '@/components/Modal';
-import { NoData } from '@/components/ui/NoData';
 
 interface Props {
   comment: string;
@@ -31,30 +29,26 @@ export const Comment: React.FC<Props> = ({
   }, [isEditing]);
 
   return (
-    <Accordian
-      title={title}
-      titlerightContainer={
-        onSave && (
-          <Button
-            styleType="textPrimary"
-            className="p-0 text-xs font-bold"
-            endIcon={<ChevronRightIcon className="ml-1 size-3" />}
-            onClick={event => {
-              event.preventDefault();
-              event.stopPropagation();
-              setIsEditing(true);
-            }}
-          >
-            Edit
-          </Button>
-        )
-      }
-    >
+    <>
       <Loader className="h-32" isLoading={isLoading}>
         {comment && (
           <p className="whitespace-pre-wrap break-words">{comment}</p>
         )}
-        {!comment && <NoData title="No Comment"></NoData>}
+        {!comment && (
+          <span className="text-gray-500">No comment available</span>
+        )}
+        <Button
+          styleType="text"
+          className="mt-4 p-2 font-bold"
+          endIcon={<PencilSquareIcon className="size-4" />}
+          onClick={event => {
+            event.preventDefault();
+            event.stopPropagation();
+            setIsEditing(true);
+          }}
+        >
+          Edit
+        </Button>
       </Loader>
       <Modal
         size="xl"
@@ -91,6 +85,6 @@ export const Comment: React.FC<Props> = ({
           }}
         />
       </Modal>
-    </Accordian>
+    </>
   );
 };
