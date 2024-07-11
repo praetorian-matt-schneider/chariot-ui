@@ -14,6 +14,8 @@ import { Button } from '@/components/Button';
 import { Drawer } from '@/components/Drawer';
 import { HorizontalTimeline } from '@/components/HorizontalTimeline';
 import { RisksIcon } from '@/components/icons';
+import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
+import { getRiskStatusIcon } from '@/components/icons/RiskStatus.icon';
 import { UnionIcon } from '@/components/icons/Union.icon';
 import { Loader } from '@/components/Loader';
 import { MarkdownEditor } from '@/components/markdown/MarkdownEditor';
@@ -35,7 +37,16 @@ import { Comment } from '@/sections/detailsDrawer/Comment';
 import { DetailsDrawerHeader } from '@/sections/detailsDrawer/DetailsDrawerHeader';
 import { DrawerList } from '@/sections/detailsDrawer/DrawerList';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
-import { JobStatus, Risk, RiskCombinedStatus, RiskHistory } from '@/types';
+import {
+  JobStatus,
+  Risk,
+  RiskCombinedStatus,
+  RiskHistory,
+  RiskSeverity,
+  RiskStatus,
+  RiskStatusLabel,
+  SeverityDef,
+} from '@/types';
 import { formatDate } from '@/utils/date.util';
 import { sToMs } from '@/utils/date.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
@@ -408,12 +419,34 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
               </TabPanel>
               <TabPanel className="h-full">
                 <DrawerList
-                  items={riskOccurrence.map(data => ({
-                    label: data.name,
-                    value: data.dns,
-                    updated: data.updated,
-                    to: getRiskDrawerLink(data),
-                  }))}
+                  items={riskOccurrence.map(data => {
+                    const riskStatusKey =
+                      `${data.status?.[0]}${data.status?.[2] || ''}` as RiskStatus;
+                    const riskSeverityKey = data.status?.[1] as RiskSeverity;
+
+                    const statusIcon = getRiskStatusIcon(riskStatusKey);
+                    const severityIcon = getRiskSeverityIcon(riskSeverityKey);
+
+                    const icons = (
+                      <div className="flex items-center gap-2 text-default">
+                        <Tooltip
+                          title={RiskStatusLabel[riskStatusKey] || 'Cloed'}
+                        >
+                          {statusIcon}
+                        </Tooltip>
+                        <Tooltip title={SeverityDef[riskSeverityKey]}>
+                          {severityIcon}
+                        </Tooltip>
+                      </div>
+                    );
+                    return {
+                      prefix: icons,
+                      label: data.name,
+                      value: data.dns,
+                      updated: data.updated,
+                      to: getRiskDrawerLink(data),
+                    };
+                  })}
                 />
               </TabPanel>
               <TabPanel className="h-full">

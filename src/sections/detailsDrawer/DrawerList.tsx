@@ -14,6 +14,7 @@ interface Props {
     value: string | ReactNode;
     updated?: string;
     to?: To;
+    prefix?: JSX.Element;
   }[];
   allowEmpty?: boolean;
 }
@@ -48,7 +49,8 @@ export const DrawerList = (props: Props) => {
         }}
       >
         {virtualItems.map(virtualItem => {
-          const { label, updated, value, to } = items[virtualItem.index];
+          const { prefix, label, updated, value, to } =
+            items[virtualItem.index];
           return (
             <li
               key={virtualItem.key}
@@ -75,7 +77,7 @@ export const DrawerList = (props: Props) => {
                         className="flex overflow-hidden"
                         buttonClass="flex overflow-hidden p-0 text-default"
                       >
-                        {children}
+                        {prefix && prefix} {children}
                       </Link>
                     );
                   }}
