@@ -192,11 +192,8 @@ export function Risks() {
   const columns: Columns<Risk> = useMemo(
     () => [
       {
-        label: 'Risk Name',
-        id: 'name',
-        to: (item: Risk) => getRiskDrawerLink(item),
-        className: 'w-full',
-        copy: true,
+        label: 'Priority',
+        id: 'status',
         cell: (risk: Risk) => {
           const riskStatusKey =
             `${risk.status?.[0]}${risk.status?.[2] || ''}` as RiskStatus;
@@ -208,17 +205,27 @@ export function Risks() {
           return (
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-2 text-default">
-                <Tooltip title={RiskStatusLabel[riskStatusKey] || 'Cloed'}>
+                <Tooltip
+                  title={
+                    (RiskStatusLabel[riskStatusKey] || 'Closed') + ' Status'
+                  }
+                >
                   {statusIcon}
                 </Tooltip>
-                <Tooltip title={SeverityDef[riskSeverityKey]}>
+                <Tooltip title={SeverityDef[riskSeverityKey] + ' Severity'}>
                   {severityIcon}
                 </Tooltip>
               </div>
-              <span>{risk.name}</span>
             </div>
           );
         },
+      },
+      {
+        label: 'Risk',
+        id: 'name',
+        to: (item: Risk) => getRiskDrawerLink(item),
+        className: 'w-full',
+        copy: true,
       },
       {
         label: 'Status',
@@ -263,14 +270,14 @@ export function Risks() {
         label: 'Proof',
         id: '',
         cell: risk => (
-          <Tooltip title="View Proof">
+          <Tooltip title="View Proof of Exploit">
             <Link
               to={generatePathWithSearch({
                 appendSearch: [[StorageKey.POE, `${risk.dns}/${risk.name}`]],
               })}
               className="cursor-pointer"
             >
-              <DocumentTextIcon className="size-5 text-default-light" />
+              <DocumentTextIcon className="size-5 text-default" />
             </Link>
           </Tooltip>
         ),

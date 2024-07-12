@@ -150,7 +150,7 @@ const Assets: React.FC = () => {
     {
       label: 'Priority',
       id: 'name',
-      className: 'w-24',
+      className: 'w-20',
       cell: (asset: AssetsWithRisk) => {
         const integration = isIntegration(asset);
         const containsRisks = Object.values(asset.riskSummary || {}).length > 0;
@@ -185,7 +185,7 @@ const Assets: React.FC = () => {
       },
     },
     {
-      label: 'Asset Name',
+      label: 'Asset',
       id: 'name',
       className: 'w-full',
       to: item => getAssetDrawerLink(item),
