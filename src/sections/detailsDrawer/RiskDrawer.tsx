@@ -419,7 +419,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                     )}
                   </>
                   <Button
-                    styleType="text"
+                    styleType="none"
                     className="mt-4 pl-0 font-bold"
                     endIcon={<PencilSquareIcon className="size-5" />}
                     onClick={event => {
