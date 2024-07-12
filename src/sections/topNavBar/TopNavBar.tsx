@@ -10,7 +10,7 @@ import { LogoIcon } from '@/components/icons/Logo.icon';
 import { Shortcuts } from '@/components/ui/Shortcuts';
 import { AccountDropdown } from '@/sections/topNavBar/AccountDropdown';
 import { Notifications } from '@/sections/topNavBar/Notifications';
-import { getRoute } from '@/utils/route.util';
+import { getAppRoute } from '@/utils/route.util';
 
 export function TopNavBar() {
   const [showNotification, setShowNotification] = useState<boolean>(false);
@@ -20,7 +20,7 @@ export function TopNavBar() {
     <div className="flex flex-col items-center justify-between py-3 md:flex-row">
       <div className="flex w-full items-center">
         <div className="flex w-full flex-wrap items-center">
-          <Link to={getRoute(['app', 'risks'])}>
+          <Link to={getAppRoute(['risks'])}>
             <LogoIcon className="mr-4 size-9" />
           </Link>
 
@@ -41,7 +41,7 @@ export function TopNavBar() {
                 //       <SeedsIcon className="-ml-2 size-7 stroke-1 text-default-light" />
                 //     </div>
                 //   ),
-                //   to: getRoute(['app', 'seeds']),
+                //   to: getAppRoute([ 'seeds']),
                 // },
                 {
                   label: 'Assets',
@@ -53,7 +53,7 @@ export function TopNavBar() {
                       <AssetsIcon className="-ml-2 size-7 stroke-1 text-default-light" />
                     </div>
                   ),
-                  to: getRoute(['app', 'assets']),
+                  to: getAppRoute(['assets']),
                 },
                 {
                   label: 'Risks',
@@ -65,14 +65,14 @@ export function TopNavBar() {
                       <RisksIcon className="-ml-2 size-7 stroke-1 text-default-light" />
                     </div>
                   ),
-                  to: getRoute(['app', 'risks']),
+                  to: getAppRoute(['risks']),
                 },
               ],
             }}
           />
           <button
             onClick={() => {
-              navigate(getRoute(['app', 'overview']));
+              navigate(getAppRoute(['overview']));
             }}
             className="ml-2 flex flex-row space-x-1 text-sm font-normal"
           >

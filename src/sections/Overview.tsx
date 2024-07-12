@@ -26,13 +26,12 @@ const formatDate = (date: Date): string => date.toISOString().split('T')[0];
 const TODAY = formatDate(new Date());
 
 export const Overview = () => {
-  const { me, friend } = useAuth();
+  const { me, impersonatingEmail } = useAuth();
   const { data: accounts } = useMy({
     resource: 'account',
   });
 
-  const client =
-    useGetDisplayName(accounts) || friend.displayName || friend.email || me;
+  const client = useGetDisplayName(accounts) || impersonatingEmail || me;
   const [showDetails, setShowDetails] = useState(false);
   const { counts } = useAggregateCounts();
   const jobsRunning = counts.jobsRunning;

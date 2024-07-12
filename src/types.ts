@@ -426,15 +426,16 @@ export interface AuthState {
   me: string;
   rToken?: string;
   expiry?: Date;
-  friend: { email: string; displayName: string };
 }
 
 export interface AuthContextType extends AuthState {
   setCognitoAuthStates: (props: CognitoAuthStates) => void;
   login: (backend: BackendType) => Promise<void>;
   logout: () => void;
-  startImpersonation: (memberId: string, displayName: string) => void;
+  startImpersonation: (userId: string) => void;
   stopImpersonation: () => void;
+  getDefaultRoute: () => string;
+  impersonatingEmail: string;
 }
 
 export interface CognitoAuthStates {

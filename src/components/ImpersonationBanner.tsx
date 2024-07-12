@@ -1,12 +1,15 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
+import { Bars3Icon } from '@heroicons/react/20/solid';
 import { XMarkIcon } from '@heroicons/react/24/solid';
+
+import { Tooltip } from '@/components/Tooltip';
+import { useGetDisplayName } from '@/hooks/useAccounts';
+import { useMy } from '@/hooks/useMy';
 import { useAuth } from '@/state/auth';
 import { useStorage } from '@/utils/storage/useStorage.util';
-import { Bars3Icon } from '@heroicons/react/20/solid';
-import { Tooltip } from '@/components/Tooltip';
 
 const ImpersonationBanner: React.FC = () => {
-  const { friend, stopImpersonation } = useAuth();
+  const { stopImpersonation, impersonatingEmail } = useAuth();
   const [position, setPosition] = useStorage(
     { key: 'impersonationPosition' },
     {
@@ -14,6 +17,15 @@ const ImpersonationBanner: React.FC = () => {
       y: 0,
     }
   );
+
+  const { data: accounts, status: accountsStatus } = useMy(
+    {
+      resource: 'account',
+    },
+    { enabled: Boolean(impersonatingEmail) }
+  );
+
+  const displayName = useGetDisplayName(accounts);
 
   const bannerRef = useRef<HTMLDivElement>(null);
 
@@ -27,7 +39,7 @@ const ImpersonationBanner: React.FC = () => {
     }
   }, [setPosition, bannerRef.current]);
 
-  if (!friend || !friend.email) {
+  if (!impersonatingEmail || accountsStatus === 'pending') {
     return null;
   }
 
@@ -62,31 +74,31 @@ const ImpersonationBanner: React.FC = () => {
   return (
     <div
       ref={bannerRef}
-      className="fixed top-0 z-[99999] flex items-center bg-brand px-4 py-1 text-xs text-white shadow-lg rounded-b-[2px]"
+      className="fixed top-0 z-[99999] flex items-center rounded-b-[2px] bg-brand px-4 py-1 text-xs text-white shadow-lg"
       style={{ left: `${position.x}px`, top: `${position.y}px` }}
     >
       <button
-        className="hover:bg-brand-dark mr-2 rounded-b-[4px] p-1 text-center"
+        className="mr-2 rounded-b-[4px] p-1 text-center hover:bg-brand-dark"
         onClick={stopImpersonation}
       >
-        <XMarkIcon className="h-4 w-4" />
+        <XMarkIcon className="size-4" />
       </button>
       <span className="text-nowrap">Viewing:</span>
       <span className="ml-1 font-semibold">
-        {friend.displayName ? (
-          <Tooltip placement="bottom" title={friend.email}>
-            {friend.displayName}
+        {displayName ? (
+          <Tooltip placement="bottom" title={impersonatingEmail}>
+            {displayName}
           </Tooltip>
         ) : (
-          friend.email
+          impersonatingEmail
         )}
       </span>
       <div
-        className="cursor-move ml-2 hover:bg-brand-dark rounded-b-[4px] p-1 "
+        className="ml-2 cursor-move rounded-b-[4px] p-1 hover:bg-brand-dark "
         onMouseDown={handleMouseDown}
       >
         <span className="text-lg">
-          <Bars3Icon className="h-4 w-4" />
+          <Bars3Icon className="size-4" />
         </span>
       </div>
     </div>

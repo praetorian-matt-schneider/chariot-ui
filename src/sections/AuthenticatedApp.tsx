@@ -21,7 +21,7 @@ import { Upgrade } from '@/sections/Upgrade';
 import { useAuth } from '@/state/auth';
 import { useBreadCrumbsContext } from '@/state/breadcrumbs';
 import { cn } from '@/utils/classname';
-import { getRoute } from '@/utils/route.util';
+import { getAppRoute } from '@/utils/route.util';
 
 const offsetViewMargin = 16;
 interface AuthenticatedApp {
@@ -34,7 +34,7 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
   const headerRef = useRef<HTMLDivElement>(null);
 
   const { useBreadCrumb } = useBreadCrumbsContext();
-  const { me, friend } = useAuth();
+  const { me, impersonatingEmail } = useAuth();
 
   const { data: accounts, status: accountsStatus } = useMy({
     resource: 'account',
@@ -42,10 +42,10 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
 
   const showUpgrade = useMemo(() => {
     return Boolean(
-      friend.email === '' &&
+      impersonatingEmail === '' &&
         !accounts.some(account => account.member.endsWith('praetorian.com'))
     );
-  }, [accountsStatus, JSON.stringify(accounts), JSON.stringify(friend)]);
+  }, [accountsStatus, JSON.stringify(accounts), impersonatingEmail]);
 
   const displayName = useGetDisplayName(accounts);
 
@@ -61,15 +61,15 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
         switch (event.key) {
           case 'a':
           case 'A':
-            navigate(getRoute(['app', 'assets']));
+            navigate(getAppRoute(['assets']));
             break;
           case 'r':
           case 'R':
-            navigate(getRoute(['app', 'risks']));
+            navigate(getAppRoute(['risks']));
             break;
           case 'j':
           case 'J':
-            navigate(getRoute(['app', 'jobs']));
+            navigate(getAppRoute(['jobs']));
             break;
         }
 
@@ -93,7 +93,7 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
   }, []);
 
   useBreadCrumb({
-    label: displayName || friend.displayName || friend.email || me,
+    label: displayName || impersonatingEmail || me,
     order: 1,
   });
 
@@ -132,7 +132,7 @@ const HeaderPortalSections = {
 };
 
 export function Header() {
-  const { friend } = useAuth();
+  const { impersonatingEmail } = useAuth();
   const { status: statusAccount } = useMy({ resource: 'account' });
   const { breadcrumbs } = useBreadCrumbsContext();
 
@@ -145,7 +145,7 @@ export function Header() {
     <>
       <div
         className={cn(
-          `${friend?.email?.length > 0 && 'pt-[10px]'} flex flex-col items-center w-full bg-header text-header px-4`
+          `${(impersonatingEmail || '')?.length > 0 && 'pt-[10px]'} flex flex-col items-center w-full bg-header text-header px-4`
         )}
       >
         <div className="w-full max-w-screen-xl">

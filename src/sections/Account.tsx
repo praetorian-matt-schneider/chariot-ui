@@ -26,12 +26,12 @@ import { useAuth } from '@/state/auth';
 const Account: React.FC = () => {
   const [displayName, setDisplayName] = useState('');
 
-  const { me, friend } = useAuth();
+  const { me, impersonatingEmail } = useAuth();
   const { data, status } = useMy({ resource: 'account' });
   const { mutate: updateAccount } = useModifyAccount('updateSetting');
   const accountDisplayName = useGetDisplayName(data);
   const isDirty = status === 'success' && accountDisplayName !== displayName;
-  const header = MD5(friend.email || me).toString();
+  const header = MD5(impersonatingEmail || me).toString();
 
   useEffect(() => {
     if (status === 'success') {
@@ -45,8 +45,8 @@ const Account: React.FC = () => {
 
   const { data: profilePicture, status: profilePictureStatus } =
     useGetProfilePictureUrl(
-      { email: friend.email || me },
-      { enabled: !friend.email }
+      { email: impersonatingEmail || me },
+      { enabled: !impersonatingEmail }
     );
 
   const handleFileDrop = (files: Files<'arrayBuffer'>): void => {
@@ -90,7 +90,7 @@ const Account: React.FC = () => {
             </div>
             <Loader
               isLoading={profilePictureStatus === 'pending'}
-              className="h-5 m-0"
+              className="m-0 h-5"
             >
               {showDpDropzone && (
                 <Dropzone
@@ -104,7 +104,10 @@ const Account: React.FC = () => {
               )}
               {!showDpDropzone && (
                 <div className="flex flex-row items-center">
-                  <Avatar className="mr-2 size-20" email={friend.email || me} />
+                  <Avatar
+                    className="mr-2 size-20"
+                    email={impersonatingEmail || me}
+                  />
 
                   <Button
                     styleType="text"
@@ -148,7 +151,7 @@ const Account: React.FC = () => {
       {/* It's a temporary solution until a better approach is implemented */}
       {collaborators &&
         collaborators.length > 0 &&
-        friend.email.length === 0 && (
+        impersonatingEmail.length === 0 && (
           <Section
             title="Collaborating With"
             description={
