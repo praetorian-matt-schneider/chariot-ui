@@ -9,6 +9,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
 import { TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
+import DOMPurify from 'dompurify';
 
 import { Button } from '@/components/Button';
 import { Drawer } from '@/components/Drawer';
@@ -330,7 +331,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                 <TabWrapper key={tab}>{tab}</TabWrapper>
               ))}
             </TabList>
-            <TabPanels className="size-full h-[calc(100%-220px)] overflow-auto">
+            <TabPanels className="size-full h-[calc(100%)] overflow-auto">
               <TabPanel className="h-full p-6">
                 <Loader
                   isLoading={
@@ -359,8 +360,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                     }}
                   >
                     <MarkdownEditor
-                      height={'60vh'}
-                      value={markdownValue}
+                      value={DOMPurify.sanitize(markdownValue)}
                       onChange={value => {
                         setMarkdownValue(value || '');
                       }}
@@ -370,7 +370,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                   <>
                     {definitionsFile && (
                       <MarkdownPreview
-                        source={definitionsFileValue}
+                        source={DOMPurify.sanitize(definitionsFileValue)}
                         style={{
                           wordBreak: 'break-word',
                           minHeight: '20px',
