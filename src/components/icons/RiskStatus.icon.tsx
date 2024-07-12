@@ -5,6 +5,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 import { RiskStatus } from '@/types';
+import { cn } from '@/utils/classname';
 
 export const getRiskStatusIcon = (status: RiskStatus, className = 'size-5') => {
   switch (status) {
@@ -16,6 +17,6 @@ export const getRiskStatusIcon = (status: RiskStatus, className = 'size-5') => {
     case RiskStatus.Rejected:
     case RiskStatus.FalsePositive:
     default:
-      return <LockClosedIcon className={className} />;
+      return <LockClosedIcon className={cn('text-default-light', className)} />;
   }
 };
