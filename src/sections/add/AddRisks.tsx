@@ -171,8 +171,7 @@ export const AddRisks = () => {
             selectedIndex === 0 ? () => null : handleConfigureIntegration,
           text: selectedIndex === 0 ? 'Add' : 'Configure',
           form: selectedIndex === 0 ? 'addRisk' : undefined,
-
-          secondary: selectedIntegration.length
+          disconnect: selectedIntegration.length
             ? {
                 text: 'Disconnect',
                 onClick: handleDisconnect,
@@ -310,6 +309,7 @@ export const AddRisks = () => {
                   key={tab.id}
                   onChange={setIntegrationFormData}
                   tab={tab}
+                  onCancel={onClose}
                 />
               );
             })}

@@ -234,8 +234,7 @@ export const IntegrationsMeta: IntegrationMeta[] = [
     displayName: 'GitHub',
     description: (
       <p>
-        Discover your GitHub organization&apos;s repositories and identify
-        risks.{' '}
+        Discover your GitHub organization&apos;s repositories and risks.{' '}
         <a
           href="https://docs.praetorian.com/hc/en-us/articles/25815083333787-Source-Code-Managers#h_01HY2TH58M604R2DYKQZVZPZJ9"
           target="_blank"
@@ -544,7 +543,7 @@ export const IntegrationsMeta: IntegrationMeta[] = [
 
     description: (
       <p>
-        Discover your GitLab organization&apos;s repositories and identify risks{' '}
+        Discover your GitLab organization&apos;s repositories and risks{' '}
         <a
           href="https://docs.praetorian.com/hc/en-us/articles/25815083333787-Source-Code-Managers#h_01J0VK2SY0FMRJK8WTN3S6Q4RG"
           target="_blank"
