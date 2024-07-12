@@ -142,7 +142,11 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
     >
       <Loader isLoading={isInitialLoading} type="spinner">
         <div className="mb-2 flex justify-between border border-gray-100 bg-gray-50 px-8 py-3">
-          <AssetStatusDropdown asset={asset} />
+          <Tooltip placement="top" title="Change scan priority">
+            <div>
+              <AssetStatusDropdown asset={asset} />
+            </div>
+          </Tooltip>
         </div>
         <TabGroup className="h-full">
           <TabList className="flex overflow-x-auto">
@@ -200,8 +204,10 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
 
                     if (containsRisks) {
                       icons.push(
-                        <Tooltip key="risks" title="Contains Open Risks">
-                          <RisksIcon className="size-5" />
+                        <Tooltip key="risks" title="Contains open risks">
+                          <div>
+                            <RisksIcon className="size-5" />
+                          </div>
                         </Tooltip>
                       );
                     }

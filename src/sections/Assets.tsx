@@ -165,8 +165,10 @@ const Assets: React.FC = () => {
         if (containsRisks) {
           icons.push(
             <div>
-              <Tooltip title="Risks Discovered">
-                <RisksIcon className="size-5" />
+              <Tooltip title="Contains open risks">
+                <div>
+                  <RisksIcon className="size-5" />
+                </div>
               </Tooltip>
             </div>
           );

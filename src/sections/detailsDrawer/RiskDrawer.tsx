@@ -278,27 +278,40 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
               />
             </div>
             <div className="flex justify-between border border-gray-100 bg-gray-50 px-8 py-3">
-              <RiskDropdown type="status" risk={risk} />
-              <RiskDropdown type="severity" risk={risk} />
-              <Button
-                className="border-1 h-8 border border-default"
-                startIcon={<DocumentTextIcon className="size-5" />}
-                onClick={() => {
-                  navigate(
-                    generatePathWithSearch({
-                      appendSearch: [[StorageKey.POE, `${dns}/${name}`]],
-                    })
-                  );
-                }}
-              >
-                Proof of Exploit
-              </Button>
+              <Tooltip placement="top" title="Change risk status">
+                <div>
+                  <RiskDropdown type="status" risk={risk} />
+                </div>
+              </Tooltip>
+              <Tooltip placement="top" title="Change risk severity">
+                <div>
+                  <RiskDropdown type="severity" risk={risk} />
+                </div>
+              </Tooltip>
+              <Tooltip placement="top" title="View proof of exploit">
+                <div>
+                  <Button
+                    className="border-1 h-8 border border-default"
+                    startIcon={<DocumentTextIcon className="size-5" />}
+                    onClick={() => {
+                      navigate(
+                        generatePathWithSearch({
+                          appendSearch: [[StorageKey.POE, `${dns}/${name}`]],
+                        })
+                      );
+                    }}
+                  >
+                    Proof of Exploit
+                  </Button>
+                </div>
+              </Tooltip>
               <Tooltip
+                placement="top"
                 title={
                   risk.source
                     ? isJobRunningForThisRisk
                       ? 'Scanning in progress'
-                      : ''
+                      : 'Revalidate the risk'
                     : 'On-Demand Scanning is only available for Automated Risks.'
                 }
               >
