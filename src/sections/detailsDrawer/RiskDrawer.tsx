@@ -7,7 +7,6 @@ import {
   EyeIcon,
   PencilSquareIcon,
 } from '@heroicons/react/24/outline';
-import { CheckCircleIcon } from '@heroicons/react/24/solid';
 import { TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import DOMPurify from 'dompurify';
 
@@ -510,7 +509,9 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                           title,
                           description: updated,
                           icon:
-                            itemIndex === 0 ? <CheckCircleIcon /> : undefined,
+                            itemIndex === 0 ? (
+                              <RisksIcon className="stroke-1" />
+                            ) : undefined,
                         };
                       })
                       .reverse() || []),
@@ -565,7 +566,16 @@ function getHistoryDiff(
   const severity = (
     <>
       <p className="inline">
-        {by ? `${by} changed the Severity from` : `Severity changed from`}
+        {by ? (
+          <span>
+            {by} changed the <span className="font-semibold">Severity</span>{' '}
+            from
+          </span>
+        ) : (
+          <span>
+            <span className="font-semibold">Severity</span> changed from
+          </span>
+        )}
         {EmptySpace}
       </p>
       <RiskDropdown
@@ -597,11 +607,21 @@ function getHistoryDiff(
       <p className="inline">
         {isBothChanged ? (
           <>
-            {EmptySpace}, and Status from{EmptySpace}
+            {EmptySpace}, and <span className="font-semibold">Status</span> from
+            {EmptySpace}
           </>
         ) : (
           <>
-            {by ? `${by} changed the Status from` : 'Status changed from'}
+            {by ? (
+              <span>
+                {by} changed the <span className="font-semibold">Status</span>{' '}
+                from
+              </span>
+            ) : (
+              <span>
+                <span className="font-semibold">Status</span> changed from
+              </span>
+            )}
             {EmptySpace}
           </>
         )}
