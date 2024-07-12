@@ -439,17 +439,28 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                       `${data.status?.[0]}${data.status?.[2] || ''}` as RiskStatus;
                     const riskSeverityKey = data.status?.[1] as RiskSeverity;
 
-                    const statusIcon = getRiskStatusIcon(riskStatusKey);
-                    const severityIcon = getRiskSeverityIcon(riskSeverityKey);
+                    const statusIcon = getRiskStatusIcon(
+                      riskStatusKey,
+                      'size-3'
+                    );
+                    const severityIcon = getRiskSeverityIcon(
+                      riskSeverityKey,
+                      'size-3'
+                    );
 
                     const icons = (
-                      <div className="flex items-center gap-2 text-default">
+                      <div className="flex items-center gap-1 text-default">
                         <Tooltip
-                          title={RiskStatusLabel[riskStatusKey] || 'Cloed'}
+                          title={
+                            (RiskStatusLabel[riskStatusKey] || 'Closed') +
+                            ' Status'
+                          }
                         >
                           {statusIcon}
                         </Tooltip>
-                        <Tooltip title={SeverityDef[riskSeverityKey]}>
+                        <Tooltip
+                          title={SeverityDef[riskSeverityKey] + ' Severity'}
+                        >
                           {severityIcon}
                         </Tooltip>
                       </div>

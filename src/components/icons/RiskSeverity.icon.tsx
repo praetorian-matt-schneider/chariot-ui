@@ -7,20 +7,22 @@ import {
 } from '@heroicons/react/24/outline';
 
 import { RiskSeverity } from '@/types';
-import { cn } from '@/utils/classname';
 
-export const getRiskSeverityIcon = (severity: RiskSeverity) => {
+export const getRiskSeverityIcon = (
+  severity: RiskSeverity,
+  className = 'size-5'
+) => {
   switch (severity) {
     case RiskSeverity.Critical:
-      return <ChevronDoubleUpIcon className={cn('size-5')} />;
+      return <ChevronDoubleUpIcon className={className} />;
     case RiskSeverity.High:
-      return <ChevronUpIcon className={cn('size-5')} />;
+      return <ChevronUpIcon className={className} />;
     case RiskSeverity.Medium:
-      return <Bars2Icon className={cn('size-5')} />;
+      return <Bars2Icon className={className} />;
     case RiskSeverity.Low:
-      return <ChevronDownIcon className={cn('size-5')} />;
+      return <ChevronDownIcon className={className} />;
     case RiskSeverity.Info:
     default:
-      return <ChevronDoubleDownIcon className={cn('size-5')} />;
+      return <ChevronDoubleDownIcon className={className} />;
   }
 };
