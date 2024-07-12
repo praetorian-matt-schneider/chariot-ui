@@ -372,13 +372,15 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                       },
                     }}
                   >
-                    <MarkdownEditor
-                      value={markdownValue}
-                      onChange={value => {
-                        setMarkdownValue(value || '');
-                      }}
-                      filePathPrefix="definitions/files"
-                    />
+                    <div className="h-[60vh]">
+                      <MarkdownEditor
+                        value={markdownValue}
+                        onChange={value => {
+                          setMarkdownValue(value || '');
+                        }}
+                        filePathPrefix="definitions/files"
+                      />
+                    </div>
                   </Modal>
                   <>
                     {definitionsFile && (

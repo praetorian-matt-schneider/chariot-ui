@@ -367,14 +367,15 @@ function AddDefinition(props: AddDefinitionProps) {
         },
       }}
     >
-      <MarkdownEditor
-        height={'60vh'}
-        value={definition}
-        onChange={value => {
-          setDefinition(value || '');
-        }}
-        filePathPrefix="definitions/files"
-      />
+      <div className="h-[60vh]">
+        <MarkdownEditor
+          value={definition}
+          onChange={value => {
+            setDefinition(value || '');
+          }}
+          filePathPrefix="definitions/files"
+        />
+      </div>
     </Modal>
   );
 }
@@ -414,14 +415,15 @@ function AddProofOfExploit(props: AddProofOfExploitProps) {
         },
       }}
     >
-      <MarkdownEditor
-        height={'60vh'}
-        value={poe}
-        onChange={value => {
-          setPoe(value || '');
-        }}
-        filePathPrefix="proof-of-exploit/files"
-      />
+      <div className="h-[60vh]">
+        <MarkdownEditor
+          value={poe}
+          onChange={value => {
+            setPoe(value || '');
+          }}
+          filePathPrefix="proof-of-exploit/files"
+        />
+      </div>
     </Modal>
   );
 }

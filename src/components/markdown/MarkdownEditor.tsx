@@ -147,6 +147,7 @@ export function MarkdownEditor(
       {...props}
       ref={textareaRef}
       value={markdown}
+      height="100%"
       onChange={value => {
         setMarkdown(DOMPurify.sanitize(value || ''));
       }}
