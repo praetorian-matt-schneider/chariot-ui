@@ -46,7 +46,7 @@ export const IntegrationsMeta: IntegrationMeta[] = [
     id: 12,
     name: 'hook',
     displayName: 'Chariot Webhook',
-    description: 'Push assets and risks to Chariot',
+    description: 'Push assets and risks to Chariot.',
     logo: '/icons/PraetorianWebhook.svg',
     connected: true,
     types: [IntegrationType.Workflow],
@@ -84,7 +84,19 @@ export const IntegrationsMeta: IntegrationMeta[] = [
     id: 9,
     name: 'slack',
     displayName: 'Slack',
-    description: 'Receive Slack notifications when new risks are discovered',
+    description: (
+      <p>
+        Receive Slack notifications when new risks are discovered.{' '}
+        <a
+          href="https://docs.praetorian.com/hc/en-us/articles/25815125222171-Workplace-Messaging#h_01HY2VVHFNVYRZAKA2AAHMYVY6"
+          target="_blank"
+          rel="noreferrer"
+          className="block underline"
+        >
+          Learn more
+        </a>
+      </p>
+    ),
     logo: '/icons/Slack.svg',
     connected: true,
     types: [IntegrationType.Workflow],
@@ -126,8 +138,20 @@ export const IntegrationsMeta: IntegrationMeta[] = [
     id: 10,
     name: 'jira',
     displayName: 'Atlassian Jira',
-    description:
-      'Track and manage risks directly within your connected Jira project',
+
+    description: (
+      <p>
+        Track and manage risks directly within your Jira project.{' '}
+        <a
+          href="https://docs.praetorian.com/hc/en-us/articles/25815095834267-Ticketing-Systems#h_01HY2VTWKZNT9W3D1X3YBM9FFY"
+          target="_blank"
+          rel="noreferrer"
+          className="block underline"
+        >
+          Learn more
+        </a>
+      </p>
+    ),
     logo: '/icons/Jira.svg',
     connected: true,
     types: [IntegrationType.Workflow],
@@ -591,7 +615,7 @@ export const IntegrationsMeta: IntegrationMeta[] = [
     id: 17,
     name: 'zulip',
     displayName: 'Zulip',
-    description: 'Receive Zulip notifications when new risks are discovered',
+    description: 'Receive Zulip notifications when new risks are discovered.',
     logo: '/icons/Zulip.svg',
     connected: true,
     types: [IntegrationType.Workflow],
