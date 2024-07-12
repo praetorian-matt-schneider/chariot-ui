@@ -62,7 +62,9 @@ export const DrawerList = (props: Props) => {
               }}
             >
               <div className="flex justify-between text-xs text-default-light ">
-                <CopyToClipboard>{label}</CopyToClipboard>
+                <div className="flex flex-row space-x-2">
+                  {prefix && prefix} <CopyToClipboard>{label}</CopyToClipboard>
+                </div>
                 {updated && <span>{formatDate(updated)}</span>}
               </div>
               <CopyToClipboard>
@@ -78,7 +80,7 @@ export const DrawerList = (props: Props) => {
                         className="flex overflow-hidden"
                         buttonClass="flex overflow-hidden p-0 text-default"
                       >
-                        {prefix && prefix} {children}
+                        {children}
                       </Link>
                     );
                   }}
