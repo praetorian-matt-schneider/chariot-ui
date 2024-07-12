@@ -141,7 +141,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
       }
     >
       <Loader isLoading={isInitialLoading} type="spinner">
-        <div className="flex justify-between px-8 pb-4 ">
+        <div className="mb-2 flex justify-between border border-gray-100 bg-gray-50 px-8 py-3">
           <AssetStatusDropdown asset={asset} />
         </div>
         <TabGroup className="h-full">
