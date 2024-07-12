@@ -40,9 +40,13 @@ export const Comment: React.FC<Props> = ({ comment, onSave }: Props) => {
           {comment ? (
             <p className="whitespace-pre-wrap break-words">{comment}</p>
           ) : (
-            <span className="text-gray-500">No comment available</span>
+            <span className="italic text-gray-400">No comment provided.</span>
           )}
-          <Button styleType="none" onClick={() => setIsEditing(true)}>
+          <Button
+            className="mt-2 pl-0"
+            styleType="none"
+            onClick={() => setIsEditing(true)}
+          >
             Edit <PencilSquareIcon className="size-5" />
           </Button>
         </>

@@ -420,7 +420,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                   </>
                   <Button
                     styleType="text"
-                    className="mt-4 p-2 font-bold"
+                    className="mt-4 pl-0 font-bold"
                     endIcon={<PencilSquareIcon className="size-5" />}
                     onClick={event => {
                       event.preventDefault();
