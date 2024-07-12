@@ -84,7 +84,7 @@ export const DrawerList = (props: Props) => {
                   }}
                 >
                   <Tooltip title={value}>
-                    <div className="w-full truncate text-lg font-semibold">
+                    <div className="w-full truncate text-lg font-medium">
                       {value}
                     </div>
                   </Tooltip>
