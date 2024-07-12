@@ -298,7 +298,7 @@ const Assets: React.FC = () => {
         selection={{ value: selectedRows, onChange: setSelectedRows }}
         primaryAction={() => {
           return {
-            label: 'Configure',
+            label: 'Asset Discovery',
             icon: <AssetsIcon className="size-5" />,
             startIcon: <PlusIcon className="size-5" />,
             onClick: () => {
