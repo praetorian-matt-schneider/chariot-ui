@@ -274,13 +274,13 @@ export const AddRisks = () => {
                             <div className="flex justify-around">
                               <Button
                                 startIcon={<PlusIcon className="size-5" />}
-                                styleType="textPrimary"
+                                styleType="secondary"
                                 label="Proof of Exploit"
                                 onClick={() => setIsPOEOpen(true)}
                               />
                               <Button
                                 startIcon={<PlusIcon className="size-5" />}
-                                styleType="textPrimary"
+                                styleType="secondary"
                                 label="Description & Remediation"
                                 onClick={() => setIsDefinitionOpen(true)}
                               />
