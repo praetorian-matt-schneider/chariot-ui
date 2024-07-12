@@ -162,14 +162,14 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
                     `${status?.[0]}${status?.[2] || ''}` as RiskStatus;
                   const riskSeverityKey = status?.[1] as RiskSeverity;
 
-                  const statusIcon = getRiskStatusIcon(riskStatusKey, 'size-3');
+                  const statusIcon = getRiskStatusIcon(riskStatusKey, 'size-4');
                   const severityIcon = getRiskSeverityIcon(
                     riskSeverityKey,
-                    'size-3'
+                    'size-4'
                   );
 
                   const icons = (
-                    <div className="flex items-center gap-2 text-default">
+                    <div className="flex items-center gap-2 text-black">
                       <Tooltip
                         title={
                           (RiskStatusLabel[riskStatusKey] || 'Closed') +

@@ -61,12 +61,6 @@ export const DrawerList = (props: Props) => {
                 transform: `translateY(${virtualItem.start}px)`,
               }}
             >
-              <div className="flex justify-between text-xs text-default-light ">
-                <div className="flex flex-row space-x-2">
-                  {prefix && prefix} <CopyToClipboard>{label}</CopyToClipboard>
-                </div>
-                {updated && <span>{formatDate(updated)}</span>}
-              </div>
               <CopyToClipboard>
                 <ConditionalRender
                   condition={Boolean(to)}
@@ -80,7 +74,7 @@ export const DrawerList = (props: Props) => {
                         className="flex overflow-hidden"
                         buttonClass="flex overflow-hidden p-0 text-default"
                       >
-                        {children}
+                        {prefix && prefix} {children}
                       </Link>
                     );
                   }}
@@ -92,6 +86,13 @@ export const DrawerList = (props: Props) => {
                   </Tooltip>
                 </ConditionalRender>
               </CopyToClipboard>
+              <div className="flex justify-between text-xs text-default-light ">
+                <div className="flex flex-row items-center">
+                  <CopyToClipboard textToCopy={label}>
+                    {label} {updated && ' added ' + formatDate(updated)}
+                  </CopyToClipboard>{' '}
+                </div>
+              </div>
             </li>
           );
         })}
