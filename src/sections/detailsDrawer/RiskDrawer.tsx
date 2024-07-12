@@ -267,15 +267,17 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
       }
     >
       <Loader isLoading={isInitialLoading} type="spinner">
-        <div className="flex h-full flex-col gap-10">
-          <div className="px-8">
-            <HorizontalTimeline
-              steps={jobTimeline}
-              current={jobTimeline.findIndex(
-                ({ status }) => status === jobForThisRisk?.status
-              )}
-            />
-            <div className="mt-16 flex justify-between">
+        <div className="flex h-full flex-col gap-2">
+          <div>
+            <div className="px-8">
+              <HorizontalTimeline
+                steps={jobTimeline}
+                current={jobTimeline.findIndex(
+                  ({ status }) => status === jobForThisRisk?.status
+                )}
+              />
+            </div>
+            <div className="flex justify-between border border-gray-100 bg-gray-50 px-8 py-3">
               <RiskDropdown type="status" risk={risk} />
               <RiskDropdown type="severity" risk={risk} />
               <Button
