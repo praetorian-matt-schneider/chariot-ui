@@ -194,6 +194,7 @@ export function Risks() {
       {
         label: 'Priority',
         id: 'status',
+        fixedWidth: 80,
         cell: (risk: Risk) => {
           const riskStatusKey =
             `${risk.status?.[0]}${risk.status?.[2] || ''}` as RiskStatus;
