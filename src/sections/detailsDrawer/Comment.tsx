@@ -43,7 +43,7 @@ export const Comment: React.FC<Props> = ({ comment, onSave }: Props) => {
             <span className="italic text-gray-400">No comment provided.</span>
           )}
           <Button
-            className="mt-2 pl-0"
+            className="mt-2 pl-0 font-bold"
             styleType="none"
             onClick={() => setIsEditing(true)}
           >
