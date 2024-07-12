@@ -256,8 +256,8 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
               </div>
             }
             tag={
-              <div className="flex text-default-light">
-                <EyeIcon className="mr-2 size-5" />
+              <div className="flex items-center text-sm text-gray-400">
+                <EyeIcon className="mr-2 size-4" />
                 {formatDate(risk.updated)}
               </div>
             }

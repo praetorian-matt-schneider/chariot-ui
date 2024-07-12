@@ -128,9 +128,13 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
             subtitle={assetType === 'seed' ? asset.username : asset.dns}
             prefix={<AssetsIcon className="size-5" />}
             tag={
-              assetType === 'integration' && (
-                <Chip>{capitalize(assetType)}</Chip>
-              )
+              <div className="flex justify-center text-sm text-gray-400">
+                {assetType === 'integration' && (
+                  <Chip>{capitalize(assetType)}</Chip>
+                )}
+                <EyeIcon className="mr-2 size-5" />
+                {formatDate(asset.updated)}
+              </div>
             }
           />
         )
@@ -139,10 +143,6 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
       <Loader isLoading={isInitialLoading} type="spinner">
         <div className="flex justify-between px-8 pb-4 ">
           <AssetStatusDropdown asset={asset} />
-          <div className="flex text-default-light">
-            <EyeIcon className="mr-2 size-5" />
-            {formatDate(asset.updated)}
-          </div>
         </div>
         <TabGroup className="h-full">
           <TabList className="flex overflow-x-auto">
