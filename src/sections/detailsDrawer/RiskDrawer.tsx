@@ -258,7 +258,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
             }
             tag={
               <div className="flex items-center text-sm text-gray-400">
-                <EyeIcon className="mr-2 size-4" />
+                <EyeIcon className="mr-2 size-5" />
                 {formatDate(risk.updated)}
               </div>
             }
@@ -421,7 +421,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                   <Button
                     styleType="text"
                     className="mt-4 p-2 font-bold"
-                    endIcon={<PencilSquareIcon className="size-4" />}
+                    endIcon={<PencilSquareIcon className="size-5" />}
                     onClick={event => {
                       event.preventDefault();
                       event.stopPropagation();
@@ -441,11 +441,11 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
 
                     const statusIcon = getRiskStatusIcon(
                       riskStatusKey,
-                      'size-4'
+                      'size-5'
                     );
                     const severityIcon = getRiskSeverityIcon(
                       riskSeverityKey,
-                      'size-4'
+                      'size-5'
                     );
 
                     const icons = (

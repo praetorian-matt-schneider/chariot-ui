@@ -162,10 +162,10 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
                     `${status?.[0]}${status?.[2] || ''}` as RiskStatus;
                   const riskSeverityKey = status?.[1] as RiskSeverity;
 
-                  const statusIcon = getRiskStatusIcon(riskStatusKey, 'size-4');
+                  const statusIcon = getRiskStatusIcon(riskStatusKey, 'size-5');
                   const severityIcon = getRiskSeverityIcon(
                     riskSeverityKey,
-                    'size-4'
+                    'size-5'
                   );
 
                   const icons = (
@@ -206,7 +206,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
 
                     const icons = [
                       <Tooltip key="status" title={detail}>
-                        {getAssetStatusIcon(data.status, 'size-4')}
+                        {getAssetStatusIcon(data.status, 'size-5')}
                       </Tooltip>,
                     ];
 
@@ -214,7 +214,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
                       icons.push(
                         <Tooltip key="risks" title="Contains open risks">
                           <div>
-                            <RisksIcon className="size-4" />
+                            <RisksIcon className="size-5" />
                           </div>
                         </Tooltip>
                       );
@@ -236,7 +236,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
 
                     const icons = [
                       <Tooltip key="status" title={detail + ' Status'}>
-                        {getAssetStatusIcon(data.status, 'size-4')}
+                        {getAssetStatusIcon(data.status, 'size-5')}
                       </Tooltip>,
                     ];
 
@@ -244,7 +244,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
                       icons.push(
                         <Tooltip key="risks" title="Contains Open Risks">
                           <div>
-                            <RisksIcon className="size-4" />
+                            <RisksIcon className="size-5" />
                           </div>
                         </Tooltip>
                       );

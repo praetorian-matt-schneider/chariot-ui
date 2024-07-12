@@ -86,7 +86,7 @@ export const DrawerList = (props: Props) => {
                   </Tooltip>
                 </ConditionalRender>
               </CopyToClipboard>
-              <div className="flex justify-between text-xs text-default-light ">
+              <div className="flex justify-between text-xs text-default-light">
                 <div className="flex flex-row items-center">
                   <CopyToClipboard textToCopy={label}>
                     {label} {updated && ' added ' + formatDate(updated)}
