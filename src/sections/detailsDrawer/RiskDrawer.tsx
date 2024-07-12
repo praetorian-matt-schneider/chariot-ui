@@ -476,7 +476,9 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                 />
               </TabPanel>
               <TabPanel className="h-full">
-                <AddAttribute resourceKey={risk.key} />
+                <div className="ml-4">
+                  <AddAttribute resourceKey={risk.key} />
+                </div>
                 <div>
                   <DrawerList
                     allowEmpty={true}

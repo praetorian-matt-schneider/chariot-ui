@@ -265,7 +265,9 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
               />
             </TabPanel>
             <TabPanel className="h-full">
-              <AddAttribute resourceKey={asset.key} />
+              <div className="ml-4">
+                <AddAttribute resourceKey={asset.key} />
+              </div>
               <div>
                 <DrawerList
                   allowEmpty={true}
