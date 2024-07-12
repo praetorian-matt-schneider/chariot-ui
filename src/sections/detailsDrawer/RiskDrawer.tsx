@@ -8,7 +8,6 @@ import {
   PencilSquareIcon,
 } from '@heroicons/react/24/outline';
 import { TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
-import DOMPurify from 'dompurify';
 
 import { Button } from '@/components/Button';
 import { Drawer } from '@/components/Drawer';
@@ -374,7 +373,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                     }}
                   >
                     <MarkdownEditor
-                      value={DOMPurify.sanitize(markdownValue)}
+                      value={markdownValue}
                       onChange={value => {
                         setMarkdownValue(value || '');
                       }}
@@ -384,7 +383,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                   <>
                     {definitionsFile && (
                       <MarkdownPreview
-                        source={DOMPurify.sanitize(definitionsFileValue)}
+                        source={definitionsFileValue}
                         style={{
                           wordBreak: 'break-word',
                           minHeight: '20px',
