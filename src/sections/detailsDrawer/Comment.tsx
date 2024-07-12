@@ -54,7 +54,7 @@ export const Comment: React.FC<Props> = ({ comment, onSave }: Props) => {
             rows={6}
             value={value}
             onChange={e => setValue(e.target.value)}
-            className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+            className="block w-full rounded-sm border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 "
             placeholder="Write your thoughts here..."
           />
           <div className="mt-2 flex justify-end space-x-2">
