@@ -150,7 +150,7 @@ const Assets: React.FC = () => {
     {
       label: 'Priority',
       id: 'name',
-      className: 'w-20',
+      fixedWidth: 100,
       cell: (asset: AssetsWithRisk) => {
         const integration = isIntegration(asset);
         const containsRisks = Object.values(asset.riskSummary || {}).length > 0;
