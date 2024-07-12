@@ -320,6 +320,10 @@ const Assets: React.FC = () => {
                 },
                 { type: 'divider', label: 'Divider' },
                 {
+                  label: 'Change Priority',
+                  type: 'label',
+                },
+                {
                   label: AssetStatusLabel[AssetStatus.ActiveHigh],
                   icon: getAssetStatusIcon(AssetStatus.ActiveHigh),
                   disabled: assets.every(

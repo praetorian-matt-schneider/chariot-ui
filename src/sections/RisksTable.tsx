@@ -461,7 +461,7 @@ export function Risks() {
             menu: {
               items: [
                 {
-                  label: 'Status',
+                  label: 'Change Status',
                   type: 'label',
                 },
                 {
@@ -490,7 +490,7 @@ export function Risks() {
                   },
                 },
                 {
-                  label: 'Severity',
+                  label: 'Change Severity',
                   type: 'label',
                 },
                 {
