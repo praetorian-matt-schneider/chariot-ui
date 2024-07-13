@@ -7,6 +7,7 @@ import Account from '@/sections/Account';
 import Assets from '@/sections/Assets';
 import { Attributes } from '@/sections/Attributes';
 import { AuthenticatedApp } from '@/sections/AuthenticatedApp';
+import ChariotLandingPage from '@/sections/ChariotLandingPage';
 import Files from '@/sections/Files';
 import Hello from '@/sections/Hello';
 import Intelligence from '@/sections/Intelligence';
@@ -32,6 +33,10 @@ function CheckAuth(props: { children: ReactNode }) {
 }
 
 const appRoutes = {
+  landing: {
+    element: <ChariotLandingPage />,
+    title: 'Chariot',
+  },
   login: {
     element: <Login />,
     title: 'login',
