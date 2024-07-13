@@ -13,10 +13,11 @@ import { useGetDisplayName } from '@/hooks/useAccounts';
 import { useMy } from '@/hooks/useMy';
 import Avatar from '@/sections/topNavBar/Avatar';
 import { useAuth } from '@/state/auth';
-import { getRoute } from '@/utils/route.util';
+import { getAppRoute } from '@/utils/route.util';
 
 export const AccountDropdown: React.FC = () => {
-  const { friend, me, startImpersonation, stopImpersonation } = useAuth();
+  const { impersonatingEmail, me, startImpersonation, stopImpersonation } =
+    useAuth();
 
   const { data: accounts, status: accountsStatus } = useMy(
     {
@@ -39,7 +40,7 @@ export const AccountDropdown: React.FC = () => {
           {
             label: 'Organization Settings',
             icon: <UserIcon />,
-            to: getRoute(['app', 'account']),
+            to: getAppRoute(['account']),
           },
           {
             label: 'Divider',
@@ -64,7 +65,7 @@ export const AccountDropdown: React.FC = () => {
               />
             ),
             value: displayName || me,
-            onClick: () => friend?.email && stopImpersonation(),
+            onClick: () => impersonatingEmail && stopImpersonation(),
           },
           ...collaborators.map(collaborator => ({
             label: (
@@ -81,11 +82,7 @@ export const AccountDropdown: React.FC = () => {
               />
             ),
             value: collaborator.email,
-            onClick: () =>
-              startImpersonation(
-                collaborator.email,
-                collaborator.displayName ?? ''
-              ),
+            onClick: () => startImpersonation(collaborator.email),
           })),
           {
             label: 'Divider',
@@ -95,12 +92,12 @@ export const AccountDropdown: React.FC = () => {
           {
             label: 'Documents',
             icon: <DocumentTextIcon />,
-            to: getRoute(['app', 'files']),
+            to: getAppRoute(['files']),
           },
           {
             label: 'Widgets',
             icon: <ChartBarSquareIcon />,
-            to: getRoute(['app', 'widgets']),
+            to: getAppRoute(['widgets']),
           },
           {
             label: 'Divider',
@@ -109,14 +106,14 @@ export const AccountDropdown: React.FC = () => {
           {
             label: 'Log Out',
             icon: <ArrowRightStartOnRectangleIcon />,
-            to: getRoute(['app', 'logout']),
+            to: getAppRoute(['logout']),
           },
         ],
-        value: friend?.email || me,
+        value: impersonatingEmail || me,
       }}
     >
       <Hexagon>
-        <Avatar className="scale-150" email={friend.email || me} />
+        <Avatar className="scale-150" email={impersonatingEmail || me} />
       </Hexagon>
     </Dropdown>
   );

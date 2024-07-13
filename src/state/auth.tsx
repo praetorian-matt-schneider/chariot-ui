@@ -6,7 +6,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { generatePath, useLocation, useNavigate } from 'react-router-dom';
 import { CognitoIdentityProvider } from '@aws-sdk/client-cognito-identity-provider';
 import { jwtDecode } from 'jwt-decode';
 
@@ -32,17 +32,41 @@ const emptyAuth: AuthState = {
   region: '',
   clientId: '',
   me: '',
-  friend: { email: '', displayName: '' },
 };
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const userId = location.pathname.match(/(?<=\/app\/).*(?=\/)/)?.[0] || '';
+  const parsedUserId = userId ? atob(decodeURIComponent(userId)) : '';
+
   const [auth, setAuth] = useStorage<AuthState>(
     { key: StorageKey.AUTH },
     emptyAuth
   );
 
+  const [savedImpersonatedEmail, setSavedImpersonatedEmail] = useStorage(
+    { key: StorageKey.IMPERSONATED_UER_ID },
+    ''
+  );
+
   const { backend, token, rToken, expiry, region, clientId } = auth;
+
+  const impersonatingEmail = parsedUserId
+    ? parsedUserId === auth.me
+      ? ''
+      : parsedUserId
+    : '';
+
+  useEffect(() => {
+    if (impersonatingEmail) {
+      if (impersonatingEmail !== savedImpersonatedEmail) {
+        console.log('impersonatingEmail', impersonatingEmail);
+        setSavedImpersonatedEmail(impersonatingEmail);
+      }
+    }
+  }, [impersonatingEmail]);
 
   const [isTabVisible, setIsTabVisible] = useState(true);
   const [, setNewUserSeedModal] = useStorage(
@@ -71,25 +95,29 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setIsTabVisible(isVisible);
   }, [expiry]);
 
-  const startImpersonation = (memberId: string, displayName: string) => {
-    setAuth(prevAuth => {
-      return {
-        ...prevAuth,
-        friend: { email: memberId, displayName: displayName },
-      };
-    });
-    window.location.assign('/app/risks');
+  const startImpersonation = (userId: string) => {
+    window.location.assign(
+      generatePath(getRoute(['app/:userId', 'risks']), {
+        userId: encodeURIComponent(btoa(userId)),
+      })
+    );
   };
 
   const stopImpersonation = () => {
-    setAuth(prevAuth => {
-      return {
-        ...prevAuth,
-        friend: { email: '', displayName: '' },
-      };
-    });
-    window.location.assign('/app/account');
+    window.location.assign(
+      generatePath(getRoute(['app/:userId', 'account']), {
+        userId: encodeURIComponent(btoa(auth.me)),
+      })
+    );
   };
+
+  function getDefaultRoute() {
+    console.log('impersonatingEmail', savedImpersonatedEmail, auth.me);
+
+    return generatePath(getRoute(['app/:userId', 'risks']), {
+      userId: encodeURIComponent(btoa(savedImpersonatedEmail || auth.me)),
+    });
+  }
 
   async function login(backend: BackendType) {
     const extracted_region = REGION_REGEX.exec(backend.api)?.[1] ?? 'us-east-2';
@@ -123,6 +151,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           refreshToken: response?.AuthenticationResult?.RefreshToken,
         });
       }
+
       navigate('/');
     } else {
       // Redirect to hosted UI
@@ -160,8 +189,10 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setCognitoAuthStates,
       startImpersonation,
       stopImpersonation,
+      impersonatingEmail,
+      getDefaultRoute,
     }),
-    [login, logout, JSON.stringify(auth)]
+    [login, logout, JSON.stringify(auth), impersonatingEmail]
   );
 
   async function rTokenFn() {

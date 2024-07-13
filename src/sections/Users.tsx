@@ -19,7 +19,7 @@ const isAccount = (account: Account): boolean => {
 };
 
 export const Users: React.FC = () => {
-  const { me, friend } = useAuth();
+  const { me, impersonatingEmail } = useAuth();
   const { mutate: unlink } = useModifyAccount('unlink');
 
   const {
@@ -30,9 +30,9 @@ export const Users: React.FC = () => {
 
   const users = [
     {
-      username: friend.email || me,
-      member: friend.email || me,
-      name: friend.email || me,
+      username: impersonatingEmail || me,
+      member: impersonatingEmail || me,
+      name: impersonatingEmail || me,
       updated: '',
       config: {},
       key: 'self',
