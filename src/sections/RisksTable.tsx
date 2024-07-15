@@ -351,6 +351,32 @@ export function Risks() {
             <Dropdown
               styleType="header"
               label={getFilterLabel(
+                'Severities',
+                severityFilter,
+                severityOptions
+              )}
+              endIcon={DownIcon}
+              menu={{
+                items: [
+                  {
+                    label: 'All Severities',
+                    labelSuffix: risksExceptSeverity.length,
+                    value: '',
+                  },
+                  {
+                    label: 'Divider',
+                    type: 'divider',
+                  },
+                  ...severityOptions,
+                ],
+                onSelect: selectedRows => setSeverityFilter(selectedRows),
+                value: severityFilter,
+                multiSelect: true,
+              }}
+            />
+            <Dropdown
+              styleType="header"
+              label={getFilterLabel(
                 'Statuses',
                 statusFilter,
                 riskStatusFilterOptions
@@ -384,32 +410,6 @@ export function Risks() {
                 onSelect: selectedRows =>
                   setStatusesFilter(selectedRows as RiskStatus[]),
                 value: statusFilter,
-                multiSelect: true,
-              }}
-            />
-            <Dropdown
-              styleType="header"
-              label={getFilterLabel(
-                'Severities',
-                severityFilter,
-                severityOptions
-              )}
-              endIcon={DownIcon}
-              menu={{
-                items: [
-                  {
-                    label: 'All Severities',
-                    labelSuffix: risksExceptSeverity.length,
-                    value: '',
-                  },
-                  {
-                    label: 'Divider',
-                    type: 'divider',
-                  },
-                  ...severityOptions,
-                ],
-                onSelect: selectedRows => setSeverityFilter(selectedRows),
-                value: severityFilter,
                 multiSelect: true,
               }}
             />
