@@ -12,6 +12,7 @@ import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
 import { getAssetStatusProperties } from '@/components/ui/AssetStatusChip';
+import { AttributeFilter } from '@/components/ui/AttributeFilter';
 import { useMy } from '@/hooks';
 import { AssetsSnackbarTitle, useUpdateAsset } from '@/hooks/useAssets';
 import { useFilter } from '@/hooks/useFilter';
@@ -70,7 +71,6 @@ const Assets: React.FC = () => {
       asset: { onOpenChange: setShowAddAsset },
     },
   } = useGlobalState();
-
   const {
     isLoading,
     status: assetsStatus,
@@ -91,6 +91,9 @@ const Assets: React.FC = () => {
     'asset-priority',
     setSelectedRows
   );
+  const [assetsWithAttributesFilter, setAssetsWithAttributesFilter] = useState<
+    string[]
+  >([]);
 
   const status = useMergeStatus(riskStatus, assetsStatus);
   const { getAssetDrawerLink } = getDrawerLink();
@@ -118,16 +121,29 @@ const Assets: React.FC = () => {
     }
   }, []);
 
+  // Filter assets list with the selected attributes
+  const assetsObjectWithAttributesFilter: Asset[] = useMemo(() => {
+    return assetsWithAttributesFilter &&
+      Array.isArray(assetsWithAttributesFilter) &&
+      assetsWithAttributesFilter.length > 0
+      ? ((assetsWithAttributesFilter as string[])
+          .map(key => assets.find(asset => asset.key === key))
+          .filter(Boolean) as Asset[])
+      : assets;
+  }, [assets, assetsWithAttributesFilter]);
+
   // merge risk data with asset data
-  const assetsWithRisk: AssetsWithRisk[] = assets.map(asset => {
-    const riskSummary = openRiskDataset[asset.dns];
+  const assetsWithRisk: AssetsWithRisk[] = assetsObjectWithAttributesFilter.map(
+    asset => {
+      const riskSummary = openRiskDataset[asset.dns];
 
-    if (riskSummary) {
-      return { ...asset, riskSummary };
+      if (riskSummary) {
+        return { ...asset, riskSummary };
+      }
+
+      return asset;
     }
-
-    return asset;
-  });
+  );
 
   const filteredAssets = useMemo(() => {
     let filteredAssets = assetsWithRisk;
@@ -272,6 +288,9 @@ const Assets: React.FC = () => {
         name="assets"
         filters={
           <div className="flex gap-4">
+            <AttributeFilter
+              onAssetsChange={assets => setAssetsWithAttributesFilter(assets)}
+            />
             <Dropdown
               styleType="header"
               label={getFilterLabel(
