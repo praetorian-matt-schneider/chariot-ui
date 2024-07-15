@@ -25,6 +25,7 @@ import {
 import { useUploadFile } from '@/hooks/useFiles';
 import { useMy } from '@/hooks/useMy';
 import { CollaboratingWith } from '@/sections/CollaboratingWith';
+import { SSOSetupForm } from '@/sections/SSOSetupForm';
 import Avatar from '@/sections/topNavBar/Avatar';
 import { Users } from '@/sections/Users';
 import { useAuth } from '@/state/auth';
@@ -82,21 +83,12 @@ const Account: React.FC = () => {
               config: { displayName },
             });
           }}
+          className="flex flex-col space-y-6"
         >
-          <Input
-            label="Organization Name"
-            value={displayName}
-            name="displayName"
-            isLoading={status === 'pending'}
-            onChange={e => setDisplayName(e.target.value)}
-          />
-
-          <>
-            <div className="mt-5 flex items-center">
-              <label className="block text-sm font-medium leading-6 text-gray-900">
-                Organization Logo
-              </label>
-            </div>
+          <div>
+            <label className="block text-sm font-medium leading-6 text-gray-900">
+              Organization Logo
+            </label>
             <Loader
               isLoading={profilePictureStatus === 'pending'}
               className="m-0 h-5"
@@ -112,7 +104,10 @@ const Account: React.FC = () => {
               )}
               {!showDpDropzone && (
                 <div className="flex flex-row items-center">
-                  <Avatar className="mr-2 size-20" email={friend.email || me} />
+                  <Avatar
+                    className="mr-2 size-20 rounded-md"
+                    email={friend.email || me}
+                  />
 
                   <Button
                     styleType="text"
@@ -128,22 +123,35 @@ const Account: React.FC = () => {
                 </div>
               )}
             </Loader>
-          </>
-          <div className="mt-4 flex gap-2">
-            {isDirty && (
-              <Button
-                style={{
-                  opacity: isDirty ? '100%' : '0%',
-                  visibility: isDirty ? 'visible' : 'hidden',
-                  transition: 'opacity 0.1s',
-                }}
-                type="submit"
-                styleType="primary"
-              >
-                Save
-              </Button>
-            )}
           </div>
+
+          <Input
+            label="Organization Name"
+            value={displayName}
+            name="displayName"
+            isLoading={status === 'pending'}
+            onChange={e => setDisplayName(e.target.value)}
+          />
+
+          <div className="mt-5">
+            <label className="block text-sm font-medium leading-6 text-gray-900">
+              Single Sign-On (SSO)
+            </label>
+            <SSOSetupForm />
+          </div>
+
+          <Button
+            style={{
+              opacity: isDirty ? '100%' : '0%',
+              visibility: isDirty ? 'visible' : 'hidden',
+              transition: 'opacity 0.1s',
+            }}
+            className="mt-2"
+            type="submit"
+            styleType="primary"
+          >
+            Save
+          </Button>
         </form>
       </Section>
 
