@@ -60,13 +60,16 @@ export const AttributeFilter = (props: Props) => {
         <ChevronDownIcon className="size-3 stroke-[4px] text-header-dark" />
       }
       menu={{
-        className: 'h-[400px]',
+        className: 'max-h-[400px] min-w-[200px]',
         items: menuItems,
         onSelect: attributesFilter => {
           setAttributesFilter(attributesFilter);
         },
         value: attributesFilter,
         multiSelect: true,
+        emptyState: {
+          label: 'No attributes found',
+        },
       }}
     />
   );
@@ -113,5 +116,22 @@ const getMenuItems = (
     },
     []
   );
-  return menuItems;
+  return [
+    {
+      label: 'All Attributes',
+      labelSuffix: Object.values(statsObject)
+        .reduce(
+          (acc, values) =>
+            acc + Object.values(values).reduce((acc, v) => acc + v, 0),
+          0
+        )
+        .toLocaleString(),
+      value: '',
+    },
+    {
+      label: 'Divider',
+      type: 'divider',
+    },
+    ...menuItems,
+  ];
 };
