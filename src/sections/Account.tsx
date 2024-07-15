@@ -90,7 +90,7 @@ const Account: React.FC = () => {
             </div>
             <Loader
               isLoading={profilePictureStatus === 'pending'}
-              className="h-5 m-0"
+              className="m-0 h-5"
             >
               {showDpDropzone && (
                 <Dropzone
@@ -98,7 +98,6 @@ const Account: React.FC = () => {
                   onFilesDrop={handleFileDrop}
                   title="Click or drag and drop your logo image here."
                   subTitle=""
-                  maxFileSizeInMb={6}
                   className="mt-1"
                 />
               )}
