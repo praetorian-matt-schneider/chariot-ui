@@ -9,9 +9,9 @@ import { useFilter } from '@/hooks/useFilter';
 
 export type AttributeFilterType = Record<string, string[]>;
 
-export const getSelectedAttributes = (attribues: AttributeFilterType) => {
+export const getSelectedAttributes = (attributes: AttributeFilterType) => {
   return Object.fromEntries(
-    Object.entries(attribues).filter(([, value]) => value.length > 0)
+    Object.entries(attributes).filter(([, value]) => value.length > 0)
   );
 };
 
@@ -94,6 +94,7 @@ const getMenuItems = (
       },
       {} as Record<string, Record<string, number>>
     );
+
   const menuItems = Object.entries(statsObject).reduce<MenuProps['items']>(
     (acc, [name, values]) => {
       // Skip source attribute, as it has a separate filter
@@ -116,16 +117,11 @@ const getMenuItems = (
     },
     []
   );
+
   return [
     {
       label: 'All Attributes',
-      labelSuffix: Object.values(statsObject)
-        .reduce(
-          (acc, values) =>
-            acc + Object.values(values).reduce((acc, v) => acc + v, 0),
-          0
-        )
-        .toLocaleString(),
+      labelSuffix: menuItems.length.toLocaleString(),
       value: '',
     },
     {
