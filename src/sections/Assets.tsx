@@ -275,7 +275,7 @@ const Assets: React.FC = () => {
             <Dropdown
               styleType="header"
               label={getFilterLabel(
-                'Priorities',
+                'Statuses',
                 priorityFilter,
                 priorityOptions
               )}
@@ -285,7 +285,7 @@ const Assets: React.FC = () => {
               menu={{
                 items: [
                   {
-                    label: 'All Priorities',
+                    label: 'All Statuses',
                     labelSuffix: assets.length.toLocaleString(),
                     value: '',
                   },
