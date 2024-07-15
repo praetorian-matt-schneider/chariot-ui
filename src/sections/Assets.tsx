@@ -186,10 +186,18 @@ const Assets: React.FC = () => {
     },
     {
       label: 'Asset',
-      id: 'name',
       className: 'w-full',
+      id: 'name',
       to: item => getAssetDrawerLink(item),
       copy: true,
+    },
+    {
+      label: 'Status',
+      id: 'status',
+      fixedWidth: 200,
+      cell: (asset: Asset) => {
+        return AssetStatusLabel[asset.status];
+      },
     },
     {
       label: 'DNS',
