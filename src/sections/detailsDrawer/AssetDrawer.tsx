@@ -157,6 +157,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
           <TabPanels className="size-full h-[calc(100%-150px)] overflow-auto">
             <TabPanel className="h-full">
               <DrawerList
+                dns={asset.dns}
                 items={openRisks.map(({ dns, name, status, updated }) => {
                   const riskStatusKey =
                     `${status?.[0]}${status?.[2] || ''}` as RiskStatus;
@@ -199,6 +200,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
 
             <TabPanel className="h-full">
               <DrawerList
+                dns={asset.dns}
                 items={[
                   ...linkedHostnames.map(data => {
                     const { detail } = getAssetStatusProperties(data.status);
@@ -271,6 +273,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
               <div>
                 <DrawerList
                   allowEmpty={true}
+                  dns={asset.dns}
                   items={(attributesGenericSearch?.attributes || [])?.map(
                     data => ({
                       label: data.name,

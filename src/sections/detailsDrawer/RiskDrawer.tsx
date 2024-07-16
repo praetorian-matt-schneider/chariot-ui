@@ -433,6 +433,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
               </TabPanel>
               <TabPanel className="h-full">
                 <DrawerList
+                  dns={risk.dns}
                   items={riskOccurrence.map(data => {
                     const riskStatusKey =
                       `${data.status?.[0]}${data.status?.[2] || ''}` as RiskStatus;
@@ -480,6 +481,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                 </div>
                 <div>
                   <DrawerList
+                    dns={risk.dns}
                     allowEmpty={true}
                     items={(attributesGenericSearch?.attributes || [])?.map(
                       data => ({

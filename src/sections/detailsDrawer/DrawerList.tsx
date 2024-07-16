@@ -1,5 +1,5 @@
 import { ReactNode, useRef } from 'react';
-import { To } from 'react-router-dom';
+import { To, useNavigate } from 'react-router-dom';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
 import { ConditionalRender } from '@/components/ConditionalRender';
@@ -7,6 +7,7 @@ import { CopyToClipboard } from '@/components/CopyToClipboard';
 import { Link } from '@/components/Link';
 import { Tooltip } from '@/components/Tooltip';
 import { NoData } from '@/components/ui/NoData';
+import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { formatDate } from '@/utils/date.util';
 
 interface Props {
@@ -18,9 +19,12 @@ interface Props {
     prefix?: JSX.Element;
   }[];
   allowEmpty?: boolean;
+  dns: string;
 }
 
 export const DrawerList = (props: Props) => {
+  const { getAssetDrawerLink } = getDrawerLink();
+  const navigate = useNavigate();
   const { items, allowEmpty } = props;
   const parentRef = useRef<HTMLDivElement>(null);
 
@@ -40,6 +44,35 @@ export const DrawerList = (props: Props) => {
   });
 
   const virtualItems = virtualizer.getVirtualItems();
+
+  const createLabel = (label: string, value: string) => {
+    if (label?.toLowerCase() === 'url') {
+      return (
+        <a href={value as string} target="_blank" rel="noreferrer">
+          {value}
+        </a>
+      );
+    } else if (label?.toLowerCase() === 'host') {
+      const domain = props.dns;
+      const ip = value.split(':')[0];
+      return (
+        <button
+          onClick={() => {
+            navigate(
+              getAssetDrawerLink({
+                dns: domain,
+                name: ip,
+              })
+            );
+          }}
+        >
+          {value}
+        </button>
+      );
+    } else {
+      return value;
+    }
+  };
 
   return (
     <div className="size-full overflow-auto" ref={parentRef}>
@@ -81,17 +114,7 @@ export const DrawerList = (props: Props) => {
                 >
                   <Tooltip title={value}>
                     <div className="w-full truncate text-lg font-medium">
-                      {label === 'url' ? (
-                        <a
-                          href={value as string}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          {value}
-                        </a>
-                      ) : (
-                        value
-                      )}
+                      {createLabel(label, value)}
                     </div>
                   </Tooltip>
                 </ConditionalRender>
