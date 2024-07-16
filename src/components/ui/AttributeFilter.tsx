@@ -60,8 +60,8 @@ export const AttributeFilter = (props: Props) => {
         <ChevronDownIcon className="size-3 stroke-[4px] text-header-dark" />
       }
       menu={{
-        className: 'max-h-[400px] min-w-[200px]',
-        items: menuItems,
+        className: 'w-96',
+        items: [...menuItems, ...menuItems, ...menuItems],
         onSelect: attributesFilter => {
           setAttributesFilter(attributesFilter);
         },

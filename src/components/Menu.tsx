@@ -1,4 +1,4 @@
-import React, { ReactNode, useMemo, useRef, useState } from 'react';
+import React, { forwardRef, ReactNode, useMemo, useRef, useState } from 'react';
 import { Link, To } from 'react-router-dom';
 import { CheckIcon } from '@heroicons/react/20/solid';
 import { ChevronRightIcon, StopIcon } from '@heroicons/react/24/outline';
@@ -6,6 +6,7 @@ import {
   CheckCircleIcon,
   StopIcon as StopIconSolid,
 } from '@heroicons/react/24/solid';
+import { useVirtualizer } from '@tanstack/react-virtual';
 
 import { Button, ButtonProps } from '@/components/Button';
 import { Dropdown } from '@/components/Dropdown';
@@ -41,7 +42,7 @@ export const Menu: React.FC<MenuProps> = props => {
     emptyState,
   } = props;
 
-  const ulRef = useRef<HTMLUListElement>(null);
+  const ulRef = useRef<HTMLDivElement>(null);
 
   const [isSubMenuOpen, setIsSubMenuOpen] = useState(false);
   const [selected, setSelected] = useStorage<string[]>(
@@ -53,69 +54,100 @@ export const Menu: React.FC<MenuProps> = props => {
     []
   );
 
+  const virtualizer = useVirtualizer({
+    count: unparsedItems.length,
+    getScrollElement: () => ulRef.current,
+    estimateSize: () => 48,
+    overscan: 5,
+    //measure dynamic row height
+    measureElement:
+      typeof window !== 'undefined'
+        ? element => element?.getBoundingClientRect().height
+        : undefined,
+  });
+
+  const virtualItems = virtualizer.getVirtualItems();
+
   const items = useMemo(() => {
     return unparsedItems.filter(item => !item.hide);
   }, [unparsedItems]);
 
   return (
-    <ul
-      ref={ulRef}
+    <div
       className={cn(
-        'relative w-full overflow-auto rounded-[2px] bg-layer0 shadow-lg outline-none ring-1 ring-default-dark',
+        'h-max-[600px] relative w-[300px] overflow-y-auto rounded-[2px] bg-layer0 shadow-lg outline-none ring-1 ring-default-dark',
         className
       )}
+      ref={ulRef}
     >
-      {items.length === 0 && !emptyState?.hide && (
-        <li
-          className={cn(
-            'flex items-center text-xs font-medium text-default-light',
-            menuMarginClassName,
-            className
-          )}
-        >
-          {emptyState?.label || 'No items found'}
-        </li>
-      )}
-      {items.map((item, index) => (
-        <MenuItem
-          key={index}
-          {...item}
-          multiSelect={multiSelect}
-          isSubMenuOpen={isSubMenuOpen}
-          setIsSubMenuOpen={setIsSubMenuOpen}
-          isSelected={
-            item.value === undefined ? false : selected.includes(item.value)
-          }
-          onClick={(...args) => {
-            onClick?.(...args);
-            item.onClick?.(...args);
+      <ul
+        className="relative"
+        style={{
+          height: `${virtualizer.getTotalSize()}px`,
+        }}
+      >
+        {items.length === 0 && !emptyState?.hide && (
+          <li
+            className={cn(
+              'flex items-center text-xs font-medium text-default-light',
+              menuMarginClassName,
+              className
+            )}
+          >
+            {emptyState?.label || 'No items found'}
+          </li>
+        )}
+        {virtualItems.map(virtualItem => {
+          const item = items[virtualItem.index];
 
-            setSelected(prev => {
-              let newSelected = prev;
-              if (multiSelect && item.value !== undefined) {
-                if (item.value) {
-                  // Toggle the value
-                  if (prev.includes(item.value)) {
-                    newSelected = prev.filter(v => v !== item.value);
-                  } else {
-                    newSelected = [...prev, item.value];
-                  }
-                  // Toggle "All option" and other values
-                  newSelected =
-                    newSelected.length > 0
-                      ? newSelected.filter(v => v !== '')
-                      : [''];
-                } else {
-                  // If 'All' option is selected, remove all other values
-                  newSelected = [''];
-                }
+          return (
+            <MenuItem
+              dataIndex={virtualItem.index} //needed for dynamic row height
+              key={virtualItem.key}
+              {...item}
+              className="absolute left-0 top-0"
+              ref={node => virtualizer.measureElement(node)}
+              multiSelect={multiSelect}
+              isSubMenuOpen={isSubMenuOpen}
+              setIsSubMenuOpen={setIsSubMenuOpen}
+              isSelected={
+                item.value === undefined ? false : selected.includes(item.value)
               }
-              return newSelected;
-            });
-          }}
-        />
-      ))}
-    </ul>
+              style={{
+                transform: `translateY(${virtualItem.start}px)`,
+              }}
+              onClick={(...args) => {
+                onClick?.(...args);
+                item.onClick?.(...args);
+
+                setSelected(prev => {
+                  let newSelected = prev;
+                  if (multiSelect && item.value !== undefined) {
+                    if (item.value) {
+                      // Toggle the value
+                      if (prev.includes(item.value)) {
+                        newSelected = prev.filter(v => v !== item.value);
+                      } else {
+                        newSelected = [...prev, item.value];
+                      }
+                      // Toggle "All option" and other values
+                      newSelected =
+                        newSelected.length > 0
+                          ? newSelected.filter(v => v !== '')
+                          : [''];
+                    } else {
+                      // If 'All' option is selected, remove all other values
+                      newSelected = [''];
+                    }
+                  }
+                  return newSelected;
+                });
+              }}
+            />
+          );
+        })}
+      </ul>
+    </div>
   );
 };
 
@@ -143,11 +175,14 @@ export interface MenuItemProps {
   isLoading?: boolean;
   // checked?: boolean;
   submenu?: MenuItemProps[];
+  style?: React.CSSProperties;
+  dataIndex?: number;
 }
 
-const MenuItem: React.FC<
+export const MenuItem = forwardRef<
+  HTMLLIElement,
   MenuItemProps & subMenuOpenProps & { multiSelect?: boolean }
-> = props => {
+>(function MenuItem(props, ref) {
   if (props.hide) {
     return null;
   }
@@ -158,9 +193,12 @@ const MenuItem: React.FC<
     return (
       <li
         className={cn(
-          'pt-5 pb-2 px-3 text-xs font-medium text-default-light top-0 sticky bg-layer0 z-10 mx-2',
+          'w-full pt-5 pb-2 px-3 text-xs font-medium text-default-light sticky bg-layer0 z-10 mx-2',
           className
         )}
+        style={props.style}
+        ref={ref}
+        data-index={props.dataIndex}
       >
         {label}
       </li>
@@ -170,8 +208,13 @@ const MenuItem: React.FC<
   if (props.type === 'divider') {
     return (
       <li
-        className={cn('m-2 -ml-2 border-t border-default', props.className)}
-      />
+        className={cn('pt-4 -ml-1 w-[calc(100%-4px)]', props.className)}
+        style={props.style}
+        ref={ref}
+        data-index={props.dataIndex}
+      >
+        <hr className="border-t border-default" />
+      </li>
     );
   }
 
@@ -189,28 +232,32 @@ const MenuItem: React.FC<
   if (to) {
     const isNewTab =
       newTab || download || (typeof to === 'string' && to.startsWith('http'));
+    const { style, dataIndex, className, ...rest } = props;
 
     return (
-      <Link
-        onClick={handleClick}
-        to={to}
-        tabIndex={-1}
-        {...(isNewTab
-          ? {
-              target: '_blank',
-              rel: 'noreferrer',
-            }
-          : {})}
-        {...(download
-          ? {
-              download: true,
-            }
-          : {})}
-      >
-        <MenuButton {...props} onClick={undefined}>
-          <Content {...props} />
-        </MenuButton>
-      </Link>
+      <li className={className} style={style} ref={ref} data-index={dataIndex}>
+        <Link
+          className="relative size-full"
+          onClick={handleClick}
+          to={to}
+          tabIndex={-1}
+          {...(isNewTab
+            ? {
+                target: '_blank',
+                rel: 'noreferrer',
+              }
+            : {})}
+          {...(download
+            ? {
+                download: true,
+              }
+            : {})}
+        >
+          <MenuButton {...rest} onClick={undefined}>
+            <Content {...rest} />
+          </MenuButton>
+        </Link>
+      </li>
     );
   }
 
@@ -219,14 +266,16 @@ const MenuItem: React.FC<
       <Content {...props} />
     </MenuButton>
   );
-};
+});
 
-function MenuButton(
-  props: MenuItemProps & {
+const MenuButton = forwardRef<
+  HTMLButtonElement,
+  MenuItemProps & {
     onClick?: React.MouseEventHandler<HTMLButtonElement>;
     children: ReactNode;
+    dataIndex?: number;
   } & subMenuOpenProps
-) {
+>(function MenuButton(props, ref) {
   const {
     disabled,
     onClick,
@@ -240,6 +289,8 @@ function MenuButton(
     submenu,
     isSubMenuOpen,
     setIsSubMenuOpen,
+    style,
+    dataIndex,
   } = props;
 
   const buttonClassName = cn(
@@ -271,6 +322,7 @@ function MenuButton(
             open: isSubMenuOpen,
             onOpenChange: setIsSubMenuOpen,
           }}
+          style={style}
         >
           {children}
         </Dropdown>
@@ -287,12 +339,15 @@ function MenuButton(
         className={cn(buttonClassName)}
         onClick={onClick}
         styleType={styleType}
+        style={style}
+        ref={ref}
+        dataIndex={dataIndex}
       >
         {children}
       </Button>
     </Tooltip>
   );
-}
+});
 
 function Content(props: MenuItemProps & { multiSelect?: boolean }) {
   const {
