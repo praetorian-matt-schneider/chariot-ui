@@ -6,6 +6,8 @@ import {
   CheckCircleIcon,
   StopIcon as StopIconSolid,
 } from '@heroicons/react/24/solid';
+// eslint-disable-next-line no-restricted-imports
+import { QueryStatus } from '@tanstack/react-query';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
 import { Button, ButtonProps } from '@/components/Button';
@@ -26,12 +28,17 @@ export type MenuProps = {
     label: ReactNode;
     hide?: boolean;
   };
+  status?: QueryStatus;
 };
 
 interface subMenuOpenProps {
   isSubMenuOpen: boolean;
   setIsSubMenuOpen: (isSubMenuOpen: boolean) => void;
 }
+
+const MenuClassName =
+  'overflow-y-auto rounded-[2px] bg-layer0 shadow-lg outline-none ring-1 ring-default-dark';
+const menuMarginClassName = `m-2 w-[calc(100%-16px)]`;
 
 export const Menu: React.FC<MenuProps> = props => {
   const {
@@ -40,6 +47,7 @@ export const Menu: React.FC<MenuProps> = props => {
     onClick,
     multiSelect,
     emptyState,
+    status,
   } = props;
 
   const ulRef = useRef<HTMLDivElement>(null);
@@ -68,16 +76,37 @@ export const Menu: React.FC<MenuProps> = props => {
 
   const virtualItems = virtualizer.getVirtualItems();
 
+  console.log(virtualizer.getTotalSize());
+
   const items = useMemo(() => {
     return unparsedItems.filter(item => !item.hide);
   }, [unparsedItems]);
 
+  if (status === 'pending' || (items.length === 0 && !emptyState?.hide)) {
+    return (
+      <div
+        className={cn(
+          'p-2 text-default-light italic text-sm w-56',
+          MenuClassName
+        )}
+      >
+        {status === 'pending' && <>Loading...</>}
+        {status !== 'pending' && <>{emptyState?.label || 'No items found'}</>}
+      </div>
+    );
+  }
+
   return (
     <div
-      className={cn(
-        'h-max-[600px] relative w-[300px] overflow-y-auto rounded-[2px] bg-layer0 shadow-lg outline-none ring-1 ring-default-dark',
-        className
-      )}
+      className={cn('h-[600px] relative w-[300px]', MenuClassName, className)}
+      style={
+        virtualizer.getTotalSize() < window.innerHeight
+          ? {
+              height: `${virtualizer.getTotalSize()}px`,
+              overflow: 'hidden',
+            }
+          : {}
+      }
       ref={ulRef}
     >
       <ul
@@ -86,17 +115,6 @@ export const Menu: React.FC<MenuProps> = props => {
           height: `${virtualizer.getTotalSize()}px`,
         }}
       >
-        {items.length === 0 && !emptyState?.hide && (
-          <li
-            className={cn(
-              'flex items-center text-xs font-medium text-default-light',
-              menuMarginClassName,
-              className
-            )}
-          >
-            {emptyState?.label || 'No items found'}
-          </li>
-        )}
         {virtualItems.map(virtualItem => {
           const item = items[virtualItem.index];
 
@@ -150,8 +168,6 @@ export const Menu: React.FC<MenuProps> = props => {
     </div>
   );
 };
-
-const menuMarginClassName = `m-[8px] w-[calc(100%-16px)]`;
 
 export interface MenuItemProps {
   label: ReactNode;

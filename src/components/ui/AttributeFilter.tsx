@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 
 import { Dropdown } from '@/components/Dropdown';
@@ -35,8 +35,10 @@ export const AttributeFilter = (props: Props) => {
     resource: 'attribute',
   });
 
-  const menuItems =
-    statusCounts === 'pending' ? [] : getMenuItems(resource, stats);
+  const menuItems = useMemo(
+    () => (statusCounts === 'pending' ? [] : getMenuItems(resource, stats)),
+    [statusCounts, resource, stats]
+  );
 
   const { data, status } = useAssetsWithAttributes(attributesFilter);
 
@@ -70,6 +72,7 @@ export const AttributeFilter = (props: Props) => {
         emptyState: {
           label: 'No attributes found',
         },
+        status: statusCounts,
       }}
     />
   );

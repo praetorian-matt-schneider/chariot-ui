@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { AssetsIcon, RisksIcon, SeedsIcon } from '@/components/icons';
+import { AssetsIcon, RisksIcon } from '@/components/icons';
 import { AnimatedArrowIcon } from '@/components/icons/AnimatedArrow.icon';
 import { Loader } from '@/components/Loader';
 import { OverviewLabels, Statistics } from '@/types';
