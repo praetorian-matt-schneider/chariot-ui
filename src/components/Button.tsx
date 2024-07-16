@@ -24,7 +24,6 @@ export interface ButtonProps extends BaseButtonProps {
   className?: string;
   type?: 'button' | 'submit' | 'reset';
   isLoading?: boolean;
-  dataIndex?: number;
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -39,7 +38,6 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       type = 'button',
       isLoading,
       disabled,
-      dataIndex,
       ...restProps
     } = props;
 
@@ -79,7 +77,6 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           ref={ref}
           type={type}
           disabled={isLoading || disabled}
-          data-index={dataIndex}
         >
           {isLoading && (
             <div className="absolute left-0 top-0 z-10 size-full rounded-[2px] bg-layer1">

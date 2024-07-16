@@ -1,4 +1,4 @@
-import React, { forwardRef, ReactNode, useMemo, useRef, useState } from 'react';
+import React, { ReactNode, useMemo, useRef, useState } from 'react';
 import { Link, To } from 'react-router-dom';
 import { CheckIcon } from '@heroicons/react/20/solid';
 import { ChevronRightIcon, StopIcon } from '@heroicons/react/24/outline';
@@ -62,25 +62,29 @@ export const Menu: React.FC<MenuProps> = props => {
     []
   );
 
-  const virtualizer = useVirtualizer({
-    count: unparsedItems.length,
-    getScrollElement: () => ulRef.current,
-    estimateSize: () => 48,
-    overscan: 5,
-    //measure dynamic row height
-    measureElement:
-      typeof window !== 'undefined'
-        ? element => element?.getBoundingClientRect().height
-        : undefined,
-  });
-
-  const virtualItems = virtualizer.getVirtualItems();
-
-  console.log(virtualizer.getTotalSize());
-
   const items = useMemo(() => {
     return unparsedItems.filter(item => !item.hide);
   }, [unparsedItems]);
+
+  const virtualizer = useVirtualizer({
+    count: unparsedItems.length,
+    getScrollElement: () => ulRef.current,
+    estimateSize: (rowIndex: number) => {
+      const item = items[rowIndex];
+
+      if (item?.type === 'divider') {
+        return 18;
+      } else if (item?.type === 'label' && !item?.description) {
+        return 32;
+      } else if (item?.description) {
+        return 96;
+      }
+      return 64;
+    },
+    overscan: 5,
+  });
+
+  const virtualItems = virtualizer.getVirtualItems();
 
   if (status === 'pending' || (items.length === 0 && !emptyState?.hide)) {
     return (
@@ -120,16 +124,16 @@ export const Menu: React.FC<MenuProps> = props => {
 
           return (
             <MenuItem
-              dataIndex={virtualItem.index} //needed for dynamic row height
               key={virtualItem.key}
               {...item}
-              className="absolute left-0 top-0"
-              ref={node => virtualizer.measureElement(node)}
+              className={cn('absolute left-0 top-0', menuMarginClassName)}
               multiSelect={multiSelect}
               isSubMenuOpen={isSubMenuOpen}
               setIsSubMenuOpen={setIsSubMenuOpen}
               isSelected={
-                item.value === undefined ? false : selected.includes(item.value)
+                item?.value === undefined
+                  ? false
+                  : selected.includes(item?.value)
               }
               style={{
                 transform: `translateY(${virtualItem.start}px)`,
@@ -192,13 +196,11 @@ export interface MenuItemProps {
   // checked?: boolean;
   submenu?: MenuItemProps[];
   style?: React.CSSProperties;
-  dataIndex?: number;
 }
 
-export const MenuItem = forwardRef<
-  HTMLLIElement,
+const MenuItem: React.FC<
   MenuItemProps & subMenuOpenProps & { multiSelect?: boolean }
->(function MenuItem(props, ref) {
+> = props => {
   if (props.hide) {
     return null;
   }
@@ -209,12 +211,10 @@ export const MenuItem = forwardRef<
     return (
       <li
         className={cn(
-          'w-full pt-5 pb-2 px-3 text-xs font-medium text-default-light sticky bg-layer0 z-10 mx-2',
+          'w-full pt-2 pb-2 px-3 text-xs font-medium text-default-light sticky bg-layer0 z-10 mx-2',
           className
         )}
         style={props.style}
-        ref={ref}
-        data-index={props.dataIndex}
       >
         {label}
       </li>
@@ -223,12 +223,7 @@ export const MenuItem = forwardRef<
 
   if (props.type === 'divider') {
     return (
-      <li
-        className={cn('pt-4 -ml-1 w-[calc(100%-4px)]', props.className)}
-        style={props.style}
-        ref={ref}
-        data-index={props.dataIndex}
-      >
+      <li className={cn('w-full -ml-2', props.className)} style={props.style}>
         <hr className="border-t border-default" />
       </li>
     );
@@ -248,10 +243,10 @@ export const MenuItem = forwardRef<
   if (to) {
     const isNewTab =
       newTab || download || (typeof to === 'string' && to.startsWith('http'));
-    const { style, dataIndex, className, ...rest } = props;
+    const { style, className, ...rest } = props;
 
     return (
-      <li className={className} style={style} ref={ref} data-index={dataIndex}>
+      <li className={className} style={style}>
         <Link
           className="relative size-full"
           onClick={handleClick}
@@ -282,16 +277,14 @@ export const MenuItem = forwardRef<
       <Content {...props} />
     </MenuButton>
   );
-});
+};
 
-const MenuButton = forwardRef<
-  HTMLButtonElement,
-  MenuItemProps & {
+function MenuButton(
+  props: MenuItemProps & {
     onClick?: React.MouseEventHandler<HTMLButtonElement>;
     children: ReactNode;
-    dataIndex?: number;
   } & subMenuOpenProps
->(function MenuButton(props, ref) {
+) {
   const {
     disabled,
     onClick,
@@ -306,14 +299,12 @@ const MenuButton = forwardRef<
     isSubMenuOpen,
     setIsSubMenuOpen,
     style,
-    dataIndex,
   } = props;
 
   const buttonClassName = cn(
-    'relative text-start rounded-[2px] flex items-center justify-start m-0 py-2',
+    'relative text-start rounded-[2px] flex items-center justify-start m-0',
     isFocused ? 'outline-none z-10' : '',
     isSelected ? 'bg-brand-lighter' : '',
-    menuMarginClassName,
     className
   );
 
@@ -356,14 +347,12 @@ const MenuButton = forwardRef<
         onClick={onClick}
         styleType={styleType}
         style={style}
-        ref={ref}
-        dataIndex={dataIndex}
       >
         {children}
       </Button>
     </Tooltip>
   );
-});
+}
 
 function Content(props: MenuItemProps & { multiSelect?: boolean }) {
   const {
@@ -419,9 +408,9 @@ function Content(props: MenuItemProps & { multiSelect?: boolean }) {
         </div>
         {(description || helpText) && (
           <div
-            className={`flex w-full gap-1 text-xs  ${disabled ? 'italic text-disabled' : 'text-default-light'}`}
+            className={`flex w-full gap-1 text-xs ${disabled ? 'italic text-disabled' : 'text-default-light'}`}
           >
-            {description}
+            <span className="line-clamp-2">{description}</span>
             <span className="ml-auto text-nowrap">{helpText}</span>
           </div>
         )}
