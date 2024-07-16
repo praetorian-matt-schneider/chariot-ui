@@ -81,7 +81,17 @@ export const DrawerList = (props: Props) => {
                 >
                   <Tooltip title={value}>
                     <div className="w-full truncate text-lg font-medium">
-                      {value}
+                      {label === 'url' ? (
+                        <a
+                          href={value as string}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {value}
+                        </a>
+                      ) : (
+                        value
+                      )}
                     </div>
                   </Tooltip>
                 </ConditionalRender>
