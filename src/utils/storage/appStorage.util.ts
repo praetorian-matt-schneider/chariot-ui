@@ -1,5 +1,7 @@
+import { AuthState } from '@/types';
 import { decode, encode } from '@/utils/encrypt.util';
 import { PropertyPath } from '@/utils/lodash.util';
+import { StorageKey } from '@/utils/storage/useStorage.util';
 
 export const appStorageKey = 'appStorage';
 
@@ -37,9 +39,18 @@ function appStorageFn() {
 export const appStorage = appStorageFn();
 
 function getPropertyPathString(propertyPath: PropertyPath): string {
-  if (Array.isArray(propertyPath)) {
-    return [appStorageKey, ...propertyPath].join('.');
+  const authString =
+    localStorage.getItem(`${appStorageKey}.${StorageKey.AUTH}`) || '';
+  const auth = decode<AuthState>(authString);
+  const user = auth?.friend?.email || auth?.me;
+
+  if (propertyPath === StorageKey.AUTH) {
+    return `${appStorageKey}.${StorageKey.AUTH}`;
   }
 
-  return `${appStorageKey}.${propertyPath.toString()}`;
+  if (Array.isArray(propertyPath)) {
+    return [appStorageKey, user, ...propertyPath].join('.');
+  }
+
+  return `${appStorageKey}.${user}.${propertyPath.toString()}`;
 }
