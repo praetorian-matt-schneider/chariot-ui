@@ -45,7 +45,7 @@ export const DrawerList = (props: Props) => {
 
   const virtualItems = virtualizer.getVirtualItems();
 
-  const createLabel = (label: string, value: string) => {
+  const createLabel = (label: string, value: ReactNode) => {
     if (label?.toLowerCase() === 'url') {
       return (
         <a href={value as string} target="_blank" rel="noreferrer">
@@ -54,7 +54,7 @@ export const DrawerList = (props: Props) => {
       );
     } else if (label?.toLowerCase() === 'host') {
       const domain = props.dns;
-      const ip = value.split(':')[0];
+      const ip = value?.toString().split(':')[0] ?? '';
       return (
         <button
           onClick={() => {
@@ -62,6 +62,21 @@ export const DrawerList = (props: Props) => {
               getAssetDrawerLink({
                 dns: domain,
                 name: ip,
+              })
+            );
+          }}
+        >
+          {value}
+        </button>
+      );
+    } else if (label?.toLowerCase() === 'seed') {
+      return (
+        <button
+          onClick={() => {
+            navigate(
+              getAssetDrawerLink({
+                dns: value?.toString() ?? '',
+                name: value?.toString() ?? '',
               })
             );
           }}
