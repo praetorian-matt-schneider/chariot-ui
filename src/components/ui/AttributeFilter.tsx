@@ -61,7 +61,7 @@ export const AttributeFilter = (props: Props) => {
       }
       menu={{
         className: 'w-96',
-        items: [...menuItems, ...menuItems, ...menuItems],
+        items: menuItems,
         onSelect: attributesFilter => {
           setAttributesFilter(attributesFilter);
         },
