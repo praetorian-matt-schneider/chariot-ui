@@ -104,14 +104,19 @@ const getMenuItems = (
       if (name === 'source') {
         return acc;
       }
+      const valuesEntries = Object.entries(values);
 
       return [
         ...acc,
-        {
-          label: name,
-          type: 'label' as const,
-        },
-        ...Object.entries(values).map(([value, count]) => ({
+        ...(valuesEntries.length > 0
+          ? [
+              {
+                label: name,
+                type: 'label' as const,
+              },
+            ]
+          : []),
+        ...valuesEntries.map(([value, count]) => ({
           label: value,
           labelSuffix: count.toLocaleString(),
           value: `${name}#${value}`,
