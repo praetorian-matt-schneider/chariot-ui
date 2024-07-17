@@ -336,7 +336,10 @@ export const TabPanelContent = (props: TabPanelContentProps) => {
       )}
       {message && <div className=" text-gray-500">{message}</div>}
       <div className="mt-4 flex">
-        <form id="new-asset" className="w-full">
+        <form
+          id="new-asset"
+          className="border-1 w-full rounded-sm border border-gray-200 p-4"
+        >
           <div>
             {markup && <div className="relative">{markup}</div>}
             {showInputs &&

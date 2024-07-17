@@ -291,7 +291,7 @@ export const IntegrationsMeta: IntegrationMeta[] = [
     message: (
       <div>
         <label className="mt-4 block text-sm font-medium leading-6 text-gray-900">
-          CloudFormation Template
+          CloudFormation Template Download
         </label>
         <div className="mt-1">
           <a
