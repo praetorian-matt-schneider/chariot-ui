@@ -149,8 +149,8 @@ const GlobalSearch = () => {
               containing the term &quot;dev&quot;.
             </p>
             <p>
-              <span className="font-semibold">#name</span>: Filter page table
-              name.
+              <span className="font-semibold">#name</span>: Filter the current
+              page table by &quot;name&quot;.
             </p>
             <p>
               <span className="font-semibold">dns:staging</span>: Search for
