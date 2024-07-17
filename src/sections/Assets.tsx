@@ -172,12 +172,15 @@ const Assets: React.FC = () => {
       cell: (asset: AssetsWithRisk) => {
         const integration = isIntegration(asset);
         const containsRisks = Object.values(asset.riskSummary || {}).length > 0;
-        const { detail } = getAssetStatusProperties(asset.status);
+        const simplifiedStatus = asset.status.startsWith('F')
+          ? AssetStatus.Frozen
+          : asset.status;
+        const { detail } = getAssetStatusProperties(simplifiedStatus);
         const icons: JSX.Element[] = [];
 
         icons.push(
-          <Tooltip title={detail || asset.status}>
-            {getAssetStatusIcon(asset.status)}
+          <Tooltip title={detail || simplifiedStatus}>
+            {getAssetStatusIcon(simplifiedStatus)}
           </Tooltip>
         );
         if (containsRisks) {
@@ -212,7 +215,10 @@ const Assets: React.FC = () => {
       label: 'Status',
       id: 'status',
       cell: (asset: Asset) => {
-        return AssetStatusLabel[asset.status];
+        const simplifiedStatus = asset.status.startsWith('F')
+          ? AssetStatus.Frozen
+          : asset.status;
+        return AssetStatusLabel[simplifiedStatus];
       },
     },
     {
