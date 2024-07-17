@@ -80,7 +80,7 @@ export const SSOSetupForm = () => {
           onSubmit={handleFormSubmit}
         >
           <div className="rounded-lg bg-gray-100 p-4">
-            <p className="mb-2 text-sm font-bold">Need help with SSO setup?</p>
+            <p className="mb-2 text-sm font-bold">Need help?</p>
             <div className="flex flex-col space-y-2">
               <a
                 href="https://docs.praetorian.com/hc/en-us/articles/27430843438619-Okta-SSO-Configuration"
