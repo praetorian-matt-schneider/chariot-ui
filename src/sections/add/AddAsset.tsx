@@ -72,7 +72,7 @@ const Tabs: IntegrationMeta[] = [
     id: 0,
     name: PUBLIC_ASSET,
     displayName: 'Add Asset',
-    description: '',
+    description: <AddAssetMessage />,
     logo: '',
     connected: true,
     types: [IntegrationType.AssetDiscovery],
@@ -114,7 +114,6 @@ const Tabs: IntegrationMeta[] = [
         className: 'h-11',
       },
     ],
-    message: <AddAssetMessage />,
   },
   ...IntegrationsMeta.filter(({ types }) =>
     types?.includes(IntegrationType.AssetDiscovery)
