@@ -67,17 +67,18 @@ export const AttributeFilter = (props: Props) => {
     >
       <div className="p-4">
         <p className="mb-2 text-sm text-gray-600">
-          Use the search box below to filter attributes. You can search by:
+          Use the search box below to filter assets based on their attributes.
+          You can search by:
         </p>
         <ul className="mb-4 list-inside list-disc text-sm text-gray-600">
           <li>
             Attribute key, e.g., <span className="font-bold">ssh</span> to find
-            all attributes with the key &quot;ssh&quot;
+            all assets with the attribute key &quot;ssh&quot;
           </li>
           <li>
             Attribute key and value, e.g.,{' '}
-            <span className="font-bold">ssh#22</span> to find all attributes
-            with the key &quot;ssh&quot; and the value &quot;22&quot;
+            <span className="font-bold">ssh#22</span> to find all assets with
+            the attribute key &quot;ssh&quot; and the value &quot;22&quot;
           </li>
         </ul>
         <TypeSearch
