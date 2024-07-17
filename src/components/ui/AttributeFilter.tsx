@@ -72,13 +72,13 @@ export const AttributeFilter = (props: Props) => {
         </p>
         <ul className="mb-4 list-inside list-disc text-sm text-gray-600">
           <li>
-            Attribute key, e.g., <span className="font-bold">ssh</span> to find
-            all assets with the attribute key &quot;ssh&quot;
+            Attribute name, e.g., <span className="font-bold">ssh</span> to find
+            all assets with the attribute name &quot;ssh&quot;
           </li>
           <li>
-            Attribute key and value, e.g.,{' '}
+            Attribute name and value, e.g.,{' '}
             <span className="font-bold">ssh#22</span> to find all assets with
-            the attribute key &quot;ssh&quot; and the value &quot;22&quot;
+            the attribute name &quot;ssh&quot; and the value &quot;22&quot;
           </li>
         </ul>
         <TypeSearch
