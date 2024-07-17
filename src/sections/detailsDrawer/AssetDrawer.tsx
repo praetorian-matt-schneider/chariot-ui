@@ -274,7 +274,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
                     prefix: icons,
                     label: dns,
                     value: name,
-                    date: updated,
+                    updated: updated,
                     to: getDrawerLink().getRiskDrawerLink({ dns, name }),
                   };
                 })}

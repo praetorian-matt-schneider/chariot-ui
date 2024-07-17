@@ -105,6 +105,7 @@ export const DrawerList = (props: Props) => {
         {virtualItems.map(virtualItem => {
           const { prefix, label, updated, value, to } =
             items[virtualItem.index];
+
           return (
             <li
               key={virtualItem.key}
@@ -142,7 +143,7 @@ export const DrawerList = (props: Props) => {
               <div className="flex justify-between text-xs text-default-light">
                 <div className="flex flex-row items-center">
                   <CopyToClipboard textToCopy={label}>
-                    {label} {updated && ' added ' + formatDate(updated)}
+                    {label} {updated && ' updated ' + formatDate(updated)}
                   </CopyToClipboard>{' '}
                 </div>
               </div>
