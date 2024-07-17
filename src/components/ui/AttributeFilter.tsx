@@ -47,25 +47,53 @@ export const AttributeFilter = (props: Props) => {
     }
   }, [status, JSON.stringify(data)]);
 
+  const filterLabel = useMemo(() => {
+    if (attributesFilter.length === 0) {
+      return 'All Attributes';
+    }
+    return (
+      attributesFilter.map(att => att.replace('#attribute#', '')).join(', ') ||
+      'All Attributes'
+    );
+  }, [attributesFilter]);
+
   return (
     <Popover
-      label="Attribute Filter"
+      label={filterLabel}
       styleType="header"
       endIcon={
         <ChevronDownIcon className="size-3 stroke-[4px] text-header-dark" />
       }
     >
-      <TypeSearch
-        queryPrefix="#attribute#"
-        onChange={({ attributes }) => {
-          setAttributesFilter(attributes || []);
-        }}
-        types={['attributes']}
-        value={{ attributes: attributesFilter }}
-        filterOption={attribute => {
-          return (attribute as { source: string }).source.startsWith('#asset');
-        }}
-      />
+      <div className="p-4">
+        <p className="mb-2 text-sm text-gray-600">
+          Use the search box below to filter attributes. You can search by:
+        </p>
+        <ul className="mb-4 list-inside list-disc text-sm text-gray-600">
+          <li>
+            Attribute key, e.g., <span className="font-bold">ssh</span> to find
+            all attributes with the key &quot;ssh&quot;
+          </li>
+          <li>
+            Attribute key and value, e.g.,{' '}
+            <span className="font-bold">ssh#22</span> to find all attributes
+            with the key &quot;ssh&quot; and the value &quot;22&quot;
+          </li>
+        </ul>
+        <TypeSearch
+          queryPrefix="#attribute#"
+          onChange={({ attributes }) => {
+            setAttributesFilter(attributes || []);
+          }}
+          types={['attributes']}
+          value={{ attributes: attributesFilter }}
+          filterOption={attribute => {
+            return (attribute as { source: string }).source.startsWith(
+              '#asset'
+            );
+          }}
+        />
+      </div>
     </Popover>
   );
 };
