@@ -238,7 +238,7 @@ export function Risks() {
         },
       },
       {
-        label: 'Asset',
+        label: 'DNS',
         id: 'dns',
         className: 'hidden md:table-cell',
         copy: true,
