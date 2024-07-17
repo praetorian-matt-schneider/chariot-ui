@@ -1,6 +1,8 @@
 export enum RiskScanMessage {
   Stop = 'Risk scanning will stop.',
   Start = 'Risk scanning will start automatically.',
+  StartHigh = 'Comprehensive risk scanning will start automatically.',
+  StartLow = 'Asset discovery will start automatically.',
 }
 
 export enum UniqueQueryKeys {

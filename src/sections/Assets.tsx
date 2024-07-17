@@ -13,7 +13,11 @@ import { Tooltip } from '@/components/Tooltip';
 import { getAssetStatusProperties } from '@/components/ui/AssetStatusChip';
 import { AttributeFilter } from '@/components/ui/AttributeFilter';
 import { useMy } from '@/hooks';
-import { AssetsSnackbarTitle, useUpdateAsset } from '@/hooks/useAssets';
+import {
+  AssetsSnackbarTitle,
+  getStartMessage,
+  useUpdateAsset,
+} from '@/hooks/useAssets';
 import { useFilter } from '@/hooks/useFilter';
 import { useIntegration } from '@/hooks/useIntegration';
 import { AssetStatusWarning } from '@/sections/AssetStatusWarning';
@@ -21,13 +25,7 @@ import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { getFilterLabel } from '@/sections/RisksTable';
 import { parseKeys } from '@/sections/SearchByType';
 import { useGlobalState } from '@/state/global.state';
-import {
-  Asset,
-  AssetStatus,
-  AssetStatusLabel,
-  Risk,
-  RiskScanMessage,
-} from '@/types';
+import { Asset, AssetStatus, AssetStatusLabel, Risk } from '@/types';
 import { useMergeStatus } from '@/utils/api';
 
 type Severity = 'I' | 'L' | 'M' | 'H' | 'C';
@@ -269,12 +267,7 @@ const Assets: React.FC = () => {
             if (showBulk) {
               Snackbar({
                 title: `${assets.length} assets ${AssetsSnackbarTitle[status]}`,
-                description: [
-                  AssetStatus.Active,
-                  AssetStatus.ActiveHigh,
-                ].includes(status)
-                  ? RiskScanMessage.Start
-                  : RiskScanMessage.Stop,
+                description: getStartMessage(status),
                 variant: 'success',
               });
             }

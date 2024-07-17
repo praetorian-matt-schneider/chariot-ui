@@ -1,7 +1,6 @@
 import { Snackbar } from '@/components/Snackbar';
 import { useAxios } from '@/hooks/useAxios';
 import { useMy } from '@/hooks/useMy';
-import { startMessage } from '@/hooks/useSeeds';
 import { Asset, AssetStatus, AssetStatusLabel, RiskScanMessage } from '@/types';
 import { useMutation } from '@/utils/api';
 
@@ -19,6 +18,22 @@ export const AssetsSnackbarTitle = {
   [AssetStatus.ActiveLow]: `will be marked as ${AssetStatusLabel[AssetStatus.ActiveLow].toLocaleLowerCase()}`,
   [AssetStatus.Frozen]: 'will stop scanning',
   [AssetStatus.Deleted]: 'will stop scanning',
+};
+
+export const getStartMessage = (status: AssetStatus) => {
+  if (status === AssetStatus.Frozen) {
+    return RiskScanMessage.Stop;
+  }
+
+  if (status === AssetStatus.ActiveHigh) {
+    return RiskScanMessage.StartHigh;
+  } else if (status === AssetStatus.ActiveLow) {
+    return RiskScanMessage.StartLow;
+  } else if (status === AssetStatus.Active) {
+    return RiskScanMessage.Start;
+  } else {
+    return '';
+  }
 };
 
 export const useUpdateAsset = () => {
@@ -47,9 +62,7 @@ export const useUpdateAsset = () => {
       if (status && showSnackbar) {
         Snackbar({
           title: `${name} ${AssetsSnackbarTitle[status]}`,
-          description: status.startsWith(AssetStatus.Frozen)
-            ? RiskScanMessage.Stop
-            : RiskScanMessage.Start,
+          description: getStartMessage(status),
           variant: 'success',
         });
       }
@@ -161,7 +174,7 @@ export const useBulkAddAsset = () => {
       if (validResults.length > 0) {
         Snackbar({
           title: `Added ${validResults.length} assets`,
-          description: startMessage,
+          description: getStartMessage(AssetStatus.Active),
           variant: 'success',
         });
 
