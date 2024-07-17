@@ -228,15 +228,9 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
               <DrawerList
                 noDataMessage={
                   <NoData
-                    title={
-                      asset?.status?.startsWith('A')
-                        ? 'Scanning for Risks'
-                        : 'No Risks Found'
-                    }
+                    title={'No Risks Found'}
                     description={
-                      asset?.status?.startsWith('A')
-                        ? "No risks have been found, but we're actively scanning for them.\nWe'll alert you if we find any."
-                        : "Congratulations! Your Asset look safe, secure, and properly configured.\nWe'll continue to watch it to ensure nothing changes."
+                      "Congratulations! Your Asset look safe, secure, and properly configured.\nWe'll continue to watch it to ensure nothing changes."
                     }
                   />
                 }

@@ -535,11 +535,10 @@ export function Risks() {
         error={error}
         selection={{ value: selectedRows, onChange: setSelectedRows }}
         noData={{
-          title:
-            risks.length === 0 ? 'Scanning for Risks...' : 'No Matching Risks',
+          title: risks.length === 0 ? 'No Risks Found' : 'No Matching Risks',
           description:
             risks.length === 0
-              ? 'We are currently scanning your assets for potential risks. They will appear here if any are detected. Please check back shortly.'
+              ? "Congratulations! Your Assets look safe, secure, and properly configured.\nWe'll continue to watch it to ensure nothing changes."
               : 'Try adjusting your filters or add new risks to see results.',
           icon: <HorseIcon />,
         }}
