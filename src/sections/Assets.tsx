@@ -204,7 +204,6 @@ const Assets: React.FC = () => {
     },
     {
       label: 'Name',
-      className: 'w-full',
       id: 'name',
       to: item => getAssetDrawerLink(item),
       copy: true,
@@ -219,7 +218,7 @@ const Assets: React.FC = () => {
     {
       label: 'DNS',
       id: 'dns',
-      className: 'w-full hidden md:table-cell',
+      className: 'hidden md:table-cell',
       copy: true,
     },
     {

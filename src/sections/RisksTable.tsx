@@ -225,7 +225,6 @@ export function Risks() {
         label: 'Name',
         id: 'name',
         to: (item: Risk) => getRiskDrawerLink(item),
-        className: 'w-full',
         copy: true,
       },
       {
@@ -241,7 +240,7 @@ export function Risks() {
       {
         label: 'Asset',
         id: 'dns',
-        className: 'w-full hidden md:table-cell',
+        className: 'hidden md:table-cell',
         copy: true,
       },
       {
