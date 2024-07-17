@@ -54,7 +54,7 @@ const Files: React.FC = () => {
       const dns = parts.shift() ?? '';
       const name = parts.join('/') ?? '';
       const riskDrawerLink = getRiskDrawerLink({ dns, name });
-      const poeLink = getProofOfExploitLink({ dns, name });
+      const OthersLink = getProofOfExploitLink({ dns, name });
 
       return (
         <div className="flex flex-row justify-end space-x-1">
@@ -67,7 +67,7 @@ const Files: React.FC = () => {
             </button>
           </Tooltip>
           <Tooltip title="View Proof">
-            <button onClick={() => navigate(poeLink)}>
+            <button onClick={() => navigate(OthersLink)}>
               <DocumentTextIcon className="size-5" />
             </button>
           </Tooltip>
@@ -143,6 +143,8 @@ const Files: React.FC = () => {
     },
   ];
 
+  const types = getFileTypes(files);
+
   return (
     <div className="flex w-full flex-col">
       <Table
@@ -182,6 +184,23 @@ const Files: React.FC = () => {
             </p>
           ),
         }}
+        groupBy={types.map(type => ({
+          label: type,
+          filter: (data: MyFile) => {
+            if (type === 'Others') {
+              return !FileStartWith.find(prefix =>
+                data.name.startsWith(prefix)
+              );
+            }
+
+            const prefixMatch = data.name.startsWith(type);
+            if (type === 'definitions') {
+              return prefixMatch && !data.name.startsWith('definitions/files');
+            }
+
+            return prefixMatch;
+          },
+        }))}
       />
       <Modal
         open={filename.length > 0 && filetype.length > 0}
@@ -192,6 +211,34 @@ const Files: React.FC = () => {
       </Modal>
     </div>
   );
+};
+
+/**
+ * There are 2 conditions left (for now adding them to Others):
+ * - If someone manually uploads
+ * - If there is Proof of exploit with dns/name
+ */
+const FileStartWith = [
+  'cti/kev',
+  'definitions/files',
+  'definitions',
+  'export-',
+  '#profile',
+  'proof-of-exploit/files',
+];
+
+const getFileTypes = (files: MyFile[]) => {
+  const types = files.reduce((acc, file) => {
+    const prefix = FileStartWith.find(prefix => file.name.startsWith(prefix));
+    if (prefix) {
+      acc.add(prefix);
+    } else {
+      acc.add('Others');
+    }
+    return acc;
+  }, new Set<string>());
+
+  return Array.from(types);
 };
 
 export default Files;
