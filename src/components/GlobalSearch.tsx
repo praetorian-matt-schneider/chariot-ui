@@ -146,7 +146,7 @@ const GlobalSearch = () => {
             </p>
             <p>
               <span className="font-semibold">dev</span>: Find all records
-              containing the term &quot;dev&quot;.
+              beginning with the term &quot;dev&quot;.
             </p>
             <p>
               <span className="font-semibold">#name</span>: Filter the current
