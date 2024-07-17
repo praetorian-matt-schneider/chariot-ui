@@ -5,7 +5,7 @@ import { PlusIcon, PuzzlePieceIcon } from '@heroicons/react/24/outline';
 import { Dropdown } from '@/components/Dropdown';
 import { AssetsIcon, RisksIcon } from '@/components/icons';
 import { getAssetStatusIcon } from '@/components/icons/AssetStatus.icon';
-import { SpinnerIcon } from '@/components/icons/Spinner.icon';
+import { HorseIcon } from '@/components/icons/Horse.icon';
 import { showBulkSnackbar, Snackbar } from '@/components/Snackbar';
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
@@ -420,10 +420,15 @@ const Assets: React.FC = () => {
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={isFetchingNextPage}
         noData={{
-          icon: <SpinnerIcon className="size-[100px]" />,
-          title: 'Scans Running',
+          icon: <HorseIcon />,
+          title:
+            assets.length === 0
+              ? 'Discovering Assets...'
+              : 'No Matching Assets',
           description:
-            'Your seeds are being scanned and your assets will appear here soon',
+            assets.length === 0
+              ? 'We are currently scanning for assets. They will appear here as soon as they are discovered. Please check back shortly.'
+              : 'Try adjusting your filter settings or add new assets to see results.',
         }}
       />
 
