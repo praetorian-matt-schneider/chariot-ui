@@ -204,7 +204,7 @@ const Assets: React.FC = () => {
       },
     },
     {
-      label: 'Asset',
+      label: 'Name',
       className: 'w-full',
       id: 'name',
       to: item => getAssetDrawerLink(item),

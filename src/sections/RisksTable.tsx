@@ -222,7 +222,7 @@ export function Risks() {
         },
       },
       {
-        label: 'Risk',
+        label: 'Name',
         id: 'name',
         to: (item: Risk) => getRiskDrawerLink(item),
         className: 'w-full',
