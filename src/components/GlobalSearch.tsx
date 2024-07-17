@@ -131,8 +131,7 @@ const GlobalSearch = () => {
           <div className="mb-4 text-gray-700">
             <div className="mb-3">
               <span className="font-bold">Global Search:</span> Enter any term
-              to search across all records including assets, risks, jobs, and
-              more.
+              to find matching records beginning with that term.
             </div>
             <div className="mb-3">
               <span className="font-bold">Hash Search:</span> Start your search
