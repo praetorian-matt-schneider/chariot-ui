@@ -152,7 +152,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     },
     { enabled: open, refetchInterval: sToMs(10) }
   );
-  const { data: knownExploitedThreats = [] } = useGetKev({ enabled: open });
+  const { data: knownExploitedThreats = [] } = useGetKev();
   const { data: riskNameGenericSearch } = useGenericSearch(
     { query: name },
     { enabled: open }
