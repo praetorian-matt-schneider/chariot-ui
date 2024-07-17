@@ -360,7 +360,7 @@ const Assets: React.FC = () => {
                 },
                 { type: 'divider', label: 'Divider' },
                 {
-                  label: 'Change Priority',
+                  label: 'Change Status',
                   type: 'label',
                 },
                 {
