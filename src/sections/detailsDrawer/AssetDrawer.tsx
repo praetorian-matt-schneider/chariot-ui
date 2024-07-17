@@ -150,7 +150,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
         </div>
         <TabGroup className="h-full">
           <TabList className="flex overflow-x-auto">
-            {['Risks', 'Assets', 'Attributes'].map(tab => (
+            {['Risks', 'Attributes', 'Related Assets'].map(tab => (
               <TabWrapper key={tab}>{tab}</TabWrapper>
             ))}
           </TabList>
@@ -197,7 +197,24 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
                 })}
               />
             </TabPanel>
-
+            <TabPanel className="h-full">
+              <div className="ml-4">
+                <AddAttribute resourceKey={asset.key} />
+              </div>
+              <div>
+                <DrawerList
+                  allowEmpty={true}
+                  dns={asset.dns}
+                  items={(attributesGenericSearch?.attributes || [])?.map(
+                    data => ({
+                      label: data.name,
+                      value: data.value,
+                      updated: data.updated,
+                    })
+                  )}
+                />
+              </div>
+            </TabPanel>
             <TabPanel className="h-full">
               <DrawerList
                 dns={asset.dns}
@@ -265,24 +282,6 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
                   }),
                 ]}
               />
-            </TabPanel>
-            <TabPanel className="h-full">
-              <div className="ml-4">
-                <AddAttribute resourceKey={asset.key} />
-              </div>
-              <div>
-                <DrawerList
-                  allowEmpty={true}
-                  dns={asset.dns}
-                  items={(attributesGenericSearch?.attributes || [])?.map(
-                    data => ({
-                      label: data.name,
-                      value: data.value,
-                      updated: data.updated,
-                    })
-                  )}
-                />
-              </div>
             </TabPanel>
           </TabPanels>
         </TabGroup>
