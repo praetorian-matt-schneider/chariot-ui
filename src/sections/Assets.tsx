@@ -170,7 +170,6 @@ const Assets: React.FC = () => {
       id: 'name',
       fixedWidth: 100,
       cell: (asset: AssetsWithRisk) => {
-        console.log('asset', asset.status);
         const integration = isIntegration(asset);
         const containsRisks = Object.values(asset.riskSummary || {}).length > 0;
         const { detail } = getAssetStatusProperties(asset.status);
@@ -236,16 +235,21 @@ const Assets: React.FC = () => {
     },
   ];
 
-  const priorityOptions = useMemo(
-    () =>
-      Object.entries(AssetStatusLabel).map(([value, label]) => ({
-        label,
-        labelSuffix: assetsWithRisk.filter(({ status }) => status === value)
-          .length,
-        value,
-      })),
-    [assetsWithRisk]
-  );
+  const priorityOptions = useMemo(() => {
+    const options = Object.entries(AssetStatusLabel).map(([value, label]) => ({
+      label,
+      labelSuffix: assetsWithRisk.filter(({ status }) => status === value)
+        .length,
+      value,
+    }));
+
+    // Use a Set to filter out duplicates based on the 'value' property
+    const uniqueOptions = Array.from(
+      new Set(options.map(option => option.label))
+    ).map(value => options.find(option => option.label === value));
+
+    return uniqueOptions;
+  }, [assetsWithRisk]);
 
   function updateStatus(assets: string[], status: AssetStatus) {
     const showBulk = showBulkSnackbar(assets.length);

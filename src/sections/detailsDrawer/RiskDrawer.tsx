@@ -37,10 +37,10 @@ import { DetailsDrawerHeader } from '@/sections/detailsDrawer/DetailsDrawerHeade
 import { DrawerList } from '@/sections/detailsDrawer/DrawerList';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import {
+  EntityHistory,
   JobStatus,
   Risk,
   RiskCombinedStatus,
-  RiskHistory,
   RiskSeverity,
   RiskStatus,
   RiskStatusLabel,
@@ -198,7 +198,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     const riskHistory = risk.history || [];
     const noHistory = riskHistory.length === 0;
 
-    const firstTrackedHistory: RiskHistory = {
+    const firstTrackedHistory: EntityHistory = {
       from: '',
       to: noHistory ? risk.status : risk.history[0].from,
       updated: risk.created,
@@ -531,7 +531,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
 }
 
 function getHistoryDiff(
-  history: RiskHistory,
+  history: EntityHistory,
   isFirst: boolean
 ): {
   title: ReactNode;

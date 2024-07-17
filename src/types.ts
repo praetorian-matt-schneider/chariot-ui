@@ -172,7 +172,6 @@ export interface AccountMetadata {
   [key: string]: AccountMetadata | string | undefined;
 }
 
-// TODO: Discover the unknowns
 export interface Asset {
   class: string;
   comment: string;
@@ -180,7 +179,7 @@ export interface Asset {
   created: string;
   dns: string;
   seed: boolean;
-  history: unknown;
+  history: EntityHistory[];
   key: string;
   name: string;
   status: AssetStatus;
@@ -212,7 +211,7 @@ export interface RiskTemplate {
   status: RiskCombinedStatus;
 }
 
-export type RiskHistory = {
+export type EntityHistory = {
   from: string;
   to: string;
   updated: string;
@@ -228,7 +227,7 @@ export interface Risk extends RiskTemplate {
   ttl: number;
   source: string;
   seed: string;
-  history: RiskHistory[];
+  history: EntityHistory[];
 }
 
 export interface Seed {
