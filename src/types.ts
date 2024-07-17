@@ -44,8 +44,6 @@ export enum AssetStatus {
   ActiveHigh = 'AH',
   ActiveLow = 'AL',
   Active = 'A',
-  FrozenHigh = 'FH',
-  FrozenLow = 'FL',
   Frozen = 'F',
 }
 
@@ -53,8 +51,6 @@ export const AssetStatusLabel: Record<AssetStatus, string> = {
   [AssetStatus.ActiveHigh]: 'Comprehensive Scan',
   [AssetStatus.Active]: 'Standard Scan',
   [AssetStatus.ActiveLow]: 'Asset Discovery',
-  [AssetStatus.FrozenHigh]: 'Excluded (Comprehensive)',
-  [AssetStatus.FrozenLow]: 'Excluded (Asset Discovery)',
   [AssetStatus.Frozen]: 'Excluded',
 };
 

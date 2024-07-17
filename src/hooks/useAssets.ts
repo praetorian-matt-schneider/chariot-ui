@@ -17,8 +17,6 @@ export const AssetsSnackbarTitle = {
   [AssetStatus.Active]: `will be marked as ${AssetStatusLabel[AssetStatus.Active].toLocaleLowerCase()}`,
   [AssetStatus.ActiveHigh]: `will be marked as ${AssetStatusLabel[AssetStatus.ActiveHigh].toLocaleLowerCase()}`,
   [AssetStatus.ActiveLow]: `will be marked as ${AssetStatusLabel[AssetStatus.ActiveLow].toLocaleLowerCase()}`,
-  [AssetStatus.FrozenHigh]: `will be marked as ${AssetStatusLabel[AssetStatus.FrozenHigh].toLocaleLowerCase()}`,
-  [AssetStatus.FrozenLow]: `will be marked as ${AssetStatusLabel[AssetStatus.FrozenLow].toLocaleLowerCase()}`,
   [AssetStatus.Frozen]: 'will stop scanning',
 };
 
@@ -48,10 +46,9 @@ export const useUpdateAsset = () => {
       if (status && showSnackbar) {
         Snackbar({
           title: `${name} ${AssetsSnackbarTitle[status]}`,
-          description:
-            status === AssetStatus.Frozen
-              ? RiskScanMessage.Stop
-              : RiskScanMessage.Start,
+          description: status.startsWith(AssetStatus.Frozen)
+            ? RiskScanMessage.Stop
+            : RiskScanMessage.Start,
           variant: 'success',
         });
       }

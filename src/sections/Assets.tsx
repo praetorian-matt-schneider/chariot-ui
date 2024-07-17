@@ -239,8 +239,9 @@ const Assets: React.FC = () => {
     () =>
       Object.entries(AssetStatusLabel).map(([value, label]) => ({
         label,
-        labelSuffix: assetsWithRisk.filter(({ status }) => status === value)
-          .length,
+        labelSuffix: assetsWithRisk.filter(({ status }) =>
+          status.startsWith(value)
+        ).length,
         value,
       })),
     [assetsWithRisk]
