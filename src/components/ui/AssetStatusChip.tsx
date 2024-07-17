@@ -4,6 +4,8 @@ import { AssetStatus, AssetStatusLabel } from '@/types';
 export const getAssetStatusProperties = (status: AssetStatus) => {
   const styles: Record<AssetStatus, ChipProps['style']> = {
     [AssetStatus.Frozen]: 'error',
+    [AssetStatus.FrozenHigh]: 'error',
+    [AssetStatus.FrozenLow]: 'error',
     [AssetStatus.Active]: 'primary',
     [AssetStatus.ActiveHigh]: 'primary',
     [AssetStatus.ActiveLow]: 'primary',
@@ -11,6 +13,8 @@ export const getAssetStatusProperties = (status: AssetStatus) => {
 
   const texts: Record<AssetStatus, string> = {
     [AssetStatus.Frozen]: 'Frozen',
+    [AssetStatus.FrozenHigh]: 'Frozen',
+    [AssetStatus.FrozenLow]: 'Frozen',
     [AssetStatus.Active]: 'Active',
     [AssetStatus.ActiveHigh]: 'Active',
     [AssetStatus.ActiveLow]: 'Active',

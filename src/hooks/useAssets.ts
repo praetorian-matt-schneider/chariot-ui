@@ -16,8 +16,10 @@ interface UpdateAssetProps {
 export const AssetsSnackbarTitle = {
   [AssetStatus.Active]: `will be marked as ${AssetStatusLabel[AssetStatus.Active].toLocaleLowerCase()}`,
   [AssetStatus.ActiveHigh]: `will be marked as ${AssetStatusLabel[AssetStatus.ActiveHigh].toLocaleLowerCase()}`,
-  [AssetStatus.Frozen]: 'will be removed',
   [AssetStatus.ActiveLow]: `will be marked as ${AssetStatusLabel[AssetStatus.ActiveLow].toLocaleLowerCase()}`,
+  [AssetStatus.FrozenHigh]: `will be marked as ${AssetStatusLabel[AssetStatus.FrozenHigh].toLocaleLowerCase()}`,
+  [AssetStatus.FrozenLow]: `will be marked as ${AssetStatusLabel[AssetStatus.FrozenLow].toLocaleLowerCase()}`,
+  [AssetStatus.Frozen]: 'will stop scanning',
 };
 
 export const useUpdateAsset = () => {
@@ -88,9 +90,7 @@ export function mapAssetStataus(asset: Asset) {
     return AssetStatus.Active;
   }
 
-  return (
-    asset.status.length === 1 ? asset.status : asset.status[1]
-  ) as AssetStatus;
+  return asset.status as AssetStatus;
 }
 
 export const useCreateAsset = () => {

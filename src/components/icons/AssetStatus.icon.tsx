@@ -19,6 +19,8 @@ export const getAssetStatusIcon = (
     case AssetStatus.ActiveLow:
       return <MagnifyingGlassIcon className={className} />;
     case AssetStatus.Frozen:
+    case AssetStatus.FrozenHigh:
+    case AssetStatus.FrozenLow:
     default:
       return <NoSymbolIcon className={className} />;
   }

@@ -170,13 +170,14 @@ const Assets: React.FC = () => {
       id: 'name',
       fixedWidth: 100,
       cell: (asset: AssetsWithRisk) => {
+        console.log('asset', asset.status);
         const integration = isIntegration(asset);
         const containsRisks = Object.values(asset.riskSummary || {}).length > 0;
         const { detail } = getAssetStatusProperties(asset.status);
         const icons: JSX.Element[] = [];
 
         icons.push(
-          <Tooltip title={detail || 'Closed'}>
+          <Tooltip title={detail || asset.status}>
             {getAssetStatusIcon(asset.status)}
           </Tooltip>
         );
