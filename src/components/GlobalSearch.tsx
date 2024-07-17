@@ -126,6 +126,39 @@ const GlobalSearch = () => {
         }
         onFocus={() => setIsFocused(true)}
       />
+      {isFocused && search?.length === 0 ? (
+        <div className="font-default absolute right-0 top-10 z-10 w-[500px] rounded-sm bg-white p-4 text-black shadow-lg">
+          <div className="mb-4 text-gray-700">
+            <div className="mb-3">
+              <span className="font-bold">Global Search:</span> Enter any term
+              to search across all records including assets, risks, jobs, and
+              more.
+            </div>
+            <div className="mb-3">
+              <span className="font-bold">Hash Search:</span> Start your search
+              with <span className="font-bold">#</span> to filter records by
+              name within the current page table.
+            </div>
+          </div>
+          <div className="bg-gray-100 p-3">
+            <p className="mb-3  rounded-sm font-medium text-gray-800">
+              Example searches:
+            </p>
+            <p>
+              <span className="font-semibold">staging</span>: Find all records
+              containing the term &quot;staging&quot;.
+            </p>
+            <p>
+              <span className="font-semibold">#asset</span>: Filter assets by
+              name.
+            </p>
+            <p>
+              <span className="font-semibold">dns:staging</span>: Search for
+              assets with &quot;staging&quot; in the name.
+            </p>
+          </div>
+        </div>
+      ) : null}
       {isGenericSearch && isFocused && search?.length > 0 && (
         <SearchResultDropdown
           {...(data as unknown as Search)}
