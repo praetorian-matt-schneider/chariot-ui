@@ -428,7 +428,7 @@ const Assets: React.FC = () => {
           description:
             assets.length === 0
               ? 'We are currently scanning for assets. They will appear here as soon as they are discovered. Please check back shortly.'
-              : 'Try adjusting your filter settings or add new assets to see results.',
+              : 'Try adjusting your filters or add new assets to see results.',
         }}
       />
 

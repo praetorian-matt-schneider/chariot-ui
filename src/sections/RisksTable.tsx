@@ -17,7 +17,6 @@ import { RisksIcon } from '@/components/icons';
 import { HorseIcon } from '@/components/icons/Horse.icon';
 import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
 import { getRiskStatusIcon } from '@/components/icons/RiskStatus.icon';
-import { SpinnerIcon } from '@/components/icons/Spinner.icon';
 import { MenuItemProps } from '@/components/Menu';
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
@@ -536,17 +535,13 @@ export function Risks() {
         error={error}
         selection={{ value: selectedRows, onChange: setSelectedRows }}
         noData={{
-          title: risks?.length > 0 ? 'Scanning for Risks' : 'No Risks Found',
+          title:
+            risks.length === 0 ? 'Scanning for Risks...' : 'No Matching Risks',
           description:
-            risks.length > 0
-              ? `No risks have been found, but we're actively scanning for them.\nWe'll alert you if we find any.`
-              : `Congratulations! Your Assets look safe, secure, and properly configured.\nWe'll continue to watch them to ensure nothing changes.`,
-          icon:
-            risks.length > 0 ? (
-              <SpinnerIcon className="size-[100px]" />
-            ) : (
-              <HorseIcon />
-            ),
+            risks.length === 0
+              ? 'We are currently scanning your assets for potential risks. They will appear here if any are detected. Please check back shortly.'
+              : 'Try adjusting your filters or add new risks to see results.',
+          icon: <HorseIcon />,
         }}
         isFetchingNextPage={isFetchingNextPage}
         fetchNextPage={fetchNextPage}
