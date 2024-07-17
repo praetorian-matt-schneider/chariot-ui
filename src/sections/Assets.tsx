@@ -105,9 +105,7 @@ const Assets: React.FC = () => {
   );
   const [showAssetStatusWarning, setShowAssetStatusWarning] =
     useState<boolean>(false);
-  const [assetStatus, setAssetStatus] = useState<
-    AssetStatus.ActiveHigh | AssetStatus.Frozen | ''
-  >('');
+  const [assetStatus, setAssetStatus] = useState<AssetStatus | ''>('');
 
   const { mutateAsync: updateAsset } = useUpdateAsset();
 
@@ -413,6 +411,15 @@ const Assets: React.FC = () => {
                     setSelectedAssets(assets.map(asset => asset.key));
                     setShowAssetStatusWarning(true);
                     setAssetStatus(AssetStatus.Frozen);
+                  },
+                },
+                {
+                  label: AssetStatusLabel[AssetStatus.Deleted],
+                  icon: getAssetStatusIcon(AssetStatus.Deleted),
+                  onClick: () => {
+                    setSelectedAssets(assets.map(asset => asset.key));
+                    setShowAssetStatusWarning(true);
+                    setAssetStatus(AssetStatus.Deleted);
                   },
                 },
               ],

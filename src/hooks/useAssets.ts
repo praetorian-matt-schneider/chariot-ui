@@ -18,6 +18,7 @@ export const AssetsSnackbarTitle = {
   [AssetStatus.ActiveHigh]: `will be marked as ${AssetStatusLabel[AssetStatus.ActiveHigh].toLocaleLowerCase()}`,
   [AssetStatus.ActiveLow]: `will be marked as ${AssetStatusLabel[AssetStatus.ActiveLow].toLocaleLowerCase()}`,
   [AssetStatus.Frozen]: 'will stop scanning',
+  [AssetStatus.Deleted]: 'will stop scanning',
 };
 
 export const useUpdateAsset = () => {
