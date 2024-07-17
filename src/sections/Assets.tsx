@@ -6,7 +6,6 @@ import { Dropdown } from '@/components/Dropdown';
 import { AssetsIcon, RisksIcon } from '@/components/icons';
 import { getAssetStatusIcon } from '@/components/icons/AssetStatus.icon';
 import { SpinnerIcon } from '@/components/icons/Spinner.icon';
-import { OverflowText } from '@/components/OverflowText';
 import { showBulkSnackbar, Snackbar } from '@/components/Snackbar';
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
@@ -213,7 +212,6 @@ const Assets: React.FC = () => {
     {
       label: 'Status',
       id: 'status',
-      fixedWidth: 200,
       cell: (asset: Asset) => {
         return AssetStatusLabel[asset.status];
       },
@@ -222,9 +220,6 @@ const Assets: React.FC = () => {
       label: 'DNS',
       id: 'dns',
       className: 'w-full hidden md:table-cell',
-      cell: (asset: Asset) => {
-        return <OverflowText text={asset.dns} truncateType="center" />;
-      },
       copy: true,
     },
     {
