@@ -137,7 +137,7 @@ const GlobalSearch = () => {
             <div className="mb-3">
               <span className="font-bold">Hash Search:</span> Start your search
               with <span className="font-bold">#</span> to filter records by
-              name within the current page table.
+              asset name within the current page table.
             </div>
           </div>
           <div className="bg-gray-100 p-3">

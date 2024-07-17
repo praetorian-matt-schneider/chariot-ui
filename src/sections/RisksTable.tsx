@@ -222,7 +222,7 @@ export function Risks() {
         },
       },
       {
-        label: 'Name',
+        label: 'Risk',
         id: 'name',
         to: (item: Risk) => getRiskDrawerLink(item),
         copy: true,

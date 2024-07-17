@@ -203,7 +203,7 @@ const Assets: React.FC = () => {
       },
     },
     {
-      label: 'Name',
+      label: 'Asset',
       id: 'name',
       to: item => getAssetDrawerLink(item),
       copy: true,

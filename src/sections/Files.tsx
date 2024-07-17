@@ -114,7 +114,7 @@ const Files: React.FC = () => {
       cell: (item: MyFile) => getAdditionalActions(item),
     },
     {
-      label: 'Name',
+      label: 'Document Name',
       id: 'name',
       className: 'w-full',
     },
