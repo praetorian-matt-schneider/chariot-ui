@@ -66,21 +66,6 @@ export const AttributeFilter = (props: Props) => {
       }
     >
       <div className="p-4">
-        <p className="mb-2 text-sm text-gray-600">
-          Use the search box below to filter assets based on their attributes.
-          You can search by:
-        </p>
-        <ul className="mb-4 list-inside list-disc text-sm text-gray-600">
-          <li>
-            Attribute name, e.g., <span className="font-bold">ssh</span> to find
-            all assets with the attribute name &quot;ssh&quot;
-          </li>
-          <li>
-            Attribute name and value, e.g.,{' '}
-            <span className="font-bold">ssh#22</span> to find all assets with
-            the attribute name &quot;ssh&quot; and the value &quot;22&quot;
-          </li>
-        </ul>
         <TypeSearch
           queryPrefix="#attribute#"
           onChange={({ attributes }) => {
@@ -94,6 +79,26 @@ export const AttributeFilter = (props: Props) => {
             );
           }}
         />
+
+        <div className="mt-4">
+          <div className="rounded-md bg-gray-100 p-4">
+            <p className="mb-3 font-medium text-gray-800">Example searches:</p>
+            <ul className="list-inside list-disc text-gray-700">
+              <li className="mb-2">
+                <span className="font-bold">ssh</span>: Find all assets with the
+                attribute name &quot;ssh&quot;.
+              </li>
+              <li className="mb-2">
+                <span className="font-bold">ssh#22</span>: Find all assets with
+                the attribute name &quot;ssh&quot; and the value &quot;22&quot;.
+              </li>
+              <li className="mb-2">
+                <span className="font-bold">source#acme.com</span>: Find all
+                assets discovered from the source &quot;acme.com&quot;.
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
     </Popover>
   );
