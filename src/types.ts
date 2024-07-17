@@ -53,9 +53,9 @@ export const AssetStatusLabel: Record<AssetStatus, string> = {
   [AssetStatus.ActiveHigh]: 'Comprehensive Scan',
   [AssetStatus.Active]: 'Standard Scan',
   [AssetStatus.ActiveLow]: 'Asset Discovery',
-  [AssetStatus.FrozenHigh]: 'Exclude Asset',
-  [AssetStatus.FrozenLow]: 'Exclude Asset',
-  [AssetStatus.Frozen]: 'Exclude Asset',
+  [AssetStatus.FrozenHigh]: 'Excluded (Comprehensive)',
+  [AssetStatus.FrozenLow]: 'Excluded (Asset Discovery)',
+  [AssetStatus.Frozen]: 'Excluded (Standard))',
 };
 
 export const RiskStatusLabel: Record<RiskStatus, string> = {
