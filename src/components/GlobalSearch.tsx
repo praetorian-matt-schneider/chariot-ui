@@ -145,11 +145,11 @@ const GlobalSearch = () => {
               Example searches:
             </p>
             <p>
-              <span className="font-semibold">staging</span>: Find all records
-              containing the term &quot;staging&quot;.
+              <span className="font-semibold">dev</span>: Find all records
+              containing the term &quot;dev&quot;.
             </p>
             <p>
-              <span className="font-semibold">#asset</span>: Filter assets by
+              <span className="font-semibold">#name</span>: Filter page table
               name.
             </p>
             <p>
