@@ -16,9 +16,10 @@ interface Props {
     value: string | ReactNode;
     updated?: string;
     to?: To;
-    prefix?: JSX.Element;
+    prefix?: JSX.Element | string;
   }[];
   allowEmpty?: boolean;
+  noDataMessage?: JSX.Element;
   dns: string;
 }
 
@@ -29,7 +30,11 @@ export const DrawerList = (props: Props) => {
   const parentRef = useRef<HTMLDivElement>(null);
 
   if (items.length === 0 && !allowEmpty) {
-    return <NoData title={'No data found'} />;
+    return props.noDataMessage ? (
+      props.noDataMessage
+    ) : (
+      <NoData title={'No data found'} />
+    );
   }
 
   if (items.length === 0 && allowEmpty) {

@@ -14,6 +14,7 @@ import { Timeline } from '@/components/Timeline';
 import { Tooltip } from '@/components/Tooltip';
 import { AssetStatusDropdown } from '@/components/ui/AssetPriorityDropdown';
 import { getAssetStatusProperties } from '@/components/ui/AssetStatusChip';
+import { NoData } from '@/components/ui/NoData';
 import { TabWrapper } from '@/components/ui/TabWrapper';
 import { useMy } from '@/hooks';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
@@ -225,6 +226,20 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
           <TabPanels className="size-full h-[calc(100%-150px)] overflow-auto">
             <TabPanel className="h-full">
               <DrawerList
+                noDataMessage={
+                  <NoData
+                    title={
+                      asset?.status?.startsWith('A')
+                        ? 'Scanning for Risks'
+                        : 'No Risks Found'
+                    }
+                    description={
+                      asset?.status?.startsWith('A')
+                        ? "No risks have been found, but we're actively scanning for them.\nWe'll alert you if we find any."
+                        : "Congratulations! Your Asset look safe, secure, and properly configured.\nWe'll continue to watch it to ensure nothing changes."
+                    }
+                  />
+                }
                 dns={asset.dns}
                 items={openRisks.map(({ dns, name, status, updated }) => {
                   const riskStatusKey =
