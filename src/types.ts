@@ -470,6 +470,7 @@ export interface ModuleMeta {
   label: string;
   name: string;
   description: string;
+  categoryDescription: JSX.Element;
   risks: number;
   status: string;
   Icon: React.ElementType;
