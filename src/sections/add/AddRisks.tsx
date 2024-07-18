@@ -145,6 +145,8 @@ export const AddRisks = () => {
         payload[input.name] = input.value;
       });
       setIntegrationFormData([payload]);
+    } else {
+      setIntegrationFormData([]);
     }
   }, [selectedIndex]);
 
