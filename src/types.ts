@@ -182,6 +182,7 @@ export interface Asset {
   history: EntityHistory[];
   key: string;
   name: string;
+  source: string;
   status: AssetStatus;
   ttl: number;
   updated: string;
@@ -194,9 +195,9 @@ export interface Job {
   key: string;
   delay: number;
   comment?: string;
+  source: string;
   dns: string;
   id: string;
-  source: string;
   queue: string;
   status: JobStatus;
   ttl: number;
@@ -284,7 +285,9 @@ export interface MyFile {
 }
 
 export interface Statistics {
-  [key: string]: number;
+  status?: { [key: string]: number };
+  source?: { [key: string]: number };
+  attributes?: { [key: string]: number };
 }
 
 export type Secret = {

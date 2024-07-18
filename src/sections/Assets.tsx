@@ -7,6 +7,7 @@ import { AssetsIcon, RisksIcon } from '@/components/icons';
 import { getAssetStatusIcon } from '@/components/icons/AssetStatus.icon';
 import { HorseIcon } from '@/components/icons/Horse.icon';
 import { showBulkSnackbar, Snackbar } from '@/components/Snackbar';
+import SourceDropdown from '@/components/SourceDropdown';
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
@@ -91,6 +92,11 @@ const Assets: React.FC = () => {
     'asset-priority',
     setSelectedRows
   );
+  const [sourceFilter, setSourceFilter] = useFilter(
+    [''],
+    'asset-source-filter',
+    setSelectedRows
+  );
   const [assetsWithAttributesFilter, setAssetsWithAttributesFilter] = useState<
     string[]
   >([]);
@@ -145,9 +151,16 @@ const Assets: React.FC = () => {
 
   const filteredAssets = useMemo(() => {
     let filteredAssets = assetsWithRisk;
+
     if (priorityFilter?.filter(Boolean).length > 0) {
       filteredAssets = filteredAssets.filter(({ status }) =>
         priorityFilter.includes(status)
+      );
+    }
+
+    if (sourceFilter?.filter(Boolean).length > 0) {
+      filteredAssets = filteredAssets.filter(({ source }) =>
+        sourceFilter.includes(source)
       );
     }
     const sortOrder = Object.keys(AssetStatusLabel);
@@ -329,6 +342,11 @@ const Assets: React.FC = () => {
                 value: priorityFilter,
                 multiSelect: true,
               }}
+            />
+            <SourceDropdown
+              type="asset"
+              onSelect={selected => setSourceFilter(selected)}
+              types={['Provided', 'Discovered']}
             />
           </div>
         }
