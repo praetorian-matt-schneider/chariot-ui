@@ -1,24 +1,26 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowDownCircleIcon,
   DocumentIcon,
   DocumentTextIcon,
   PhotoIcon,
-  PlusIcon,
 } from '@heroicons/react/24/outline';
+import { FolderIcon } from '@heroicons/react/24/solid';
 
-import { Button } from '@/components/Button';
+import { Accordian } from '@/components/Accordian';
 import FileViewer from '@/components/FileViewer';
 import { RisksIcon } from '@/components/icons';
 import { Modal } from '@/components/Modal';
 import { Table } from '@/components/table/Table';
-import { Columns } from '@/components/table/types';
+import { Columns, TableProps } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
+import { Body } from '@/components/ui/Body';
 import { useDownloadFile, useMy } from '@/hooks';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { useGlobalState } from '@/state/global.state';
 import { MyFile } from '@/types';
+import { cn } from '@/utils/classname';
 
 const Files: React.FC = () => {
   const navigate = useNavigate();
@@ -143,11 +145,16 @@ const Files: React.FC = () => {
     },
   ];
 
-  const types = getFileTypes(files);
+  const tree = useMemo(() => {
+    const tree = buildTree(files);
+    return tree;
+  }, [files]);
 
   return (
-    <div className="flex w-full flex-col">
-      <Table
+    <Body>
+      <div className="flex w-full flex-col">
+        <Folder name="folder" tree={tree} columns={columns} level={1} />
+        {/* <Table
         columns={columns}
         data={files}
         resize={true}
@@ -184,61 +191,148 @@ const Files: React.FC = () => {
             </p>
           ),
         }}
-        groupBy={types.map(type => ({
-          label: type,
-          filter: (data: MyFile) => {
-            if (type === 'Others') {
-              return !FileStartWith.find(prefix =>
-                data.name.startsWith(prefix)
-              );
-            }
+        // groupBy={types.map(type => ({
+        //   label: type,
+        //   filter: (data: MyFile) => {
+        //     if (type === 'Others') {
+        //       return !FileStartWith.find(prefix =>
+        //         data.name.startsWith(prefix)
+        //       );
+        //     }
 
-            const prefixMatch = data.name.startsWith(type);
-            if (type === 'definitions') {
-              return prefixMatch && !data.name.startsWith('definitions/files');
-            }
+        //     const prefixMatch = data.name.startsWith(type);
+        //     if (type === 'definitions') {
+        //       return prefixMatch && !data.name.startsWith('definitions/files');
+        //     }
 
-            return prefixMatch;
-          },
-        }))}
-      />
-      <Modal
-        open={filename.length > 0 && filetype.length > 0}
-        onClose={() => setFilename('')}
-        title="File Content"
-      >
-        <FileViewer fileName={filename} fileType={filetype} />
-      </Modal>
-    </div>
+        //     return prefixMatch;
+        //   },
+        // }))}
+      /> */}
+
+        <Modal
+          open={filename.length > 0 && filetype.length > 0}
+          onClose={() => setFilename('')}
+          title="File Content"
+        >
+          <FileViewer fileName={filename} fileType={filetype} />
+        </Modal>
+      </div>
+    </Body>
   );
 };
 
-/**
- * There are 2 conditions left (for now adding them to Others):
- * - If someone manually uploads
- * - If there is Proof of exploit with dns/name
- */
-const FileStartWith = [
-  'cti/kev',
-  'definitions/files',
-  'definitions',
-  'export-',
-  '#profile',
-  'proof-of-exploit/files',
-];
+const Folder = ({
+  name,
+  tree,
+  columns,
+  level = 1,
+}: {
+  name: string;
+  tree: FileTree;
+  columns: Columns<MyFile>;
+  level?: number;
+}) => {
+  const { children, ...rest } = tree;
+  return (
+    <>
+      {children && children.length > 0 && (
+        <Table
+          name={name}
+          isTableView={false}
+          columns={columns}
+          data={children}
+          error={null}
+          status={'success'}
+          skipHeader={true}
+        />
+      )}
+      {Object.entries(rest).map(([key, value]) => {
+        return (
+          <div className="bg-layer0" key={key}>
+            <Accordian
+              className={cn('bg-layer0', level > 1 && '-ml-4 -mr-4')}
+              defaultOpen={false}
+              title={key}
+              icon={<FolderIcon className="size-5 text-brand-light" />}
+            >
+              <Folder
+                level={level + 1}
+                name={key}
+                tree={value as FileTree}
+                columns={columns}
+              />
+            </Accordian>
+          </div>
+        );
+      })}
+    </>
+  );
+};
 
-const getFileTypes = (files: MyFile[]) => {
-  const types = files.reduce((acc, file) => {
-    const prefix = FileStartWith.find(prefix => file.name.startsWith(prefix));
-    if (prefix) {
-      acc.add(prefix);
-    } else {
-      acc.add('Others');
-    }
-    return acc;
-  }, new Set<string>());
+interface FileTree {
+  children?: MyFile[];
+  [key: string]: FileTree | MyFile[] | undefined;
+}
 
-  return Array.from(types);
+function buildTree(flatData: MyFile[] = [], prefixKey = ''): FileTree {
+  // Use reduce to create a nodeMap
+  const nodeMap = flatData.reduce(
+    (acc, item) => {
+      const nameWithPrefix = prefixKey
+        ? item.name.split(`${prefixKey}/`)[1]
+        : item.name;
+      const nameSplit = nameWithPrefix.split('/');
+      const prefix = nameSplit.length > 1 ? nameSplit[0] : 'children';
+      acc[prefix] = [...(acc[prefix] || []), item];
+      return acc;
+    },
+    {} as Record<string, MyFile[]>
+  );
+
+  const { children = [], ...restNodeMap } = nodeMap;
+
+  const tree = {
+    children,
+    ...Object.entries(restNodeMap).reduce(
+      (acc, [key, flatDataLocal]): FileTree => {
+        return {
+          ...acc,
+          [key]: buildTree(
+            flatDataLocal,
+            prefixKey ? `${prefixKey}/${key}` : key
+          ),
+        };
+      },
+      {} as FileTree
+    ),
+  };
+
+  return tree;
+}
+
+const buildTableObject = (tree: FileTree) => {
+  let tableObject: TableProps<MyFile>['data'] = [];
+
+  const { children, ...restNode } = tree;
+  if (children) {
+    tableObject = [...tableObject, ...children];
+  }
+
+  Object.entries(restNode).forEach(([key, localTree]) => {
+    tableObject = [
+      ...tableObject,
+      {
+        key,
+        name: key,
+        updated: '',
+        username: '',
+        children: buildTableObject(localTree as FileTree),
+      },
+    ];
+  });
+
+  return tableObject;
 };
 
 export default Files;

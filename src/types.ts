@@ -277,7 +277,7 @@ export interface MyFile {
   name: string;
   updated: string;
   username: string;
-  class: 'report' | 'proof' | 'manual' | 'definition';
+  class?: 'report' | 'proof' | 'manual' | 'definition';
 }
 
 export interface Statistics {
