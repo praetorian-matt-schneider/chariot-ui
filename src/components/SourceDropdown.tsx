@@ -27,13 +27,7 @@ const SourceDropdown: React.FC<SourceDropdownProps> = ({ type, onSelect }) => {
     onSelect(selectedRows);
   };
 
-  let name = 'Sources';
-
-  if (type === 'asset') {
-    name = 'Origins';
-  } else if (type === 'risk' || type === 'job') {
-    name = 'Capabilities';
-  }
+  const name = 'Origins';
 
   function override(item: string) {
     switch (item?.toLowerCase()) {
@@ -44,8 +38,12 @@ const SourceDropdown: React.FC<SourceDropdownProps> = ({ type, onSelect }) => {
       case 'github-discovery':
         return 'GitHub Discovery';
       case 'ssh':
-        return 'SSH';
+      case 'ns1':
+      case 'cidr':
+      case 'whois':
+        return item.toUpperCase();
       default:
+        if (item.includes('@')) return item;
         return <span className="capitalize">{item}</span>;
     }
   }
