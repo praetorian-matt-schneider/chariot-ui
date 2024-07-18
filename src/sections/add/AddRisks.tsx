@@ -136,6 +136,18 @@ export const AddRisks = () => {
     }
   }, [isOpen]);
 
+  // Set the form data for the hook integration
+  useEffect(() => {
+    if (IntegrationsMeta[selectedIndex - 1]?.name === 'hook') {
+      const payload: Values = {};
+      const formValues = IntegrationsMeta[selectedIndex - 1].inputs;
+      formValues?.forEach(input => {
+        payload[input.name] = input.value;
+      });
+      setIntegrationFormData([payload]);
+    }
+  }, [selectedIndex]);
+
   async function handleConfigureIntegration() {
     integrationFormData.map(data => link(data as unknown as LinkAccount));
     onClose();
