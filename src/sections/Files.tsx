@@ -1,42 +1,78 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowDownCircleIcon,
   DocumentIcon,
   DocumentTextIcon,
   PhotoIcon,
+  PlusIcon,
 } from '@heroicons/react/24/outline';
 import { FolderIcon } from '@heroicons/react/24/solid';
 
 import { Accordian } from '@/components/Accordian';
+import { Button } from '@/components/Button';
 import FileViewer from '@/components/FileViewer';
 import { RisksIcon } from '@/components/icons';
 import { Modal } from '@/components/Modal';
 import { Table } from '@/components/table/Table';
-import { Columns, TableProps } from '@/components/table/types';
+import { Columns } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
 import { Body } from '@/components/ui/Body';
 import { useDownloadFile, useMy } from '@/hooks';
+import { RenderHeaderExtraContentSection } from '@/sections/AuthenticatedApp';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { useGlobalState } from '@/state/global.state';
 import { MyFile } from '@/types';
 import { cn } from '@/utils/classname';
+
+const TreeObject: Folder[] = [
+  {
+    label: 'juno.praetorianlabs.com',
+    query: 'juno.praetorianlabs.com',
+  },
+  {
+    label: 'https://github.com/praetorian-inc',
+    query: 'https://github.com/praetorian-inc',
+  },
+  {
+    label: 'https://github.com/praetorian-inc/noseyparker',
+    query: 'https://github.com/praetorian-inc/noseyparker',
+    children: (files: MyFile[], parentQuery: string): Folder[] => {
+      const groups = files.map(
+        ({ name }) => name.split(parentQuery)[1].split('/')[1]
+      );
+      const malwareLabels = [...new Set(groups)];
+
+      return malwareLabels.map(label => {
+        return {
+          label: `${label}`,
+          data: files.filter(({ name }) =>
+            name.includes(`${parentQuery}/${label}`)
+          ),
+        };
+      });
+    },
+  },
+  {
+    label: 'definitions',
+    children: [
+      {
+        label: 'files',
+        query: 'definitions/files',
+      },
+    ],
+  },
+  {
+    label: 'random',
+    query: 'random',
+  },
+];
 
 const Files: React.FC = () => {
   const navigate = useNavigate();
   const { getRiskDrawerLink, getProofOfExploitLink } = getDrawerLink();
   const [filename, setFilename] = React.useState('');
   const [filetype, setFiletype] = React.useState('');
-  const {
-    status,
-    data: files = [],
-    error,
-    isFetchingNextPage,
-    fetchNextPage,
-  } = useMy({
-    resource: 'file',
-    filterByGlobalSearch: true,
-  });
 
   const {
     modal: {
@@ -145,71 +181,23 @@ const Files: React.FC = () => {
     },
   ];
 
-  const tree = useMemo(() => {
-    const tree = buildTree(files);
-    return tree;
-  }, [files]);
-
   return (
     <Body>
       <div className="flex w-full flex-col">
-        <Folder name="folder" tree={tree} columns={columns} level={1} />
-        {/* <Table
-        columns={columns}
-        data={files}
-        resize={true}
-        error={error}
-        status={status}
-        fetchNextPage={fetchNextPage}
-        isFetchingNextPage={isFetchingNextPage}
-        primaryAction={() => {
-          return {
-            startIcon: <PlusIcon className="size-5" />,
-            label: 'Add Document',
-            onClick: () => {
-              setIsUploadFileDialogOpen(true);
-            },
-          };
-        }}
-        name="documents"
-        noData={{
-          title: 'No Documents Found',
-          description: (
-            <p>
-              No documents have been attached to your account yet.
-              <br />
-              Remedy that by{' '}
-              <Button
-                className="inline p-0 text-base"
-                onClick={() => {
-                  setIsUploadFileDialogOpen(true);
-                }}
-                styleType="textPrimary"
-              >
-                Uploading a file now
-              </Button>
-            </p>
-          ),
-        }}
-        // groupBy={types.map(type => ({
-        //   label: type,
-        //   filter: (data: MyFile) => {
-        //     if (type === 'Others') {
-        //       return !FileStartWith.find(prefix =>
-        //         data.name.startsWith(prefix)
-        //       );
-        //     }
-
-        //     const prefixMatch = data.name.startsWith(type);
-        //     if (type === 'definitions') {
-        //       return prefixMatch && !data.name.startsWith('definitions/files');
-        //     }
-
-        //     return prefixMatch;
-        //   },
-        // }))}
-      /> */}
-
+        <RenderHeaderExtraContentSection>
+          <div className="flex justify-between">
+            <Button
+              startIcon={<PlusIcon className="size-5" />}
+              label={'Add Document'}
+              onClick={() => {
+                setIsUploadFileDialogOpen(true);
+              }}
+              styleType="header"
+              className="ml-auto rounded-none rounded-l-[2px]"
+            />
+          </div>
+        </RenderHeaderExtraContentSection>
+        <Tree tree={TreeObject} columns={columns} />
         <Modal
           open={filename.length > 0 && filetype.length > 0}
           onClose={() => setFilename('')}
@@ -222,117 +210,117 @@ const Files: React.FC = () => {
   );
 };
 
-const Folder = ({
-  name,
-  tree,
-  columns,
-  level = 1,
-}: {
-  name: string;
-  tree: FileTree;
+interface TreeProps {
+  tree: Folder[];
   columns: Columns<MyFile>;
-  level?: number;
-}) => {
-  const { children, ...rest } = tree;
+}
+
+const Tree = ({ tree, columns }: TreeProps) => {
   return (
     <>
-      {children && children.length > 0 && (
-        <Table
-          name={name}
-          isTableView={false}
-          columns={columns}
-          data={children}
-          error={null}
-          status={'success'}
-          skipHeader={true}
-        />
-      )}
-      {Object.entries(rest).map(([key, value]) => {
-        return (
-          <div className="bg-layer0" key={key}>
-            <Accordian
-              className={cn('bg-layer0', level > 1 && '-ml-4 -mr-4')}
-              defaultOpen={false}
-              title={key}
-              icon={<FolderIcon className="size-5 text-brand-light" />}
-            >
-              <Folder
-                level={level + 1}
-                name={key}
-                tree={value as FileTree}
-                columns={columns}
-              />
-            </Accordian>
-          </div>
-        );
-      })}
+      {tree.map(item => (
+        <TreeLevel key={item.label} columns={columns} {...item} />
+      ))}
     </>
   );
 };
 
-interface FileTree {
-  children?: MyFile[];
-  [key: string]: FileTree | MyFile[] | undefined;
+interface Folder {
+  label: string;
+  query?: string; // Add query string if we need to fetch the data from /my?key=#files endpoint
+  // children can be an array of folders or a function that returns an array of folders
+  children?: Folder[] | ((files: MyFile[], parentQuery: string) => Folder[]);
+  level?: number;
+  // if data is available, pass it directly to display the files in the table
+  data?: MyFile[];
 }
 
-function buildTree(flatData: MyFile[] = [], prefixKey = ''): FileTree {
-  // Use reduce to create a nodeMap
-  const nodeMap = flatData.reduce(
-    (acc, item) => {
-      const nameWithPrefix = prefixKey
-        ? item.name.split(`${prefixKey}/`)[1]
-        : item.name;
-      const nameSplit = nameWithPrefix.split('/');
-      const prefix = nameSplit.length > 1 ? nameSplit[0] : 'children';
-      acc[prefix] = [...(acc[prefix] || []), item];
-      return acc;
+const TreeLevel = ({
+  columns = [],
+  query = '',
+  label = '',
+  children,
+  data,
+  level = 0,
+}: Folder & { columns: Columns<MyFile> }) => {
+  const {
+    status,
+    data: files = [],
+    error,
+  } = useMy(
+    {
+      resource: 'file',
+      query: query ? `#${query}` : '',
     },
-    {} as Record<string, MyFile[]>
+    { enabled: Boolean(query) }
   );
+  const {
+    modal: {
+      file: { onOpenChange: setIsUploadFileDialogOpen },
+    },
+  } = useGlobalState();
 
-  const { children = [], ...restNodeMap } = nodeMap;
-
-  const tree = {
-    children,
-    ...Object.entries(restNodeMap).reduce(
-      (acc, [key, flatDataLocal]): FileTree => {
-        return {
-          ...acc,
-          [key]: buildTree(
-            flatDataLocal,
-            prefixKey ? `${prefixKey}/${key}` : key
-          ),
-        };
-      },
-      {} as FileTree
-    ),
-  };
-
-  return tree;
-}
-
-const buildTableObject = (tree: FileTree) => {
-  let tableObject: TableProps<MyFile>['data'] = [];
-
-  const { children, ...restNode } = tree;
-  if (children) {
-    tableObject = [...tableObject, ...children];
-  }
-
-  Object.entries(restNode).forEach(([key, localTree]) => {
-    tableObject = [
-      ...tableObject,
-      {
-        key,
-        name: key,
-        updated: '',
-        username: '',
-        children: buildTableObject(localTree as FileTree),
-      },
-    ];
-  });
-
-  return tableObject;
+  return (
+    <Accordian
+      className={cn('bg-layer0 z-10', level > 0 && '-ml-4 -mr-4')}
+      defaultOpen={false}
+      title={label}
+      icon={<FolderIcon className="size-5 text-brand-light" />}
+    >
+      {children &&
+        typeof children === 'object' &&
+        Array.isArray(children) &&
+        children.map(item => (
+          <TreeLevel
+            {...item}
+            key={item.label}
+            level={level + 1}
+            columns={columns}
+          />
+        ))}
+      {children &&
+        typeof children === 'function' &&
+        children(files, query).map(group => (
+          <TreeLevel
+            {...group}
+            key={group.label}
+            level={level + 1}
+            columns={columns}
+          />
+        ))}
+      {!children && (
+        <Table
+          name={label}
+          loadingRowCount={5}
+          isTableView={false}
+          columns={columns}
+          data={data || files}
+          error={data ? null : error}
+          status={data ? 'success' : status}
+          skipHeader={true}
+          noData={{
+            title: 'No Documents Found',
+            description: (
+              <p>
+                No documents have been attached to your account yet.
+                <br />
+                Remedy that by{' '}
+                <Button
+                  className="inline p-0 text-base"
+                  onClick={() => {
+                    setIsUploadFileDialogOpen(true);
+                  }}
+                  styleType="textPrimary"
+                >
+                  Uploading a file now
+                </Button>
+              </p>
+            ),
+          }}
+        />
+      )}
+    </Accordian>
+  );
 };
 
 export default Files;
