@@ -48,6 +48,7 @@ import {
 } from '@/types';
 import { formatDate } from '@/utils/date.util';
 import { sToMs } from '@/utils/date.util';
+import { isManualORPRrovidedRisk } from '@/utils/risk.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
 import { generatePathWithSearch, useSearchParams } from '@/utils/url.util';
 
@@ -305,17 +306,21 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
               <Tooltip
                 placement="top"
                 title={
-                  risk.source
+                  risk.source && !isManualORPRrovidedRisk(risk)
                     ? isJobRunningForThisRisk
                       ? 'Scanning in progress'
                       : 'Revalidate the risk'
-                    : 'On-Demand Scanning is only available for Automated Risks.'
+                    : 'On-demand scanning is only available for discovered risks.'
                 }
               >
                 <Button
                   className="border-1 h-8 border border-default"
                   startIcon={<ArrowPathIcon className="size-5" />}
-                  disabled={!risk.source || Boolean(isJobRunningForThisRisk)}
+                  disabled={
+                    !risk.source ||
+                    isManualORPRrovidedRisk(risk) ||
+                    Boolean(isJobRunningForThisRisk)
+                  }
                   isLoading={
                     reRunJobStatus === 'pending' ||
                     allAssetJobsStatus === 'pending'
