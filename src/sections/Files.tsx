@@ -3,9 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import {
   DocumentIcon,
   DocumentTextIcon,
+  MagnifyingGlassIcon,
   PhotoIcon,
+  PlusIcon,
 } from '@heroicons/react/24/outline';
 import { FolderIcon } from '@heroicons/react/24/solid';
+import { useDebounce } from 'use-debounce';
 
 import { Button } from '@/components/Button';
 import FileViewer from '@/components/FileViewer';
@@ -75,12 +78,7 @@ const Files: React.FC = () => {
       return (
         <div className="flex flex-row justify-end">
           <Tooltip title="Preview Image">
-            <button
-              onClick={() => {
-                setFiletype('image');
-                setFilename(item.name);
-              }}
-            >
+            <button onClick={() => {}}>
               <PhotoIcon className="size-5" />
             </button>
           </Tooltip>
@@ -90,12 +88,7 @@ const Files: React.FC = () => {
       return (
         <div className="flex flex-row justify-end">
           <Tooltip title="View File">
-            <button
-              onClick={() => {
-                setFiletype('text');
-                setFilename(item.name);
-              }}
-            >
+            <button onClick={() => {}}>
               <DocumentIcon className="size-5" />
             </button>
           </Tooltip>
@@ -136,14 +129,14 @@ const FolderList = ({ folders, onFolderClick }: FolderListProps) => {
         <div
           key={folder.label}
           className={cn(
-            'ml-4 mt-4 h-[100px] w-[130px] text-center',
-            'flex cursor-pointer flex-col rounded-sm border border-layer0 p-2 text-center hover:border hover:border-gray-200 hover:bg-gray-50'
+            'ml-4 mt-4 text-center',
+            'flex cursor-pointer flex-col rounded-sm border border-layer0 py-2 px-10 text-center hover:border hover:border-gray-200 hover:bg-gray-50'
           )}
           onClick={() => onFolderClick(folder)}
         >
-          <FolderIcon className="m-auto size-12 text-brand-light" />
-          <span className="mt-2 w-full text-center text-sm font-medium">
-            {folder.label}
+          <FolderIcon className="m-auto size-16 text-brand-light" />
+          <span className="mt-2 w-full text-center text-xl ">
+            {folder.label === 'Home' ? 'My Files' : folder.label}
           </span>
         </div>
       ))}
@@ -165,6 +158,8 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
   const { query = '', children } = currentFolder;
   const [filename, setFilename] = useState('');
   const [filetype, setFiletype] = useState('');
+  const [search, setSearch] = useState('');
+  const [debouncedSearch] = useDebounce(search, 500);
 
   const { data: files = [] } = useMy(
     {
@@ -200,6 +195,14 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
     [children, files, query]
   );
 
+  const filteredFiles = useMemo(
+    () =>
+      files.filter(file =>
+        file.name.toLowerCase().includes(search.toLowerCase())
+      ),
+    [files, debouncedSearch]
+  );
+
   return (
     <div className="">
       {childFolders && childFolders.length > 0 && (
@@ -218,6 +221,26 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
           ))}
         </div>
       )}
+      <div className="mx-12 flex items-center pt-6">
+        <div className="relative grow">
+          <input
+            placeholder="Search for files"
+            value={search}
+            name="file_search"
+            onChange={e => setSearch(e.target.value)}
+            className="w-full rounded-full border border-gray-200 p-4 pl-16 focus:outline-none focus:ring-2 focus:ring-brand-light"
+          />
+          <MagnifyingGlassIcon className="absolute left-4 top-4 size-6 text-gray-400" />
+        </div>
+        <Button
+          styleType="primary"
+          className="ml-4 rounded-md bg-brand px-6 py-2 text-xl text-white"
+          startIcon={<PlusIcon className="size-8" />}
+        >
+          Upload File
+        </Button>
+      </div>
+
       <div className="flex flex-row flex-wrap space-x-4 space-y-4">
         <div className="ml-4 mt-5 h-[100px] w-[130px]">
           <Tooltip title="Go Back">
@@ -230,7 +253,7 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
             </div>
           </Tooltip>
         </div>
-        {files.map(file => (
+        {filteredFiles.map(file => (
           <div className="h-[100px] w-[130px]" key={file.name}>
             <Tooltip title={file.name}>
               <div
