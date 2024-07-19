@@ -141,6 +141,10 @@ const Assets: React.FC = () => {
     asset => {
       const riskSummary = openRiskDataset[asset.dns];
 
+      if (asset.status.startsWith(AssetStatus.Frozen)) {
+        asset.status = AssetStatus.Frozen;
+      }
+
       if (riskSummary) {
         return { ...asset, riskSummary };
       }
@@ -254,9 +258,8 @@ const Assets: React.FC = () => {
     () =>
       Object.entries(AssetStatusLabel).map(([value, label]) => ({
         label,
-        labelSuffix: assetsWithRisk.filter(({ status }) =>
-          status.startsWith(value)
-        ).length,
+        labelSuffix: assetsWithRisk.filter(({ status }) => status === value)
+          .length,
         value,
       })),
     [assetsWithRisk]
