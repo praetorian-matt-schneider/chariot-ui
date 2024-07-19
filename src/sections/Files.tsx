@@ -1,65 +1,44 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ArrowDownCircleIcon,
   DocumentIcon,
   DocumentTextIcon,
   PhotoIcon,
-  PlusIcon,
 } from '@heroicons/react/24/outline';
 import { FolderIcon } from '@heroicons/react/24/solid';
 
-import { Accordian } from '@/components/Accordian';
 import { Button } from '@/components/Button';
 import FileViewer from '@/components/FileViewer';
 import { RisksIcon } from '@/components/icons';
 import { Modal } from '@/components/Modal';
-import { Table } from '@/components/table/Table';
-import { Columns } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
 import { Body } from '@/components/ui/Body';
 import { NoData } from '@/components/ui/NoData';
 import { useDownloadFile, useMy } from '@/hooks';
-import { RenderHeaderExtraContentSection } from '@/sections/AuthenticatedApp';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
-import { useGlobalState } from '@/state/global.state';
 import { MyFile } from '@/types';
 import { cn } from '@/utils/classname';
 
-const TreeData: Folder[] = [
-  { label: 'home', query: 'home' },
-  {
-    label: 'malware',
-    query: 'malware',
-    children: (files: MyFile[], parentQuery: string): Folder[] => {
-      const labelsWithDuplicates = files.map(
-        ({ name }) => name.split(parentQuery)[1].split('/')[1]
-      );
-      const labels = [...new Set(labelsWithDuplicates)];
+interface Folder {
+  label: string;
+  query?: string;
+  children?: Folder[] | ((files: MyFile[], parentQuery: string) => Folder[]);
+  level?: number;
+  data?: MyFile[];
+}
 
-      return labels.map(label => {
-        return {
-          label,
-          data: files.filter(({ name }) =>
-            name.includes(`${parentQuery}/${label}`)
-          ),
-        };
-      });
-    },
+const TreeData: Folder[] = [
+  { label: 'Home', query: 'home' },
+  {
+    label: 'Malware',
+    query: 'malware',
   },
 ];
 
 const Files: React.FC = () => {
   const navigate = useNavigate();
   const { getRiskDrawerLink, getProofOfExploitLink } = getDrawerLink();
-  const [filename, setFilename] = React.useState('');
-  const [filetype, setFiletype] = React.useState('');
-
-  const {
-    modal: {
-      file: { onOpenChange: setIsUploadFileDialogOpen },
-    },
-  } = useGlobalState();
+  const [currentFolder, setCurrentFolder] = useState<Folder | null>(null);
 
   const { mutate: downloadFile } = useDownloadFile();
 
@@ -73,7 +52,7 @@ const Files: React.FC = () => {
       const dns = parts.shift() ?? '';
       const name = parts.join('/') ?? '';
       const riskDrawerLink = getRiskDrawerLink({ dns, name });
-      const OthersLink = getProofOfExploitLink({ dns, name });
+      const othersLink = getProofOfExploitLink({ dns, name });
 
       return (
         <div className="flex flex-row justify-end space-x-1">
@@ -86,7 +65,7 @@ const Files: React.FC = () => {
             </button>
           </Tooltip>
           <Tooltip title="View Proof">
-            <button onClick={() => navigate(OthersLink)}>
+            <button onClick={() => navigate(othersLink)}>
               <DocumentTextIcon className="size-5" />
             </button>
           </Tooltip>
@@ -125,125 +104,75 @@ const Files: React.FC = () => {
     }
   };
 
-  const columns: Columns<MyFile> = [
-    {
-      label: 'Preview',
-      id: 'name',
-      className: 'w-20',
-      cell: (item: MyFile) => getAdditionalActions(item),
-    },
-    {
-      label: 'Document Name',
-      id: 'name',
-      className: 'w-full',
-    },
-    {
-      label: 'Added',
-      id: 'updated',
-      cell: 'date',
-    },
-    {
-      label: 'Actions',
-      id: '',
-      cell: (item: MyFile) => (
-        <div className="flex w-full flex-row justify-center">
-          <Tooltip title={'Download'}>
-            <button
-              onClick={() => handleDownload(item)}
-              className="block cursor-pointer"
-            >
-              <ArrowDownCircleIcon className="m-1 size-5 stroke-2" />
-            </button>
-          </Tooltip>
-        </div>
-      ),
-      fixedWidth: 120,
-      align: 'center',
-    },
-  ];
+  const handleFolderClick = (folder: Folder) => {
+    setCurrentFolder(folder);
+  };
 
   return (
-    <Body>
-      <div className="flex w-full flex-col">
-        <RenderHeaderExtraContentSection>
-          <div className="flex justify-between">
-            <Button
-              startIcon={<PlusIcon className="size-5" />}
-              label={'Add Document'}
-              onClick={() => {
-                setIsUploadFileDialogOpen(true);
-              }}
-              styleType="header"
-              className="ml-auto rounded-none rounded-l-[2px]"
-            />
-          </div>
-        </RenderHeaderExtraContentSection>
-        <Tree tree={TreeData} columns={columns} />
-        <Modal
-          open={filename.length > 0 && filetype.length > 0}
-          onClose={() => setFilename('')}
-          title="File Content"
-        >
-          <FileViewer fileName={filename} fileType={filetype} />
-        </Modal>
-      </div>
+    <Body className="bg-layer0 pb-4">
+      {currentFolder ? (
+        <TreeLevel
+          currentFolder={currentFolder}
+          setCurrentFolder={setCurrentFolder}
+          getAdditionalActions={getAdditionalActions}
+          handleDownload={handleDownload}
+        />
+      ) : (
+        <FolderList folders={TreeData} onFolderClick={handleFolderClick} />
+      )}
     </Body>
   );
 };
 
-interface TreeProps {
-  tree: Folder[];
-  columns: Columns<MyFile>;
+interface FolderListProps {
+  folders: Folder[];
+  onFolderClick: (folder: Folder) => void;
 }
 
-const Tree = ({ tree, columns }: TreeProps) => {
+const FolderList = ({ folders, onFolderClick }: FolderListProps) => {
   return (
-    <>
-      {tree.map(item => (
-        <TreeLevel key={item.label} columns={columns} {...item} />
+    <div className="flex flex-row flex-wrap space-x-4 space-y-4">
+      {folders.map(folder => (
+        <div
+          key={folder.label}
+          className={cn(
+            'ml-4 mt-4 h-[100px] w-[130px] text-center',
+            'flex cursor-pointer flex-col rounded-sm border border-layer0 p-2 text-center hover:border hover:border-gray-200 hover:bg-gray-50'
+          )}
+          onClick={() => onFolderClick(folder)}
+        >
+          <FolderIcon className="m-auto size-12 text-brand-light" />
+          <span className="mt-2 w-full text-center text-sm font-medium">
+            {folder.label}
+          </span>
+        </div>
       ))}
-    </>
+    </div>
   );
 };
 
-interface Folder {
-  label: string;
-  query?: string; // Add query string if we need to fetch the data from /my?key=#files endpoint
-  /**
-   * children can be of the following:
-   * Folder[] : when we know the children queries and labels
-   * () => Folder[] : when the children queries and labels are dynamically generated
-   */
-  children?: Folder[] | ((files: MyFile[], parentQuery: string) => Folder[]);
-  level?: number;
-  // if data is available, pass it directly to display the files in the table
-  data?: MyFile[];
+interface TreeLevelProps {
+  currentFolder: Folder;
+  setCurrentFolder: React.Dispatch<React.SetStateAction<Folder | null>>;
+  getAdditionalActions: (item: MyFile) => React.ReactNode;
+  handleDownload: (item: MyFile) => void;
 }
 
-const TreeLevel = ({
-  columns = [],
-  query = '',
-  label = '',
-  children,
-  data,
-  level = 0,
-}: Folder & { columns: Columns<MyFile> }) => {
-  const {
-    status,
-    data: files = [],
-    error,
-  } = useMy(
+const TreeLevel: React.FC<TreeLevelProps> = ({
+  currentFolder,
+  setCurrentFolder,
+}) => {
+  const { query = '', children } = currentFolder;
+  const [filename, setFilename] = useState('');
+  const [filetype, setFiletype] = useState('');
+
+  const { data: files = [] } = useMy(
     {
       resource: 'file',
-      query: query ? `#${query}` : '',
+      query: query ? `#` : '',
     },
     { enabled: Boolean(query) }
   );
-  const {
-    modal: {
-      file: { onOpenChange: setIsUploadFileDialogOpen },
-    },
-  } = useGlobalState();
 
   const noData = {
     title: 'No Documents Found',
@@ -254,9 +183,7 @@ const TreeLevel = ({
         Remedy that by{' '}
         <Button
           className="inline p-0 text-base"
-          onClick={() => {
-            setIsUploadFileDialogOpen(true);
-          }}
+          onClick={() => setCurrentFolder(null)}
           styleType="textPrimary"
         >
           Uploading a file now
@@ -264,6 +191,7 @@ const TreeLevel = ({
       </p>
     ),
   };
+
   const childFolders = useMemo(
     () =>
       children && typeof children === 'function'
@@ -271,54 +199,75 @@ const TreeLevel = ({
         : undefined,
     [children, files, query]
   );
-  console.log(label, data || files, !children);
 
   return (
-    <Accordian
-      className={cn('bg-layer0 z-10', level > 0 && '-ml-4 -mr-4')}
-      defaultOpen={false}
-      title={label}
-      icon={<FolderIcon className="size-5 text-brand-light" />}
-    >
-      {children &&
-        typeof children === 'object' &&
-        Array.isArray(children) &&
-        children.map(item => (
-          <TreeLevel
-            {...item}
-            key={item.label}
-            level={level + 1}
-            columns={columns}
-          />
-        ))}
-      {childFolders && childFolders.length === 0 && (
-        <NoData title={noData?.title} description={noData?.description} />
+    <div className="">
+      {childFolders && childFolders.length > 0 && (
+        <div className="flex flex-row flex-wrap space-x-6">
+          {childFolders.map(folder => (
+            <div
+              key={folder.label}
+              className="flex cursor-pointer flex-col text-center"
+              onClick={() => setCurrentFolder(folder)}
+            >
+              <FolderIcon className="size-12 text-brand-light" />
+              <span className="mt-2 w-32 truncate whitespace-nowrap text-center text-sm font-medium">
+                {folder.label}
+              </span>
+            </div>
+          ))}
+        </div>
       )}
-      {childFolders &&
-        childFolders.map(group => (
-          <>
-            <TreeLevel
-              {...group}
-              key={group.label}
-              level={level + 1}
-              columns={columns}
-            />
-          </>
+      <div className="flex flex-row flex-wrap space-x-4 space-y-4">
+        <div className="ml-4 mt-5 h-[100px] w-[130px]">
+          <Tooltip title="Go Back">
+            <div
+              className="flex cursor-pointer flex-col rounded-sm border border-layer0 p-2 text-center hover:border hover:border-gray-200 hover:bg-gray-50"
+              onClick={() => setCurrentFolder(null)}
+            >
+              <FolderIcon className="m-auto size-12 text-brand-light" />
+              <span className="mt-2 text-sm font-medium">..</span>
+            </div>
+          </Tooltip>
+        </div>
+        {files.map(file => (
+          <div className="h-[100px] w-[130px]" key={file.name}>
+            <Tooltip title={file.name}>
+              <div
+                className="flex cursor-pointer flex-col rounded-sm border border-layer0 p-2 text-center hover:border hover:border-gray-200 hover:bg-gray-50"
+                onClick={() => {
+                  setFilename(file.name);
+                  setFiletype(
+                    file.name.endsWith('png') || file.name.endsWith('jpg')
+                      ? 'image'
+                      : 'text'
+                  );
+                }}
+              >
+                {file.name.endsWith('png') || file.name.endsWith('jpg') ? (
+                  <PhotoIcon className="m-auto size-12 text-brand-light" />
+                ) : (
+                  <DocumentIcon className="m-auto size-12 text-brand-light" />
+                )}
+                <span className="mt-2 w-32 truncate whitespace-nowrap text-center text-sm font-medium">
+                  {file.name}
+                </span>
+              </div>
+            </Tooltip>
+          </div>
         ))}
-      {!children && (
-        <Table
-          name={label}
-          loadingRowCount={5}
-          isTableView={false}
-          columns={columns}
-          data={data || files}
-          error={data ? null : error}
-          status={data ? 'success' : status}
-          skipHeader={true}
-          noData={noData}
-        />
-      )}
-    </Accordian>
+        {files.length === 0 && !childFolders && (
+          <NoData title={noData.title} description={noData.description} />
+        )}
+      </div>
+      <Modal
+        open={filename.length > 0 && filetype.length > 0}
+        onClose={() => setFilename('')}
+        title="File Content"
+      >
+        <FileViewer fileName={filename} fileType={filetype} />
+      </Modal>
+    </div>
   );
 };
 

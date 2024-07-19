@@ -133,7 +133,7 @@ export function Header() {
   const { breadcrumbs } = useBreadCrumbsContext();
 
   // TODO: FIXME - this is a hack to not show sticky header on table pages
-  const showSticky = ['assets', 'risks', 'seeds', 'jobs', 'documents'].includes(
+  const showSticky = ['assets', 'risks', 'seeds', 'jobs'].includes(
     breadcrumbs[1]?.label?.toLowerCase()
   );
 
