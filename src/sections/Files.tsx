@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowDownCircleIcon,
@@ -18,6 +18,7 @@ import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
 import { Body } from '@/components/ui/Body';
+import { NoData } from '@/components/ui/NoData';
 import { useDownloadFile, useMy } from '@/hooks';
 import { RenderHeaderExtraContentSection } from '@/sections/AuthenticatedApp';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
@@ -25,46 +26,26 @@ import { useGlobalState } from '@/state/global.state';
 import { MyFile } from '@/types';
 import { cn } from '@/utils/classname';
 
-const TreeObject: Folder[] = [
+const TreeData: Folder[] = [
+  { label: 'home', query: 'home' },
   {
-    label: 'juno.praetorianlabs.com',
-    query: 'juno.praetorianlabs.com',
-  },
-  {
-    label: 'https://github.com/praetorian-inc',
-    query: 'https://github.com/praetorian-inc',
-  },
-  {
-    label: 'https://github.com/praetorian-inc/noseyparker',
-    query: 'https://github.com/praetorian-inc/noseyparker',
+    label: 'malware',
+    query: 'malware',
     children: (files: MyFile[], parentQuery: string): Folder[] => {
-      const groups = files.map(
+      const labelsWithDuplicates = files.map(
         ({ name }) => name.split(parentQuery)[1].split('/')[1]
       );
-      const malwareLabels = [...new Set(groups)];
+      const labels = [...new Set(labelsWithDuplicates)];
 
-      return malwareLabels.map(label => {
+      return labels.map(label => {
         return {
-          label: `${label}`,
+          label,
           data: files.filter(({ name }) =>
             name.includes(`${parentQuery}/${label}`)
           ),
         };
       });
     },
-  },
-  {
-    label: 'definitions',
-    children: [
-      {
-        label: 'files',
-        query: 'definitions/files',
-      },
-    ],
-  },
-  {
-    label: 'random',
-    query: 'random',
   },
 ];
 
@@ -197,7 +178,7 @@ const Files: React.FC = () => {
             />
           </div>
         </RenderHeaderExtraContentSection>
-        <Tree tree={TreeObject} columns={columns} />
+        <Tree tree={TreeData} columns={columns} />
         <Modal
           open={filename.length > 0 && filetype.length > 0}
           onClose={() => setFilename('')}
@@ -228,7 +209,11 @@ const Tree = ({ tree, columns }: TreeProps) => {
 interface Folder {
   label: string;
   query?: string; // Add query string if we need to fetch the data from /my?key=#files endpoint
-  // children can be an array of folders or a function that returns an array of folders
+  /**
+   * children can be of the following:
+   * Folder[] : when we know the children queries and labels
+   * () => Folder[] : when the children queries and labels are dynamically generated
+   */
   children?: Folder[] | ((files: MyFile[], parentQuery: string) => Folder[]);
   level?: number;
   // if data is available, pass it directly to display the files in the table
@@ -260,6 +245,34 @@ const TreeLevel = ({
     },
   } = useGlobalState();
 
+  const noData = {
+    title: 'No Documents Found',
+    description: (
+      <p>
+        No documents have been attached to your account yet.
+        <br />
+        Remedy that by{' '}
+        <Button
+          className="inline p-0 text-base"
+          onClick={() => {
+            setIsUploadFileDialogOpen(true);
+          }}
+          styleType="textPrimary"
+        >
+          Uploading a file now
+        </Button>
+      </p>
+    ),
+  };
+  const childFolders = useMemo(
+    () =>
+      children && typeof children === 'function'
+        ? children(files, query)
+        : undefined,
+    [children, files, query]
+  );
+  console.log(label, data || files, !children);
+
   return (
     <Accordian
       className={cn('bg-layer0 z-10', level > 0 && '-ml-4 -mr-4')}
@@ -278,15 +291,19 @@ const TreeLevel = ({
             columns={columns}
           />
         ))}
-      {children &&
-        typeof children === 'function' &&
-        children(files, query).map(group => (
-          <TreeLevel
-            {...group}
-            key={group.label}
-            level={level + 1}
-            columns={columns}
-          />
+      {childFolders && childFolders.length === 0 && (
+        <NoData title={noData?.title} description={noData?.description} />
+      )}
+      {childFolders &&
+        childFolders.map(group => (
+          <>
+            <TreeLevel
+              {...group}
+              key={group.label}
+              level={level + 1}
+              columns={columns}
+            />
+          </>
         ))}
       {!children && (
         <Table
@@ -298,25 +315,7 @@ const TreeLevel = ({
           error={data ? null : error}
           status={data ? 'success' : status}
           skipHeader={true}
-          noData={{
-            title: 'No Documents Found',
-            description: (
-              <p>
-                No documents have been attached to your account yet.
-                <br />
-                Remedy that by{' '}
-                <Button
-                  className="inline p-0 text-base"
-                  onClick={() => {
-                    setIsUploadFileDialogOpen(true);
-                  }}
-                  styleType="textPrimary"
-                >
-                  Uploading a file now
-                </Button>
-              </p>
-            ),
-          }}
+          noData={noData}
         />
       )}
     </Accordian>
