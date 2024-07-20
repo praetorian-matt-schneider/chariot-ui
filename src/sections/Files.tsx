@@ -10,12 +10,14 @@ import {
   PlusIcon,
 } from '@heroicons/react/24/outline';
 import {
-  CodeBracketSquareIcon,
+  BookOpenIcon,
+  ClipboardDocumentListIcon,
   DocumentTextIcon,
   FolderIcon,
+  GlobeAltIcon,
   HomeIcon,
-  MapPinIcon,
-  ServerIcon,
+  ShieldCheckIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/solid';
 import { useDebounce } from 'use-debounce';
 
@@ -46,29 +48,29 @@ interface Folder {
 
 const TreeData: Folder[] = [
   {
-    label: 'Home',
+    label: 'My Files',
     query: 'home',
     icon: <HomeIcon className="size-6" />,
   },
   {
-    label: 'Malware',
+    label: 'Procedures',
     query: 'malware',
-    icon: <CodeBracketSquareIcon className="size-6" />,
+    icon: <ClipboardDocumentListIcon className="size-6" />,
   },
   {
-    label: 'Threats',
+    label: 'Intel Sources',
     query: 'threats',
-    icon: <MapPinIcon className="size-6" />,
+    icon: <GlobeAltIcon className="size-6" />,
   },
   {
-    label: 'Assets',
+    label: 'Proof of Exploits',
     query: 'assets',
-    icon: <ServerIcon className="size-6" />,
+    icon: <ShieldCheckIcon className="size-6" />,
   },
   {
-    label: 'Definitions',
+    label: 'Risk Definitions',
     query: 'definitions',
-    icon: <DocumentTextIcon className="size-6" />,
+    icon: <BookOpenIcon className="size-6" />,
   },
 ];
 
@@ -133,7 +135,7 @@ const Files: React.FC = () => {
 
   return (
     <>
-      <Body className="border border-gray-200 bg-layer0 pb-4">
+      <Body className="border border-gray-200 bg-layer0 pb-4 shadow-sm">
         <TreeLevel
           currentFolder={currentFolder}
           setCurrentFolder={setCurrentFolder}
@@ -221,6 +223,23 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
     [files, debouncedSearch]
   );
 
+  const getLabel = (query: string) => {
+    switch (query) {
+      case 'home':
+        return 'Upload File';
+      case 'malware':
+        return 'Procedure';
+      case 'threats':
+        return 'Intel Source';
+      case 'assets':
+        return 'Proof of Exploit';
+      case 'definitions':
+        return 'Risk Definition';
+      default:
+        return 'Upload File';
+    }
+  };
+
   return (
     <div>
       {childFolders && childFolders.length > 0 && (
@@ -239,7 +258,7 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
           ))}
         </div>
       )}
-      <div className="flex items-center space-x-6 border-b border-gray-200 bg-gray-50 px-8 py-6">
+      <div className="flex items-center space-x-6 border-b border-gray-200 bg-gray-50 px-8 py-6 shadow-sm">
         <Dropdown
           menu={{
             items: TreeData.map(folder => ({
@@ -249,16 +268,17 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
             })),
             onClick: value => {
               if (value) {
-                const label = value[0].toUpperCase() + value.slice(1);
                 setCurrentFolder({
-                  label,
+                  label:
+                    TreeData.find(folder => folder.query === value)?.label ??
+                    '',
                   query: value,
                   icon: TreeData.find(folder => folder.query === value)?.icon,
                 });
               }
             },
           }}
-          className="h-12 w-[160px] border border-gray-300 text-left capitalize"
+          className="h-12 w-[200px] border border-gray-300 text-left capitalize shadow-sm"
           startIcon={currentFolder.icon}
           endIcon={<ChevronDownIcon className="size-4 text-gray-400" />}
         >
@@ -270,16 +290,26 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
             value={search}
             name="file_search"
             onChange={e => setSearch(e.target.value)}
-            className="h-12 w-full rounded-sm border border-gray-300 p-2.5 pl-12 "
+            className="h-12 w-full rounded-sm border border-gray-300 p-2.5 pl-12 shadow-sm"
           />
           <MagnifyingGlassIcon className="absolute left-4 top-3 size-5 text-gray-400" />
+          {search.length > 0 && (
+            <Tooltip title="Clear Search">
+              <button
+                onClick={() => setSearch('')}
+                className="absolute right-4 top-3"
+              >
+                <XMarkIcon className="size-5 text-gray-400" />
+              </button>
+            </Tooltip>
+          )}
         </div>
         <Button
-          className="h-12 rounded-sm border border-gray-300 px-6 py-3 text-sm"
+          className="h-12 w-[180px] rounded-sm border border-gray-300 px-6 py-3 text-left text-sm shadow-sm"
           startIcon={<PlusIcon className="size-5" />}
           onClick={() => setIsUploadFileDialogOpen(true)}
         >
-          Upload File
+          <div className="w-full">{getLabel(currentFolder.query ?? '')}</div>
         </Button>
       </div>
       <div className="flex w-full flex-row flex-wrap p-6 transition-all">
