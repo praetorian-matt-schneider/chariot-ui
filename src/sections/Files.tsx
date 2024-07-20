@@ -279,7 +279,7 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
           Upload File
         </Button>
       </div>
-      <div className="flex flex-row flex-wrap p-6 transition-all">
+      <div className="flex w-full flex-row flex-wrap p-6 transition-all">
         {filteredFiles.map(file => (
           <div
             className={cn(
