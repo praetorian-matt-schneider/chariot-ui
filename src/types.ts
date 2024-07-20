@@ -492,6 +492,7 @@ export enum Integration {
   qualys = 'qualys',
   zulip = 'zulip',
   basAgent = 'basAgent',
+  kev = 'kev',
 }
 
 export interface IntegrationMeta {
