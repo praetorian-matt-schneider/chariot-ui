@@ -279,24 +279,23 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
           Upload File
         </Button>
       </div>
-      <div className="flex flex-row flex-wrap justify-center space-x-5 space-y-5 pr-[10px]">
-        {filteredFiles.map((file, index) => (
+      <div className="flex flex-row flex-wrap p-6 transition-all">
+        {filteredFiles.map(file => (
           <div
             className={cn(
-              'relative p-4 w-[280px] border border-gray-100 rounded-sm',
-              index === 0 && 'ml-4 mt-5'
+              ' relative py-4 pl-2 w-[290px] rounded-sm border border-gray-100 m-2'
             )}
             key={file.name}
           >
-            <div className="flex flex-row items-center overflow-hidden text-center">
-              <div>
+            <div className="mr-[35px] flex flex-row items-center overflow-hidden break-all text-center">
+              <div className="mr-2">
                 {file.name.endsWith('png') || file.name.endsWith('jpg') ? (
                   <PhotoIcon className="size-10 text-gray-500" />
                 ) : (
                   <DocumentIcon className="size-10 text-gray-500" />
                 )}
               </div>
-              <div className="flex flex-col pr-5 text-left">
+              <div className="flex flex-col text-left">
                 <button
                   onClick={() => {
                     setFilename(file.name);
@@ -320,7 +319,7 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
             <Tooltip title="Download File">
               <button
                 onClick={() => handleDownload(file)}
-                className="absolute right-2 top-2 rounded-full p-1.5 transition-colors hover:bg-gray-100"
+                className="absolute right-2 top-3 rounded-full p-1.5 transition-colors hover:bg-gray-100"
               >
                 <ArrowDownTrayIcon className="size-4 stroke-2 text-default" />
               </button>
