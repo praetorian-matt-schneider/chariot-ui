@@ -9,7 +9,7 @@ import {
   PhotoIcon,
   PlusIcon,
 } from '@heroicons/react/24/outline';
-import { FolderIcon } from '@heroicons/react/24/solid';
+import { ArrowDownTrayIcon, FolderIcon } from '@heroicons/react/24/solid';
 import { useDebounce } from 'use-debounce';
 
 import { Button } from '@/components/Button';
@@ -222,7 +222,6 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
         </div>
       )}
       <div className="flex items-center space-x-12 border-b border-gray-200 bg-gray-50 px-12 py-6">
-        {/* Add a folder list dropdown here */}
         <div className="flex items-center space-x-2">
           <Dropdown
             menu={{
@@ -266,38 +265,44 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
           Upload File
         </Button>
       </div>
-
       <div className="flex flex-row flex-wrap justify-center space-x-5 space-y-5">
         {filteredFiles.map((file, index) => (
           <div
             className={cn(
-              'p-4 w-[230px] border border-gray-100 hover:border hover:border-gray-200 hover:bg-gray-50',
+              'relative p-4 w-[230px] border border-gray-200 rounded-md hover:bg-gray-100',
               index === 0 && 'ml-4 mt-5'
             )}
             key={file.name}
           >
-            <Tooltip title={file.name}>
-              <div
-                className="flex cursor-pointer flex-col rounded-sm text-center "
-                onClick={() => {
-                  setFilename(file.name);
-                  setFiletype(
-                    file.name.endsWith('png') || file.name.endsWith('jpg')
-                      ? 'image'
-                      : 'text'
-                  );
-                }}
-              >
-                {file.name.endsWith('png') || file.name.endsWith('jpg') ? (
-                  <PhotoIcon className="m-auto size-20 text-brand-light" />
-                ) : (
-                  <DocumentIcon className="m-auto size-20 text-brand-light" />
-                )}
-                <span className="mt-2 w-full truncate whitespace-nowrap text-center text-sm font-medium">
+            <div className="flex flex-col items-center text-center">
+              {file.name.endsWith('png') || file.name.endsWith('jpg') ? (
+                <PhotoIcon className="size-20 text-gray-500" />
+              ) : (
+                <DocumentIcon className="size-20 text-gray-500" />
+              )}
+              <Tooltip title={file.name}>
+                <button
+                  onClick={() => {
+                    setFilename(file.name);
+                    setFiletype(
+                      file.name.endsWith('png') || file.name.endsWith('jpg')
+                        ? 'image'
+                        : 'text'
+                    );
+                  }}
+                  className="mt-2 w-full truncate whitespace-nowrap text-center text-sm font-medium text-brand hover:underline"
+                >
                   {file.name}
-                </span>
-              </div>
-            </Tooltip>
+                </button>
+              </Tooltip>
+            </div>
+            <a
+              href={`/download/${file.name}`}
+              download
+              className="absolute right-2 top-2 rounded-full border border-gray-300 bg-white p-1 shadow-sm hover:bg-gray-200"
+            >
+              <ArrowDownTrayIcon className="size-5 text-blue-600" />
+            </a>
           </div>
         ))}
         {files.length === 0 && !childFolders && (
