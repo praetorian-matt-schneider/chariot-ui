@@ -236,45 +236,43 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
           ))}
         </div>
       )}
-      <div className="flex items-center space-x-12 border-b border-gray-200 bg-gray-50 px-12 py-6">
-        <div className="flex items-center space-x-2">
-          <Dropdown
-            menu={{
-              items: TreeData.map(folder => ({
-                label: folder.label,
-                value: folder.query,
-                icon: folder.icon,
-              })),
-              onClick: value => {
-                if (value) {
-                  const label = value[0].toUpperCase() + value.slice(1);
-                  setCurrentFolder({
-                    label,
-                    query: value,
-                    icon: TreeData.find(folder => folder.query === value)?.icon,
-                  });
-                }
-              },
-            }}
-            className="border border-gray-300 capitalize"
-            startIcon={currentFolder.icon}
-            endIcon={<ChevronDownIcon className="size-4 text-gray-400" />}
-          >
-            {currentFolder.label}
-          </Dropdown>
-        </div>
+      <div className="flex items-center space-x-6 border-b border-gray-200 bg-gray-50 px-8 py-6">
+        <Dropdown
+          menu={{
+            items: TreeData.map(folder => ({
+              label: folder.label,
+              value: folder.query,
+              icon: folder.icon,
+            })),
+            onClick: value => {
+              if (value) {
+                const label = value[0].toUpperCase() + value.slice(1);
+                setCurrentFolder({
+                  label,
+                  query: value,
+                  icon: TreeData.find(folder => folder.query === value)?.icon,
+                });
+              }
+            },
+          }}
+          className="h-12 w-[160px] border border-gray-300 text-left capitalize"
+          startIcon={currentFolder.icon}
+          endIcon={<ChevronDownIcon className="size-4 text-gray-400" />}
+        >
+          <div className="w-full">{currentFolder.label}</div>
+        </Dropdown>
         <div className="relative grow">
           <input
             placeholder="Search for files"
             value={search}
             name="file_search"
             onChange={e => setSearch(e.target.value)}
-            className="w-full rounded-sm border border-gray-300 p-2.5 pl-12 "
+            className="h-12 w-full rounded-sm border border-gray-300 p-2.5 pl-12 "
           />
           <MagnifyingGlassIcon className="absolute left-4 top-3 size-5 text-gray-400" />
         </div>
         <Button
-          className="rounded-sm border border-gray-300 px-6 py-3 text-sm"
+          className="h-12 rounded-sm border border-gray-300 px-6 py-3 text-sm"
           startIcon={<PlusIcon className="size-5" />}
           onClick={() => setIsUploadFileDialogOpen(true)}
         >
