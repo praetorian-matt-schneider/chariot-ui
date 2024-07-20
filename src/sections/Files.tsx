@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { JSX } from 'react/jsx-runtime';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -81,7 +81,17 @@ const TreeData: Folder[] = [
 const Files: React.FC = () => {
   const navigate = useNavigate();
   const { getRiskDrawerLink, getProofOfExploitLink } = getDrawerLink();
-  const [currentFolder, setCurrentFolder] = useState<Folder>(TreeData[0]);
+  const [defaultDir, setDefaultDir] = useStorage<string>(
+    { key: 'files/defaultDir' },
+    'home'
+  );
+  const [currentFolder, setCurrentFolder] = useState<Folder>(
+    TreeData.find(d => d.query === defaultDir) ?? TreeData[0]
+  );
+
+  useEffect(() => {
+    setDefaultDir(currentFolder.query ?? '');
+  }, [currentFolder]);
 
   const { mutate: downloadFile } = useDownloadFile();
 
@@ -142,7 +152,9 @@ const Files: React.FC = () => {
       <Body className="border border-gray-200 bg-layer0 pb-4 shadow-sm">
         <TreeLevel
           currentFolder={currentFolder}
-          setCurrentFolder={setCurrentFolder}
+          setCurrentFolder={folder => {
+            setCurrentFolder(folder);
+          }}
           getAdditionalActions={getAdditionalActions}
           handleDownload={handleDownload}
         />
