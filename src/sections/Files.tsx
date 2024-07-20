@@ -330,10 +330,12 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
           <NoData title={noData.title} description={noData.description} />
         )}
       </div>
+
       <Modal
         open={filename.length > 0 && filetype.length > 0}
         onClose={() => setFilename('')}
-        title="File Content"
+        size="xl"
+        title={filename}
       >
         <FileViewer fileName={filename} fileType={filetype} />
       </Modal>

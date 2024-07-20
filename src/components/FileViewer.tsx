@@ -1,7 +1,8 @@
-import { Loader } from '@/components/Loader';
-import { useOpenFile } from '@/hooks/useFiles';
-import { Editor } from '@monaco-editor/react';
 import React, { useEffect, useState } from 'react';
+
+import { Loader } from '@/components/Loader';
+import { MarkdownEditor } from '@/components/markdown/MarkdownEditor';
+import { useOpenFile } from '@/hooks/useFiles';
 
 const FileViewer = ({
   fileName,
@@ -22,8 +23,6 @@ const FileViewer = ({
   useEffect(() => {
     if (fileContent) {
       if (fileType === 'image') {
-        // Handling image files
-        const url = URL.createObjectURL(fileContent);
         setEditorContent('');
       } else {
         // Handling non-image files, converting blob to text
@@ -37,16 +36,6 @@ const FileViewer = ({
       }
     }
   }, [fileContent, fileType]);
-
-  // Conditional rendering based on content type
-  let renderedContent: JSX.Element | null = null;
-  if (fileContent) {
-    if (fileType === 'image') {
-      const url = URL.createObjectURL(fileContent);
-      renderedContent = <img src={url} alt="Loaded content" />;
-    }
-  }
-
   // Rest of the code...
 
   // Conditional rendering based on content type
@@ -59,14 +48,13 @@ const FileViewer = ({
     return <img src={url} alt="File content" />;
   } else {
     return (
-      <div className="h-52">
-        <Editor
-          height="100%"
-          language="text" // Change this based on the expected content type of text files
+      <div className="h-[60vh]">
+        <MarkdownEditor
           value={editorContent}
-          options={{
-            scrollBeyondLastLine: false,
+          onChange={value => {
+            setEditorContent(value || '');
           }}
+          filePathPrefix="proof-of-exploit/files"
         />
       </div>
     );
