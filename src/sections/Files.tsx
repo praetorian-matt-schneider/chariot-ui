@@ -2,9 +2,11 @@ import React, { useMemo, useState } from 'react';
 import { JSX } from 'react/jsx-runtime';
 import { useNavigate } from 'react-router-dom';
 import {
-  ArrowDownTrayIcon,
+  ArrowDownOnSquareIcon,
+  BookmarkIcon,
   ChevronDownIcon,
   DocumentIcon,
+  DocumentTextIcon,
   MagnifyingGlassIcon,
   PhotoIcon,
   PlusIcon,
@@ -12,13 +14,14 @@ import {
 import {
   BookOpenIcon,
   ClipboardDocumentListIcon,
-  DocumentTextIcon,
+  EllipsisVerticalIcon,
   FolderIcon,
   GlobeAltIcon,
   HomeIcon,
   ShieldCheckIcon,
   XMarkIcon,
 } from '@heroicons/react/24/solid';
+import { Divider } from '@tremor/react';
 import { useDebounce } from 'use-debounce';
 
 import { Button } from '@/components/Button';
@@ -174,6 +177,7 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
   const [filetype, setFiletype] = useState('');
   const [content, setContent] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [favorites, setFavorites] = useState<string[]>([]);
   const [debouncedSearch] = useDebounce(search, 500);
   const {
     modal: {
@@ -221,6 +225,11 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
         file.name.toLowerCase().includes(search.toLowerCase())
       ),
     [files, debouncedSearch]
+  );
+
+  const favoritedFiles = useMemo(
+    () => files.filter(file => favorites.includes(file.name)),
+    [files, favorites]
   );
 
   const getLabel = (query: string) => {
@@ -313,51 +322,37 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
         </Button>
       </div>
       <div className="flex w-full flex-row flex-wrap p-6 transition-all">
+        {favoritedFiles.length > 0 && (
+          <>
+            <h4 className="ml-2 w-full text-sm font-medium text-gray-500">
+              Favorites
+            </h4>
+            {favoritedFiles.map(file => (
+              <FileItem
+                key={file.name}
+                file={file}
+                currentFolder={currentFolder}
+                setFavorites={setFavorites}
+                setFilename={setFilename}
+                setFiletype={setFiletype}
+                handleDownload={handleDownload}
+                favorites={favorites}
+              />
+            ))}
+            <Divider />
+          </>
+        )}
         {filteredFiles.map(file => (
-          <div
-            className={cn(
-              ' relative py-4 pl-2 w-[290px] rounded-sm border border-gray-100 m-2'
-            )}
+          <FileItem
             key={file.name}
-          >
-            <div className="mr-[35px] flex flex-row items-center overflow-hidden break-all text-center">
-              <div className="mr-2">
-                {file.name.endsWith('png') || file.name.endsWith('jpg') ? (
-                  <PhotoIcon className="size-10 text-gray-500" />
-                ) : (
-                  <DocumentIcon className="size-10 text-gray-500" />
-                )}
-              </div>
-              <div className="flex flex-col text-left">
-                <button
-                  onClick={() => {
-                    setFilename(file.name);
-                    setFiletype(
-                      file.name.endsWith('png') || file.name.endsWith('jpg')
-                        ? 'image'
-                        : 'text'
-                    );
-                  }}
-                  className="w-full text-ellipsis text-left text-sm font-medium hover:underline"
-                >
-                  <Tooltip title={'Preview File'}>
-                    {file.name.replace(`${currentFolder.query}/` ?? '/', '')}
-                  </Tooltip>
-                </button>
-                <p className="mt-1 text-xs text-gray-400">
-                  Added {formatDate(file.updated)}
-                </p>
-              </div>
-            </div>
-            <Tooltip title="Download File">
-              <button
-                onClick={() => handleDownload(file)}
-                className="absolute right-2 top-3 rounded-full p-1.5 transition-colors hover:bg-gray-100"
-              >
-                <ArrowDownTrayIcon className="size-4 stroke-2 text-default" />
-              </button>
-            </Tooltip>
-          </div>
+            file={file}
+            currentFolder={currentFolder}
+            setFavorites={setFavorites}
+            setFilename={setFilename}
+            setFiletype={setFiletype}
+            handleDownload={handleDownload}
+            favorites={favorites}
+          />
         ))}
         {files.length === 0 && !childFolders && (
           <NoData title={noData.title} description={noData.description} />
@@ -402,6 +397,90 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
           onChange={changed => setContent(changed)}
         />
       </Modal>
+    </div>
+  );
+};
+
+interface FileItemProps {
+  file: MyFile;
+  currentFolder: Folder;
+  setFavorites: React.Dispatch<React.SetStateAction<string[]>>;
+  setFilename: React.Dispatch<React.SetStateAction<string>>;
+  setFiletype: React.Dispatch<React.SetStateAction<string>>;
+  handleDownload: (item: MyFile) => void;
+  favorites: string[];
+}
+
+const FileItem: React.FC<FileItemProps> = ({
+  file,
+  currentFolder,
+  setFavorites,
+  setFilename,
+  setFiletype,
+  handleDownload,
+  favorites,
+}) => {
+  return (
+    <div
+      className={cn(
+        ' relative py-4 pl-2 w-[290px] rounded-sm border border-gray-200 m-2'
+      )}
+      key={file.name}
+    >
+      <div className="mr-[35px] flex flex-row items-center overflow-hidden break-all text-center">
+        <div className="mr-2">
+          {file.name.endsWith('png') || file.name.endsWith('jpg') ? (
+            <PhotoIcon className="size-10 text-gray-500" />
+          ) : (
+            <DocumentIcon className="size-10 text-gray-500" />
+          )}
+        </div>
+        <div className="flex flex-col text-left">
+          <span className="font-default text-sm">
+            {file.name.replace(`${currentFolder.query}/` ?? '/', '')}
+          </span>
+          <p className="mt-1 text-xs text-gray-400">
+            Added {formatDate(file.updated)}
+          </p>
+        </div>
+      </div>
+      <Dropdown
+        menu={{
+          items: [
+            {
+              label: favorites.includes(file.name) ? 'Unfavorite' : 'Favorite',
+              icon: <BookmarkIcon className="size-6 text-default" />,
+              onClick: () => {
+                if (favorites.includes(file.name)) {
+                  setFavorites(favorites.filter(fav => fav !== file.name));
+                  return;
+                } else {
+                  setFavorites([...favorites, file.name]);
+                }
+              },
+            },
+            {
+              icon: <DocumentTextIcon className="size-6 text-default" />,
+              label: 'View',
+              onClick: () => {
+                setFilename(file.name);
+                setFiletype(
+                  file.name.endsWith('png') || file.name.endsWith('jpg')
+                    ? 'image'
+                    : 'text'
+                );
+              },
+            },
+            {
+              icon: <ArrowDownOnSquareIcon className="size-7 text-default" />,
+              label: 'Download',
+              onClick: () => handleDownload(file),
+            },
+          ],
+        }}
+        className="absolute right-2 top-2 bg-layer0 p-0"
+        endIcon={<EllipsisVerticalIcon className="size-6 text-default" />}
+      />
     </div>
   );
 };
