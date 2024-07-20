@@ -132,7 +132,7 @@ const Files: React.FC = () => {
 
   return (
     <>
-      <Body className="bg-layer0 pb-4">
+      <Body className="border border-gray-200 bg-layer0 pb-4">
         <TreeLevel
           currentFolder={currentFolder}
           setCurrentFolder={setCurrentFolder}
@@ -219,7 +219,7 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
   );
 
   return (
-    <div className="">
+    <div>
       {childFolders && childFolders.length > 0 && (
         <div className="flex flex-row flex-wrap space-x-6">
           {childFolders.map(folder => (
@@ -311,7 +311,7 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
                     {file.name.replace(`${currentFolder.query}/` ?? '/', '')}
                   </Tooltip>
                 </button>
-                <p className="mt-2 text-xs text-gray-400">
+                <p className="mt-1 text-xs text-gray-400">
                   Added {formatDate(file.updated)}
                 </p>
               </div>
