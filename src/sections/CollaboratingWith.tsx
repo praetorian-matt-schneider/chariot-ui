@@ -33,9 +33,9 @@ export const CollaboratingWith = () => {
     return collaborators.map((collaborator): TableData => {
       const counts = { total: 0, low: 0, medium: 0, high: 0, critical: 0 };
 
-      if (collaborator.counts) {
-        Object.keys(collaborator.counts).forEach(key => {
-          const val = collaborator.counts![key];
+      if (collaborator?.counts?.status) {
+        Object.keys(collaborator.counts.status).forEach(key => {
+          const val = collaborator?.counts?.status![key] || 0;
 
           // Hide non-open status and info severity risks
           // These were deemed not important enough to show in the table
@@ -95,9 +95,13 @@ export const CollaboratingWith = () => {
     {
       label: 'User',
       id: 'displayName',
-      cell: 'highlight',
       onClick: (row: TableData) =>
         startImpersonation(row.email, row.displayName ?? ''),
+      cell: row => (
+        <span className="text-brand">
+          {row.displayName || row.email || '-'}
+        </span>
+      ),
     },
     {
       label: 'Total',
@@ -162,7 +166,7 @@ export const CollaboratingWith = () => {
         open={showModal}
         onClose={() => setShowModal(false)}
         title={
-          <div>{collaborator?.displayName || collaborator?.email}'s Export</div>
+          <div>{`${collaborator?.displayName || collaborator?.email}'s Export`}</div>
         }
         icon={<ArrowDownCircleIcon className="size-5" />}
         size="md"

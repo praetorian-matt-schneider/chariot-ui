@@ -17,8 +17,8 @@ import { RisksIcon } from '@/components/icons';
 import { HorseIcon } from '@/components/icons/Horse.icon';
 import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
 import { getRiskStatusIcon } from '@/components/icons/RiskStatus.icon';
-import { SpinnerIcon } from '@/components/icons/Spinner.icon';
 import { MenuItemProps } from '@/components/Menu';
+import SourceDropdown from '@/components/SourceDropdown';
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
@@ -84,12 +84,14 @@ const getFilteredRisks = (
   {
     statusFilter = [],
     severityFilter = [],
-    sourceFilter = [],
+    intelFilter = [],
+    sourcesFilter = [],
     knownExploitedThreats,
   }: {
     statusFilter?: string[];
     severityFilter?: string[];
-    sourceFilter?: string[];
+    intelFilter?: string[];
+    sourcesFilter?: string[];
     knownExploitedThreats?: string[];
   }
 ) => {
@@ -106,8 +108,8 @@ const getFilteredRisks = (
   }
 
   if (
-    sourceFilter.length > 0 &&
-    sourceFilter[0] === 'cisa_kev' &&
+    intelFilter.length > 0 &&
+    intelFilter[0] === 'cisa_kev' &&
     knownExploitedThreats &&
     knownExploitedThreats.length > 0
   ) {
@@ -116,6 +118,13 @@ const getFilteredRisks = (
       knownExploitedThreats
     );
   }
+
+  if (sourcesFilter?.filter(Boolean).length > 0) {
+    filteredRisks = filteredRisks.filter(risk =>
+      sourcesFilter.includes(risk.source)
+    );
+  }
+
   return filteredRisks;
 };
 
@@ -139,9 +148,15 @@ export function Risks() {
     setSelectedRows
   );
 
-  const [sourceFilter, setSourceFilter] = useFilter(
+  const [intelFilter, setIntelFilter] = useFilter(
     [''],
-    'risk-source',
+    'risk-intel',
+    setSelectedRows
+  );
+
+  const [sourcesFilter, setSourcesFilter] = useFilter(
+    [''],
+    'risk-sources',
     setSelectedRows
   );
 
@@ -169,7 +184,8 @@ export function Risks() {
     filteredRisks = getFilteredRisks(risks, {
       statusFilter,
       severityFilter,
-      sourceFilter,
+      intelFilter,
+      sourcesFilter,
       knownExploitedThreats,
     });
 
@@ -184,7 +200,8 @@ export function Risks() {
   }, [
     severityFilter,
     statusFilter,
-    sourceFilter,
+    intelFilter,
+    sourcesFilter,
     JSON.stringify(risks),
     JSON.stringify(knownExploitedThreats),
   ]);
@@ -281,10 +298,17 @@ export function Risks() {
     () =>
       getFilteredRisks(risks, {
         statusFilter,
-        sourceFilter,
+        intelFilter,
+        sourcesFilter,
         knownExploitedThreats,
       }),
-    [risks, statusFilter, sourceFilter, JSON.stringify(knownExploitedThreats)]
+    [
+      risks,
+      statusFilter,
+      sourcesFilter,
+      intelFilter,
+      JSON.stringify(knownExploitedThreats),
+    ]
   );
 
   const severityOptions = useMemo(
@@ -305,14 +329,22 @@ export function Risks() {
     () =>
       getFilteredRisks(risks, {
         severityFilter,
-        sourceFilter,
+        intelFilter,
+        sourcesFilter,
         knownExploitedThreats,
       }),
-    [risks, severityFilter, sourceFilter, JSON.stringify(knownExploitedThreats)]
+    [
+      risks,
+      severityFilter,
+      sourcesFilter,
+      intelFilter,
+      JSON.stringify(knownExploitedThreats),
+    ]
   );
   const risksExceptSource = useMemo(
-    () => getFilteredRisks(risks, { severityFilter, statusFilter }),
-    [risks, severityFilter, statusFilter]
+    () =>
+      getFilteredRisks(risks, { severityFilter, statusFilter, sourcesFilter }),
+    [risks, severityFilter, statusFilter, sourcesFilter]
   );
 
   function getRiskStausOptionWithCount(riskStatus: RiskStatus[]) {
@@ -403,7 +435,7 @@ export function Risks() {
             />
             <Dropdown
               styleType="header"
-              label={getFilterLabel('Threat Intel', sourceFilter, [
+              label={getFilterLabel('Threat Intel', intelFilter, [
                 { label: 'CISA KEV', value: 'cisa_kev' },
               ])}
               endIcon={DownIcon}
@@ -427,9 +459,15 @@ export function Risks() {
                     value: 'cisa_kev',
                   },
                 ],
-                onSelect: selectedRows => setSourceFilter(selectedRows),
-                value: sourceFilter,
+                onSelect: selectedRows => setIntelFilter(selectedRows),
+                value: intelFilter,
                 multiSelect: true,
+              }}
+            />
+            <SourceDropdown
+              type="risk"
+              onSelect={selectedRows => {
+                setSourcesFilter(selectedRows);
               }}
             />
           </div>
@@ -536,17 +574,12 @@ export function Risks() {
         error={error}
         selection={{ value: selectedRows, onChange: setSelectedRows }}
         noData={{
-          title: risks?.length > 0 ? 'Scanning for Risks' : 'No Risks Found',
+          title: risks.length === 0 ? 'No Risks Found' : 'No Matching Risks',
           description:
-            risks.length > 0
-              ? `No risks have been found, but we're actively scanning for them.\nWe'll alert you if we find any.`
-              : `Congratulations! Your Assets look safe, secure, and properly configured.\nWe'll continue to watch them to ensure nothing changes.`,
-          icon:
-            risks.length > 0 ? (
-              <SpinnerIcon className="size-[100px]" />
-            ) : (
-              <HorseIcon />
-            ),
+            risks.length === 0
+              ? "Congratulations! Your Assets look safe, secure, and properly configured.\nWe'll continue to watch it to ensure nothing changes."
+              : 'Try adjusting your filters or add new risks to see results.',
+          icon: <HorseIcon />,
         }}
         isFetchingNextPage={isFetchingNextPage}
         fetchNextPage={fetchNextPage}

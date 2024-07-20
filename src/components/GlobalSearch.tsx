@@ -131,8 +131,7 @@ const GlobalSearch = () => {
           <div className="mb-4 text-gray-700">
             <div className="mb-3">
               <span className="font-bold">Global Search:</span> Enter any term
-              to search across all records including assets, risks, jobs, and
-              more.
+              to find matching records beginning with that term.
             </div>
             <div className="mb-3">
               <span className="font-bold">Hash Search:</span> Start your search
@@ -140,13 +139,11 @@ const GlobalSearch = () => {
               within the current page table.
             </div>
           </div>
-          <div className="bg-gray-100 p-3">
-            <p className="mb-3  rounded-sm font-medium text-gray-800">
-              Example searches:
-            </p>
+          <div className="rounded-md bg-gray-100 p-3">
+            <p className="mb-3 font-medium text-gray-800">Example searches:</p>
             <p>
               <span className="font-semibold">dev</span>: Find all records
-              containing the term &quot;dev&quot;.
+              beginning with the term &quot;dev&quot;.
             </p>
             <p>
               <span className="font-semibold">#name</span>: Filter the current

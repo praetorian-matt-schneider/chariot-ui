@@ -1,13 +1,12 @@
 import { useMemo, useState } from 'react';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { InformationCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 import { Button } from '@/components/Button';
 import { Chip } from '@/components/Chip';
 import { Input } from '@/components/form/Input';
 import { Inputs } from '@/components/form/Inputs';
 import { Modal } from '@/components/Modal';
-import { useMy } from '@/hooks';
-import { useModifyAccount } from '@/hooks/useAccounts';
+import { useModifyAccount, useMy } from '@/hooks';
 
 const DefaultFormValues = {
   domain: '',
@@ -41,7 +40,6 @@ export const SSOSetupForm = () => {
         issuer: issuerUrl,
       },
     });
-    // Close the modal after submission
     setShowModal(false);
     setFormData(DefaultFormValues);
   };
@@ -54,12 +52,12 @@ export const SSOSetupForm = () => {
             {ssoAccount.member.split(':')[1]}
           </Chip>
           <button
-            className="jusify-center flex flex-row items-center space-x-2 text-sm font-medium"
+            className="flex flex-row items-center justify-center space-x-2 text-sm font-medium"
             onClick={() =>
               unlink({ ...ssoAccount, username: ssoAccount.member })
             }
           >
-            <XMarkIcon className="size-3" />
+            <XMarkIcon className="size-5" />
             <span>Remove</span>
           </button>
         </div>
@@ -81,6 +79,29 @@ export const SSOSetupForm = () => {
           id="sso-setup-form"
           onSubmit={handleFormSubmit}
         >
+          <div className="rounded-lg bg-gray-100 p-4">
+            <p className="mb-2 text-sm font-bold">Need help?</p>
+            <div className="flex flex-col space-y-2">
+              <a
+                href="https://docs.praetorian.com/hc/en-us/articles/27430843438619-Okta-SSO-Configuration"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-2 text-blue-600 hover:underline"
+              >
+                <InformationCircleIcon className="size-5" />
+                <span>How to: Okta SSO Configuration</span>
+              </a>
+              <a
+                href="https://docs.praetorian.com/hc/en-us/articles/27451961594139-Azure-SSO-Configuration"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-2 text-blue-600 hover:underline"
+              >
+                <InformationCircleIcon className="size-5" />
+                <span>How to: Azure SSO Configuration</span>
+              </a>
+            </div>
+          </div>
           <p className="text-sm font-bold">
             Add a TXT record to your domain with the following value:{' '}
             <code>chariot=&lt;email&gt;</code>

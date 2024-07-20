@@ -5,15 +5,20 @@ import { PlusIcon, PuzzlePieceIcon } from '@heroicons/react/24/outline';
 import { Dropdown } from '@/components/Dropdown';
 import { AssetsIcon, RisksIcon } from '@/components/icons';
 import { getAssetStatusIcon } from '@/components/icons/AssetStatus.icon';
-import { SpinnerIcon } from '@/components/icons/Spinner.icon';
+import { HorseIcon } from '@/components/icons/Horse.icon';
 import { showBulkSnackbar, Snackbar } from '@/components/Snackbar';
+import SourceDropdown from '@/components/SourceDropdown';
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
 import { getAssetStatusProperties } from '@/components/ui/AssetStatusChip';
 import { AttributeFilter } from '@/components/ui/AttributeFilter';
 import { useMy } from '@/hooks';
-import { AssetsSnackbarTitle, useUpdateAsset } from '@/hooks/useAssets';
+import {
+  AssetsSnackbarTitle,
+  getStartMessage,
+  useUpdateAsset,
+} from '@/hooks/useAssets';
 import { useFilter } from '@/hooks/useFilter';
 import { useIntegration } from '@/hooks/useIntegration';
 import { AssetStatusWarning } from '@/sections/AssetStatusWarning';
@@ -21,13 +26,7 @@ import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { getFilterLabel } from '@/sections/RisksTable';
 import { parseKeys } from '@/sections/SearchByType';
 import { useGlobalState } from '@/state/global.state';
-import {
-  Asset,
-  AssetStatus,
-  AssetStatusLabel,
-  Risk,
-  RiskScanMessage,
-} from '@/types';
+import { Asset, AssetStatus, AssetStatusLabel, Risk } from '@/types';
 import { useMergeStatus } from '@/utils/api';
 
 type Severity = 'I' | 'L' | 'M' | 'H' | 'C';
@@ -93,6 +92,11 @@ const Assets: React.FC = () => {
     'asset-priority',
     setSelectedRows
   );
+  const [sourceFilter, setSourceFilter] = useFilter(
+    [''],
+    'asset-source-filter',
+    setSelectedRows
+  );
   const [assetsWithAttributesFilter, setAssetsWithAttributesFilter] = useState<
     string[]
   >([]);
@@ -105,9 +109,7 @@ const Assets: React.FC = () => {
   );
   const [showAssetStatusWarning, setShowAssetStatusWarning] =
     useState<boolean>(false);
-  const [assetStatus, setAssetStatus] = useState<
-    AssetStatus.ActiveHigh | AssetStatus.Frozen | ''
-  >('');
+  const [assetStatus, setAssetStatus] = useState<AssetStatus | ''>('');
 
   const { mutateAsync: updateAsset } = useUpdateAsset();
 
@@ -149,9 +151,16 @@ const Assets: React.FC = () => {
 
   const filteredAssets = useMemo(() => {
     let filteredAssets = assetsWithRisk;
+
     if (priorityFilter?.filter(Boolean).length > 0) {
       filteredAssets = filteredAssets.filter(({ status }) =>
         priorityFilter.includes(status)
+      );
+    }
+
+    if (sourceFilter?.filter(Boolean).length > 0) {
+      filteredAssets = filteredAssets.filter(({ source }) =>
+        sourceFilter.includes(source)
       );
     }
     const sortOrder = Object.keys(AssetStatusLabel);
@@ -172,12 +181,15 @@ const Assets: React.FC = () => {
       cell: (asset: AssetsWithRisk) => {
         const integration = isIntegration(asset);
         const containsRisks = Object.values(asset.riskSummary || {}).length > 0;
-        const { detail } = getAssetStatusProperties(asset.status);
+        const simplifiedStatus = asset.status.startsWith('F')
+          ? AssetStatus.Frozen
+          : asset.status;
+        const { detail } = getAssetStatusProperties(simplifiedStatus);
         const icons: JSX.Element[] = [];
 
         icons.push(
-          <Tooltip title={detail || 'Closed'}>
-            {getAssetStatusIcon(asset.status)}
+          <Tooltip title={detail || simplifiedStatus}>
+            {getAssetStatusIcon(simplifiedStatus)}
           </Tooltip>
         );
         if (containsRisks) {
@@ -212,7 +224,10 @@ const Assets: React.FC = () => {
       label: 'Status',
       id: 'status',
       cell: (asset: Asset) => {
-        return AssetStatusLabel[asset.status];
+        const simplifiedStatus = asset.status.startsWith('F')
+          ? AssetStatus.Frozen
+          : asset.status;
+        return AssetStatusLabel[simplifiedStatus];
       },
     },
     {
@@ -239,8 +254,9 @@ const Assets: React.FC = () => {
     () =>
       Object.entries(AssetStatusLabel).map(([value, label]) => ({
         label,
-        labelSuffix: assetsWithRisk.filter(({ status }) => status === value)
-          .length,
+        labelSuffix: assetsWithRisk.filter(({ status }) =>
+          status.startsWith(value)
+        ).length,
         value,
       })),
     [assetsWithRisk]
@@ -264,12 +280,7 @@ const Assets: React.FC = () => {
             if (showBulk) {
               Snackbar({
                 title: `${assets.length} assets ${AssetsSnackbarTitle[status]}`,
-                description: [
-                  AssetStatus.Active,
-                  AssetStatus.ActiveHigh,
-                ].includes(status)
-                  ? RiskScanMessage.Start
-                  : RiskScanMessage.Stop,
+                description: getStartMessage(status),
                 variant: 'success',
               });
             }
@@ -332,6 +343,11 @@ const Assets: React.FC = () => {
                 multiSelect: true,
               }}
             />
+            <SourceDropdown
+              type="asset"
+              onSelect={selected => setSourceFilter(selected)}
+              types={['Provided', 'Discovered']}
+            />
           </div>
         }
         resize={true}
@@ -360,7 +376,7 @@ const Assets: React.FC = () => {
                 },
                 { type: 'divider', label: 'Divider' },
                 {
-                  label: 'Change Priority',
+                  label: 'Change Status',
                   type: 'label',
                 },
                 {
@@ -408,6 +424,15 @@ const Assets: React.FC = () => {
                     setAssetStatus(AssetStatus.Frozen);
                   },
                 },
+                {
+                  label: AssetStatusLabel[AssetStatus.Deleted],
+                  icon: getAssetStatusIcon(AssetStatus.Deleted),
+                  onClick: () => {
+                    setSelectedAssets(assets.map(asset => asset.key));
+                    setShowAssetStatusWarning(true);
+                    setAssetStatus(AssetStatus.Deleted);
+                  },
+                },
               ],
             },
           };
@@ -419,10 +444,15 @@ const Assets: React.FC = () => {
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={isFetchingNextPage}
         noData={{
-          icon: <SpinnerIcon className="size-[100px]" />,
-          title: 'Scans Running',
+          icon: <HorseIcon />,
+          title:
+            assets.length === 0
+              ? 'Discovering Assets...'
+              : 'No Matching Assets',
           description:
-            'Your seeds are being scanned and your assets will appear here soon',
+            assets.length === 0
+              ? 'We are currently scanning for assets. They will appear here as soon as they are discovered. Please check back shortly.'
+              : 'Try adjusting your filters or add new assets to see results.',
         }}
       />
 

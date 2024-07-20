@@ -37,10 +37,10 @@ import { DetailsDrawerHeader } from '@/sections/detailsDrawer/DetailsDrawerHeade
 import { DrawerList } from '@/sections/detailsDrawer/DrawerList';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import {
+  EntityHistory,
   JobStatus,
   Risk,
   RiskCombinedStatus,
-  RiskHistory,
   RiskSeverity,
   RiskStatus,
   RiskStatusLabel,
@@ -48,6 +48,7 @@ import {
 } from '@/types';
 import { formatDate } from '@/utils/date.util';
 import { sToMs } from '@/utils/date.util';
+import { isManualORPRrovidedRisk } from '@/utils/risk.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
 import { generatePathWithSearch, useSearchParams } from '@/utils/url.util';
 
@@ -152,7 +153,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     },
     { enabled: open, refetchInterval: sToMs(10) }
   );
-  const { data: knownExploitedThreats = [] } = useGetKev({ enabled: open });
+  const { data: knownExploitedThreats = [] } = useGetKev();
   const { data: riskNameGenericSearch } = useGenericSearch(
     { query: name },
     { enabled: open }
@@ -198,7 +199,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     const riskHistory = risk.history || [];
     const noHistory = riskHistory.length === 0;
 
-    const firstTrackedHistory: RiskHistory = {
+    const firstTrackedHistory: EntityHistory = {
       from: '',
       to: noHistory ? risk.status : risk.history[0].from,
       updated: risk.created,
@@ -305,17 +306,21 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
               <Tooltip
                 placement="top"
                 title={
-                  risk.source
+                  risk.source && !isManualORPRrovidedRisk(risk)
                     ? isJobRunningForThisRisk
                       ? 'Scanning in progress'
                       : 'Revalidate the risk'
-                    : 'On-Demand Scanning is only available for Automated Risks.'
+                    : 'On-demand scanning is only available for automated risk discovery.'
                 }
               >
                 <Button
                   className="border-1 h-8 border border-default"
                   startIcon={<ArrowPathIcon className="size-5" />}
-                  disabled={!risk.source || Boolean(isJobRunningForThisRisk)}
+                  disabled={
+                    !risk.source ||
+                    isManualORPRrovidedRisk(risk) ||
+                    Boolean(isJobRunningForThisRisk)
+                  }
                   isLoading={
                     reRunJobStatus === 'pending' ||
                     allAssetJobsStatus === 'pending'
@@ -531,7 +536,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
 }
 
 function getHistoryDiff(
-  history: RiskHistory,
+  history: EntityHistory,
   isFirst: boolean
 ): {
   title: ReactNode;

@@ -16,9 +16,10 @@ interface Props {
     value: string | ReactNode;
     updated?: string;
     to?: To;
-    prefix?: JSX.Element;
+    prefix?: JSX.Element | string;
   }[];
   allowEmpty?: boolean;
+  noDataMessage?: JSX.Element;
   dns: string;
 }
 
@@ -29,7 +30,11 @@ export const DrawerList = (props: Props) => {
   const parentRef = useRef<HTMLDivElement>(null);
 
   if (items.length === 0 && !allowEmpty) {
-    return <NoData title={'No data found'} />;
+    return props.noDataMessage ? (
+      props.noDataMessage
+    ) : (
+      <NoData title={'No data found'} />
+    );
   }
 
   if (items.length === 0 && allowEmpty) {
@@ -100,6 +105,7 @@ export const DrawerList = (props: Props) => {
         {virtualItems.map(virtualItem => {
           const { prefix, label, updated, value, to } =
             items[virtualItem.index];
+
           return (
             <li
               key={virtualItem.key}
@@ -137,7 +143,7 @@ export const DrawerList = (props: Props) => {
               <div className="flex justify-between text-xs text-default-light">
                 <div className="flex flex-row items-center">
                   <CopyToClipboard textToCopy={label}>
-                    {label} {updated && ' added ' + formatDate(updated)}
+                    {label} {updated && ' updated ' + formatDate(updated)}
                   </CopyToClipboard>{' '}
                 </div>
               </div>

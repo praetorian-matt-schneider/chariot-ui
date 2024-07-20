@@ -136,6 +136,20 @@ export const AddRisks = () => {
     }
   }, [isOpen]);
 
+  // Set the form data for the hook integration
+  useEffect(() => {
+    if (IntegrationsMeta[selectedIndex - 1]?.name === 'hook') {
+      const payload: Values = {};
+      const formValues = IntegrationsMeta[selectedIndex - 1].inputs;
+      formValues?.forEach(input => {
+        payload[input.name] = input.value;
+      });
+      setIntegrationFormData([payload]);
+    } else {
+      setIntegrationFormData([]);
+    }
+  }, [selectedIndex]);
+
   async function handleConfigureIntegration() {
     integrationFormData.map(data => link(data as unknown as LinkAccount));
     onClose();
@@ -228,7 +242,7 @@ export const AddRisks = () => {
                     </p>
                   </div>
                 </div>
-                <div className="mt-4 flex flex-1 flex-col justify-center">
+                <div className="border-1 mt-4 flex flex-1 flex-col justify-center rounded-sm border border-gray-200 p-4">
                   <form
                     id="addRisk"
                     onSubmit={handleSubmit}
@@ -291,12 +305,12 @@ export const AddRisks = () => {
                         setFormData(formData => ({ ...formData, ...values }))
                       }
                     />
-                    <p className="mt-3 text-center text-xs text-gray-500">
-                      Manually entered risks will be tracked but not
-                      automatically monitored.
-                    </p>
                   </form>
                 </div>
+                <p className="mt-3 text-center text-xs text-gray-500">
+                  Manually entered risks will be tracked but not automatically
+                  monitored.
+                </p>
               </div>
             </TabPanel>
             {Tabs.map(tab => {

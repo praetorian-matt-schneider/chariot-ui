@@ -1,6 +1,8 @@
 export enum RiskScanMessage {
   Stop = 'Risk scanning will stop.',
   Start = 'Risk scanning will start automatically.',
+  StartHigh = 'Comprehensive risk scanning will start automatically.',
+  StartLow = 'Asset discovery will start automatically.',
 }
 
 export enum UniqueQueryKeys {
@@ -45,13 +47,15 @@ export enum AssetStatus {
   ActiveLow = 'AL',
   Active = 'A',
   Frozen = 'F',
+  Deleted = 'D',
 }
 
 export const AssetStatusLabel: Record<AssetStatus, string> = {
   [AssetStatus.ActiveHigh]: 'Comprehensive Scan',
   [AssetStatus.Active]: 'Standard Scan',
   [AssetStatus.ActiveLow]: 'Asset Discovery',
-  [AssetStatus.Frozen]: 'Exclude Asset',
+  [AssetStatus.Frozen]: 'Excluded',
+  [AssetStatus.Deleted]: 'Deleted',
 };
 
 export const RiskStatusLabel: Record<RiskStatus, string> = {
@@ -168,7 +172,6 @@ export interface AccountMetadata {
   [key: string]: AccountMetadata | string | undefined;
 }
 
-// TODO: Discover the unknowns
 export interface Asset {
   class: string;
   comment: string;
@@ -176,9 +179,10 @@ export interface Asset {
   created: string;
   dns: string;
   seed: boolean;
-  history: unknown;
+  history: EntityHistory[];
   key: string;
   name: string;
+  source: string;
   status: AssetStatus;
   ttl: number;
   updated: string;
@@ -191,9 +195,9 @@ export interface Job {
   key: string;
   delay: number;
   comment?: string;
+  source: string;
   dns: string;
   id: string;
-  source: string;
   queue: string;
   status: JobStatus;
   ttl: number;
@@ -208,7 +212,7 @@ export interface RiskTemplate {
   status: RiskCombinedStatus;
 }
 
-export type RiskHistory = {
+export type EntityHistory = {
   from: string;
   to: string;
   updated: string;
@@ -224,7 +228,7 @@ export interface Risk extends RiskTemplate {
   ttl: number;
   source: string;
   seed: string;
-  history: RiskHistory[];
+  history: EntityHistory[];
 }
 
 export interface Seed {
@@ -281,7 +285,9 @@ export interface MyFile {
 }
 
 export interface Statistics {
-  [key: string]: number;
+  status?: { [key: string]: number };
+  source?: { [key: string]: number };
+  attributes?: { [key: string]: number };
 }
 
 export type Secret = {
