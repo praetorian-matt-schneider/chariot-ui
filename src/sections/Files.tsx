@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { JSX } from 'react/jsx-runtime';
 import { useNavigate } from 'react-router-dom';
 import {
+  ArrowDownTrayIcon,
   ChevronDownIcon,
   DocumentIcon,
   MagnifyingGlassIcon,
@@ -9,7 +10,6 @@ import {
   PlusIcon,
 } from '@heroicons/react/24/outline';
 import {
-  ArrowDownTrayIcon,
   CodeBracketSquareIcon,
   DocumentTextIcon,
   FolderIcon,
@@ -32,6 +32,7 @@ import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { useGlobalState } from '@/state/global.state';
 import { MyFile } from '@/types';
 import { cn } from '@/utils/classname';
+import { formatDate } from '@/utils/date.util';
 
 interface Folder {
   label: string;
@@ -162,6 +163,7 @@ interface TreeLevelProps {
 const TreeLevel: React.FC<TreeLevelProps> = ({
   currentFolder,
   setCurrentFolder,
+  handleDownload,
 }) => {
   const { query = '', children } = currentFolder;
   const [filename, setFilename] = useState('');
@@ -279,22 +281,24 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
           Upload File
         </Button>
       </div>
-      <div className="flex flex-row flex-wrap justify-center space-x-5 space-y-5">
+      <div className="flex flex-row flex-wrap justify-center space-x-5 space-y-5 pr-[10px]">
         {filteredFiles.map((file, index) => (
           <div
             className={cn(
-              'relative p-4 w-[230px] border border-gray-200 rounded-md hover:bg-gray-100',
+              'relative p-4 w-[280px] border border-gray-100 rounded-sm',
               index === 0 && 'ml-4 mt-5'
             )}
             key={file.name}
           >
-            <div className="flex flex-col items-center text-center">
-              {file.name.endsWith('png') || file.name.endsWith('jpg') ? (
-                <PhotoIcon className="size-20 text-gray-500" />
-              ) : (
-                <DocumentIcon className="size-20 text-gray-500" />
-              )}
-              <Tooltip title={file.name}>
+            <div className="flex flex-row items-center overflow-hidden text-center">
+              <div>
+                {file.name.endsWith('png') || file.name.endsWith('jpg') ? (
+                  <PhotoIcon className="size-10 text-gray-500" />
+                ) : (
+                  <DocumentIcon className="size-10 text-gray-500" />
+                )}
+              </div>
+              <div className="flex flex-col pr-5 text-left">
                 <button
                   onClick={() => {
                     setFilename(file.name);
@@ -304,19 +308,25 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
                         : 'text'
                     );
                   }}
-                  className="mt-2 w-full truncate whitespace-nowrap text-center text-sm font-medium text-brand hover:underline"
+                  className="w-full text-ellipsis text-left text-sm font-medium hover:underline"
                 >
-                  {file.name}
+                  <Tooltip title={'Preview File'}>
+                    {file.name.replace(`${currentFolder.query}/` ?? '/', '')}
+                  </Tooltip>
                 </button>
-              </Tooltip>
+                <p className="mt-2 text-xs text-gray-400">
+                  Added {formatDate(file.updated)}
+                </p>
+              </div>
             </div>
-            <a
-              href={`/download/${file.name}`}
-              download
-              className="absolute right-2 top-2 rounded-full border border-gray-300 bg-white p-1 shadow-sm hover:bg-gray-200"
-            >
-              <ArrowDownTrayIcon className="size-5 text-blue-600" />
-            </a>
+            <Tooltip title="Download File">
+              <button
+                onClick={() => handleDownload(file)}
+                className="absolute right-2 top-2 rounded-full p-1.5 transition-colors hover:bg-gray-100"
+              >
+                <ArrowDownTrayIcon className="size-4 stroke-2 text-default" />
+              </button>
+            </Tooltip>
           </div>
         ))}
         {files.length === 0 && !childFolders && (
