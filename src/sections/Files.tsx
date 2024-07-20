@@ -39,6 +39,7 @@ import { useGlobalState } from '@/state/global.state';
 import { MyFile } from '@/types';
 import { cn } from '@/utils/classname';
 import { formatDate } from '@/utils/date.util';
+import { useStorage } from '@/utils/storage/useStorage.util';
 
 interface Folder {
   label: string;
@@ -177,7 +178,10 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
   const [filetype, setFiletype] = useState('');
   const [content, setContent] = useState<string | null>(null);
   const [search, setSearch] = useState('');
-  const [favorites, setFavorites] = useState<string[]>([]);
+  const [favorites, setFavorites] = useStorage<string[]>(
+    { key: 'files/favorites' },
+    []
+  );
   const [debouncedSearch] = useDebounce(search, 500);
   const {
     modal: {
