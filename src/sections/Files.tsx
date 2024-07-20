@@ -22,6 +22,7 @@ import { Body } from '@/components/ui/Body';
 import { NoData } from '@/components/ui/NoData';
 import { useDownloadFile, useMy } from '@/hooks';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
+import { useGlobalState } from '@/state/global.state';
 import { MyFile } from '@/types';
 import { cn } from '@/utils/classname';
 
@@ -154,6 +155,11 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
   const [filetype, setFiletype] = useState('');
   const [search, setSearch] = useState('');
   const [debouncedSearch] = useDebounce(search, 500);
+  const {
+    modal: {
+      file: { onOpenChange: setIsUploadFileDialogOpen },
+    },
+  } = useGlobalState();
 
   const { data: files = [] } = useMy(
     {
@@ -170,7 +176,11 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
         No documents have been attached to your account yet.
         <br />
         Remedy that by{' '}
-        <Button className="inline p-0 text-base" styleType="textPrimary">
+        <Button
+          className="inline p-0 text-base"
+          styleType="textPrimary"
+          onClick={() => setIsUploadFileDialogOpen(true)}
+        >
           Uploading a file now
         </Button>
       </p>
@@ -251,6 +261,7 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
         <Button
           className="rounded-sm border border-gray-300 px-6 py-3 text-sm"
           startIcon={<PlusIcon className="size-5" />}
+          onClick={() => setIsUploadFileDialogOpen(true)}
         >
           Upload File
         </Button>
