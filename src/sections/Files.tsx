@@ -15,7 +15,7 @@ import { useDebounce } from 'use-debounce';
 import { Button } from '@/components/Button';
 import { Dropdown } from '@/components/Dropdown';
 import FileViewer from '@/components/FileViewer';
-import { AssetsIcon, RisksIcon } from '@/components/icons';
+import { RisksIcon } from '@/components/icons';
 import { Modal } from '@/components/Modal';
 import { Tooltip } from '@/components/Tooltip';
 import { Body } from '@/components/ui/Body';
@@ -129,11 +129,6 @@ const Files: React.FC = () => {
   );
 };
 
-interface FolderListProps {
-  folders: Folder[];
-  onFolderClick: (folder: Folder) => void;
-}
-
 export const FilesIcon = (
   props: JSX.IntrinsicAttributes & React.SVGProps<SVGSVGElement>
 ) => (
@@ -142,73 +137,6 @@ export const FilesIcon = (
     <path d="M12 2L2 12h3v8h14v-8h3L12 2zM10 16h4v2h-4v-2zm0-4h4v2h-4v-2zm0-4h4v2h-4v-2z" />
   </svg>
 );
-
-export const MalwareIcon = (
-  props: JSX.IntrinsicAttributes & React.SVGProps<SVGSVGElement>
-) => (
-  <svg {...props} viewBox="0 0 24 24" fill="currentColor">
-    {/* Refined SVG for Malware */}
-    <path d="M12 2a1 1 0 0 0-1 1v2H9a1 1 0 0 0-1 1v2H6a1 1 0 0 0-1 1v2H3a1 1 0 0 0-1 1v2H1a1 1 0 0 0 0 2h1v2a1 1 0 0 0 1 1h2v2a1 1 0 0 0 1 1h2v2a1 1 0 0 0 2 0v-2h2a1 1 0 0 0 1-1v-2h2a1 1 0 0 0 1-1v-2h2a1 1 0 0 0 1-1v-2h1a1 1 0 1 0 0-2h-1v-2a1 1 0 0 0-1-1h-2V9a1 1 0 0 0-1-1h-2V6a1 1 0 0 0-1-1h-2V3a1 1 0 0 0-1-1zm1 4h-2v2h2V6zm4 4h-2v2h2v-2zm-8 0H7v2h2v-2zm2 4h2v2h-2v-2zm-4 4h2v2H7v-2zm8 0h2v2h-2v-2zm4-4h-2v2h2v-2zm-8-8h2v2h-2V6zm-4 0h2v2H7V6zm8 8h2v2h-2v-2zm-4 4h2v2h-2v-2zm-4-4h2v2H7v-2zm12 0h2v2h-2v-2z" />
-  </svg>
-);
-
-export const ThreatsIcon = (
-  props: JSX.IntrinsicAttributes & React.SVGProps<SVGSVGElement>
-) => (
-  <svg {...props} viewBox="0 0 24 24" fill="currentColor">
-    {/* SVG for Threats */}
-    <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm-1 14h-2v-2h2v2zm0-4h-2V7h2v5zm4 4h-2v-2h2v2zm0-4h-2V7h2v5z" />
-  </svg>
-);
-
-const getIcon = (label: string) => {
-  switch (label) {
-    case 'My Files':
-      return <FilesIcon className="size-6 text-gray-600" />;
-    case 'Malware':
-      return <MalwareIcon className="size-6 text-gray-600" />;
-    case 'Threats':
-      return <ThreatsIcon className="size-6 text-gray-600" />;
-    case 'Assets':
-      return <AssetsIcon className="size-6 text-gray-600" />;
-    case 'Definitions':
-      return <RisksIcon className="size-6 text-gray-600" />;
-    case 'Exports':
-      return <FilesIcon className="size-6 text-gray-600" />;
-    default:
-      return <FilesIcon className="size-6 text-gray-600" />; // Default icon
-  }
-};
-
-const r = () => {
-  return Math.floor(Math.random() * 10000);
-};
-const FolderList = ({ folders, onFolderClick }: FolderListProps) => {
-  return (
-    <div className="flex flex-wrap justify-center gap-6">
-      {folders.map(folder => (
-        <div
-          key={folder.label}
-          className={cn(
-            'p-4 cursor-pointer rounded-sm border border-gray-200 bg-white w-48',
-            'transition duration-100 ease-in-out hover:shadow-md hover:border-gray-300'
-          )}
-          onClick={() => onFolderClick(folder)}
-        >
-          <h3 className="text-5xl font-medium text-gray-800">
-            {r().toLocaleString()}
-          </h3>
-          <div className="mt-4 flex items-center">
-            <div className="mr-1">{getIcon(folder.label)}</div>
-            <span className="text-lg font-medium text-gray-800">
-              {folder.label === 'Home' ? 'My Files' : folder.label}
-            </span>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-};
 
 interface TreeLevelProps {
   currentFolder: Folder;
@@ -242,11 +170,7 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
         No documents have been attached to your account yet.
         <br />
         Remedy that by{' '}
-        <Button
-          className="inline p-0 text-base"
-          onClick={() => setCurrentFolder(null)}
-          styleType="textPrimary"
-        >
+        <Button className="inline p-0 text-base" styleType="textPrimary">
           Uploading a file now
         </Button>
       </p>
@@ -292,12 +216,19 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
         <div className="flex items-center space-x-2">
           <Dropdown
             menu={{
-              items: TreeData,
+              items: TreeData.map(folder => ({
+                label: folder.label,
+                value: folder.query,
+              })),
               onClick: value => {
-                setCurrentFolder({
-                  label: value ?? 'Home',
-                  query: value,
-                });
+                console.log('value', value);
+                if (value) {
+                  const label = value[0].toUpperCase() + value.slice(1);
+                  setCurrentFolder({
+                    label,
+                    query: value,
+                  });
+                }
               },
             }}
             className="border border-gray-300 capitalize"
