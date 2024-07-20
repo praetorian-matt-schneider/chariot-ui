@@ -9,13 +9,19 @@ import {
   PhotoIcon,
   PlusIcon,
 } from '@heroicons/react/24/outline';
-import { ArrowDownTrayIcon, FolderIcon } from '@heroicons/react/24/solid';
+import {
+  ArrowDownTrayIcon,
+  CodeBracketSquareIcon,
+  FolderIcon,
+  HomeIcon,
+  MapPinIcon,
+} from '@heroicons/react/24/solid';
 import { useDebounce } from 'use-debounce';
 
 import { Button } from '@/components/Button';
 import { Dropdown } from '@/components/Dropdown';
 import FileViewer from '@/components/FileViewer';
-import { RisksIcon } from '@/components/icons';
+import { AssetsIcon, RisksIcon } from '@/components/icons';
 import { Modal } from '@/components/Modal';
 import { Tooltip } from '@/components/Tooltip';
 import { Body } from '@/components/ui/Body';
@@ -32,35 +38,41 @@ interface Folder {
   children?: Folder[] | ((files: MyFile[], parentQuery: string) => Folder[]);
   level?: number;
   data?: MyFile[];
+  icon?: JSX.Element;
 }
 
 const TreeData: Folder[] = [
-  { label: 'Home', query: 'home' },
+  {
+    label: 'Home',
+    query: 'home',
+    icon: <HomeIcon className="size-6" />,
+  },
   {
     label: 'Malware',
     query: 'malware',
+    icon: <CodeBracketSquareIcon className="size-6" />,
   },
   {
     label: 'Threats',
     query: 'threats',
+    icon: <MapPinIcon className="size-6" />,
   },
   {
     label: 'Assets',
     query: 'assets',
+    icon: <AssetsIcon className="size-6" />,
   },
   {
     label: 'Definitions',
     query: 'definitions',
+    icon: <DocumentTextIcon className="size-6" />,
   },
 ];
 
 const Files: React.FC = () => {
   const navigate = useNavigate();
   const { getRiskDrawerLink, getProofOfExploitLink } = getDrawerLink();
-  const [currentFolder, setCurrentFolder] = useState<Folder>({
-    label: 'Home',
-    query: 'home',
-  });
+  const [currentFolder, setCurrentFolder] = useState<Folder>(TreeData[0]);
 
   const { mutate: downloadFile } = useDownloadFile();
 
@@ -228,20 +240,21 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
               items: TreeData.map(folder => ({
                 label: folder.label,
                 value: folder.query,
+                icon: folder.icon,
               })),
               onClick: value => {
-                console.log('value', value);
                 if (value) {
                   const label = value[0].toUpperCase() + value.slice(1);
                   setCurrentFolder({
                     label,
                     query: value,
+                    icon: TreeData.find(folder => folder.query === value)?.icon,
                   });
                 }
               },
             }}
             className="border border-gray-300 capitalize"
-            startIcon={<FolderIcon className="size-6 text-brand-light" />}
+            startIcon={currentFolder.icon}
             endIcon={<ChevronDownIcon className="size-4 text-gray-400" />}
           >
             {currentFolder.label}
