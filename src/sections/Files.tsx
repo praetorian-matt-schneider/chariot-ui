@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import {
   ChevronDownIcon,
   DocumentIcon,
-  DocumentTextIcon,
   MagnifyingGlassIcon,
   PhotoIcon,
   PlusIcon,
@@ -12,16 +11,18 @@ import {
 import {
   ArrowDownTrayIcon,
   CodeBracketSquareIcon,
+  DocumentTextIcon,
   FolderIcon,
   HomeIcon,
   MapPinIcon,
+  ServerIcon,
 } from '@heroicons/react/24/solid';
 import { useDebounce } from 'use-debounce';
 
 import { Button } from '@/components/Button';
 import { Dropdown } from '@/components/Dropdown';
 import FileViewer from '@/components/FileViewer';
-import { AssetsIcon, RisksIcon } from '@/components/icons';
+import { RisksIcon } from '@/components/icons';
 import { Modal } from '@/components/Modal';
 import { Tooltip } from '@/components/Tooltip';
 import { Body } from '@/components/ui/Body';
@@ -60,7 +61,7 @@ const TreeData: Folder[] = [
   {
     label: 'Assets',
     query: 'assets',
-    icon: <AssetsIcon className="size-6" />,
+    icon: <ServerIcon className="size-6" />,
   },
   {
     label: 'Definitions',
@@ -185,7 +186,7 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
     title: 'No Documents Found',
     description: (
       <p>
-        No documents have been attached to your account yet.
+        No documents have been uploaded to this folder yet.
         <br />
         Remedy that by{' '}
         <Button
