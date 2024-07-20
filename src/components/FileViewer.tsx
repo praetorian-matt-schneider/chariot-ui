@@ -7,9 +7,11 @@ import { useOpenFile } from '@/hooks/useFiles';
 const FileViewer = ({
   fileName,
   fileType,
+  onChange,
 }: {
   fileName: string;
   fileType: string;
+  onChange?: (value: string) => void;
 }) => {
   const { mutate: getFileContent, data: fileContent } = useOpenFile();
   const [editorContent, setEditorContent] = useState('');
@@ -52,7 +54,8 @@ const FileViewer = ({
         <MarkdownEditor
           value={editorContent}
           onChange={value => {
-            setEditorContent(value || '');
+            setEditorContent(value ?? '');
+            onChange && onChange(value ?? '');
           }}
           filePathPrefix="proof-of-exploit/files"
         />

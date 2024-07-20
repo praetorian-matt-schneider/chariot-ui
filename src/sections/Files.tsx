@@ -24,10 +24,11 @@ import { Dropdown } from '@/components/Dropdown';
 import FileViewer from '@/components/FileViewer';
 import { RisksIcon } from '@/components/icons';
 import { Modal } from '@/components/Modal';
+import { Snackbar } from '@/components/Snackbar';
 import { Tooltip } from '@/components/Tooltip';
 import { Body } from '@/components/ui/Body';
 import { NoData } from '@/components/ui/NoData';
-import { useDownloadFile, useMy } from '@/hooks';
+import { useDownloadFile, useMy, useUploadFile } from '@/hooks';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { useGlobalState } from '@/state/global.state';
 import { MyFile } from '@/types';
@@ -166,8 +167,10 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
   handleDownload,
 }) => {
   const { query = '', children } = currentFolder;
+  const { mutateAsync: uploadFile } = useUploadFile();
   const [filename, setFilename] = useState('');
   const [filetype, setFiletype] = useState('');
+  const [content, setContent] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [debouncedSearch] = useDebounce(search, 500);
   const {
@@ -336,8 +339,38 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
         onClose={() => setFilename('')}
         size="xl"
         title={filename}
+        footer={{
+          text: 'Save',
+          onClick: async () => {
+            uploadFile({
+              ignoreSnackbar: true,
+              name: filename,
+              content: content ?? '',
+            })
+              .then(() => {
+                Snackbar({
+                  title: filename,
+                  description: 'The file has been saved successfully.',
+                  variant: 'success',
+                });
+                setFilename('');
+              })
+              .catch(() => {
+                Snackbar({
+                  title: filename,
+                  description: 'Failed to save the file.',
+                  variant: 'error',
+                });
+              });
+            console.log('save', filename, content);
+          },
+        }}
       >
-        <FileViewer fileName={filename} fileType={filetype} />
+        <FileViewer
+          fileName={filename}
+          fileType={filetype}
+          onChange={changed => setContent(changed)}
+        />
       </Modal>
     </div>
   );
