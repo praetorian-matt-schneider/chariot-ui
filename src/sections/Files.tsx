@@ -325,7 +325,7 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
         </Button>
       </div>
 
-      <div className="flex flex-row flex-wrap space-x-5 space-y-5">
+      <div className="flex flex-row flex-wrap justify-center space-x-5 space-y-5">
         {filteredFiles.map((file, index) => (
           <div
             className={cn(
