@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { JSX } from 'react/jsx-runtime';
 import { useNavigate } from 'react-router-dom';
 import {
+  ChevronDownIcon,
   DocumentIcon,
   DocumentTextIcon,
   MagnifyingGlassIcon,
@@ -12,6 +13,7 @@ import { FolderIcon } from '@heroicons/react/24/solid';
 import { useDebounce } from 'use-debounce';
 
 import { Button } from '@/components/Button';
+import { Dropdown } from '@/components/Dropdown';
 import FileViewer from '@/components/FileViewer';
 import { AssetsIcon, RisksIcon } from '@/components/icons';
 import { Modal } from '@/components/Modal';
@@ -54,7 +56,10 @@ const TreeData: Folder[] = [
 const Files: React.FC = () => {
   const navigate = useNavigate();
   const { getRiskDrawerLink, getProofOfExploitLink } = getDrawerLink();
-  const [currentFolder, setCurrentFolder] = useState<Folder | null>(null);
+  const [currentFolder, setCurrentFolder] = useState<Folder>({
+    label: 'Home',
+    query: 'home',
+  });
 
   const { mutate: downloadFile } = useDownloadFile();
 
@@ -110,95 +115,17 @@ const Files: React.FC = () => {
     }
   };
 
-  const handleFolderClick = (folder: Folder) => {
-    setCurrentFolder(folder);
-  };
-
   return (
     <>
-      {currentFolder ? (
-        <Body className="bg-layer0 pb-4">
-          <TreeLevel
-            currentFolder={currentFolder}
-            setCurrentFolder={setCurrentFolder}
-            getAdditionalActions={getAdditionalActions}
-            handleDownload={handleDownload}
-          />
-        </Body>
-      ) : (
-        <Body header={true}>
-          <FolderList folders={TreeData} onFolderClick={handleFolderClick} />
-          <div className="m-auto max-w-[1050px]">
-            <UploadForm />
-          </div>
-        </Body>
-      )}
-    </>
-  );
-};
-
-const UploadForm: React.FC = () => {
-  const [selectedSection, setSelectedSection] = useState(TreeData[0].query);
-  const [file, setFile] = useState<File | null>(null);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setFile(e.target.files[0]);
-    }
-  };
-
-  const handleSectionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectedSection(e.target.value);
-  };
-
-  const handleUpload = () => {
-    if (file) {
-      // Implement the upload logic here
-      console.log(`Uploading ${file.name} to ${selectedSection}`);
-    }
-  };
-
-  return (
-    <div className="mt-6 rounded-sm border border-gray-300 bg-white p-6">
-      <h2 className="mb-4 text-lg font-medium text-gray-900">Upload File</h2>
-      <div className="flex flex-col space-y-2">
-        {TreeData.map(section => (
-          <label
-            key={section.query}
-            className="flex cursor-pointer items-center rounded-md border border-gray-200 p-3 hover:bg-gray-100"
-          >
-            <input
-              type="radio"
-              name="section"
-              value={section.query}
-              checked={selectedSection === section.query}
-              onChange={handleSectionChange}
-              className="hidden"
-            />
-            <span className="mr-2 flex size-6 items-center justify-center rounded-full border-2 border-gray-300">
-              {selectedSection === section.query && (
-                <span className="block size-3 rounded-full bg-brand"></span>
-              )}
-            </span>
-            <span className="text-gray-900">
-              {section.label === 'Home' ? 'My Files' : section.label}
-            </span>
-          </label>
-        ))}
-        <input
-          type="file"
-          onChange={handleFileChange}
-          className="rounded-md border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-brand-light"
+      <Body className="bg-layer0 pb-4">
+        <TreeLevel
+          currentFolder={currentFolder}
+          setCurrentFolder={setCurrentFolder}
+          getAdditionalActions={getAdditionalActions}
+          handleDownload={handleDownload}
         />
-        <Button
-          onClick={handleUpload}
-          styleType="primary"
-          className="rounded-md bg-brand px-6 py-2 text-xl text-white"
-        >
-          Upload
-        </Button>
-      </div>
-    </div>
+      </Body>
+    </>
   );
 };
 
@@ -285,7 +212,7 @@ const FolderList = ({ folders, onFolderClick }: FolderListProps) => {
 
 interface TreeLevelProps {
   currentFolder: Folder;
-  setCurrentFolder: React.Dispatch<React.SetStateAction<Folder | null>>;
+  setCurrentFolder: React.Dispatch<React.SetStateAction<Folder>>;
   getAdditionalActions: (item: MyFile) => React.ReactNode;
   handleDownload: (item: MyFile) => void;
 }
@@ -360,43 +287,56 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
           ))}
         </div>
       )}
-      <div className="mx-12 flex items-center pt-6">
+      <div className="flex items-center space-x-12 border-b border-gray-200 bg-gray-50 px-12 py-6">
+        {/* Add a folder list dropdown here */}
+        <div className="flex items-center space-x-2">
+          <Dropdown
+            menu={{
+              items: TreeData,
+              onClick: value => {
+                setCurrentFolder({
+                  label: value ?? 'Home',
+                  query: value,
+                });
+              },
+            }}
+            className="border border-gray-300 capitalize"
+            startIcon={<FolderIcon className="size-6 text-brand-light" />}
+            endIcon={<ChevronDownIcon className="size-4 text-gray-400" />}
+          >
+            {currentFolder.label}
+          </Dropdown>
+        </div>
         <div className="relative grow">
           <input
             placeholder="Search for files"
             value={search}
             name="file_search"
             onChange={e => setSearch(e.target.value)}
-            className="w-full rounded-full border border-gray-200 p-4 pl-16 focus:outline-none focus:ring-2 focus:ring-brand-light"
+            className="w-full rounded-sm border border-gray-300 p-2.5 pl-12 "
           />
-          <MagnifyingGlassIcon className="absolute left-4 top-4 size-6 text-gray-400" />
+          <MagnifyingGlassIcon className="absolute left-4 top-3 size-5 text-gray-400" />
         </div>
         <Button
-          styleType="primary"
-          className="ml-4 rounded-md bg-brand px-6 py-2 text-xl text-white"
-          startIcon={<PlusIcon className="size-8" />}
+          className="rounded-sm border border-gray-300 px-6 py-3 text-sm"
+          startIcon={<PlusIcon className="size-5" />}
         >
           Upload File
         </Button>
       </div>
 
-      <div className="flex flex-row flex-wrap space-x-4 space-y-4">
-        <div className="ml-4 mt-5 h-[100px] w-[130px]">
-          <Tooltip title="Go Back">
-            <div
-              className="flex cursor-pointer flex-col rounded-sm border border-layer0 p-2 text-center hover:border hover:border-gray-200 hover:bg-gray-50"
-              onClick={() => setCurrentFolder(null)}
-            >
-              <FolderIcon className="m-auto size-12 text-brand-light" />
-              <span className="mt-2 text-sm font-medium">..</span>
-            </div>
-          </Tooltip>
-        </div>
-        {filteredFiles.map(file => (
-          <div className="h-[100px] w-[130px]" key={file.name}>
+      <div className="flex flex-row flex-wrap space-x-5 space-y-5">
+        {filteredFiles.map((file, index) => (
+          <div
+            className={cn(
+              'p-4 w-[230px] border border-gray-100 hover:border hover:border-gray-200 hover:bg-gray-50',
+              index === 0 && 'ml-4 mt-5'
+            )}
+            key={file.name}
+          >
             <Tooltip title={file.name}>
               <div
-                className="flex cursor-pointer flex-col rounded-sm border border-layer0 p-2 text-center hover:border hover:border-gray-200 hover:bg-gray-50"
+                className="flex cursor-pointer flex-col rounded-sm text-center "
                 onClick={() => {
                   setFilename(file.name);
                   setFiletype(
@@ -407,11 +347,11 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
                 }}
               >
                 {file.name.endsWith('png') || file.name.endsWith('jpg') ? (
-                  <PhotoIcon className="m-auto size-12 text-brand-light" />
+                  <PhotoIcon className="m-auto size-20 text-brand-light" />
                 ) : (
-                  <DocumentIcon className="m-auto size-12 text-brand-light" />
+                  <DocumentIcon className="m-auto size-20 text-brand-light" />
                 )}
-                <span className="mt-2 w-32 truncate whitespace-nowrap text-center text-sm font-medium">
+                <span className="mt-2 w-full truncate whitespace-nowrap text-center text-sm font-medium">
                   {file.name}
                 </span>
               </div>
