@@ -436,9 +436,19 @@ const FileItem: React.FC<FileItemProps> = ({
           )}
         </div>
         <div className="flex flex-col text-left">
-          <span className="font-default text-sm">
+          <button
+            className="font-default text-left text-sm hover:underline"
+            onClick={() => {
+              setFilename(file.name);
+              setFiletype(
+                file.name.endsWith('png') || file.name.endsWith('jpg')
+                  ? 'image'
+                  : 'text'
+              );
+            }}
+          >
             {file.name.replace(`${currentFolder.query}/` ?? '/', '')}
-          </span>
+          </button>
           <p className="mt-1 text-xs text-gray-400">
             Added {formatDate(file.updated)}
           </p>
