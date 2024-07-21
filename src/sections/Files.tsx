@@ -5,11 +5,11 @@ import {
   ArrowDownOnSquareIcon,
   BookmarkIcon,
   ChevronDownIcon,
+  ChevronUpIcon,
   DocumentIcon,
   DocumentTextIcon,
   MagnifyingGlassIcon,
   PhotoIcon,
-  PlusIcon,
 } from '@heroicons/react/24/outline';
 import {
   BookOpenIcon,
@@ -331,50 +331,59 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
             </Tooltip>
           )}
         </div>
-        <Button
-          className="h-12 w-[180px] rounded-sm border border-gray-300 px-6 py-3 text-left text-sm shadow-sm"
-          startIcon={<PlusIcon className="size-5" />}
-          onClick={() => setShowFileUpload(true)}
-        >
-          <div className="w-full">{getLabel(currentFolder.query ?? '')}</div>
-        </Button>
-        {/* File Upload flyout */}
-        <Modal
-          open={showFileUpload}
-          onClose={() => setShowFileUpload(false)}
-          size="md"
-          title={`Upload ${currentFolder.label}`}
-        >
-          <Dropzone
-            type="string"
-            onFilesDrop={files => {
-              files.forEach(({ content, file }) => {
-                uploadFile({
-                  ignoreSnackbar: true,
-                  name: `${currentFolder.query}/${filename}`,
-                  content: content ?? '',
-                })
-                  .then(() => {
-                    Snackbar({
-                      title: filename,
-                      description: 'The file has been uploaded successfully.',
-                      variant: 'success',
-                    });
-                    setShowFileUpload(false);
-                  })
-                  .catch(() => {
-                    Snackbar({
-                      title: filename,
-                      description: 'Failed to upload the file.',
-                      variant: 'error',
-                    });
+        <div className="relative">
+          <Button
+            className="h-12 w-[180px] rounded-sm border border-gray-300 px-6 py-3 text-left text-sm shadow-sm"
+            endIcon={
+              showFileUpload ? (
+                <ChevronUpIcon className="size-4" />
+              ) : (
+                <ChevronDownIcon className="size-4" />
+              )
+            }
+            onClick={() => setShowFileUpload(!showFileUpload)}
+          >
+            <div className="w-full">Upload File</div>
+          </Button>
+          {showFileUpload && (
+            <div className="absolute right-0 top-16 z-10 w-[400px] border border-gray-200 bg-layer0 p-4 shadow-md">
+              <p className="mb-0 text-sm font-medium text-gray-500">
+                Upload {currentFolder.label}
+              </p>
+              <Dropzone
+                type="string"
+                className="mt-1"
+                onFilesDrop={files => {
+                  files.forEach(({ content, file }) => {
+                    uploadFile({
+                      ignoreSnackbar: true,
+                      name: `${currentFolder.query}/${file.name}`,
+                      content: content ?? '',
+                    })
+                      .then(() => {
+                        Snackbar({
+                          title: file.name,
+                          description:
+                            'The file has been uploaded successfully.',
+                          variant: 'success',
+                        });
+                        setShowFileUpload(false);
+                      })
+                      .catch(() => {
+                        Snackbar({
+                          title: file.name,
+                          description: 'Failed to upload the file.',
+                          variant: 'error',
+                        });
+                      });
                   });
-              });
-            }}
-            title={`Click or drag and drop ${currentFolder.label.toLowerCase()} here.`}
-            subTitle="File will be stored on S3."
-          />
-        </Modal>
+                }}
+                title={`Click or drag and drop here.`}
+                subTitle=""
+              />
+            </div>
+          )}
+        </div>
       </div>
       <div className="flex w-full flex-row flex-wrap p-6 transition-all">
         {favoritedFiles.length > 0 && (
