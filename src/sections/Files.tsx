@@ -26,6 +26,7 @@ import { useDebounce } from 'use-debounce';
 
 import { Button } from '@/components/Button';
 import { Dropdown } from '@/components/Dropdown';
+import { Dropzone } from '@/components/Dropzone';
 import FileViewer from '@/components/FileViewer';
 import { RisksIcon } from '@/components/icons';
 import { Modal } from '@/components/Modal';
@@ -186,6 +187,7 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
 }) => {
   const { query = '', children } = currentFolder;
   const { mutateAsync: uploadFile } = useUploadFile();
+  const [showFileUpload, setShowFileUpload] = useState(false);
   const [filename, setFilename] = useState('');
   const [filetype, setFiletype] = useState('');
   const [content, setContent] = useState<string | null>(null);
@@ -332,10 +334,47 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
         <Button
           className="h-12 w-[180px] rounded-sm border border-gray-300 px-6 py-3 text-left text-sm shadow-sm"
           startIcon={<PlusIcon className="size-5" />}
-          onClick={() => setIsUploadFileDialogOpen(true)}
+          onClick={() => setShowFileUpload(true)}
         >
           <div className="w-full">{getLabel(currentFolder.query ?? '')}</div>
         </Button>
+        {/* File Upload flyout */}
+        <Modal
+          open={showFileUpload}
+          onClose={() => setShowFileUpload(false)}
+          size="md"
+          title={`Upload ${currentFolder.label}`}
+        >
+          <Dropzone
+            type="string"
+            onFilesDrop={files => {
+              files.forEach(({ content, file }) => {
+                uploadFile({
+                  ignoreSnackbar: true,
+                  name: `${currentFolder.query}/${filename}`,
+                  content: content ?? '',
+                })
+                  .then(() => {
+                    Snackbar({
+                      title: filename,
+                      description: 'The file has been uploaded successfully.',
+                      variant: 'success',
+                    });
+                    setShowFileUpload(false);
+                  })
+                  .catch(() => {
+                    Snackbar({
+                      title: filename,
+                      description: 'Failed to upload the file.',
+                      variant: 'error',
+                    });
+                  });
+              });
+            }}
+            title={`Click or drag and drop ${currentFolder.label.toLowerCase()} here.`}
+            subTitle="File will be stored on S3."
+          />
+        </Modal>
       </div>
       <div className="flex w-full flex-row flex-wrap p-6 transition-all">
         {favoritedFiles.length > 0 && (
