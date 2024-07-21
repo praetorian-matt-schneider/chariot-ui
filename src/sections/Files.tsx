@@ -217,14 +217,7 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
       <p>
         No documents have been uploaded to this folder yet.
         <br />
-        Remedy that by{' '}
-        <Button
-          className="inline p-0 text-base"
-          styleType="textPrimary"
-          onClick={() => setIsUploadFileDialogOpen(true)}
-        >
-          Uploading a file now
-        </Button>
+        Remedy that by uploading a file now.
       </p>
     ),
   };
@@ -347,8 +340,11 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
           </Button>
           {showFileUpload && (
             <div className="absolute right-0 top-16 z-10 w-[400px] border border-gray-200 bg-layer0 p-4 shadow-md">
-              <p className="mb-0 text-sm font-medium text-gray-500">
-                Upload {currentFolder.label}
+              <p className="mb-0 text-lg text-gray-500">
+                Upload{' '}
+                <span className="font-bold">
+                  {currentFolder.label.replace('My ', '').slice(0, -1)}
+                </span>
               </p>
               <Dropzone
                 type="string"
