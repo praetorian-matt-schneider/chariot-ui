@@ -28,6 +28,7 @@ import { Dropdown } from '@/components/Dropdown';
 import { Dropzone } from '@/components/Dropzone';
 import FileViewer from '@/components/FileViewer';
 import { RisksIcon } from '@/components/icons';
+import { Loader } from '@/components/Loader';
 import { Modal } from '@/components/Modal';
 import { Snackbar } from '@/components/Snackbar';
 import { Tooltip } from '@/components/Tooltip';
@@ -35,7 +36,6 @@ import { Body } from '@/components/ui/Body';
 import { NoData } from '@/components/ui/NoData';
 import { useDownloadFile, useMy, useUploadFile } from '@/hooks';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
-import { useGlobalState } from '@/state/global.state';
 import { MyFile } from '@/types';
 import { cn } from '@/utils/classname';
 import { formatDate } from '@/utils/date.util';
@@ -196,13 +196,8 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
     []
   );
   const [debouncedSearch] = useDebounce(search, 500);
-  const {
-    modal: {
-      file: { onOpenChange: setIsUploadFileDialogOpen },
-    },
-  } = useGlobalState();
 
-  const { data: files = [] } = useMy(
+  const { data: files = [], status } = useMy(
     {
       resource: 'file',
       query: query ? `#${query}` : '',
@@ -241,23 +236,6 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
     () => files.filter(file => favorites.includes(file.name)),
     [files, favorites]
   );
-
-  const getLabel = (query: string) => {
-    switch (query) {
-      case 'home':
-        return 'Upload File';
-      case 'malware':
-        return 'Procedure';
-      case 'threats':
-        return 'Intel Source';
-      case 'assets':
-        return 'Proof of Exploit';
-      case 'definitions':
-        return 'Risk Definition';
-      default:
-        return 'Upload File';
-    }
-  };
 
   return (
     <div>
@@ -382,41 +360,43 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
         </div>
       </div>
       <div className="flex w-full flex-row flex-wrap p-6 transition-all">
-        {favoritedFiles.length > 0 && (
-          <>
-            <h4 className="ml-2 w-full text-sm font-medium text-gray-500">
-              Favorites
-            </h4>
-            {favoritedFiles.map(file => (
-              <FileItem
-                key={file.name}
-                file={file}
-                currentFolder={currentFolder}
-                setFavorites={setFavorites}
-                setFilename={setFilename}
-                setFiletype={setFiletype}
-                handleDownload={handleDownload}
-                favorites={favorites}
-              />
-            ))}
-            <Divider />
-          </>
-        )}
-        {filteredFiles.map(file => (
-          <FileItem
-            key={file.name}
-            file={file}
-            currentFolder={currentFolder}
-            setFavorites={setFavorites}
-            setFilename={setFilename}
-            setFiletype={setFiletype}
-            handleDownload={handleDownload}
-            favorites={favorites}
-          />
-        ))}
-        {files.length === 0 && !childFolders && (
-          <NoData title={noData.title} description={noData.description} />
-        )}
+        <Loader isLoading={status === 'pending'}>
+          {favoritedFiles.length > 0 && (
+            <>
+              <h4 className="ml-2 w-full text-sm font-medium text-gray-500">
+                Favorites
+              </h4>
+              {favoritedFiles.map(file => (
+                <FileItem
+                  key={file.name}
+                  file={file}
+                  currentFolder={currentFolder}
+                  setFavorites={setFavorites}
+                  setFilename={setFilename}
+                  setFiletype={setFiletype}
+                  handleDownload={handleDownload}
+                  favorites={favorites}
+                />
+              ))}
+              <Divider />
+            </>
+          )}
+          {filteredFiles.map(file => (
+            <FileItem
+              key={file.name}
+              file={file}
+              currentFolder={currentFolder}
+              setFavorites={setFavorites}
+              setFilename={setFilename}
+              setFiletype={setFiletype}
+              handleDownload={handleDownload}
+              favorites={favorites}
+            />
+          ))}
+          {files.length === 0 && !childFolders && (
+            <NoData title={noData.title} description={noData.description} />
+          )}
+        </Loader>
       </div>
 
       <Modal
