@@ -4,23 +4,22 @@ import { useNavigate } from 'react-router-dom';
 import {
   ArrowDownOnSquareIcon,
   BookmarkIcon,
+  BookOpenIcon,
   ChevronDownIcon,
   ChevronUpIcon,
-  DocumentIcon,
-  DocumentTextIcon,
-  MagnifyingGlassIcon,
-  PhotoIcon,
-} from '@heroicons/react/24/outline';
-import {
-  BookOpenIcon,
   ClipboardDocumentListIcon,
-  EllipsisVerticalIcon,
+  DocumentIcon,
+  DocumentPlusIcon,
+  DocumentTextIcon,
   FolderIcon,
   GlobeAltIcon,
   HomeIcon,
+  MagnifyingGlassIcon,
+  PhotoIcon,
   ShieldCheckIcon,
   XMarkIcon,
-} from '@heroicons/react/24/solid';
+} from '@heroicons/react/24/outline';
+import { EllipsisVerticalIcon } from '@heroicons/react/24/solid';
 import { Divider } from '@tremor/react';
 import { useDebounce } from 'use-debounce';
 
@@ -327,6 +326,7 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
         <div className="relative">
           <Button
             className="h-12 w-[180px] rounded-sm border border-gray-300 px-6 py-3 text-left text-sm shadow-sm"
+            startIcon={<DocumentPlusIcon className="size-6 text-default" />}
             endIcon={
               showFileUpload ? (
                 <ChevronUpIcon className="size-4" />
@@ -340,8 +340,8 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
           </Button>
           {showFileUpload && (
             <div className="absolute right-0 top-16 z-10 w-[400px] border border-gray-200 bg-layer0 p-4 shadow-md">
-              <p className="mb-0 text-2xl text-gray-500">
-                <span className="font-light">Upload: </span>
+              <p className="mb-0 flex flex-row items-center space-x-1 text-2xl text-gray-500">
+                <span className="font-light">{currentFolder.icon} </span>
                 <span className="font-bold text-default">
                   {currentFolder.label.replace('My ', '').slice(0, -1)}
                 </span>
