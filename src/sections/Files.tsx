@@ -340,9 +340,9 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
           </Button>
           {showFileUpload && (
             <div className="absolute right-0 top-16 z-10 w-[400px] border border-gray-200 bg-layer0 p-4 shadow-md">
-              <p className="mb-0 text-lg text-gray-500">
-                Upload{' '}
-                <span className="font-bold">
+              <p className="mb-0 text-2xl text-gray-500">
+                <span className="font-light">Upload: </span>
+                <span className="font-bold text-default">
                   {currentFolder.label.replace('My ', '').slice(0, -1)}
                 </span>
               </p>
