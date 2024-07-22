@@ -80,10 +80,27 @@ const Assets: React.FC = () => {
     fetchNextPage,
     isFetching,
     isError,
-  } = useMy({
-    resource: 'asset',
-    filterByGlobalSearch: true,
-  });
+  } = useMy(
+    {
+      resource: 'asset',
+      filterByGlobalSearch: true,
+    },
+    {
+      select: data => {
+        data.pages.map(page => {
+          page.map(asset => {
+            if (asset.status.startsWith(AssetStatus.Frozen)) {
+              asset.status = AssetStatus.Frozen;
+            }
+            return asset;
+          });
+        });
+        return {
+          ...data,
+        };
+      },
+    }
+  );
   const { data: risks = [], status: riskStatus } = useMy({ resource: 'risk' });
   const { isIntegration } = useIntegration();
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
@@ -140,10 +157,6 @@ const Assets: React.FC = () => {
   const assetsWithRisk: AssetsWithRisk[] = assetsObjectWithAttributesFilter.map(
     asset => {
       const riskSummary = openRiskDataset[asset.dns];
-
-      if (asset.status.startsWith(AssetStatus.Frozen)) {
-        asset.status = AssetStatus.Frozen;
-      }
 
       if (riskSummary) {
         return { ...asset, riskSummary };
