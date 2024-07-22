@@ -128,11 +128,7 @@ const HeaderPortalSections = {
   EXTRA_CONTENT: 'header-extra-content-section',
 };
 
-export function Header({
-  hideBreadcrumbs = false,
-}: {
-  hideBreadcrumbs?: boolean;
-}) {
+export function Header() {
   const { friend } = useAuth();
   const { breadcrumbs } = useBreadCrumbsContext();
 

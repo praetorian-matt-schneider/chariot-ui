@@ -10,16 +10,10 @@ export const Body = forwardRef(function Paper(
     header?: boolean;
     className?: string;
     children?: ReactNode;
-    hideBreadcrumbs?: boolean;
   },
   ref?: React.Ref<HTMLDivElement>
 ) {
-  const {
-    className = '',
-    footer = true,
-    header = true,
-    hideBreadcrumbs = false,
-  } = props;
+  const { className = '', footer = true, header = true } = props;
 
   return (
     <div
@@ -32,7 +26,7 @@ export const Body = forwardRef(function Paper(
       style={{ overflowAnchor: 'none' }}
     >
       <div>
-        {header && <Header hideBreadcrumbs={hideBreadcrumbs} />}
+        {header && <Header />}
         <div
           className={cn('mx-auto w-full max-w-screen-xl rounded-sm')}
           style={{ marginTop: header ? -16 : 0 }}
