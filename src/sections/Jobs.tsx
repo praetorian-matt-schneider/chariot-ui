@@ -206,7 +206,7 @@ const Jobs: React.FC = () => {
         data={filteredJobs}
         error={error}
         status={status}
-        name="seeds"
+        name="jobs"
         isFetchingNextPage={isFetchingNextPage}
         fetchNextPage={fetchNextPage}
         noData={{

@@ -5,11 +5,13 @@ import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ChevronDownIcon,
   ExclamationCircleIcon,
+  MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
 import { notUndefined, useVirtualizer } from '@tanstack/react-virtual';
 
 import { Button } from '@/components/Button';
 import { Dropdown } from '@/components/Dropdown';
+import { Input } from '@/components/form/Input';
 import { Loader } from '@/components/Loader';
 import { CELL_WIDTHS, ROW_HEIGHT } from '@/components/table/constants';
 import { TableBody } from '@/components/table/TableBody';
@@ -56,7 +58,7 @@ export function Table<TData>(props: TableProps<TData>) {
     skipHeader,
     resize = false,
   } = props;
-
+  const [searchValue, setSearchValue] = useState('');
   const [expandedGroups, setExpandedGroups] = useState(
     groupBy?.map(group => group.label) || []
   );
@@ -95,12 +97,21 @@ export function Table<TData>(props: TableProps<TData>) {
           }, [] as InternalTData<TData>[])
         : indexedData;
 
-    return groupedData;
+    return groupedData.filter(item => {
+      // filter by searchValue
+      if (searchValue && searchValue.length > 0) {
+        return Object.values(item).some(value =>
+          String(value).toLowerCase().includes(searchValue.toLowerCase())
+        );
+      }
+      return true;
+    });
   }, [
     JSON.stringify(groupBy?.map(group => ({ ...group, icon: undefined }))),
     JSON.stringify(indexedData),
     JSON.stringify(expandedGroups),
     status,
+    searchValue,
   ]);
 
   const parentRef = useRef<HTMLDivElement>(null);
@@ -303,31 +314,51 @@ export function Table<TData>(props: TableProps<TData>) {
         <RenderHeaderExtraContentSection>
           <div className="flex justify-between">
             {filters}
-            {parsedPrimaryAction && (
-              <Button
-                {...parsedPrimaryAction}
-                styleType="header"
-                className="ml-auto rounded-none rounded-l-[2px]"
-              />
-            )}
-            {parsedActions && (
-              <Tooltip
-                title={
-                  selectedRows.length === 0 ? `No ${tableName} selected.` : ''
+
+            <div className="flex space-x-4">
+              <Input
+                name="search"
+                placeholder={`Search ${tableName}`}
+                className="h-11 w-64 justify-end rounded-sm border-gray-900 bg-header-light p-2 text-sm text-white  ring-0"
+                value={searchValue}
+                onChange={e => setSearchValue(e.target.value)}
+                startIcon={
+                  <MagnifyingGlassIcon className="size-5 stroke-2 text-default-light" />
                 }
-              >
-                <Dropdown
-                  disabled={selectedRows.length === 0}
-                  className={cn(
-                    parsedPrimaryAction &&
-                      'rounded-none rounded-r-[2px] bg-header-dark disabled:bg-header-dark disabled:cursor-not-allowed'
-                  )}
-                  styleType="header"
-                  endIcon={<ChevronDownIcon className="size-3 stroke-[4px]" />}
-                  {...parsedActions}
-                />
-              </Tooltip>
-            )}
+              />
+
+              <div className="flex flex-nowrap">
+                {parsedPrimaryAction && (
+                  <Button
+                    {...parsedPrimaryAction}
+                    styleType="header"
+                    className="rounded-none rounded-l-[2px]"
+                  />
+                )}
+                {parsedActions && (
+                  <Tooltip
+                    title={
+                      selectedRows.length === 0
+                        ? `No ${tableName} selected.`
+                        : ''
+                    }
+                  >
+                    <Dropdown
+                      disabled={selectedRows.length === 0}
+                      className={cn(
+                        parsedPrimaryAction &&
+                          'rounded-none rounded-r-[2px] bg-header-dark disabled:bg-header-dark disabled:cursor-not-allowed'
+                      )}
+                      styleType="header"
+                      endIcon={
+                        <ChevronDownIcon className="size-3 stroke-[4px]" />
+                      }
+                      {...parsedActions}
+                    />
+                  </Tooltip>
+                )}
+              </div>
+            </div>
           </div>
         </RenderHeaderExtraContentSection>
       )}
