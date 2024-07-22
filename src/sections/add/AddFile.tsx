@@ -19,7 +19,7 @@ export const AddFile = () => {
 
     files.forEach(({ content, file }) => {
       uploadFile({
-        name: file.name,
+        name: `home/${file.name}`,
         content,
       });
     });
