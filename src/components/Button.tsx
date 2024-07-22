@@ -52,7 +52,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         case 'secondary':
           return 'bg-layer0 text-default hover:bg-layer1 shadow-sm border border-default';
         case 'header':
-          return 'bg-header-light font-semibold text-header shadow-sm';
+          return 'bg-header-light font-medium text-header shadow-sm text-[.8rem] h-9';
         case 'primaryLight':
           return 'bg-brand/10 shadow-sm hover:bg-brand/20 text-brand';
         case 'none':
