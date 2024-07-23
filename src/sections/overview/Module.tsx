@@ -68,14 +68,18 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     connected: true,
     inputs: [],
     markup: (
-      <div>
-        Known Exploited Vulnerabilities - The Cybersecurity & Infrastructure
-        Security Agency (CISA) maintains the knowledge on cybersecurity risks
-        that are being exploited in the real world. Each Known Exploited Risk
-        (KEV), moves a cybersecurity vulnerability from theoretical to
-        practical. Chariot shows you whether your organization is susceptible to
-        KEVs so that you can focus attention on protecting against attacks that
-        are being used now.
+      <div className="text-default-light">
+        <div>
+          Known Exploited Vulnerabilities - The Cybersecurity & Infrastructure
+          Security Agency (CISA) maintains the knowledge on cybersecurity risks
+          that are being exploited in the real world.
+        </div>
+        <div className="mt-2">
+          Each Known Exploited Risk (KEV), moves a cybersecurity vulnerability
+          from theoretical to practical. Chariot shows you whether your
+          organization is susceptible to KEVs so that you can focus attention on
+          protecting against attacks that are being used now.
+        </div>
       </div>
     ),
   },
@@ -90,14 +94,19 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
   },
   webhook: {
     id: Integration.webhook,
-    name: 'Outbound Webhook',
+    name: 'Service Now',
     description: 'Push assets and risks to Chariot.',
     logo: '/icons/logo.png',
     connected: true,
     inputs: [
       {
         name: 'username',
-        value: 'webhook',
+        value: Integration.webhook,
+        hidden: true,
+      },
+      {
+        name: 'value',
+        value: 'servicenow',
         hidden: true,
       },
       {
@@ -116,7 +125,7 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
         ],
       },
       {
-        label: 'Webhook URL',
+        label: 'Scripted REST API',
         value: '',
         placeholder: 'https://webhook.com/services/',
         name: 'webhook',
@@ -126,14 +135,12 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
         },
       },
       {
-        label: 'Header',
-        value: '',
+        label: 'Basic Authentication Credentials',
+        value: 'Authorization',
         placeholder: 'Content-Type: application/json',
         name: 'header',
         required: true,
-        info: {
-          text: 'Optional, a header to populate in the request',
-        },
+        disabled: true,
       },
       {
         label: 'Token',
