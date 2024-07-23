@@ -748,6 +748,7 @@ export function useGetModuleData(): {
       assetAttributes: Attribute[];
       riskAttributes: Attribute[];
       isLoading: boolean;
+      route: string;
     }
   >;
   integrationsData: IntegrationsData;
@@ -858,6 +859,7 @@ export function useGetModuleData(): {
       riskAttributes: [],
       isLoading:
         riskCountStatus === 'pending' || assetCountStatus === 'pending',
+      route: '/app/risks?risk-status=%5B"O"%5D',
     },
     BAS: {
       noOfRisk: basRiskAttribute.length,
@@ -866,6 +868,7 @@ export function useGetModuleData(): {
       assetAttributes: basAssetAttribute,
       riskAttributes: basRiskAttribute,
       isLoading: basAttributesStatus === 'pending',
+      route: '',
     },
     CPT: {
       noOfRisk: 0,
@@ -874,6 +877,7 @@ export function useGetModuleData(): {
       assetAttributes: [],
       riskAttributes: [],
       isLoading: false,
+      route: '',
     },
     CTI: {
       noOfRisk: ctiRiskAttribute.length,
@@ -882,6 +886,7 @@ export function useGetModuleData(): {
       assetAttributes: ctiAssetAttribute,
       riskAttributes: ctiRiskAttribute,
       isLoading: ctiAttributeStatus === 'pending',
+      route: '/app/risks?risk-status=%5B""%5D&risk-intel=%5B"cisa_kev"%5D',
     },
     PM: {
       noOfRisk: 0,
@@ -890,6 +895,7 @@ export function useGetModuleData(): {
       assetAttributes: [],
       riskAttributes: [],
       isLoading: accountStatus === 'pending',
+      route: '',
     },
     VM: {
       noOfRisk: cveRisksGenericSearch?.risks?.length || 0,
@@ -898,6 +904,7 @@ export function useGetModuleData(): {
       assetAttributes: [],
       riskAttributes: [],
       isLoading: accountStatus === 'pending',
+      route: '',
     },
   };
 

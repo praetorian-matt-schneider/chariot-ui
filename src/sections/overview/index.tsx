@@ -40,6 +40,7 @@ import {
 } from '@/types';
 import { cn } from '@/utils/classname';
 import { generateUuid } from '@/utils/uuid.util';
+import { useNavigate } from 'react-router-dom';
 
 export function Overview() {
   const {
@@ -51,6 +52,7 @@ export function Overview() {
   const { data: accounts, status: accountsStatus } = useMy({
     resource: 'account',
   });
+  const navigate = useNavigate();
 
   const displayName =
     useGetDisplayName(accounts) || friend.displayName || friend.email || me;
@@ -150,6 +152,8 @@ export function Overview() {
                             module: moduleKey as Module,
                             integration: '',
                           });
+                        } else {
+                          navigate(moduleData.route);
                         }
                       }}
                     >
