@@ -307,6 +307,14 @@ export function ModulesModal() {
       moduleState.value?.integration
     );
 
+  const featuredModules = [
+    Module.PM,
+    Module.ASM,
+    Module.BAS,
+    Module.CTI,
+    Module.VM,
+  ];
+
   return (
     <Modal
       title="Integrations"
@@ -361,7 +369,7 @@ export function ModulesModal() {
           }}
         >
           <Tabs
-            tabs={Object.values(Module).map((module, index) => {
+            tabs={featuredModules.map((module, index) => {
               const isPM = index === 0;
 
               // If PM update design
