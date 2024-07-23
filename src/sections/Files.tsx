@@ -423,7 +423,6 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
                   variant: 'error',
                 });
               });
-            console.log('save', filename, content);
           },
         }}
       >

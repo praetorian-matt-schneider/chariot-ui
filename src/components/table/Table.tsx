@@ -57,8 +57,17 @@ export function Table<TData>(props: TableProps<TData>) {
     primaryAction,
     skipHeader,
     resize = false,
+    search: controlledSearch,
   } = props;
-  const [searchValue, setSearchValue] = useState('');
+  const controlledSearchValue = controlledSearch?.value;
+  const onControlledSearchChange = controlledSearch?.onChange;
+  const [search, setSearch] = useStorage(
+    {
+      parentState: controlledSearchValue,
+      onParentStateChange: onControlledSearchChange,
+    },
+    ''
+  );
   const [expandedGroups, setExpandedGroups] = useState(
     groupBy?.map(group => group.label) || []
   );
@@ -97,10 +106,10 @@ export function Table<TData>(props: TableProps<TData>) {
         : indexedData;
 
     return groupedData.filter(item => {
-      // filter by searchValue
-      if (searchValue && searchValue.length > 0) {
+      // filter by search
+      if (search && search.length > 0 && !controlledSearchValue) {
         return Object.values(item).some(value =>
-          String(value).toLowerCase().includes(searchValue.toLowerCase())
+          String(value).toLowerCase().includes(search.toLowerCase())
         );
       }
       return true;
@@ -110,7 +119,8 @@ export function Table<TData>(props: TableProps<TData>) {
     JSON.stringify(indexedData),
     JSON.stringify(expandedGroups),
     status,
-    searchValue,
+    search,
+    controlledSearchValue,
   ]);
 
   const parentRef = useRef<HTMLDivElement>(null);
@@ -319,8 +329,8 @@ export function Table<TData>(props: TableProps<TData>) {
                 name="search"
                 placeholder={`Search ${tableName}`}
                 className="h-9 w-64 justify-end rounded-sm border-gray-900 bg-header-light p-2 text-sm text-white  ring-0"
-                value={searchValue}
-                onChange={e => setSearchValue(e.target.value)}
+                value={search}
+                onChange={e => setSearch(e.target.value)}
                 startIcon={
                   <MagnifyingGlassIcon className="size-5 stroke-2 text-default-light" />
                 }
