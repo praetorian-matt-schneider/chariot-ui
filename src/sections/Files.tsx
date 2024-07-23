@@ -253,7 +253,7 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
           ))}
         </div>
       )}
-      <div className="flex items-center space-x-6 rounded-t-sm border-b border-gray-200 bg-gray-50 px-8 py-6 shadow-sm">
+      <div className="flex items-center space-x-2 rounded-t-sm border-b border-gray-200 bg-gray-50 px-4 py-3 shadow-sm">
         <Dropdown
           menu={{
             items: TreeData.map(folder => ({
