@@ -2,12 +2,13 @@ import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 
-import { BreadCrumbs } from '@/components/BreadCrumbs';
 import ImpersonationBanner from '@/components/ImpersonationBanner';
-import { Loader } from '@/components/Loader';
+import MyInbox from '@/components/MyInbox';
+import MyInbox from '@/components/MyInbox';
 import { ShortcutsHelper } from '@/components/ui/Shortcuts';
 import { useMy } from '@/hooks';
 import { useGetDisplayName } from '@/hooks/useAccounts';
+import { useCounts } from '@/hooks/useCounts';
 import { AddAsset } from '@/sections/add/AddAsset';
 import { AddFile } from '@/sections/add/AddFile';
 import { AddRisks } from '@/sections/add/AddRisks';
@@ -50,6 +51,7 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
   const navigate = useNavigate();
   const [shortcutsHelper, setShortcutsHelper] = useState(false);
 
+  // @types/node
   let timeout: NodeJS.Timeout;
 
   useEffect(() => {
@@ -128,6 +130,13 @@ const HeaderPortalSections = {
 };
 
 export function Header() {
+  const { data: assetCounts } = useCounts({
+    resource: 'asset',
+  });
+
+  const { data: riskCounts } = useCounts({
+    resource: 'risk',
+  });
   const { friend } = useAuth();
   const { status: statusAccount } = useMy({ resource: 'account' });
   const { breadcrumbs } = useBreadCrumbsContext();
@@ -137,6 +146,12 @@ export function Header() {
     breadcrumbs[1]?.label?.toLowerCase()
   );
 
+  const assetCount = assetCounts?.status?.A ?? 0;
+
+  const riskCount = Object.keys(riskCounts?.status ?? {})
+    .filter(key => key.startsWith('T'))
+    .reduce((acc, key) => acc + (riskCounts?.status?.[key] ?? 0), 0);
+
   return (
     <>
       <div
@@ -145,17 +160,17 @@ export function Header() {
         )}
       >
         <div className="w-full max-w-screen-xl">
-          <TopNavBar />
-          <hr className="h-px bg-layer0 opacity-15" />
-          <div className={cn('flex items-center justify-between gap-10')}>
-            <Loader
-              styleType="header"
-              className="my-9 h-11 w-1/2"
-              isLoading={statusAccount === 'pending'}
-            >
-              <BreadCrumbs breadcrumbs={breadcrumbs} />
-            </Loader>
-            <div id={HeaderPortalSections.BREADCRUMBS} className="shrink-0" />
+          <TopNavBar
+            notifyAssets={assetCount > 0}
+            notifyRisks={riskCount > 0}
+          />
+
+          <div className="flex flex-row">
+            <MyInbox
+              assets={assetCount}
+              risks={riskCount}
+              folder={breadcrumbs[breadcrumbs.length - 1]?.label}
+            />
           </div>
         </div>
       </div>

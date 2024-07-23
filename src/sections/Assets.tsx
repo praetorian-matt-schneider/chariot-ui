@@ -28,6 +28,7 @@ import { parseKeys } from '@/sections/SearchByType';
 import { useGlobalState } from '@/state/global.state';
 import { Asset, AssetStatus, AssetStatusLabel, Risk } from '@/types';
 import { useMergeStatus } from '@/utils/api';
+import { useSearchParams } from '@/utils/url.util';
 
 type Severity = 'I' | 'L' | 'M' | 'H' | 'C';
 type SeverityOpenCounts = Partial<Record<Severity, Risk[]>>;
@@ -87,6 +88,7 @@ const Assets: React.FC = () => {
   const { data: risks = [], status: riskStatus } = useMy({ resource: 'risk' });
   const { isIntegration } = useIntegration();
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
+  const { searchParams } = useSearchParams();
   const [priorityFilter, setPriorityFilter] = useFilter(
     [''],
     'asset-priority',
@@ -100,6 +102,13 @@ const Assets: React.FC = () => {
   const [assetsWithAttributesFilter, setAssetsWithAttributesFilter] = useState<
     string[]
   >([]);
+
+  useEffect(() => {
+    const assetPriority = searchParams.get('asset-priority') ?? '';
+    if (assetPriority) {
+      setPriorityFilter([assetPriority]);
+    }
+  }, [searchParams]);
 
   const status = useMergeStatus(riskStatus, assetsStatus);
   const { getAssetDrawerLink } = getDrawerLink();

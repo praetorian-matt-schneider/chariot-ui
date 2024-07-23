@@ -12,7 +12,10 @@ import { AccountDropdown } from '@/sections/topNavBar/AccountDropdown';
 import { Notifications } from '@/sections/topNavBar/Notifications';
 import { getRoute } from '@/utils/route.util';
 
-export function TopNavBar() {
+export function TopNavBar(props: {
+  notifyAssets?: boolean;
+  notifyRisks?: boolean;
+}) {
   const [showNotification, setShowNotification] = useState<boolean>(false);
   const navigate = useNavigate();
 

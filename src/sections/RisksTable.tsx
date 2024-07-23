@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ChevronDownIcon,
@@ -40,6 +40,7 @@ import {
 import { useMergeStatus } from '@/utils/api';
 import { isKEVRisk } from '@/utils/risk.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
+import { useSearchParams } from '@/utils/url.util';
 import { generatePathWithSearch } from '@/utils/url.util';
 
 const DownIcon = (
@@ -126,6 +127,7 @@ const getFilteredRisks = (
 export function Risks() {
   const { getRiskDrawerLink } = getDrawerLink();
   const updateRisk = useBulkUpdateRisk();
+  const { searchParams } = useSearchParams();
 
   const {
     modal: { risk },
@@ -160,6 +162,13 @@ export function Risks() {
 
   const { data: knownExploitedThreats = [], status: threatsStatus } =
     useGetKev();
+
+  useEffect(() => {
+    const riskStatus = (searchParams.get('risk-status') ?? '') as RiskStatus;
+    if (riskStatus) {
+      setStatusesFilter([riskStatus]);
+    }
+  }, [searchParams]);
 
   const {
     data: risks = [],
