@@ -1254,7 +1254,7 @@ export function BasIntegration() {
                               <img
                                 key={index}
                                 onClick={handleCopy}
-                                className="size-[36px] cursor-pointer p-2"
+                                className="m-1 size-[28px] cursor-pointer p-1"
                                 src={`/icons/${system}.svg`}
                               />
                             );
