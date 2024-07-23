@@ -36,7 +36,7 @@ export function TopNavBar(props: {
                     'app',
                     link as 'overview' | 'assets' | 'risks',
                   ])}
-                  className={`${linkSize} mt-1 border-b-2 pb-1 text-sm font-medium capitalize transition-colors 
+                  className={`relative ${linkSize} mt-1 border-b-2 pb-1 text-sm font-medium capitalize transition-colors 
                   hover:text-gray-100 ${
                     isCurrentPage(link)
                       ? 'border-layer0 hover:border-layer0'
@@ -44,6 +44,12 @@ export function TopNavBar(props: {
                   }`}
                 >
                   {link}
+                  {link === 'assets' && props.notifyAssets && (
+                    <span className="absolute top-0 right-0 mr-1.5 h-2 w-2 rounded-full bg-brand-light"></span>
+                  )}
+                  {link === 'risks' && props.notifyRisks && (
+                    <span className="absolute top-0 right-0 mr-1.5 h-2 w-2 rounded-full bg-brand-light"></span>
+                  )}
                 </Link>
               ))}
             </nav>
