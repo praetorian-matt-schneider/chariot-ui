@@ -740,14 +740,13 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
       <div className="p-4">
         <h3 className="text-2xl font-semibold">Attack Surface Management</h3>
         <p className="mt-2 text-default-light">
-          Gain visibility into your expanding attack surface through continuous
-          discovery, identification, and monitoring of your evolving digital
-          landscape.
+          When you provide an Asset as a starting point, Chariot’s comprehensive
+          scan protocols the digital doors to your organization. Using tools
+          like subfinder, assetfinder, Massscan, whois, and and others, Chariot
+          seeks, finds, and presents a picture of your Assets.
         </p>
         <p className="mt-2 text-default-light">
-          ASM helps you proactively manage potential vulnerabilities and
-          exposures, ensuring your organization&apos;s security measures keep
-          pace with the dynamic threat environment.
+          {`Continuous ASM helps you proactively manage potential vulnerabilities and exposures, ensuring your organization's security measures keep pace with the dynamic threat environment.`}
         </p>
       </div>
     ),
@@ -770,12 +769,12 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
       <div className="p-4">
         <h3 className="text-2xl font-semibold">Breach & Attack Simulation</h3>
         <p className="mt-2 text-default-light">
-          BAS allows you to simulate real-world attack scenarios in a controlled
-          environment, identifying vulnerabilities before attackers can exploit
-          them.
+          Upload custom TTPs to Chariot to measure your detection and response
+          to MITRE ATT&CK techniques. Deploy a 1-kilobyte agent on any device
+          and schedule jobs for immediate execution.
         </p>
         <p className="mt-2 text-default-light">
-          Enhance your threat detection and response capabilities by
+          Stress test your threat detection and response capabilities by
           continuously testing your defenses against the latest attack
           techniques.
         </p>
@@ -792,13 +791,14 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
       <div className="p-4">
         <h3 className="text-2xl font-semibold">Cyber Threat Intelligence</h3>
         <p className="mt-2 text-default-light">
-          Chariot monitors emerging threats, providing detailed analysis of new
-          vulnerabilities, exploits, and attack vectors from a variety of
-          trusted sources.
+          Chariot tags Known Exploited Vulnerabilities–risks we know are being
+          used to hack into networks– to elevate the Risks that matter most to
+          your business.
         </p>
         <p className="mt-2 text-default-light">
-          Empower your organization with actionable intelligence to anticipate,
-          prepare for, and respond to evolving cyber threats.
+          We monitor emerging threat intelligence from a variety of trusted
+          sources and provide detailed analysis of new vulnerabilities,
+          exploits, and attack vectors.
         </p>
       </div>
     ),
@@ -813,12 +813,13 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
       <div className="p-4">
         <h3 className="text-2xl font-semibold">Vulnerability Management</h3>
         <p className="mt-2 text-default-light">
-          VM services help you identify, prioritize, and remediate security
-          vulnerabilities to protect your organization from potential threats.
+          VM services take the CVEs found on your Attack Surface–the Risks that
+          represent the most potential harm to your organization–and present the
+          most efficient approach to securing your Assets.
         </p>
         <p className="mt-2 text-default-light">
-          Enhance your security posture by proactively managing vulnerabilities
-          across your IT infrastructure.
+          Chariot provides the data, up front, in a way that allows a tailored
+          remediation approach.
         </p>
       </div>
     ),
@@ -835,12 +836,12 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
           Continuous Penetration Testing
         </h3>
         <p className="mt-2 text-default-light">
-          CPT solutions offer continuous assessment of your security posture,
-          enabling proactive identification and mitigation of potential threats.
+          {`Leverage Praetorian's security engineer expertise to enhance your operations and focus security where your business needs it most.`}
         </p>
         <p className="mt-2 text-default-light">
-          Improve your security by leveraging advanced testing methodologies and
-          automated responses to address vulnerabilities effectively.
+          MSP services provide end-to-end management, including proactive
+          monitoring, maintenance, and support to ensure optimal performance and
+          security.
         </p>
       </div>
     ),
