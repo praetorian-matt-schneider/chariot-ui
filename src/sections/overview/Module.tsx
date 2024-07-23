@@ -643,7 +643,7 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
   },
   BAS: {
     Icon: <Goal className="size-10 text-default-light" />,
-    label: 'Breach & Attack Simulation',
+    label: 'Breach and Attack Simulation',
     name: 'BAS',
     description: `Breach and Attack Simulation (BAS) uses automated tools to continuously simulate real-world cyber attacks, helping organizations identify vulnerabilities, improve threat detection, and enhance their overall security posture.`,
     defaultTab: (
