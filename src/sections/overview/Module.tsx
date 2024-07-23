@@ -9,12 +9,11 @@ import {
 } from 'lucide-react';
 
 import { Button } from '@/components/Button';
-import { CopyToClipboard } from '@/components/CopyToClipboard';
 import { Dropzone, Files } from '@/components/Dropzone';
 import { Input } from '@/components/form/Input';
 import { InputText } from '@/components/form/InputText';
+import { Link } from '@/components/Link';
 import { Loader } from '@/components/Loader';
-import { OverflowText } from '@/components/OverflowText';
 import WebhookExample from '@/components/ui/WebhookExample';
 import { useMy, useUploadFile } from '@/hooks';
 import { useBulkAddAsset } from '@/hooks/useAssets';
@@ -22,7 +21,9 @@ import { useBulkAddAttributes } from '@/hooks/useAttribute';
 import { useCounts } from '@/hooks/useCounts';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useBulkReRunJob } from '@/hooks/useJobs';
+import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { parseKeys } from '@/sections/SearchByType';
+import { useAuth } from '@/state/auth';
 import {
   Account,
   Attribute,
@@ -32,6 +33,7 @@ import {
   ModuleMeta,
 } from '@/types';
 import { useMergeStatus } from '@/utils/api';
+import { copyToClipboard } from '@/utils/copyToClipboard.util';
 import { generateUuid } from '@/utils/uuid.util';
 
 const NessusInstructions = () => {
@@ -43,13 +45,13 @@ const NessusInstructions = () => {
         started.
       </p>
 
-      <h2 className="text-lg font-semibold mb-2">1. Install the CLI</h2>
+      <h2 className="mb-2 text-lg font-semibold">1. Install the CLI</h2>
       <p className="mb-2">Use the following command to install the CLI:</p>
-      <pre className="bg-gray-100 p-4 rounded-md mb-4">
+      <pre className="mb-4 rounded-md bg-gray-100 p-4">
         <code>pip install praetorian-cli</code>
       </pre>
 
-      <h2 className="text-lg font-semibold mt-4 mb-2">2. Configure the CLI</h2>
+      <h2 className="mb-2 mt-4 text-lg font-semibold">2. Configure the CLI</h2>
       <p className="mb-2">
         Refer to our{' '}
         <a
@@ -63,22 +65,22 @@ const NessusInstructions = () => {
         for detailed configuration instructions.
       </p>
 
-      <h2 className="text-lg font-semibold mb-2 mt-4">
+      <h2 className="mb-2 mt-4 text-lg font-semibold">
         3. Import Nessus Results
       </h2>
       <p className="mb-2">
         Run one of the following commands to import Nessus results:
       </p>
 
-      <h3 className="text-lg font-medium mb-2 mt-4">Using Nessus API</h3>
-      <pre className="bg-gray-100 p-4 rounded-md mb-4">
+      <h3 className="mb-2 mt-4 text-lg font-medium">Using Nessus API</h3>
+      <pre className="mb-4 rounded-md bg-gray-100 p-4">
         <code>praetorian chariot plugin nessus-api</code>
       </pre>
 
-      <h3 className="text-lg font-medium mb-2 mt-4">
+      <h3 className="mb-2 mt-4 text-lg font-medium">
         Using Nessus XML Export Files
       </h3>
-      <pre className="bg-gray-100 p-4 rounded-md mb-4">
+      <pre className="mb-4 rounded-md bg-gray-100 p-4">
         <code>praetorian chariot plugin nessus-XML</code>
       </pre>
 
@@ -850,6 +852,12 @@ export type IntegrationData = { isConnected: true; accounts: Account[] };
 
 export type IntegrationsData = Record<Integration, IntegrationData>;
 
+enum systemTyps {
+  apple = 'apple',
+  windows = 'windows',
+  linux = 'linux',
+}
+
 export function useGetModuleData(): {
   data: Record<
     Module,
@@ -1044,10 +1052,14 @@ export function useGetModuleData(): {
 }
 
 export function BasIntegration() {
+  const { me, friend } = useAuth();
+
   const {
     data: { BAS },
     isLoading,
   } = useGetModuleData();
+
+  const { getAssetDrawerLink } = getDrawerLink();
 
   const { data: basLabelAttributes, status: basLabelAttributesStatus } = useMy({
     resource: 'attribute',
@@ -1082,7 +1094,7 @@ export function BasIntegration() {
   const [attLabels, setAttLabels] = useState<Record<string, string>>({});
 
   async function handleEnable() {
-    const basAgents = 10;
+    const basAgents = 5;
 
     const assets = Array(basAgents)
       .fill(0)
@@ -1201,13 +1213,14 @@ export function BasIntegration() {
                       isLoading={bulkReRunJobsStatus === 'pending'}
                       key={index}
                     >
-                      <div className="flex gap-2">
+                      <div className="flex items-center gap-2">
                         <Loader
                           className="h-[36px] w-[100px]"
                           isLoading={basLabelAttributesStatus === 'pending'}
                         >
                           <InputText
                             className="w-[100px]"
+                            placeholder="Agent Name"
                             name={attributeMeta.name}
                             onChange={event => {
                               setAttLabels(prev => {
@@ -1220,12 +1233,33 @@ export function BasIntegration() {
                             value={attLabels[attributeMeta.name] || ''}
                           />
                         </Loader>
-                        <CopyToClipboard className="w-full overflow-hidden">
-                          <OverflowText
-                            text={attribute.key.split('#')[6]}
-                            className="mr-1 text-nowrap font-medium text-brand"
-                          />
-                        </CopyToClipboard>
+                        <Link
+                          to={getAssetDrawerLink({
+                            dns: attributeMeta.name,
+                            name: attributeMeta.value,
+                          })}
+                          buttonClass="p-[6px] w-[100px]"
+                        >
+                          {attributeMeta.name.split('-')[0]}
+                        </Link>
+                        <div className="flex">
+                          {Object.values(systemTyps).map((system, index) => {
+                            function handleCopy() {
+                              copyToClipboard(
+                                `https://preview.chariot.praetorian.com/${friend.email || me}/${attributeMeta.name}/${system}`
+                              );
+                            }
+
+                            return (
+                              <img
+                                key={index}
+                                onClick={handleCopy}
+                                className="size-[36px] cursor-pointer p-2"
+                                src={`/icons/${system}.svg`}
+                              />
+                            );
+                          })}
+                        </div>
                       </div>
                     </Loader>
                   );
