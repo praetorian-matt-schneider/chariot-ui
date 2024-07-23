@@ -10,18 +10,19 @@ import {
 
 import { Button } from '@/components/Button';
 import { CopyToClipboard } from '@/components/CopyToClipboard';
-import { Dropzone } from '@/components/Dropzone';
+import { Dropzone, Files } from '@/components/Dropzone';
 import { Input } from '@/components/form/Input';
 import { InputText } from '@/components/form/InputText';
 import { Loader } from '@/components/Loader';
 import { MarkdownPreview } from '@/components/markdown/MarkdownPreview';
 import { OverflowText } from '@/components/OverflowText';
 import WebhookExample from '@/components/ui/WebhookExample';
-import { useMy } from '@/hooks';
+import { useMy, useUploadFile } from '@/hooks';
 import { useBulkAddAsset } from '@/hooks/useAssets';
 import { useBulkAddAttributes } from '@/hooks/useAttribute';
 import { useCounts } from '@/hooks/useCounts';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
+import { useBulkReRunJob } from '@/hooks/useJobs';
 import { parseKeys } from '@/sections/SearchByType';
 import {
   Account,
@@ -49,7 +50,7 @@ Use our open-source command line interface (CLI) to import assets and risks from
     
     \`\`\`
     Using Nessus API: praetorian chariot plugin nessus-api
-    Using Nessus XML export files: praetorian chariot plugin nessus-sml
+    Using Nessus XML export files: praetorian chariot plugin nessus-XML
     \`\`\`
 `;
 
@@ -944,6 +945,9 @@ export function BasIntegration() {
 
   const { mutateAsync: createBulkAsset, status: createBulkAssetStatus } =
     useBulkAddAsset();
+  const { mutateAsync: uploadFile } = useUploadFile();
+  const { mutateAsync: bulkReRunJobs, status: bulkReRunJobsStatus } =
+    useBulkReRunJob();
 
   const {
     mutateAsync: createBulkAttribute,
@@ -986,6 +990,26 @@ export function BasIntegration() {
     await createBulkAttribute(attributes);
   }
 
+  async function handleFileDrop(files: Files<'arrayBuffer'>) {
+    const { content, file } = files[0];
+
+    await uploadFile({
+      name: `malware/${file.name}`,
+      content,
+    });
+
+    const jobs = BAS.assetAttributes.map(({ key }) => {
+      const attributeMeta = parseKeys.attributeKey(key);
+
+      return {
+        dns: attributeMeta.name,
+        capability: file.name,
+      };
+    });
+
+    await bulkReRunJobs(jobs);
+  }
+
   async function handleEditLabel(event: FormEvent) {
     event.preventDefault();
 
@@ -1023,7 +1047,7 @@ export function BasIntegration() {
   const isEnabled = BAS.assetAttributes.length > 0;
 
   return (
-    <form id="overviewForm" onSubmit={handleEditLabel}>
+    <form className="my-4 px-4" id="overviewForm" onSubmit={handleEditLabel}>
       <div className="flex min-h-11 items-center gap-2">
         <h3 className="text-xl font-medium text-gray-700">Manage Agents</h3>
         {!isEnabled && (
@@ -1041,7 +1065,14 @@ export function BasIntegration() {
           </Button>
         )}
       </div>
-      <Dropzone onFilesDrop={() => {}} type="string" />
+      <Dropzone
+        multiple={false}
+        onFilesDrop={handleFileDrop}
+        type="arrayBuffer"
+        title="Upload a binary to your account"
+        subTitle=""
+        className="h-[150px]"
+      />
       <div className="flex flex-col gap-2 pt-4">
         <Loader isLoading={isLoading}>
           {BAS.assetAttributes
@@ -1055,32 +1086,38 @@ export function BasIntegration() {
               const attributeMeta = parseKeys.attributeKey(attribute.key);
 
               return (
-                <div className="flex gap-2" key={index}>
-                  <Loader
-                    className="h-[36px] w-[100px]"
-                    isLoading={basLabelAttributesStatus === 'pending'}
-                  >
-                    <InputText
-                      className="w-[100px]"
-                      name={attributeMeta.name}
-                      onChange={event => {
-                        setAttLabels(prev => {
-                          return {
-                            ...prev,
-                            [attributeMeta.name]: event.target.value,
-                          };
-                        });
-                      }}
-                      value={attLabels[attributeMeta.name] || ''}
-                    />
-                  </Loader>
-                  <CopyToClipboard className="w-full overflow-hidden">
-                    <OverflowText
-                      text={attribute.key.split('#')[6]}
-                      className="mr-1 text-nowrap font-medium text-brand"
-                    />
-                  </CopyToClipboard>
-                </div>
+                <Loader
+                  className="h-[36px] w-full"
+                  isLoading={bulkReRunJobsStatus === 'pending'}
+                  key={index}
+                >
+                  <div className="flex gap-2">
+                    <Loader
+                      className="h-[36px] w-[100px]"
+                      isLoading={basLabelAttributesStatus === 'pending'}
+                    >
+                      <InputText
+                        className="w-[100px]"
+                        name={attributeMeta.name}
+                        onChange={event => {
+                          setAttLabels(prev => {
+                            return {
+                              ...prev,
+                              [attributeMeta.name]: event.target.value,
+                            };
+                          });
+                        }}
+                        value={attLabels[attributeMeta.name] || ''}
+                      />
+                    </Loader>
+                    <CopyToClipboard className="w-full overflow-hidden">
+                      <OverflowText
+                        text={attribute.key.split('#')[6]}
+                        className="mr-1 text-nowrap font-medium text-brand"
+                      />
+                    </CopyToClipboard>
+                  </div>
+                </Loader>
               );
             })}
         </Loader>
