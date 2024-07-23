@@ -1114,81 +1114,82 @@ export function BasIntegration() {
   const isEnabled = BAS.assetAttributes.length > 0;
 
   return (
-    <form className="my-4 px-4" id="overviewForm" onSubmit={handleEditLabel}>
-      <div className="flex min-h-11 items-center gap-2">
-        <h3 className="text-xl font-medium text-gray-700">Manage Agents</h3>
-        {!isEnabled && (
-          <Button
-            isLoading={
-              createBulkAssetStatus === 'pending' ||
-              createBulkAttributeStatus === 'pending'
-            }
-            disabled={BAS.isLoading}
-            styleType="text"
-            className="ml-auto"
-            onClick={handleEnable}
-          >
-            Enable
-          </Button>
-        )}
-      </div>
-      <Dropzone
-        multiple={false}
-        onFilesDrop={handleFileDrop}
-        type="arrayBuffer"
-        title="Upload a binary to your account"
-        subTitle=""
-        className="h-[150px]"
-      />
-      <div className="flex flex-col gap-2 pt-4">
-        <Loader isLoading={isLoading}>
-          {BAS.assetAttributes
-            .sort((a, b) => {
-              const bDate = new Date(b.updated);
-              const aDate = new Date(a.updated);
+    <form className="size-full" id="overviewForm" onSubmit={handleEditLabel}>
+      {!isEnabled && (
+        <Button
+          isLoading={
+            createBulkAssetStatus === 'pending' ||
+            createBulkAttributeStatus === 'pending'
+          }
+          disabled={BAS.isLoading}
+          styleType="secondary"
+          className="m-auto mt-20 px-8 py-4 text-3xl font-bold"
+          onClick={handleEnable}
+        >
+          Enable
+        </Button>
+      )}
+      {isEnabled && (
+        <>
+          <Dropzone
+            multiple={false}
+            onFilesDrop={handleFileDrop}
+            type="arrayBuffer"
+            title="Upload a TTP to your account"
+            subTitle="File should be an executable"
+            className="m-0 h-[200px]"
+          />
+          <div className="flex flex-col gap-2 pt-4">
+            <Loader isLoading={isLoading}>
+              {BAS.assetAttributes
+                .sort((a, b) => {
+                  const bDate = new Date(b.updated);
+                  const aDate = new Date(a.updated);
 
-              return bDate.getTime() - aDate.getTime();
-            })
-            .map((attribute, index) => {
-              const attributeMeta = parseKeys.attributeKey(attribute.key);
+                  return bDate.getTime() - aDate.getTime();
+                })
+                .map((attribute, index) => {
+                  const attributeMeta = parseKeys.attributeKey(attribute.key);
 
-              return (
-                <Loader
-                  className="h-[36px] w-full"
-                  isLoading={bulkReRunJobsStatus === 'pending'}
-                  key={index}
-                >
-                  <div className="flex gap-2">
+                  return (
                     <Loader
-                      className="h-[36px] w-[100px]"
-                      isLoading={basLabelAttributesStatus === 'pending'}
+                      className="h-[36px] w-full"
+                      isLoading={bulkReRunJobsStatus === 'pending'}
+                      key={index}
                     >
-                      <InputText
-                        className="w-[100px]"
-                        name={attributeMeta.name}
-                        onChange={event => {
-                          setAttLabels(prev => {
-                            return {
-                              ...prev,
-                              [attributeMeta.name]: event.target.value,
-                            };
-                          });
-                        }}
-                        value={attLabels[attributeMeta.name] || ''}
-                      />
+                      <div className="flex gap-2">
+                        <Loader
+                          className="h-[36px] w-[100px]"
+                          isLoading={basLabelAttributesStatus === 'pending'}
+                        >
+                          <InputText
+                            className="w-[100px]"
+                            name={attributeMeta.name}
+                            onChange={event => {
+                              setAttLabels(prev => {
+                                return {
+                                  ...prev,
+                                  [attributeMeta.name]: event.target.value,
+                                };
+                              });
+                            }}
+                            value={attLabels[attributeMeta.name] || ''}
+                          />
+                        </Loader>
+                        <CopyToClipboard className="w-full overflow-hidden">
+                          <OverflowText
+                            text={attribute.key.split('#')[6]}
+                            className="mr-1 text-nowrap font-medium text-brand"
+                          />
+                        </CopyToClipboard>
+                      </div>
                     </Loader>
-                    <CopyToClipboard className="w-full overflow-hidden">
-                      <OverflowText
-                        text={attribute.key.split('#')[6]}
-                        className="mr-1 text-nowrap font-medium text-brand"
-                      />
-                    </CopyToClipboard>
-                  </div>
-                </Loader>
-              );
-            })}
-        </Loader>
-      </div>
+                  );
+                })}
+            </Loader>
+          </div>
+        </>
+      )}
     </form>
   );
 }

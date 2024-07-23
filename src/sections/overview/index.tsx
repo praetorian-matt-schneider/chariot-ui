@@ -535,10 +535,6 @@ const IntegrationComponent = (props: IntegrationComponentProps) => {
     setCount(connectedIntegration.length || 1);
   }, [connectedIntegration.length]);
 
-  if (customIntegration) {
-    return customIntegration;
-  }
-
   return (
     <div className="mt-4 w-full px-4">
       <div className="flex min-h-11 items-center gap-2">
@@ -563,9 +559,10 @@ const IntegrationComponent = (props: IntegrationComponentProps) => {
           </div>
         </div>
       )}
-      {(showInputs || message || markup || warning) && (
+      {(showInputs || message || markup || warning || customIntegration) && (
         <div className="mt-4 flex">
           <div className=" w-full rounded-sm border-gray-200">
+            {customIntegration}
             {message && <div className="mb-4 text-gray-500">{message}</div>}
             {(showInputs || markup) && (
               <div>
