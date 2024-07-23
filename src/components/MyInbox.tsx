@@ -14,7 +14,8 @@ interface Props {
 const MyInbox: React.FC<Props> = ({ folder, risks, assets }) => {
   const [, addSearchParams] = useSearchParams();
 
-  if (!['assets', 'risks'].includes(folder.toLowerCase())) return null;
+  if (!folder) return null;
+  if (!['assets', 'risks'].includes(folder?.toLowerCase())) return null;
   if (assets === 0 && folder?.toLowerCase() === 'assets') return null;
   if (risks === 0 && folder?.toLowerCase() === 'risks') return null;
 
