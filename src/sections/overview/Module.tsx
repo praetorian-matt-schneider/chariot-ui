@@ -1219,7 +1219,7 @@ export function BasIntegration() {
                           isLoading={basLabelAttributesStatus === 'pending'}
                         >
                           <InputText
-                            className="w-[100px]"
+                            className="w-full"
                             placeholder="Agent Name"
                             name={attributeMeta.name}
                             onChange={event => {
@@ -1242,7 +1242,7 @@ export function BasIntegration() {
                         >
                           {attributeMeta.name.split('-')[0]}
                         </Link>
-                        <div className="flex">
+                        <div className="flex shrink-0">
                           {Object.values(systemTyps).map((system, index) => {
                             function handleCopy() {
                               copyToClipboard(
