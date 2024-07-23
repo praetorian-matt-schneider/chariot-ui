@@ -25,8 +25,8 @@ const MyInbox: React.FC<Props> = ({ folder, risks, assets }) => {
           >
             <div className="flex grow flex-row items-center">
               {getAssetStatusIcon(AssetStatus.ActiveLow, 'size-6')}
-              <p className="text-md ml-2 w-44 font-semibold">
-                New Assets Detected
+              <p className="text-md ml-2 w-52 font-semibold">
+                New Assets Discovered
               </p>
               <p className="text-sm text-gray-400">
                 Enable risk scanning to protect{' '}
@@ -38,18 +38,15 @@ const MyInbox: React.FC<Props> = ({ folder, risks, assets }) => {
             </div>
 
             <Button
-              styleType="none"
-              className="w-20 text-white"
+              styleType="primary"
+              className="py-2 text-white"
               onClick={() => {
                 addSearchParams({
                   'asset-priority': 'AL',
                 });
               }}
             >
-              View
-            </Button>
-            <Button styleType="primary" className="w-32 rounded-r-none py-2">
-              Enable Now
+              Review Now
             </Button>
           </div>
         )}
@@ -61,8 +58,8 @@ const MyInbox: React.FC<Props> = ({ folder, risks, assets }) => {
           >
             <div className="flex grow flex-row items-center">
               <RisksIcon className="size-6" />
-              <p className="text-md ml-2 w-44 font-semibold">
-                New Risks Detected
+              <p className="text-md ml-2 w-52 font-semibold">
+                New Risks Identified
               </p>
               <p className="text-sm text-gray-400">
                 Triage{' '}
@@ -74,18 +71,15 @@ const MyInbox: React.FC<Props> = ({ folder, risks, assets }) => {
             </div>
 
             <Button
-              styleType="none"
-              className="w-20 text-white"
+              styleType="primary"
+              className=" py-2 text-white"
               onClick={() => {
                 addSearchParams({
                   'risk-status': 'T',
                 });
               }}
             >
-              View
-            </Button>
-            <Button styleType="primary" className="w-32 py-2">
-              Triage Now
+              Review Now
             </Button>
           </div>
         )}
