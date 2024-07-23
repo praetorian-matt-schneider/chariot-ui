@@ -147,7 +147,7 @@ export function Header() {
     breadcrumbs[1]?.label?.toLowerCase()
   );
 
-  const assetCount = assetCounts?.status?.A ?? 0;
+  const assetCount = assetCounts?.status?.AL ?? 0;
 
   const riskCount = Object.keys(riskCounts?.status ?? {})
     .filter(key => key.startsWith('T'))

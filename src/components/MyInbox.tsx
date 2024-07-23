@@ -13,7 +13,10 @@ interface Props {
 }
 const MyInbox: React.FC<Props> = ({ folder, risks, assets }) => {
   const [, addSearchParams] = useSearchParams();
-  if (assets === 0 && risks === 0) return null;
+
+  if (!folder || folder === '') return null;
+  if (assets === 0 && folder?.toLowerCase() === 'assets') return null;
+  if (risks === 0 && folder?.toLowerCase() === 'risks') return null;
 
   return (
     <div className="w-full">
@@ -43,6 +46,7 @@ const MyInbox: React.FC<Props> = ({ folder, risks, assets }) => {
               onClick={() => {
                 addSearchParams({
                   'asset-priority': 'AL',
+                  review: '1',
                 });
               }}
             >
@@ -76,6 +80,7 @@ const MyInbox: React.FC<Props> = ({ folder, risks, assets }) => {
               onClick={() => {
                 addSearchParams({
                   'risk-status': 'T',
+                  review: '1',
                 });
               }}
             >

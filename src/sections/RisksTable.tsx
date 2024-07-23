@@ -127,7 +127,7 @@ const getFilteredRisks = (
 export function Risks() {
   const { getRiskDrawerLink } = getDrawerLink();
   const updateRisk = useBulkUpdateRisk();
-  const { searchParams } = useSearchParams();
+  const { searchParams, removeSearchParams } = useSearchParams();
 
   const {
     modal: { risk },
@@ -169,6 +169,8 @@ export function Risks() {
       setStatusesFilter([riskStatus]);
     }
   }, [searchParams]);
+
+  const reviewStep = searchParams.get('review');
 
   const {
     data: risks = [],
@@ -505,17 +507,38 @@ export function Risks() {
                 },
                 {
                   label: RiskStatusLabel[RiskStatus.Opened],
-                  icon: getRiskStatusIcon(RiskStatus.Opened),
-                  onClick: () =>
+                  className:
+                    reviewStep === '3' ? 'border border-brand text-brand' : '',
+                  icon:
+                    reviewStep === '3' ? (
+                      <div className="size-3 animate-pulse rounded-full bg-brand ring-brand-light" />
+                    ) : (
+                      getRiskStatusIcon(RiskStatus.Opened)
+                    ),
+                  onClick: () => {
+                    if (reviewStep === '3') {
+                      removeSearchParams('review');
+                    }
                     updateRisk({
                       selectedRows,
                       status: RiskStatus.Opened,
-                    }),
+                    });
+                  },
                 },
                 {
                   label: 'Closed',
-                  icon: getRiskStatusIcon(RiskStatus.Resolved),
+                  className:
+                    reviewStep === '3' ? 'border border-brand text-brand' : '',
+                  icon:
+                    reviewStep === '3' ? (
+                      <div className="size-3 animate-pulse rounded-full bg-brand ring-brand-light" />
+                    ) : (
+                      getRiskStatusIcon(RiskStatus.Resolved)
+                    ),
                   onClick: () => {
+                    if (reviewStep === '3') {
+                      removeSearchParams('review');
+                    }
                     setIsClosedSubStateModalOpen(true);
                   },
                 },

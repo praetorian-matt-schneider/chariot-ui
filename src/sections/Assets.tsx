@@ -88,7 +88,7 @@ const Assets: React.FC = () => {
   const { data: risks = [], status: riskStatus } = useMy({ resource: 'risk' });
   const { isIntegration } = useIntegration();
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
-  const { searchParams } = useSearchParams();
+  const { searchParams, removeSearchParams } = useSearchParams();
   const [priorityFilter, setPriorityFilter] = useFilter(
     [''],
     'asset-priority',
@@ -119,6 +119,7 @@ const Assets: React.FC = () => {
   const [showAssetStatusWarning, setShowAssetStatusWarning] =
     useState<boolean>(false);
   const [assetStatus, setAssetStatus] = useState<AssetStatus | ''>('');
+  const reviewStep = searchParams.get('review');
 
   const { mutateAsync: updateAsset } = useUpdateAsset();
 
@@ -402,15 +403,26 @@ const Assets: React.FC = () => {
                 },
                 {
                   label: AssetStatusLabel[AssetStatus.Active],
-                  icon: getAssetStatusIcon(AssetStatus.Active),
+                  className:
+                    reviewStep === '3' ? 'border border-brand text-brand' : '',
+                  icon:
+                    reviewStep === '3' ? (
+                      <div className="size-3 animate-pulse rounded-full bg-brand ring-brand-light" />
+                    ) : (
+                      getAssetStatusIcon(AssetStatus.Active)
+                    ),
                   disabled: assets.every(
                     asset => asset.status === AssetStatus.Active
                   ),
-                  onClick: () =>
+                  onClick: () => {
+                    if (reviewStep === '3') {
+                      removeSearchParams('review');
+                    }
                     updateStatus(
                       assets.map(asset => asset.key),
                       AssetStatus.Active
-                    ),
+                    );
+                  },
                 },
                 {
                   label: AssetStatusLabel[AssetStatus.ActiveLow],
