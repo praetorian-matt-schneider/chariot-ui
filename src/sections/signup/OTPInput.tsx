@@ -62,13 +62,34 @@ export const OTPInput = ({ length = 6, onSubmit = () => {} }: Props) => {
     }
   };
 
+  const handlePaste = (
+    index = 0,
+    e: React.ClipboardEvent<HTMLInputElement>
+  ) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text/plain').trim();
+
+    if (pastedData) {
+      const newOtp = [...otp].map((value, i) => {
+        if (i >= index) {
+          return pastedData[i - index];
+        }
+        return value;
+      });
+      setOtp(newOtp);
+      const nextFocusIndex = Math.min(index + pastedData.length, length - 1);
+      inputRefs.current[nextFocusIndex].focus();
+    }
+  };
+
   return (
     <div className="my-8 flex justify-center gap-5">
       {otp.map((value, index) => {
         return (
           <input
-            className="h-40 min-w-0 border-2 border-default text-center text-3xl focus:border-brand"
+            className="h-40 min-w-0 border-2 border-default text-center text-6xl font-bold focus:border-brand"
             key={index}
+            onPaste={e => handlePaste(index, e)}
             type="text"
             ref={input => (inputRefs.current[index] = input!)}
             value={value}
