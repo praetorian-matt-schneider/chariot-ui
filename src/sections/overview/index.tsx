@@ -528,7 +528,7 @@ const IntegrationComponent = (props: IntegrationComponentProps) => {
       )}
       {(showInputs || message || markup || warning) && (
         <div className="mt-4 flex">
-          <div className="border-1 w-full rounded-sm border border-gray-200 p-4">
+          <div className=" w-full rounded-sm border-gray-200">
             {message && <div className="mb-4 text-gray-500">{message}</div>}
             {(showInputs || markup) && (
               <div>
