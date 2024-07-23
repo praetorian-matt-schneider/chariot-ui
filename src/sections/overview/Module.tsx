@@ -82,7 +82,7 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     id: Integration.basAgent,
     name: 'Agents',
     description: 'Create an agent.',
-    logo: '/icons/PraetorianWebhook.svg',
+    logo: '/icons/logo.png',
     connected: true,
     inputs: [],
     customIntegration: <BasIntegration />,
@@ -91,7 +91,7 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     id: Integration.hook,
     name: 'Chariot Webhook',
     description: 'Push assets and risks to Chariot.',
-    logo: '/icons/PraetorianWebhook.svg',
+    logo: '/icons/logo.png',
     connected: true,
     inputs: [
       {
