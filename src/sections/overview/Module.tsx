@@ -14,7 +14,6 @@ import { Dropzone, Files } from '@/components/Dropzone';
 import { Input } from '@/components/form/Input';
 import { InputText } from '@/components/form/InputText';
 import { Loader } from '@/components/Loader';
-import { MarkdownPreview } from '@/components/markdown/MarkdownPreview';
 import { OverflowText } from '@/components/OverflowText';
 import WebhookExample from '@/components/ui/WebhookExample';
 import { useMy, useUploadFile } from '@/hooks';
@@ -35,24 +34,69 @@ import {
 import { useMergeStatus } from '@/utils/api';
 import { generateUuid } from '@/utils/uuid.util';
 
-const nessusMarkdown = `
-Use our open-source command line interface (CLI) to import assets and risks from Nessus scans.
+const NessusInstructions = () => {
+  return (
+    <div>
+      <p className="mb-4">
+        You can use our open-source command line interface (CLI) to seamlessly
+        import assets and risks from Nessus scans. Follow the steps below to get
+        started.
+      </p>
 
-1. Install the CLI using the following command:
-    \`\`\`
-    pip install praetorian-cli
-    \`\`\`
-2. Follow the instructions on our GitHub repo to configure the CLI:
-    \`\`\`
-    Visit: https://github.com/praetorian-inc/praetorian-cli
-   \`\`\`
-3. Run one of the following commands to import Nessus results:
-    
-    \`\`\`
-    Using Nessus API: praetorian chariot plugin nessus-api
-    Using Nessus XML export files: praetorian chariot plugin nessus-XML
-    \`\`\`
-`;
+      <h2 className="text-lg font-semibold mb-2">1. Install the CLI</h2>
+      <p className="mb-2">Use the following command to install the CLI:</p>
+      <pre className="bg-gray-100 p-4 rounded-md mb-4">
+        <code>pip install praetorian-cli</code>
+      </pre>
+
+      <h2 className="text-lg font-semibold mt-4 mb-2">2. Configure the CLI</h2>
+      <p className="mb-2">
+        Refer to our{' '}
+        <a
+          href="https://github.com/praetorian-inc/praetorian-cli"
+          className="text-blue-500 underline"
+          target="_blank"
+          rel="noreferrer noopener"
+        >
+          GitHub repository
+        </a>{' '}
+        for detailed configuration instructions.
+      </p>
+
+      <h2 className="text-lg font-semibold mb-2 mt-4">
+        3. Import Nessus Results
+      </h2>
+      <p className="mb-2">
+        Run one of the following commands to import Nessus results:
+      </p>
+
+      <h3 className="text-lg font-medium mb-2 mt-4">Using Nessus API</h3>
+      <pre className="bg-gray-100 p-4 rounded-md mb-4">
+        <code>praetorian chariot plugin nessus-api</code>
+      </pre>
+
+      <h3 className="text-lg font-medium mb-2 mt-4">
+        Using Nessus XML Export Files
+      </h3>
+      <pre className="bg-gray-100 p-4 rounded-md mb-4">
+        <code>praetorian chariot plugin nessus-XML</code>
+      </pre>
+
+      <p className="text-sm">
+        For more information, please visit our{' '}
+        <a
+          href="https://github.com/praetorian-inc/praetorian-cli"
+          className="text-blue-500 underline"
+          target="_blank"
+          rel="noreferrer noopener"
+        >
+          GitHub repository
+        </a>
+        .
+      </p>
+    </div>
+  );
+};
 
 const defaultPin = (
   Math.floor(Math.random() * (99999 - 10000 + 1)) + 10000
@@ -604,7 +648,7 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
       'Industry-standard vulnerability scanner for comprehensive security assessments.',
     logo: '/icons/Nessus.svg',
     connected: false,
-    markup: <MarkdownPreview source={nessusMarkdown} />,
+    markup: <NessusInstructions />,
   },
   qualys: {
     id: Integration.qualys,
