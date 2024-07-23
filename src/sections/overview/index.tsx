@@ -6,6 +6,7 @@ import {
   useMemo,
   useState,
 } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { InformationCircleIcon } from '@heroicons/react/24/outline';
 import {
   ArrowRightCircleIcon,
@@ -40,7 +41,6 @@ import {
 } from '@/types';
 import { cn } from '@/utils/classname';
 import { generateUuid } from '@/utils/uuid.util';
-import { useNavigate } from 'react-router-dom';
 
 export function Overview() {
   const {
@@ -301,9 +301,11 @@ export function ModulesModal() {
 
   if (!moduleState.value?.module) return null;
 
-  const renderForm = !(
-    [Integration.kev, Integration.nessus] as string[]
-  ).includes(moduleState.value?.integration);
+  const renderForm =
+    Boolean(moduleState.value?.integration) &&
+    !([Integration.kev, Integration.nessus] as string[]).includes(
+      moduleState.value?.integration
+    );
 
   return (
     <Modal
