@@ -486,6 +486,7 @@ export interface ModuleMeta {
 
 export enum Integration {
   hook = 'hook',
+  webhook = 'webhook',
   slack = 'slack',
   jira = 'jira',
   github = 'github',

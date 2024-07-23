@@ -88,9 +88,68 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     inputs: [],
     customIntegration: <BasIntegration />,
   },
+  webhook: {
+    id: Integration.webhook,
+    name: 'Outbound Webhook',
+    description: 'Push assets and risks to Chariot.',
+    logo: '/icons/logo.png',
+    connected: true,
+    inputs: [
+      {
+        name: 'username',
+        value: 'webhook',
+        hidden: true,
+      },
+      {
+        label: 'Severity',
+        value: 'MHC',
+        placeholder: 'Select a minimum severity level for your Slack alerts',
+        name: 'severities',
+        required: true,
+        type: Input.Type.SELECT,
+        options: [
+          { label: 'Info', value: 'ILMHC' },
+          { label: 'Low', value: 'LMHC' },
+          { label: 'Medium', value: 'MHC' },
+          { label: 'High', value: 'HC' },
+          { label: 'Critical', value: 'C' },
+        ],
+      },
+      {
+        label: 'Webhook URL',
+        value: '',
+        placeholder: 'https://webhook.com/services/',
+        name: 'webhook',
+        required: true,
+        info: {
+          text: 'The url to POST data to',
+        },
+      },
+      {
+        label: 'Header',
+        value: '',
+        placeholder: 'Content-Type: application/json',
+        name: 'header',
+        required: true,
+        info: {
+          text: 'Optional, a header to populate in the request',
+        },
+      },
+      {
+        label: 'Token',
+        value: '',
+        placeholder: 'Bearer token',
+        name: 'token',
+        required: true,
+        info: {
+          text: 'Optional, the value to populate `header` with',
+        },
+      },
+    ],
+  },
   hook: {
     id: Integration.hook,
-    name: 'Chariot Webhook',
+    name: 'Inbound Webhook',
     description: 'Push assets and risks to Chariot.',
     logo: '/icons/logo.png',
     connected: true,
@@ -613,6 +672,7 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
     ),
     integrations: [
       Integrations.hook,
+      Integrations.webhook,
       Integrations.slack,
       Integrations.jira,
       Integrations.zulip,
