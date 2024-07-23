@@ -600,8 +600,13 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
       <div className="p-4">
         <h3 className="text-2xl font-semibold">Project Management</h3>
         <p className="mt-2 text-default-light">
-          Project management integrations allow you to integrate with your
-          existing workflows
+          Security requires continuous management. Chariot makes project
+          management easy by integrating with your existing communication and
+          remediation applications.
+        </p>
+        <p className="mt-2 text-default-light">
+          Workflow integrations bring Chariot threat management to your existing
+          project management workflow.
         </p>
       </div>
     ),
@@ -707,21 +712,21 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
   },
   CPT: {
     Icon: <Fingerprint className="size-10 text-default-light" />,
-    label: 'Endpoint Detection and Response',
+    label: 'Continuous Penetration Testing',
     name: 'CPT',
-    description: `Endpoint Detection and Response (EDR) solutions provide continuous monitoring and response to advanced threats on endpoints, helping organizations detect and mitigate security incidents in real-time.`,
+    description: `Continuous Penetration Testing (CPT) solutions provide ongoing testing and validation of security measures, helping organizations identify and address vulnerabilities in real-time.`,
     defaultTab: (
       <div className="p-4">
         <h3 className="text-2xl font-semibold">
-          Endpoint Detection and Response
+          Continuous Penetration Testing
         </h3>
         <p className="mt-2 text-default-light">
-          EDR solutions offer comprehensive visibility into endpoint activities,
-          enabling rapid detection and response to potential threats.
+          CPT solutions offer continuous assessment of your security posture,
+          enabling proactive identification and mitigation of potential threats.
         </p>
         <p className="mt-2 text-default-light">
-          Improve your security posture by leveraging advanced analytics and
-          automated responses to mitigate risks effectively.
+          Improve your security by leveraging advanced testing methodologies and
+          automated responses to address vulnerabilities effectively.
         </p>
       </div>
     ),
