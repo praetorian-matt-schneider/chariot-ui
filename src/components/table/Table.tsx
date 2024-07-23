@@ -7,6 +7,7 @@ import {
   ChevronDownIcon,
   ExclamationCircleIcon,
   MagnifyingGlassIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { notUndefined, useVirtualizer } from '@tanstack/react-virtual';
 
@@ -34,6 +35,7 @@ import {
 import { cn } from '@/utils/classname';
 import { useStorage } from '@/utils/storage/useStorage.util';
 import { useSearchParams } from 'react-router-dom';
+import { set } from 'date-fns';
 
 // eslint-disable-next-line complexity
 export function Table<TData>(props: TableProps<TData>) {
@@ -60,7 +62,7 @@ export function Table<TData>(props: TableProps<TData>) {
     skipHeader,
     resize = false,
   } = props;
-  const [seachParams, addSearchParams] = useSearchParams();
+  const [searchParams, addSearchParams] = useSearchParams();
   const [searchValue, setSearchValue] = useState('');
   const [expandedGroups, setExpandedGroups] = useState(
     groupBy?.map(group => group.label) || []
@@ -128,7 +130,7 @@ export function Table<TData>(props: TableProps<TData>) {
     []
   );
   const [lastSelectedRow, setLastSelectedRow] = useState<number>();
-  const reviewStep = seachParams.get('review');
+  const reviewStep = searchParams.get('review');
 
   const enableCheckbox = Boolean(selection);
   const isLoading = status === 'pending';
@@ -282,14 +284,12 @@ export function Table<TData>(props: TableProps<TData>) {
   }
 
   function handleSelectAll() {
-    if (isAllRowSelected) {
-      setSelectedRows([]);
-    } else {
-      setSelectedRows(indexedData.map(({ _idx }) => _idx));
-
-      if (reviewStep === '1') {
-        addSearchParams({ review: '2' });
-      }
+    const newSelectedRows = isAllRowSelected
+      ? []
+      : indexedData.map(({ _idx }) => _idx);
+    setSelectedRows(newSelectedRows);
+    if (reviewStep === '1') {
+      addSearchParams({ review: '2' });
     }
   }
 
@@ -354,11 +354,6 @@ export function Table<TData>(props: TableProps<TData>) {
                     >
                       <Dropdown
                         disabled={selectedRows.length === 0}
-                        onClick={() => {
-                          if (reviewStep === '2') {
-                            addSearchParams({ review: '3' });
-                          }
-                        }}
                         className={cn(
                           parsedPrimaryAction &&
                             'relative rounded-none rounded-r-[2px] bg-header-dark disabled:bg-header-dark disabled:cursor-not-allowed'
@@ -372,6 +367,15 @@ export function Table<TData>(props: TableProps<TData>) {
                     </Tooltip>
                     {reviewStep === '2' && (
                       <div className="absolute bottom-full right-0 text-left w-80 p-4 pr-3 bg-white rounded-t-md -shadow-lg z-0">
+                        <button
+                          onClick={() => {
+                            searchParams.delete('review');
+                            addSearchParams(searchParams);
+                          }}
+                          className="absolute top-2 right-2"
+                        >
+                          <XMarkIcon className="w-4 h-4 " />
+                        </button>
                         <div className="flex items-start">
                           <div className="flex-1">
                             <p className="text-sm ">
@@ -433,22 +437,29 @@ export function Table<TData>(props: TableProps<TData>) {
             )}
             style={{ zIndex: 1 }}
           >
-            <tr>
+            <tr className="relative">
               {enableCheckbox && (
-                <Th
-                  fixedWidth={CELL_WIDTHS.checkbox}
-                  align="center"
-                  className="relative origin-top-left"
-                >
-                  <label className="cursor-pointer" tabIndex={0}>
+                <Th fixedWidth={CELL_WIDTHS.checkbox} align="center">
+                  <label className="cursor-pointer">
                     <input
                       type="checkbox"
                       onChange={handleSelectAll}
                       className={'hidden'}
                       checked={isAllRowSelected}
                     />
+                    <TableCheckBoxIcon isChecked={isAllRowSelected} />
                     {reviewStep === '1' && (
-                      <div className="absolute bottom-full translate-y-3 left-0 text-left w-80 p-4 pl-3 bg-white rounded-t-md -shadow-lg z-10">
+                      <div className=" absolute bottom-full translate-y-3 left-0 text-left w-80 p-4 pt-2 pl-3 bg-white rounded-t-md -shadow-lg z-10">
+                        <button
+                          onClick={e => {
+                            e.preventDefault();
+                            searchParams.delete('review');
+                            addSearchParams(searchParams);
+                          }}
+                          className="absolute top-2 right-2"
+                        >
+                          <XMarkIcon className="w-4 h-4 " />
+                        </button>
                         <div className="flex items-start">
                           <MoveDown className="w-6 h-6 mr-2 mt-auto" />
                           <div>
@@ -463,7 +474,6 @@ export function Table<TData>(props: TableProps<TData>) {
                         </div>
                       </div>
                     )}
-                    <TableCheckBoxIcon isChecked={isAllRowSelected} />
                   </label>
                 </Th>
               )}

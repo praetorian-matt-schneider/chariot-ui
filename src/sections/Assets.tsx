@@ -404,9 +404,9 @@ const Assets: React.FC = () => {
                 {
                   label: AssetStatusLabel[AssetStatus.Active],
                   className:
-                    reviewStep === '3' ? 'border border-brand text-brand' : '',
+                    reviewStep === '2' ? 'border border-brand text-brand' : '',
                   icon:
-                    reviewStep === '3' ? (
+                    reviewStep === '2' ? (
                       <div className="size-3 animate-pulse rounded-full bg-brand ring-brand-light" />
                     ) : (
                       getAssetStatusIcon(AssetStatus.Active)
@@ -415,7 +415,7 @@ const Assets: React.FC = () => {
                     asset => asset.status === AssetStatus.Active
                   ),
                   onClick: () => {
-                    if (reviewStep === '3') {
+                    if (reviewStep === '2') {
                       removeSearchParams('review');
                     }
                     updateStatus(

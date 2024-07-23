@@ -508,15 +508,15 @@ export function Risks() {
                 {
                   label: RiskStatusLabel[RiskStatus.Opened],
                   className:
-                    reviewStep === '3' ? 'border border-brand text-brand' : '',
+                    reviewStep === '2' ? 'border border-brand text-brand' : '',
                   icon:
-                    reviewStep === '3' ? (
+                    reviewStep === '2' ? (
                       <div className="size-3 animate-pulse rounded-full bg-brand ring-brand-light" />
                     ) : (
                       getRiskStatusIcon(RiskStatus.Opened)
                     ),
                   onClick: () => {
-                    if (reviewStep === '3') {
+                    if (reviewStep === '2') {
                       removeSearchParams('review');
                     }
                     updateRisk({
@@ -528,15 +528,15 @@ export function Risks() {
                 {
                   label: 'Closed',
                   className:
-                    reviewStep === '3' ? 'border border-brand text-brand' : '',
+                    reviewStep === '2' ? 'border border-brand text-brand' : '',
                   icon:
-                    reviewStep === '3' ? (
+                    reviewStep === '2' ? (
                       <div className="size-3 animate-pulse rounded-full bg-brand ring-brand-light" />
                     ) : (
                       getRiskStatusIcon(RiskStatus.Resolved)
                     ),
                   onClick: () => {
-                    if (reviewStep === '3') {
+                    if (reviewStep === '2') {
                       removeSearchParams('review');
                     }
                     setIsClosedSubStateModalOpen(true);
