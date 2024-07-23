@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import {
   ArrowDownOnSquareIcon,
   BookmarkIcon,
-  BookOpenIcon,
   ChevronDownIcon,
   ChevronUpIcon,
   ClipboardDocumentListIcon,
@@ -12,11 +11,9 @@ import {
   DocumentPlusIcon,
   DocumentTextIcon,
   FolderIcon,
-  GlobeAltIcon,
   HomeIcon,
   MagnifyingGlassIcon,
   PhotoIcon,
-  ShieldCheckIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { EllipsisVerticalIcon } from '@heroicons/react/24/solid';
@@ -61,21 +58,21 @@ const TreeData: Folder[] = [
     query: 'malware',
     icon: <ClipboardDocumentListIcon className="size-6" />,
   },
-  {
-    label: 'Intel Sources',
-    query: 'threats',
-    icon: <GlobeAltIcon className="size-6" />,
-  },
-  {
-    label: 'Proof of Exploits',
-    query: 'assets',
-    icon: <ShieldCheckIcon className="size-6" />,
-  },
-  {
-    label: 'Risk Definitions',
-    query: 'definitions',
-    icon: <BookOpenIcon className="size-6" />,
-  },
+  // {
+  //   label: 'Intel Sources',
+  //   query: 'threats',
+  //   icon: <GlobeAltIcon className="size-6" />,
+  // },
+  // {
+  //   label: 'Proof of Exploits',
+  //   query: 'assets',
+  //   icon: <ShieldCheckIcon className="size-6" />,
+  // },
+  // {
+  //   label: 'Risk Definitions',
+  //   query: 'definitions',
+  //   icon: <BookOpenIcon className="size-6" />,
+  // },
 ];
 
 const Files: React.FC = () => {
