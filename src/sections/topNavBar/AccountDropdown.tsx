@@ -31,7 +31,7 @@ export const AccountDropdown: React.FC = () => {
 
   return (
     <Dropdown
-      className="w-[50px] rounded-[2px] p-0 text-base"
+      className="rounded-[2px] p-0 text-base"
       styleType="none"
       menu={{
         className: 'w-64',
@@ -127,9 +127,14 @@ export const AccountDropdown: React.FC = () => {
         value: friend?.email || me,
       }}
     >
-      <Hexagon>
-        <Avatar className="scale-150" email={friend.email || me} />
-      </Hexagon>
+      <div className="flex h-5 flex-row items-center">
+        <div className="mr-0  p-2 text-xs">
+          {friend.displayName || friend.email || displayName || me}
+        </div>
+        <Hexagon>
+          <Avatar className="scale-150" email={friend.email || me} />
+        </Hexagon>
+      </div>
     </Dropdown>
   );
 };

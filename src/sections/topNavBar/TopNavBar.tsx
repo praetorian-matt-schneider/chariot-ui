@@ -54,17 +54,13 @@ export function TopNavBar(props: {
               ))}
             </nav>
 
-            <div className="ml-auto flex items-center space-x-4">
-              <Hexagon notify={showNotification}>
-                <Notifications
-                  onNotify={shouldShow => {
-                    setShowNotification(shouldShow);
-                  }}
-                  onClick={() => setShowNotification(false)}
-                />
-              </Hexagon>
-              <AccountDropdown />
-            </div>
+            <Notifications
+              onNotify={shouldShow => {
+                setShowNotification(shouldShow);
+              }}
+              onClick={() => setShowNotification(false)}
+            />
+            <AccountDropdown />
           </div>
         </div>
       </div>
