@@ -3,9 +3,8 @@ import Markdown from 'react-markdown';
 import { DocumentArrowDownIcon } from '@heroicons/react/24/outline';
 import { TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 
+import { Button } from '@/components/Button';
 import CircularProgressBar from '@/components/CircularProgressBar';
-import { Tooltip } from '@/components/Tooltip';
-import Counts from '@/components/ui/Counts';
 import { TabWrapper } from '@/components/ui/TabWrapper';
 import { useGetDisplayName } from '@/hooks/useAccounts';
 import { useAggregateCounts } from '@/hooks/useAggregateCounts';
@@ -71,29 +70,9 @@ export const Report = () => {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Counts
-        stats={{
-          assets: counts.assets,
-          risks: counts.risks,
-          jobs: counts.jobs,
-        }}
-      />
-
-      {reportReady && (
-        <div className="flex ">
-          <h1 className="center-align mb-2 mt-9 flex items-center text-2xl font-light text-gray-500">
-            Daily Report
-            <Tooltip title="Download Report" placement="right">
-              <button onClick={() => downloadFileContent()} className="ml-1">
-                <DocumentArrowDownIcon className="size-6" />
-              </button>
-            </Tooltip>
-          </h1>
-        </div>
-      )}
       <div
         className={cn(
-          'mt-6 flex flex-col space-y-6 rounded-[2px] bg-white p-2 shadow-sm'
+          'flex flex-col space-y-6 rounded-[2px] bg-white p-2 shadow-sm'
         )}
       >
         {reportReady ? (
@@ -131,6 +110,15 @@ export const Report = () => {
                 );
               })}
             </TabPanels>
+            <div className="flex flex-row">
+              <Button
+                onClick={() => downloadFileContent()}
+                styleType="none"
+                startIcon={<DocumentArrowDownIcon className="size-6" />}
+              >
+                Download Report
+              </Button>
+            </div>
           </TabGroup>
         ) : (
           <div className="flex flex-col justify-center p-4">
