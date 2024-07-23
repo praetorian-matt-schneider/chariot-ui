@@ -148,18 +148,16 @@ const Files: React.FC = () => {
   };
 
   return (
-    <>
-      <Body className="border border-gray-200 bg-layer0 pb-4 shadow-sm">
-        <TreeLevel
-          currentFolder={currentFolder}
-          setCurrentFolder={folder => {
-            setCurrentFolder(folder);
-          }}
-          getAdditionalActions={getAdditionalActions}
-          handleDownload={handleDownload}
-        />
-      </Body>
-    </>
+    <Body className="border border-gray-200 pb-4">
+      <TreeLevel
+        currentFolder={currentFolder}
+        setCurrentFolder={folder => {
+          setCurrentFolder(folder);
+        }}
+        getAdditionalActions={getAdditionalActions}
+        handleDownload={handleDownload}
+      />
+    </Body>
   );
 };
 
@@ -238,7 +236,7 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
   );
 
   return (
-    <div>
+    <div className="rounded-sm bg-layer0 shadow-sm">
       {childFolders && childFolders.length > 0 && (
         <div className="flex flex-row flex-wrap space-x-6">
           {childFolders.map(folder => (
@@ -255,7 +253,7 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
           ))}
         </div>
       )}
-      <div className="flex items-center space-x-6 border-b border-gray-200 bg-gray-50 px-8 py-6 shadow-sm">
+      <div className="flex items-center space-x-6 rounded-t-sm border-b border-gray-200 bg-gray-50 px-8 py-6 shadow-sm">
         <Dropdown
           menu={{
             items: TreeData.map(folder => ({
