@@ -480,7 +480,7 @@ export interface ModuleMeta {
   description: string;
   defaultTab?: JSX.Element;
   risks: number;
-  Icon: React.ElementType;
+  Icon: JSX.Element;
   integrations: IntegrationMeta[];
 }
 

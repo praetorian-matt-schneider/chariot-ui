@@ -13,6 +13,7 @@ interface Tab<ID = string> {
   tabClassName?: string;
   contentClassName?: string;
   hide?: boolean;
+  icon?: JSX.Element;
 }
 
 export interface TabsProps<ID = string> {
@@ -59,7 +60,7 @@ export function Tabs<ID = string>(props: TabsProps<ID>) {
                 key={index}
                 styleType="secondary"
                 className={cn(
-                  'w-full rounded-none border-x-0 shadow-none text-nowrap justify-start',
+                  'w-full rounded-none border-x-0 shadow-none text-nowrap justify-start ',
                   index > 0 && 'mt-[-1px]',
                   isSelected && 'sticky top-0 left-0 z-10',
                   tab.tabClassName
@@ -68,6 +69,7 @@ export function Tabs<ID = string>(props: TabsProps<ID>) {
                 onClick={() => {
                   setSelectedTabId(tab.id);
                 }}
+                startIcon={tab.icon}
               >
                 {tab.label}
               </Button>

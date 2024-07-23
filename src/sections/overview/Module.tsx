@@ -1,4 +1,11 @@
-import { BeakerIcon, HomeIcon, TrophyIcon } from '@heroicons/react/24/solid';
+import {
+  ClipboardList,
+  Crosshair,
+  Fingerprint,
+  GlobeLock,
+  Goal,
+  Radar,
+} from 'lucide-react';
 
 import { Button } from '@/components/Button';
 import { CopyToClipboard } from '@/components/CopyToClipboard';
@@ -584,13 +591,13 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
 
 export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
   PM: {
-    Icon: TrophyIcon,
-    name: 'Project management',
+    Icon: <ClipboardList className="size-10" />,
+    name: 'Project Management',
     label: 'Integrate with your existing workflows',
     description: '',
     defaultTab: (
       <div className="p-4">
-        <h3 className="text-2xl font-semibold">Project management</h3>
+        <h3 className="text-2xl font-semibold">Project Management</h3>
         <p className="mt-2 text-default-light">
           Project management integrations allow you to integrate with your
           existing workflows
@@ -605,7 +612,7 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
     ],
   },
   ASM: {
-    Icon: BeakerIcon,
+    Icon: <Radar className="size-10" />,
     label: 'Attack Surface Management',
     name: 'ASM',
     description: `Attack surface management (ASM) refers to the proactive approach of identifying, analyzing, and managing potential points of attack on an organization's IT infrastructure, applications, and networks. The goal of ASM is to minimize the attack surface, which is the sum of all possible entry points that an attacker can exploit to gain unauthorized access or cause damage.`,
@@ -635,7 +642,7 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
     ],
   },
   BAS: {
-    Icon: HomeIcon,
+    Icon: <Goal className="size-10" />,
     label: 'Breach & Attack Simulation',
     name: 'BAS',
     description: `Breach and Attack Simulation (BAS) uses automated tools to continuously simulate real-world cyber attacks, helping organizations identify vulnerabilities, improve threat detection, and enhance their overall security posture.`,
@@ -657,7 +664,7 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
     integrations: [Integrations.basAgent],
   },
   CTI: {
-    Icon: HomeIcon,
+    Icon: <Crosshair className="size-10" />,
     label: 'Cyber Threat Intelligence',
     name: 'CTI',
     description: `Cyber Threat Intelligence (CTI) involves the collection and analysis of information about potential or current attacks that threaten an organization, helping to inform security decisions and proactive defense strategies.`,
@@ -678,7 +685,7 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
     integrations: [Integrations.kev],
   },
   VM: {
-    Icon: TrophyIcon,
+    Icon: <GlobeLock className="size-10" />,
     label: 'Vulnerability Management',
     name: 'VM',
     description: `Our Vulnerability Management (VM) services include identifying, assessing, and mitigating security vulnerabilities across your IT infrastructure to ensure robust protection against potential threats.`,
@@ -698,7 +705,7 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
     integrations: [Integrations.nessus],
   },
   CPT: {
-    Icon: TrophyIcon,
+    Icon: <Fingerprint className="size-10" />,
     label: 'Endpoint Detection and Response',
     name: 'CPT',
     description: `Endpoint Detection and Response (EDR) solutions provide continuous monitoring and response to advanced threats on endpoints, helping organizations detect and mitigate security incidents in real-time.`,

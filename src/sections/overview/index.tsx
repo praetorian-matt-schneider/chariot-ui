@@ -346,6 +346,7 @@ export function ModulesModal() {
               // If PM update design
               return {
                 id: module,
+                icon: Modules[module].Icon,
                 hide:
                   !Modules[module].defaultTab &&
                   Modules[module].integrations.length === 0,
@@ -354,14 +355,16 @@ export function ModulesModal() {
                     <p
                       className={cn(
                         'text-3xl font-bold',
-                        isPM && 'font-medium'
+                        isPM && 'text-xl font-extrabold'
                       )}
                     >
                       {Modules[module].name}
                     </p>
-                    <p className="text-xs text-gray-500">
-                      {Modules[module].label}
-                    </p>
+                    {!isPM && (
+                      <p className="text-xs text-gray-500">
+                        {Modules[module].label}
+                      </p>
+                    )}
                   </div>
                 ),
                 Content: ModuleComponent,
@@ -373,6 +376,7 @@ export function ModulesModal() {
               };
             })}
             contentWrapperClassName="p-0 m-0"
+            tabWrapperclassName="bg-gray-50"
             value={moduleState.value.module}
             onChange={value => {
               moduleState.onValueChange({
@@ -455,6 +459,7 @@ function ModuleComponent(props: {
           };
         }),
       ]}
+      tabWrapperclassName="bg-gray-50"
       value={moduleState.value.integration}
       onChange={integrationId => {
         moduleState.onValueChange({
