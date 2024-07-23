@@ -5,7 +5,6 @@ import { InputsT } from '@/components/form/Inputs';
 import WebhookExample from '@/components/ui/WebhookExample';
 import { IntegrationType } from '@/types';
 import { getChariotWebhookURL } from '@/utils/integration.util';
-
 export interface IntegrationMeta {
   id: number;
   name: string;
@@ -42,9 +41,7 @@ export interface IntegrationMeta {
 
 const uuid = uuidv4();
 
-const defaultPin = (
-  Math.floor(Math.random() * (99999 - 10000 + 1)) + 10000
-).toString();
+const defaultPin = uuidv4();
 export const IntegrationsMeta: IntegrationMeta[] = [
   {
     id: 12,
