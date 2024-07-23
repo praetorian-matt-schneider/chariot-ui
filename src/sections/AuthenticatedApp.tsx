@@ -2,7 +2,6 @@ import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 
-import ImpersonationBanner from '@/components/ImpersonationBanner';
 import MyInbox from '@/components/MyInbox';
 import { ShortcutsHelper } from '@/components/ui/Shortcuts';
 import { useMy } from '@/hooks';
@@ -113,7 +112,6 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
         <ShortcutsHelper onClose={() => setShortcutsHelper(false)} />
       )}
       <DetailsDrawer />
-      <ImpersonationBanner />
       <NewUserSeedModal />
       <ProofOfExploit />
       <AddRisks />
