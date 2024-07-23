@@ -1,3 +1,4 @@
+import { FormEvent, useEffect, useMemo, useState } from 'react';
 import {
   ClipboardList,
   Crosshair,
@@ -21,6 +22,7 @@ import { useBulkAddAsset } from '@/hooks/useAssets';
 import { useBulkAddAttributes } from '@/hooks/useAttribute';
 import { useCounts } from '@/hooks/useCounts';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
+import { parseKeys } from '@/sections/SearchByType';
 import {
   Account,
   Attribute,
@@ -30,7 +32,6 @@ import {
   ModuleMeta,
 } from '@/types';
 import { useMergeStatus } from '@/utils/api';
-import { cn } from '@/utils/classname';
 import { generateUuid } from '@/utils/uuid.util';
 
 const nessusMarkdown = `
@@ -772,11 +773,11 @@ export function useGetModuleData(): {
     query: '#source#nessus',
   });
 
-  const basAssetAttribute = basAttributes.filter(({ source }) => {
-    return source.startsWith('#asset');
+  const basAssetAttribute = basAttributes.filter(({ source, value }) => {
+    return source.startsWith('#asset') && value === 'bas';
   });
-  const basRiskAttribute = basAttributes.filter(({ source }) => {
-    return source.startsWith('#risk');
+  const basRiskAttribute = basAttributes.filter(({ source, value }) => {
+    return source.startsWith('#risk') && value === 'bas';
   });
 
   const ctiAssetAttribute = kevAttributes.filter(({ source }) => {
@@ -924,6 +925,11 @@ export function BasIntegration() {
     isLoading,
   } = useGetModuleData();
 
+  const { data: basLabelAttributes, status: basLabelAttributesStatus } = useMy({
+    resource: 'attribute',
+    query: '#source#labelBas',
+  });
+
   const { mutateAsync: createBulkAsset, status: createBulkAssetStatus } =
     useBulkAddAsset();
 
@@ -932,7 +938,23 @@ export function BasIntegration() {
     status: createBulkAttributeStatus,
   } = useBulkAddAttributes();
 
-  async function handleSubmit() {
+  const allAttLabels = useMemo(() => {
+    return basLabelAttributes.reduce(
+      (acc, { key }) => {
+        const assetKey = parseKeys.attributeKey(key);
+
+        return {
+          ...acc,
+          [assetKey.name]: assetKey.value,
+        };
+      },
+      {} as Record<string, string>
+    );
+  }, [JSON.stringify(basLabelAttributes)]);
+
+  const [attLabels, setAttLabels] = useState<Record<string, string>>({});
+
+  async function handleEnable() {
     const basAgents = 10;
 
     const assets = Array(basAgents)
@@ -952,11 +974,44 @@ export function BasIntegration() {
     await createBulkAttribute(attributes);
   }
 
+  async function handleEditLabel(event: FormEvent) {
+    event.preventDefault();
+
+    const attributes = BAS.assetAttributes.map(({ key }) => {
+      const attributeMeta = parseKeys.attributeKey(key);
+
+      return {
+        key: `#asset#${attributeMeta.name}#${attributeMeta.name}`,
+        name: 'source',
+        value: `labelBas#${attLabels[attributeMeta.name]}`,
+      };
+    });
+
+    await createBulkAttribute(attributes);
+  }
+
+  useEffect(() => {
+    if (!isLoading && basLabelAttributesStatus === 'success') {
+      const updatedAttLabels = BAS.assetAttributes.reduce(
+        (acc, attribute) => {
+          const attributeMeta = parseKeys.attributeKey(attribute.key);
+
+          return {
+            ...acc,
+            [attributeMeta.name]: allAttLabels[attributeMeta.name] || '',
+          };
+        },
+        {} as Record<string, string>
+      );
+
+      setAttLabels(updatedAttLabels);
+    }
+  }, [basLabelAttributesStatus, isLoading]);
+
   const isEnabled = BAS.assetAttributes.length > 0;
 
-  console.log('BAS', BAS.assetAttributes);
   return (
-    <div className={cn('p-4')}>
+    <form id="overviewForm" onSubmit={handleEditLabel}>
       <div className="flex min-h-11 items-center gap-2">
         <h3 className="text-xl font-medium text-gray-700">Manage Agents</h3>
         {!isEnabled && (
@@ -968,7 +1023,7 @@ export function BasIntegration() {
             disabled={BAS.isLoading}
             styleType="text"
             className="ml-auto"
-            onClick={handleSubmit}
+            onClick={handleEnable}
           >
             Enable
           </Button>
@@ -985,14 +1040,28 @@ export function BasIntegration() {
               return bDate.getTime() - aDate.getTime();
             })
             .map((attribute, index) => {
+              const attributeMeta = parseKeys.attributeKey(attribute.key);
+
               return (
                 <div className="flex gap-2" key={index}>
-                  <InputText
-                    className="w-[100px]"
-                    name={`bas-asset-${index}`}
-                    onChange={() => {}}
-                    value={''}
-                  />
+                  <Loader
+                    className="h-[36px] w-[100px]"
+                    isLoading={basLabelAttributesStatus === 'pending'}
+                  >
+                    <InputText
+                      className="w-[100px]"
+                      name={attributeMeta.name}
+                      onChange={event => {
+                        setAttLabels(prev => {
+                          return {
+                            ...prev,
+                            [attributeMeta.name]: event.target.value,
+                          };
+                        });
+                      }}
+                      value={attLabels[attributeMeta.name] || ''}
+                    />
+                  </Loader>
                   <CopyToClipboard className="w-full overflow-hidden">
                     <OverflowText
                       text={attribute.key.split('#')[6]}
@@ -1004,6 +1073,6 @@ export function BasIntegration() {
             })}
         </Loader>
       </div>
-    </div>
+    </form>
   );
 }

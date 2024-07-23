@@ -18,6 +18,7 @@ import {
 } from '@heroicons/react/24/solid';
 
 import { Button } from '@/components/Button';
+import { ConditionalRender } from '@/components/ConditionalRender';
 import { Inputs, Values } from '@/components/form/Inputs';
 import { Link } from '@/components/Link';
 import { Loader } from '@/components/Loader';
@@ -296,6 +297,10 @@ export function ModulesModal() {
 
   if (!moduleState.value?.module) return null;
 
+  const renderForm = !(
+    [Integration.kev, Integration.nessus] as string[]
+  ).includes(moduleState.value?.integration);
+
   return (
     <Modal
       title="Integrations"
@@ -307,12 +312,14 @@ export function ModulesModal() {
       size="xl"
       closeOnOutsideClick={false}
       footer={
-        moduleState.value?.integration &&
-        !([Integration.kev, Integration.basAgent] as string[]).includes(
-          moduleState.value?.integration
-        )
+        renderForm
           ? {
-              text: selectedIntegration.length ? 'Update' : 'Add',
+              text:
+                moduleState.value?.integration === Integration.basAgent
+                  ? 'Update'
+                  : selectedIntegration.length
+                    ? 'Update'
+                    : 'Add',
               isLoading:
                 linkStatus === 'pending' ||
                 createBulkAssetStatus === 'pending' ||
@@ -330,7 +337,23 @@ export function ModulesModal() {
       }
     >
       <Loader isLoading={isLoading} type="spinner">
-        <form id="overviewForm" className="h-full" onSubmit={handleSubmit}>
+        <ConditionalRender
+          condition={
+            renderForm &&
+            moduleState.value?.integration !== Integration.basAgent
+          }
+          conditionalWrapper={children => {
+            return (
+              <form
+                id="overviewForm"
+                className="h-full"
+                onSubmit={handleSubmit}
+              >
+                {children}
+              </form>
+            );
+          }}
+        >
           <Tabs
             tabs={Object.values(Module).map((module, index) => {
               const isPM = index === 0;
@@ -377,7 +400,7 @@ export function ModulesModal() {
               });
             }}
           />
-        </form>
+        </ConditionalRender>
       </Loader>
     </Modal>
   );
