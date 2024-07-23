@@ -353,7 +353,7 @@ export function ModulesModal() {
                     <p
                       className={cn(
                         'text-3xl font-bold',
-                        isPM && 'text-xl font-extrabold'
+                        isPM && 'text-xl font-bold'
                       )}
                     >
                       {Modules[module].name}

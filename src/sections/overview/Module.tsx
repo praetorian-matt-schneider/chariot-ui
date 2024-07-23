@@ -60,7 +60,7 @@ const uuid = generateUuid();
 export const Integrations: Record<Integration, IntegrationMeta> = {
   kev: {
     id: Integration.kev,
-    name: 'kev',
+    name: 'CISA KEV',
     description: '',
     logo: '/icons/kev.svg',
     connected: true,
@@ -79,8 +79,8 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
   },
   basAgent: {
     id: Integration.basAgent,
-    name: 'Bas Agent',
-    description: 'Create a bas agent.',
+    name: 'Agents',
+    description: 'Create an agent.',
     logo: '/icons/PraetorianWebhook.svg',
     connected: true,
     inputs: [],
@@ -958,7 +958,7 @@ export function BasIntegration() {
   return (
     <div className={cn('p-4')}>
       <div className="flex min-h-11 items-center gap-2">
-        <h3 className="text-xl font-medium text-gray-700">Bas Agent</h3>
+        <h3 className="text-xl font-medium text-gray-700">Manage Agents</h3>
         {!isEnabled && (
           <Button
             isLoading={
