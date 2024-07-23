@@ -6,7 +6,6 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { InformationCircleIcon } from '@heroicons/react/24/outline';
 import {
   ArrowRightCircleIcon,
@@ -39,7 +38,6 @@ import {
   Module,
 } from '@/types';
 import { cn } from '@/utils/classname';
-import { getRoute } from '@/utils/route.util';
 import { generateUuid } from '@/utils/uuid.util';
 
 export function Overview() {
@@ -119,7 +117,7 @@ export function Overview() {
             >
               <div
                 className={cn(
-                  'flex flex-col gap-2 overflow-hidden rounded-md border-2 border-default p-4',
+                  'flex flex-col gap-2 overflow-hidden rounded-md p-4 shadow-lg',
                   moduleData.enabled ? 'bg-white' : 'bg-gray-200'
                 )}
               >
@@ -478,7 +476,7 @@ interface IntegrationComponentProps {
 }
 
 const IntegrationComponent = (props: IntegrationComponentProps) => {
-  const { integration, setFormData, onClose } = props;
+  const { integration, setFormData } = props;
 
   const {
     markup = '',
@@ -491,7 +489,6 @@ const IntegrationComponent = (props: IntegrationComponentProps) => {
     customIntegration,
   } = integration;
 
-  const navigate = useNavigate();
   const { integrationsData } = useGetModuleData();
 
   const integrationData = integrationsData[integration.id];
@@ -516,21 +513,6 @@ const IntegrationComponent = (props: IntegrationComponentProps) => {
       <div className="flex min-h-11 items-center gap-2">
         {name && <h3 className="text-xl font-medium text-gray-700">{name}</h3>}
         {isConnected && <CheckCircleIcon className="size-6 text-green-500" />}
-        {isConnected && connectedIntegration.length > 0 ? (
-          <Button
-            styleType="none"
-            className="ml-auto hover:underline"
-            onClick={() => {
-              navigate({
-                pathname: getRoute(['app', 'jobs']),
-                search: `?hashSearch=${encodeURIComponent(`#${connectedIntegration[0].member}`)}`,
-              });
-              onClose();
-            }}
-          >
-            Recent Activity
-          </Button>
-        ) : undefined}
       </div>
 
       {help && (
