@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 
 import ImpersonationBanner from '@/components/ImpersonationBanner';
 import MyInbox from '@/components/MyInbox';
-import MyInbox from '@/components/MyInbox';
 import { ShortcutsHelper } from '@/components/ui/Shortcuts';
 import { useMy } from '@/hooks';
 import { useGetDisplayName } from '@/hooks/useAccounts';
@@ -14,9 +13,10 @@ import { AddFile } from '@/sections/add/AddFile';
 import { AddRisks } from '@/sections/add/AddRisks';
 import { DetailsDrawer } from '@/sections/detailsDrawer';
 import { NewUserSeedModal } from '@/sections/NewUserSeedModal';
+import { ModulesModal } from '@/sections/overview';
 import { ProofOfExploit } from '@/sections/ProofOfExploit';
 import { TopNavBar } from '@/sections/topNavBar/TopNavBar';
-import { Upgrade } from '@/sections/Upgrade';
+import { Upgrade, UpgradeModal } from '@/sections/Upgrade';
 import { useAuth } from '@/state/auth';
 import { useBreadCrumbsContext } from '@/state/breadcrumbs';
 import { cn } from '@/utils/classname';
@@ -119,6 +119,8 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
       <AddRisks />
       <AddAsset />
       <AddFile />
+      <ModulesModal />
+      <UpgradeModal />
       {accountsStatus === 'success' && showUpgrade && <Upgrade />}
     </div>
   );
@@ -138,11 +140,10 @@ export function Header() {
     resource: 'risk',
   });
   const { friend } = useAuth();
-  const { status: statusAccount } = useMy({ resource: 'account' });
   const { breadcrumbs } = useBreadCrumbsContext();
 
   // TODO: FIXME - this is a hack to not show sticky header on table pages
-  const showSticky = ['assets', 'risks', 'seeds', 'jobs', 'documents'].includes(
+  const showSticky = ['assets', 'risks', 'seeds', 'jobs'].includes(
     breadcrumbs[1]?.label?.toLowerCase()
   );
 
@@ -180,7 +181,7 @@ export function Header() {
       >
         <div
           id={HeaderPortalSections.EXTRA_CONTENT}
-          className="m-auto max-w-screen-xl [&:has(*)]:pb-9"
+          className="m-auto max-w-screen-xl text-[10px] [&:has(*)]:pb-7"
         />
       </div>
     </>

@@ -34,7 +34,7 @@ export function useUploadFile() {
   );
 
   return useMutation({
-    defaultErrorMessage: `Failed to Upload file`,
+    defaultErrorMessage: 'Failed to Upload file',
     mutationFn: async (props: UploadFilesProps) => {
       const res = await axios.put(`/file`, null, {
         params: {

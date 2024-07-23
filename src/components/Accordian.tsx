@@ -14,6 +14,7 @@ interface AccordianProps {
   className?: string;
   contentClassName?: string;
   fixed?: boolean;
+  icon?: ReactNode;
 }
 
 export function Accordian(props: AccordianProps) {
@@ -23,8 +24,8 @@ export function Accordian(props: AccordianProps) {
   );
 
   return (
-    <div className="bg-brand-lighter">
-      <div className={cn('flex items-center gap-2', props.className)}>
+    <div className={cn('bg-brand-lighter', props.className)}>
+      <div className="flex items-center">
         <div
           className={cn('flex gap-2 p-4', !props.fixed && 'cursor-pointer')}
           onClick={
@@ -43,13 +44,13 @@ export function Accordian(props: AccordianProps) {
               )}
             />
           )}
+          {props.icon}
           <h6 className="font-bold leading-none">{props.title}</h6>
         </div>
         <div className="ml-auto">{props.titlerightContainer}</div>
       </div>
-      <hr className="border-default" />
       {open && (
-        <div className={cn('px-4 pb-4', props.contentClassName)}>
+        <div className={cn('pl-10 pr-4 pb-4', props.contentClassName)}>
           {props.children}
         </div>
       )}

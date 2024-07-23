@@ -1,5 +1,8 @@
 import React, { createContext, useContext, useState } from 'react';
 
+import { Module } from '@/types';
+import { useStorage } from '@/utils/storage/useStorage.util';
+
 interface UseModalState {
   open: boolean;
   onOpenChange: React.Dispatch<React.SetStateAction<boolean>>;
@@ -16,6 +19,16 @@ interface GlobalState {
     risk: UseModalState & SelectedAssets;
     asset: UseModalState;
     file: UseModalState;
+    module: {
+      value?: {
+        module: Module;
+        integration: string;
+      };
+      onValueChange: React.Dispatch<
+        React.SetStateAction<GlobalState['modal']['module']['value']>
+      >;
+    };
+    upgrade: UseModalState;
   };
 }
 
@@ -36,6 +49,10 @@ export const GlobalStateProvider: React.FC<{ children: React.ReactNode }> = ({
   const [riskOpen, setRiskOpen] = useState(false);
   const [assetOpen, setAssetOpen] = useState(false);
   const [fileOpen, setFileOpen] = useState(false);
+  const [integrationModal, setIntegrationModalOpen] = useStorage<
+    GlobalState['modal']['module']['value'] | undefined
+  >({ queryKey: 'integrationModal' });
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   const [selectedAssets, setSelectedAssets] = useState<string[]>([]);
 
@@ -43,6 +60,14 @@ export const GlobalStateProvider: React.FC<{ children: React.ReactNode }> = ({
     <GlobalStateContext.Provider
       value={{
         modal: {
+          upgrade: {
+            open: upgradeOpen,
+            onOpenChange: setUpgradeOpen,
+          },
+          module: {
+            value: integrationModal,
+            onValueChange: setIntegrationModalOpen,
+          },
           seed: { open: seedOpen, onOpenChange: setSeedOpen },
           risk: {
             open: riskOpen,

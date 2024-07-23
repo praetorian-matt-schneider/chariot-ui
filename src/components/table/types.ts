@@ -12,7 +12,7 @@ export interface TableProps<TData> {
   tableClassName?: string;
   name: string;
   columns: Columns<TData>;
-  data: TData[];
+  data: (TData & { children?: TData[] })[];
   filters?: JSX.Element;
   selection?: {
     value?: string[];

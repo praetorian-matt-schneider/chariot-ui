@@ -24,6 +24,7 @@ export interface ButtonProps extends BaseButtonProps {
   className?: string;
   type?: 'button' | 'submit' | 'reset';
   isLoading?: boolean;
+  isSelected?: boolean;
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -38,6 +39,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       type = 'button',
       isLoading,
       disabled,
+      isSelected,
       ...restProps
     } = props;
 
@@ -50,9 +52,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         case 'primary':
           return 'bg-brand text-layer0 shadow-sm hover:bg-brand-hover disabled:text-default';
         case 'secondary':
-          return 'bg-layer0 text-default hover:bg-layer1 shadow-sm border border-default';
+          return `bg-layer0 text-default hover:bg-layer1 shadow-sm border border-default ${isSelected ? 'bg-layer1' : ''}`;
         case 'header':
-          return 'bg-header-light font-semibold text-header shadow-sm';
+          return 'bg-header-light font-medium text-header shadow-sm text-[.8rem] h-9';
         case 'primaryLight':
           return 'bg-brand/10 shadow-sm hover:bg-brand/20 text-brand';
         case 'none':
