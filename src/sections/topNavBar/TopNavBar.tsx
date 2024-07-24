@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
-import { Hexagon } from '@/components/Hexagon';
 import { LogoIcon } from '@/components/icons/Logo.icon';
 import { AccountDropdown } from '@/sections/topNavBar/AccountDropdown';
 import { Notifications } from '@/sections/topNavBar/Notifications';
@@ -46,14 +45,12 @@ export function TopNavBar() {
             </nav>
 
             <div className="ml-auto flex items-center space-x-4">
-              <Hexagon notify={showNotification}>
-                <Notifications
-                  onNotify={shouldShow => {
-                    setShowNotification(shouldShow);
-                  }}
-                  onClick={() => setShowNotification(false)}
-                />
-              </Hexagon>
+              <Notifications
+                onNotify={shouldShow => {
+                  setShowNotification(shouldShow);
+                }}
+                onClick={() => setShowNotification(false)}
+              />
               <AccountDropdown />
             </div>
           </div>

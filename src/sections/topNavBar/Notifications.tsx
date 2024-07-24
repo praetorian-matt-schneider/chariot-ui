@@ -46,9 +46,10 @@ export const Notifications: React.FC<Props> = ({ onNotify, onClick }) => {
 
   return (
     <Dropdown
-      className="p-2"
+      className="h-7 border-r border-dashed border-gray-700 p-2"
       startIcon={
-        <span className="relative inline-flex">
+        <span className="relative inline-flex items-center space-x-2">
+          <span className="text-nowrap text-xs">Running:</span>
           <button
             type="button"
             className={cn(
