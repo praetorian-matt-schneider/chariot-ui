@@ -14,6 +14,7 @@ import { Button } from '@/components/Button';
 import { Dropdown } from '@/components/Dropdown';
 import { Input } from '@/components/form/Input';
 import { InputText } from '@/components/form/InputText';
+import { Link } from '@/components/Link';
 import { Loader } from '@/components/Loader';
 import { Tooltip } from '@/components/Tooltip';
 import WebhookExample from '@/components/ui/WebhookExample';
@@ -891,9 +892,6 @@ export function useGetModuleData(): {
   const { data: accounts, status: accountStatus } = useMy({
     resource: 'account',
   });
-  const { data: allRisks, status: allRisksStatus } = useMy({
-    resource: 'risk',
-  });
   const { data: basAttributes, status: basAttributesStatus } = useMy({
     resource: 'attribute',
     query: '#source#bas',
@@ -907,11 +905,13 @@ export function useGetModuleData(): {
     query: '#source#nessus',
   });
 
-  const cptRisks = allRisks.filter(risk => {
-    return (
-      risk.username.endsWith('@praetorian.com') && risk.status.startsWith('O')
-    );
-  });
+  const allPraetorianRiskUsernames = Object.keys(
+    riskCount?.source || {}
+  ).filter(key => key.endsWith('@praetorian.com'));
+
+  const cptRisks = allPraetorianRiskUsernames.reduce((acc, key) => {
+    return acc + (riskCount?.source?.[key] || 0);
+  }, 0);
 
   const isManagedServiceAccount = Boolean(
     accounts.find(account => {
@@ -1016,14 +1016,15 @@ export function useGetModuleData(): {
       },
     },
     CPT: {
-      noOfRisk: cptRisks.length,
+      noOfRisk: cptRisks,
       noOfAsset: 0,
       enabled: isManagedServiceAccount,
       assetAttributes: [],
       riskAttributes: [],
-      isLoading: accountStatus === 'pending' || allRisksStatus === 'pending',
+      isLoading: accountStatus === 'pending' || riskCountStatus === 'pending',
       route: {
         pathname: getRoute(['app', 'risks']),
+        search: `?risk-sources=${encodeURIComponent(JSON.stringify(allPraetorianRiskUsernames))}`,
       },
     },
     CTI: {
@@ -1076,8 +1077,7 @@ export function useGetModuleData(): {
         ctiAttributeStatus,
         assetCountStatus,
         riskCountStatus,
-        nessusAttributesStatus,
-        allRisksStatus
+        nessusAttributesStatus
       ) === 'pending',
   };
 }
@@ -1148,7 +1148,7 @@ export function BasIntegration() {
     const { content, file } = files[0];
 
     await uploadFile({
-      name: `malware/${selectedAgent}/${selectedPlatform}`,
+      name: `malware/${selectedAgent}-${selectedPlatform}`,
       content,
     });
 
@@ -1164,7 +1164,6 @@ export function BasIntegration() {
     await bulkReRunJobs(jobs);
   }
 
-  const [fileName, setFileName] = useState<string | null>(null);
   const [selectedAgent, setSelectedAgent] = useState<string>('');
   const [selectedPlatform, setSelectedPlatform] = useState<string>('');
 
@@ -1173,7 +1172,6 @@ export function BasIntegration() {
   ) => {
     const file = event.target.files?.[0];
     if (file) {
-      setFileName(file.name);
       const arrayBuffer = await file.arrayBuffer();
       await handleFileDrop([{ content: arrayBuffer, file }]);
     }
@@ -1183,7 +1181,6 @@ export function BasIntegration() {
     event.preventDefault();
     const file = event.dataTransfer.files?.[0];
     if (file) {
-      setFileName(file.name);
       const arrayBuffer = await file.arrayBuffer();
       await handleFileDrop([{ content: arrayBuffer, file }]);
     }
@@ -1259,7 +1256,7 @@ export function BasIntegration() {
             <div className="flex w-full flex-row space-x-4">
               <Dropdown
                 menu={{
-                  items: BAS.assetAttributes.map((attribute, index) => {
+                  items: BAS.assetAttributes.map(attribute => {
                     const attributeMeta = parseKeys.attributeKey(attribute.key);
 
                     return {
@@ -1398,9 +1395,15 @@ export function BasIntegration() {
                             </Loader>
                           </div>
 
-                          <p className="mb-1 mt-auto text-xs">
+                          <Link
+                            className="mb-1 mt-auto text-xs"
+                            to={getAssetDrawerLink({
+                              name: attributeMeta.name,
+                              dns: attributeMeta.name,
+                            })}
+                          >
                             {attributeMeta.name.split('-')[0]}
-                          </p>
+                          </Link>
                         </div>
                         <div className="ml-3 flex shrink-0 border-l border-gray-200 bg-gray-50 py-2 ">
                           {Object.values(systemTypes).map((system, index) => {
