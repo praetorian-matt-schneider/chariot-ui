@@ -114,6 +114,8 @@ export function Overview() {
           const module = Modules[moduleKey];
           const moduleData = modulesData[moduleKey];
 
+          const isCpt = moduleKey === Module.CPT;
+
           const riskContent = moduleData.enabled ? (
             moduleData.noOfRisk
           ) : (
@@ -178,6 +180,12 @@ export function Overview() {
                       <button
                         className={cn('mb-2 text-6xl text-gray-400')}
                         onClick={() => {
+                          if (isCpt) {
+                            upgradeState.onOpenChange(true);
+
+                            return;
+                          }
+
                           if (!moduleData.enabled) {
                             moduleState.onValueChange({
                               module: moduleKey as Module,
@@ -194,7 +202,7 @@ export function Overview() {
                     Risks
                   </p>
                 </div>
-                {moduleKey === Module.CPT ? (
+                {isCpt ? (
                   <Button
                     isLoading={moduleData.isLoading}
                     className={cn(
