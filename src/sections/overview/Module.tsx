@@ -689,10 +689,6 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
           management easy by integrating with your existing communication and
           remediation applications.
         </p>
-        <p className="mt-2 text-default-light">
-          Workflow integrations bring Chariot threat management to your existing
-          project management workflow.
-        </p>
       </div>
     ),
     integrations: [
