@@ -1408,7 +1408,7 @@ export function BasIntegration() {
                     return {
                       label:
                         allAttLabels[attributeMeta.name] ||
-                        attributeMeta.name.split('-')[0],
+                        attributeMeta.name.slice(0, 5),
                       value: attributeMeta.name,
                       onClick: () => {
                         setSelectedAgent(attributeMeta.name);
@@ -1418,7 +1418,7 @@ export function BasIntegration() {
                 }}
                 label={
                   selectedAgent
-                    ? allAttLabels[selectedAgent] || selectedAgent.split('-')[0]
+                    ? allAttLabels[selectedAgent] || selectedAgent.slice(0, 5)
                     : 'Select Agent'
                 }
                 className="w-full"
@@ -1546,7 +1546,7 @@ export function BasIntegration() {
                             dns: attributeMeta.name,
                           })}
                         >
-                          {attributeMeta.name.split('-')[0]}
+                          {attributeMeta.name.slice(0, 5)}
                         </Link>
                       </div>
                       <div className="ml-3 flex shrink-0 border-l border-gray-200 bg-gray-50 py-2 ">
