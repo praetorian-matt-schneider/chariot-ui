@@ -1391,7 +1391,8 @@ export function BasIntegration() {
         <div>
           <div className="">
             <p className="-mt-2 text-sm text-gray-700">
-              {`Upload your TTP (Tactics, Techniques, and Procedures) binary for Chariot's internal assessments. Ensure the file is correctly prepared before uploading.`}
+              Upload your TTP (Tactics, Techniques, and Procedures) executable
+              for Chariot&apos;s internal assessments.
             </p>
           </div>
           <label className="mt-4 block text-sm font-medium leading-6 text-gray-900">
