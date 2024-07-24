@@ -448,6 +448,7 @@ export interface AuthState {
   expiry?: Date;
   friend: { email: string; displayName: string };
   isImpersonating: boolean;
+  userPoolId: string;
 }
 
 export interface AuthContextType extends AuthState {
@@ -456,6 +457,13 @@ export interface AuthContextType extends AuthState {
   logout: () => void;
   startImpersonation: (memberId: string, displayName: string) => void;
   stopImpersonation: () => void;
+  // TODO: Remove the old functions, rename the new ones
+  loginNew: (login: string, password: string) => void;
+  logoutNew: () => void;
+  error: string;
+  setError: (error: string) => void;
+  fetchToken: () => void;
+  isLoading: boolean;
 }
 
 export interface CognitoAuthStates {

@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 import { cn } from '@/utils/classname';
 
 interface Props {
@@ -8,11 +6,12 @@ interface Props {
     description: string;
     Content: React.ElementType;
   }[];
+  currentStep: number;
+  setCurrentStep: (index: number) => void;
 }
 
 export const Steps = (props: Props) => {
-  const { steps = [] } = props;
-  const [currentStep, setCurrentStep] = useState(0);
+  const { steps = [], currentStep, setCurrentStep } = props;
   const Content = steps[currentStep].Content;
 
   return (

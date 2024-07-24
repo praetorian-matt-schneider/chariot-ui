@@ -1,12 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { useAuth } from '@/state/auth';
 
 function Logout() {
-  const { logout } = useAuth();
+  const { logoutNew } = useAuth();
 
-  React.useEffect(() => {
-    logout();
+  useEffect(() => {
+    logoutNew();
   }, []);
 
   return <div></div>;

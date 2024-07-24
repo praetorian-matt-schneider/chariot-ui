@@ -8,6 +8,7 @@ import React, {
 } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CognitoIdentityProvider } from '@aws-sdk/client-cognito-identity-provider';
+import { fetchAuthSession, signIn, signOut } from 'aws-amplify/auth';
 import { jwtDecode } from 'jwt-decode';
 
 import { queryClient } from '@/queryclient';
@@ -17,7 +18,7 @@ import {
   BackendType,
   CognitoAuthStates,
 } from '@/types';
-import { msToM, sToM } from '@/utils/date.util';
+import { sToM } from '@/utils/date.util';
 import { getRoute } from '@/utils/route.util';
 import { StorageKey, useStorage } from '@/utils/storage/useStorage.util';
 
@@ -25,7 +26,7 @@ const REGION_REGEX = /.*execute-api.(.*).amazonaws/;
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const emptyAuth: AuthState = {
+export const emptyAuth: AuthState = {
   token: '',
   backend: 'chariot',
   api: 'https://d0qcl2e18h.execute-api.us-east-2.amazonaws.com/chariot',
@@ -34,18 +35,20 @@ const emptyAuth: AuthState = {
   me: '',
   friend: { email: '', displayName: '' },
   isImpersonating: false,
+  userPoolId: '',
 };
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
+  const [error, setError] = useState<string>('');
   const [auth, setAuth] = useStorage<AuthState>(
     { key: StorageKey.AUTH },
     emptyAuth
   );
+  const [isLoading, setIsLoading] = useState(true);
+  const { backend, expiry, region, clientId } = auth;
 
-  const { backend, token, rToken, expiry, region, clientId } = auth;
-
-  const [isTabVisible, setIsTabVisible] = useState(true);
+  const [, setIsTabVisible] = useState(true);
   const [, setNewUserSeedModal] = useStorage(
     { key: StorageKey.SHOW_NEW_USER_SEED_MODAL },
     false
@@ -135,6 +138,37 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }
 
+  async function loginNew(email = '', password = '') {
+    try {
+      setAuth(emptyAuth);
+      setNewUserSeedModal(true);
+
+      const { isSignedIn } = await signIn({
+        username: email,
+        password: password,
+      });
+
+      console.log('isSignedIn', isSignedIn);
+      if (isSignedIn) {
+        navigate('/');
+      }
+    } catch (error) {
+      if (error instanceof Error && error.message) {
+        setError(error.message);
+      }
+    }
+  }
+
+  async function fetchToken() {
+    setIsLoading(true);
+    const session = await fetchAuthSession();
+    setIsLoading(false);
+    setAuth(auth => ({
+      ...auth,
+      token: session.tokens?.idToken?.toString() ?? '',
+    }));
+  }
+
   function logout() {
     queryClient.clear();
     setAuth(emptyAuth);
@@ -153,6 +187,15 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }
 
+  async function logoutNew() {
+    queryClient.clear();
+    setAuth(emptyAuth);
+    setNewUserSeedModal(false);
+
+    await signOut();
+    navigate(getRoute(['login']));
+  }
+
   const value: AuthContextType = useMemo(
     (): AuthContextType => ({
       ...auth,
@@ -162,35 +205,41 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setCognitoAuthStates,
       startImpersonation,
       stopImpersonation,
+      logoutNew,
+      loginNew,
+      error,
+      setError,
+      fetchToken,
+      isLoading,
     }),
     [login, logout, JSON.stringify(auth)]
   );
 
-  async function rTokenFn() {
-    try {
-      const cognito = new CognitoIdentityProvider({ region });
-      const response = await cognito.initiateAuth({
-        AuthFlow: 'REFRESH_TOKEN_AUTH',
-        AuthParameters: {
-          REFRESH_TOKEN: rToken ?? '',
-        },
-        ClientId: clientId,
-      });
+  // async function rTokenFn() {
+  //   try {
+  //     const cognito = new CognitoIdentityProvider({ region });
+  //     const response = await cognito.initiateAuth({
+  //       AuthFlow: 'REFRESH_TOKEN_AUTH',
+  //       AuthParameters: {
+  //         REFRESH_TOKEN: rToken ?? '',
+  //       },
+  //       ClientId: clientId,
+  //     });
 
-      if (response?.AuthenticationResult?.IdToken) {
-        setCognitoAuthStates({
-          idToken: response?.AuthenticationResult?.IdToken,
-          expiresIn: response?.AuthenticationResult?.ExpiresIn,
-          refreshToken: response?.AuthenticationResult?.RefreshToken,
-        });
-      }
-    } catch {
-      console.error('Token refresh failed');
-      logout();
-    } finally {
-      setIsTokenRefreshing(false);
-    }
-  }
+  //     if (response?.AuthenticationResult?.IdToken) {
+  //       setCognitoAuthStates({
+  //         idToken: response?.AuthenticationResult?.IdToken,
+  //         expiresIn: response?.AuthenticationResult?.ExpiresIn,
+  //         refreshToken: response?.AuthenticationResult?.RefreshToken,
+  //       });
+  //     }
+  //   } catch {
+  //     console.error('Token refresh failed');
+  //     logout();
+  //   } finally {
+  //     setIsTokenRefreshing(false);
+  //   }
+  // }
 
   function setCognitoAuthStates(props: CognitoAuthStates) {
     // Note: Below is for testing expiry. Setting it to 10.59secs for testing purposes
@@ -234,44 +283,44 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }));
   }
 
-  useEffect(() => {
-    if (isTabVisible) {
-      if (rToken && !expiry) {
-        console.log(
-          'The token expiry has been misplaced. Using the refresh token to obtain a new one.'
-        );
-        rTokenFn();
-      } else if (rToken && expiry) {
-        if (isExpired(expiry)) {
-          console.log('The Token has expired on init.', {
-            expiry: new Date(expiry),
-            currentDate: new Date(),
-          });
-          rTokenFn();
-        } else {
-          const expiresInMs =
-            new Date(expiry).getTime() - getCurrentData().getTime();
-          console.log(
-            'The Token will expire in',
-            msToM(expiresInMs),
-            'minutes.'
-          );
+  // useEffect(() => {
+  //   if (isTabVisible) {
+  //     if (rToken && !expiry) {
+  //       console.log(
+  //         'The token expiry has been misplaced. Using the refresh token to obtain a new one.'
+  //       );
+  //       rTokenFn();
+  //     } else if (rToken && expiry) {
+  //       if (isExpired(expiry)) {
+  //         console.log('The Token has expired on init.', {
+  //           expiry: new Date(expiry),
+  //           currentDate: new Date(),
+  //         });
+  //         rTokenFn();
+  //       } else {
+  //         const expiresInMs =
+  //           new Date(expiry).getTime() - getCurrentData().getTime();
+  //         console.log(
+  //           'The Token will expire in',
+  //           msToM(expiresInMs),
+  //           'minutes.'
+  //         );
 
-          const refreshTimeout = setTimeout(() => {
-            console.log('The token has expire, while using the app.', {
-              expiry: new Date(expiry),
-              currentDate: new Date(),
-            });
-            rTokenFn();
-          }, expiresInMs);
+  //         const refreshTimeout = setTimeout(() => {
+  //           console.log('The token has expire, while using the app.', {
+  //             expiry: new Date(expiry),
+  //             currentDate: new Date(),
+  //           });
+  //           rTokenFn();
+  //         }, expiresInMs);
 
-          return () => {
-            clearTimeout(refreshTimeout);
-          };
-        }
-      }
-    }
-  }, [token, rToken, expiry, isTabVisible]);
+  //         return () => {
+  //           clearTimeout(refreshTimeout);
+  //         };
+  //       }
+  //     }
+  //   }
+  // }, [token, rToken, expiry, isTabVisible]);
 
   useEffect(() => {
     document.addEventListener('visibilitychange', updateTabVisibility);
