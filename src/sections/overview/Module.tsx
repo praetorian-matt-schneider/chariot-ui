@@ -1202,23 +1202,6 @@ export function BasIntegration() {
     query: '#source#labelBas',
   });
 
-  const { data: malwares } = useMy({
-    resource: 'file',
-    query: '#malware',
-  });
-
-  const malwareMap = useMemo(() => {
-    return malwares.reduce(
-      (acc, malware) => {
-        return {
-          ...acc,
-          [malware.name]: malware.name,
-        };
-      },
-      {} as Record<string, string>
-    );
-  }, [JSON.stringify(malwares)]);
-
   const { mutateAsync: createBulkAsset, status: createBulkAssetStatus } =
     useBulkAddAsset();
   const { mutateAsync: uploadFile } = useUploadFile();
@@ -1268,22 +1251,29 @@ export function BasIntegration() {
   async function handleFileDrop(files: Files<'arrayBuffer'>) {
     const { content, file } = files[0];
 
-    const fileName = `malware/${file.name}`;
-    await uploadFile({
-      name: fileName,
-      content,
-    });
+    const [, uuid, platform, extension] =
+      file.name.match(/(.*)-(windows|darwin|linux)\.(.*)$/) || [];
 
-    const jobs = BAS.assetAttributes.map(attribute => {
-      const attMeta = parseKeys.attributeKey(attribute.key);
+    console.log('file', file);
 
-      return {
-        dns: attMeta.name,
-        capability: fileName,
-      };
-    });
+    if (uuid && platform) {
+      const fileName = `malware/${uuid}-${platform}`;
+      await uploadFile({
+        name: fileName,
+        content,
+      });
 
-    await bulkReRunJobs(jobs);
+      const jobs = BAS.assetAttributes.map(attribute => {
+        const attMeta = parseKeys.attributeKey(attribute.key);
+
+        return {
+          dns: attMeta.name,
+          capability: uuid,
+        };
+      });
+
+      await bulkReRunJobs(jobs);
+    }
   }
 
   async function handleEditLabel(event: FormEvent) {
@@ -1426,37 +1416,23 @@ export function BasIntegration() {
                       </div>
                       <div className="ml-3 flex shrink-0 border-l border-gray-200 bg-gray-50 py-2 ">
                         {Object.values(systemTypes).map((system, index) => {
-                          const malwareAvailable =
-                            malwareMap[
-                              `malware/${attributeMeta.name}-${system}`
-                            ];
-
                           function handleCopy() {
                             const filename =
                               system === 'windows' ? 'agent.ps1' : 'agent.sh';
                             copyToClipboard(
-                              `curl -o ${filename} https://preview.chariot.praetorian.com/${friend.email || me}/${attributeMeta.name}/${system}`
+                              `curl -o ${filename} https://d0qcl2e18h.execute-api.us-east-2.amazonaws.com/chariot/${friend.email || me}/${attributeMeta.name}/${system}`
                             );
                           }
 
                           return (
                             <Tooltip
-                              title={
-                                malwareAvailable
-                                  ? `Copy ${system} command`
-                                  : 'Upload TTP Binary to copy executable command'
-                              }
+                              title={`Copy ${system} command`}
                               key={index}
                             >
                               <img
-                                onClick={
-                                  malwareAvailable ? handleCopy : undefined
-                                }
+                                onClick={handleCopy}
                                 className={cn(
-                                  'm-1 size-[28px] cursor-pointer p-1',
-                                  malwareAvailable
-                                    ? ''
-                                    : 'cursor-not-allowed opacity-20'
+                                  'm-1 size-[28px] cursor-pointer p-1'
                                 )}
                                 src={`/icons/${system}.svg`}
                               />
