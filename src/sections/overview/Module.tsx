@@ -1260,7 +1260,7 @@ export function BasIntegration() {
     const { content, file } = files[0];
 
     const [, uuid, platform] =
-      file.name.match(/(.*)-(windows|darwin|linux)\.(.*)$/) || [];
+      file.name.match(/(.*)-(windows|darwin|linux)(?:\.(.*))?$/) || [];
 
     console.log('file', file);
 
@@ -1311,7 +1311,7 @@ export function BasIntegration() {
 
     if (attToRemove.length > 0) {
       await removeBulkAttribute(
-        attToRemove.map(({ key, name }) => {
+        attToRemove.map(({ key }) => {
           const attributeMeta = parseKeys.attributeKey(key);
 
           return {
