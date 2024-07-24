@@ -1016,7 +1016,7 @@ export function useGetModuleData(): {
       enabled: isManagedServiceAccount,
       assetAttributes: [],
       riskAttributes: [],
-      isLoading: false,
+      isLoading: accountStatus === 'pending' || allRisksStatus === 'pending',
       route: '',
     },
     CTI: {
