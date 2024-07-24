@@ -1279,14 +1279,23 @@ export function BasIntegration() {
                     : 'Select Agent'
                 }
                 className="w-full"
-                endIcon={<ChevronDownIcon className="size-4 text-gray-500" />}
+                endIcon={
+                  <ChevronDownIcon className="ml-auto size-4 text-gray-500" />
+                }
                 value={selectedAgent}
               />
               <Dropdown
                 menu={{
                   items: Object.values(systemTypes).map(system => {
                     return {
-                      label: system,
+                      icon: (
+                        <img
+                          className="size-4"
+                          src={`/icons/${system}.svg`}
+                          alt={system}
+                        />
+                      ),
+                      label: <div className="w-full capitalize">{system}</div>,
                       value: system,
                       onClick: () => {
                         setSelectedPlatform(system);
@@ -1294,10 +1303,21 @@ export function BasIntegration() {
                     };
                   }),
                 }}
+                startIcon={
+                  selectedPlatform && (
+                    <img
+                      className="size-4"
+                      src={`/icons/${selectedPlatform}.svg`}
+                      alt={selectedPlatform}
+                    />
+                  )
+                }
                 label={selectedPlatform || 'Select Platform'}
-                endIcon={<ChevronDownIcon className="size-4 text-gray-500" />}
+                endIcon={
+                  <ChevronDownIcon className="ml-auto size-4 text-gray-500" />
+                }
                 value={selectedPlatform}
-                className="w-full"
+                className="w-full capitalize"
               />
             </div>
             <div className="flex w-full items-center">
