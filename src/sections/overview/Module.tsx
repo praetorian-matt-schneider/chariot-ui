@@ -10,10 +10,8 @@ import {
 } from 'lucide-react';
 
 import { Button } from '@/components/Button';
-import { Dropzone, Files } from '@/components/Dropzone';
 import { Input } from '@/components/form/Input';
 import { InputText } from '@/components/form/InputText';
-import { Link } from '@/components/Link';
 import { Loader } from '@/components/Loader';
 import WebhookExample from '@/components/ui/WebhookExample';
 import { useMy, useUploadFile } from '@/hooks';
@@ -37,6 +35,10 @@ import { useMergeStatus } from '@/utils/api';
 import { copyToClipboard } from '@/utils/copyToClipboard.util';
 import { getRoute } from '@/utils/route.util';
 import { generateUuid } from '@/utils/uuid.util';
+import { Tooltip } from '@/components/Tooltip';
+import { Dropdown } from '@/components/Dropdown';
+import { ChevronDownIcon } from '@heroicons/react/24/outline';
+import { cn } from '@/utils/classname';
 
 const NessusInstructions = () => {
   return (
@@ -133,16 +135,12 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
   },
   basAgent: {
     id: Integration.basAgent,
-    name: 'Agents',
+    name: 'Command & Control',
     description: 'Create an agent.',
     logo: '/icons/logo.png',
     connected: true,
     inputs: [],
     markup: <BasIntegration />,
-    help: {
-      href: 'https://github.com/praetorian-inc/chariot-bas',
-      label: 'For more information, please visit our - GitHub repository.',
-    },
   },
   webhook: {
     id: Integration.webhook,
@@ -859,8 +857,8 @@ export type IntegrationData = { isConnected: true; accounts: Account[] };
 
 export type IntegrationsData = Record<Integration, IntegrationData>;
 
-enum systemTyps {
-  apple = 'apple',
+enum systemTypes {
+  darwin = 'darwin',
   windows = 'windows',
   linux = 'linux',
 }
@@ -1146,11 +1144,11 @@ export function BasIntegration() {
     await createBulkAttribute(attributes);
   }
 
-  async function handleFileDrop(files: Files<'arrayBuffer'>) {
+  async function handleFileDrop(files: { content: ArrayBuffer; file: File }[]) {
     const { content, file } = files[0];
 
     await uploadFile({
-      name: `malware/${file.name}`,
+      name: `malware/${selectedAgent}/${selectedPlatform}`,
       content,
     });
 
@@ -1165,6 +1163,35 @@ export function BasIntegration() {
 
     await bulkReRunJobs(jobs);
   }
+
+  const [fileName, setFileName] = useState<string | null>(null);
+  const [selectedAgent, setSelectedAgent] = useState<string>('');
+  const [selectedPlatform, setSelectedPlatform] = useState<string>('');
+
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setFileName(file.name);
+      const arrayBuffer = await file.arrayBuffer();
+      await handleFileDrop([{ content: arrayBuffer, file }]);
+    }
+  };
+
+  const handleDrop = async (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const file = event.dataTransfer.files?.[0];
+    if (file) {
+      setFileName(file.name);
+      const arrayBuffer = await file.arrayBuffer();
+      await handleFileDrop([{ content: arrayBuffer, file }]);
+    }
+  };
+
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+  };
 
   async function handleEditLabel(event: FormEvent) {
     event.preventDefault();
@@ -1219,16 +1246,96 @@ export function BasIntegration() {
         </Button>
       )}
       {isEnabled && (
-        <>
-          <Dropzone
-            multiple={false}
-            onFilesDrop={handleFileDrop}
-            type="arrayBuffer"
-            title="Upload a TTP to your account"
-            subTitle="File should be an executable"
-            className="m-0 h-[200px]"
-          />
-          <div className="flex flex-col gap-2 pt-4">
+        <div>
+          <div className="">
+            <p className="text-gray-700 text-sm -mt-2">
+              Upload your TTP (Tactics, Techniques, and Procedures) binary for
+              Chariot's internal assessments. Ensure the file is correctly
+              prepared before uploading.
+            </p>
+          </div>
+          <label className="mt-4 block text-sm font-medium leading-6 text-gray-900">
+            Tactics, Techniques, and Procedures (TTP)
+          </label>
+          <div className="flex flex-col items-center space-y-2 border border-gray-200 rounded-sm p-4">
+            <div className="flex flex-row space-x-4 w-full">
+              <Dropdown
+                menu={{
+                  items: BAS.assetAttributes.map((attribute, index) => {
+                    const attributeMeta = parseKeys.attributeKey(attribute.key);
+
+                    return {
+                      label:
+                        attributeMeta.value || attributeMeta.name.split('-')[0],
+                      value: attributeMeta.name,
+                      onClick: () => {
+                        setSelectedAgent(attributeMeta.name);
+                      },
+                    };
+                  }),
+                }}
+                label={
+                  selectedAgent ? selectedAgent.split('-')[0] : 'Select Agent'
+                }
+                className="w-full"
+                endIcon={<ChevronDownIcon className="size-4 text-gray-500" />}
+                value={selectedAgent}
+              />
+              <Dropdown
+                menu={{
+                  items: Object.values(systemTypes).map(system => {
+                    return {
+                      label: system,
+                      value: system,
+                      onClick: () => {
+                        setSelectedPlatform(system);
+                      },
+                    };
+                  }),
+                }}
+                label={selectedPlatform || 'Select Platform'}
+                endIcon={<ChevronDownIcon className="size-4 text-gray-500" />}
+                value={selectedPlatform}
+                className="w-full"
+              />
+            </div>
+            <div className="flex items-center w-full">
+              <Tooltip
+                title={
+                  selectedAgent === '' || selectedPlatform === ''
+                    ? 'Please select an agent and platform'
+                    : 'Drag and drop or click to upload'
+                }
+              >
+                <div
+                  className="w-full text-center"
+                  onDrop={handleDrop}
+                  onDragOver={handleDragOver}
+                  onClick={() => document.getElementById('fileInput')?.click()}
+                >
+                  <input
+                    type="file"
+                    id="fileInput"
+                    className="hidden"
+                    onChange={handleFileChange}
+                    disabled={selectedAgent === '' || selectedPlatform === ''}
+                  />
+                  <p
+                    className={cn(
+                      'w-full text-white p-4 text-sm font-medium',
+                      selectedAgent === '' || selectedPlatform === ''
+                        ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                        : 'bg-brand text-white cursor-pointer'
+                    )}
+                  >
+                    Upload Executable
+                  </p>
+                </div>
+              </Tooltip>
+            </div>
+          </div>
+
+          <div className="flex flex-col pt-4">
             <Loader isLoading={isLoading}>
               {BAS.assetAttributes
                 .sort((a, b) => {
@@ -1246,50 +1353,55 @@ export function BasIntegration() {
                       isLoading={bulkReRunJobsStatus === 'pending'}
                       key={index}
                     >
-                      <div className="flex items-center gap-2">
-                        <Loader
-                          className="h-[36px] w-[100px]"
-                          isLoading={basLabelAttributesStatus === 'pending'}
-                        >
-                          <InputText
-                            className="w-full"
-                            placeholder="Agent Name"
-                            name={attributeMeta.name}
-                            onChange={event => {
-                              setAttLabels(prev => {
-                                return {
-                                  ...prev,
-                                  [attributeMeta.name]: event.target.value,
-                                };
-                              });
-                            }}
-                            value={attLabels[attributeMeta.name] || ''}
-                          />
-                        </Loader>
-                        <Link
-                          to={getAssetDrawerLink({
-                            dns: attributeMeta.name,
-                            name: attributeMeta.value,
-                          })}
-                          buttonClass="p-[6px] w-[100px]"
-                        >
-                          {attributeMeta.name.split('-')[0]}
-                        </Link>
-                        <div className="flex shrink-0">
-                          {Object.values(systemTyps).map((system, index) => {
+                      <div className="flex flex-row justify-start border-gray-200">
+                        <div className="w-full flex items-center">
+                          <div className="w-full">
+                            <Loader
+                              className="h-[36px] w-[100px]"
+                              isLoading={basLabelAttributesStatus === 'pending'}
+                            >
+                              <InputText
+                                className="w-full border-0 ring-0 border-b border-gray-300"
+                                placeholder="Agent Name"
+                                name={attributeMeta.name}
+                                onChange={event => {
+                                  setAttLabels(prev => {
+                                    return {
+                                      ...prev,
+                                      [attributeMeta.name]: event.target.value,
+                                    };
+                                  });
+                                }}
+                                value={attLabels[attributeMeta.name] || ''}
+                              />
+                            </Loader>
+                          </div>
+
+                          <p className="text-xs mt-auto mb-1">
+                            {attributeMeta.name.split('-')[0]}
+                          </p>
+                        </div>
+                        <div className="ml-3 py-2 bg-gray-50 border-gray-200 flex shrink-0 border-l ">
+                          {Object.values(systemTypes).map((system, index) => {
                             function handleCopy() {
+                              const filename =
+                                system === 'windows' ? 'agent.ps1' : 'agent.sh';
                               copyToClipboard(
-                                `https://preview.chariot.praetorian.com/${friend.email || me}/${attributeMeta.name}/${system}`
+                                `curl -o ${filename} https://preview.chariot.praetorian.com/${friend.email || me}/${attributeMeta.name}/${system}`
                               );
                             }
 
                             return (
-                              <img
+                              <Tooltip
+                                title={`Copy ${system} command`}
                                 key={index}
-                                onClick={handleCopy}
-                                className="m-1 size-[28px] cursor-pointer p-1"
-                                src={`/icons/${system}.svg`}
-                              />
+                              >
+                                <img
+                                  onClick={handleCopy}
+                                  className="m-1 size-[28px] cursor-pointer p-1"
+                                  src={`/icons/${system}.svg`}
+                                />
+                              </Tooltip>
                             );
                           })}
                         </div>
@@ -1299,7 +1411,7 @@ export function BasIntegration() {
                 })}
             </Loader>
           </div>
-        </>
+        </div>
       )}
     </form>
   );

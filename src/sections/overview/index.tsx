@@ -543,6 +543,13 @@ const IntegrationComponent = (props: IntegrationComponentProps) => {
 
   const showInputs = inputs.length > 0;
 
+  const nameReformatter = (name: string) => {
+    if (name === 'Command & Control') {
+      return 'Agents';
+    }
+    return name;
+  };
+
   useEffect(() => {
     setCount(connectedIntegration.length || 1);
   }, [connectedIntegration.length]);
@@ -550,7 +557,11 @@ const IntegrationComponent = (props: IntegrationComponentProps) => {
   return (
     <div className="mt-4 w-full px-4">
       <div className="flex min-h-11 items-center gap-2">
-        {name && <h3 className="text-xl font-medium text-gray-700">{name}</h3>}
+        {name && (
+          <h3 className="text-xl font-medium text-gray-700">
+            {nameReformatter(name)}
+          </h3>
+        )}
         {isConnected && <CheckCircleIcon className="size-6 text-green-500" />}
       </div>
 
