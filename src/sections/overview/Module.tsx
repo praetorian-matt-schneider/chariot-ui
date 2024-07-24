@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { To } from 'react-router-dom';
+import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import {
   ClipboardList,
   Crosshair,
@@ -10,9 +11,11 @@ import {
 } from 'lucide-react';
 
 import { Button } from '@/components/Button';
+import { Dropdown } from '@/components/Dropdown';
 import { Input } from '@/components/form/Input';
 import { InputText } from '@/components/form/InputText';
 import { Loader } from '@/components/Loader';
+import { Tooltip } from '@/components/Tooltip';
 import WebhookExample from '@/components/ui/WebhookExample';
 import { useMy, useUploadFile } from '@/hooks';
 import { useBulkAddAsset } from '@/hooks/useAssets';
@@ -32,13 +35,10 @@ import {
   ModuleMeta,
 } from '@/types';
 import { useMergeStatus } from '@/utils/api';
+import { cn } from '@/utils/classname';
 import { copyToClipboard } from '@/utils/copyToClipboard.util';
 import { getRoute } from '@/utils/route.util';
 import { generateUuid } from '@/utils/uuid.util';
-import { Tooltip } from '@/components/Tooltip';
-import { Dropdown } from '@/components/Dropdown';
-import { ChevronDownIcon } from '@heroicons/react/24/outline';
-import { cn } from '@/utils/classname';
 
 const NessusInstructions = () => {
   return (
@@ -1248,17 +1248,15 @@ export function BasIntegration() {
       {isEnabled && (
         <div>
           <div className="">
-            <p className="text-gray-700 text-sm -mt-2">
-              Upload your TTP (Tactics, Techniques, and Procedures) binary for
-              Chariot's internal assessments. Ensure the file is correctly
-              prepared before uploading.
+            <p className="-mt-2 text-sm text-gray-700">
+              {`Upload your TTP (Tactics, Techniques, and Procedures) binary for Chariot's internal assessments. Ensure the file is correctly prepared before uploading.`}
             </p>
           </div>
           <label className="mt-4 block text-sm font-medium leading-6 text-gray-900">
             Tactics, Techniques, and Procedures (TTP)
           </label>
-          <div className="flex flex-col items-center space-y-2 border border-gray-200 rounded-sm p-4">
-            <div className="flex flex-row space-x-4 w-full">
+          <div className="flex flex-col items-center space-y-2 rounded-sm border border-gray-200 p-4">
+            <div className="flex w-full flex-row space-x-4">
               <Dropdown
                 menu={{
                   items: BAS.assetAttributes.map((attribute, index) => {
@@ -1266,7 +1264,8 @@ export function BasIntegration() {
 
                     return {
                       label:
-                        attributeMeta.value || attributeMeta.name.split('-')[0],
+                        allAttLabels[attributeMeta.name] ||
+                        attributeMeta.name.split('-')[0],
                       value: attributeMeta.name,
                       onClick: () => {
                         setSelectedAgent(attributeMeta.name);
@@ -1275,7 +1274,9 @@ export function BasIntegration() {
                   }),
                 }}
                 label={
-                  selectedAgent ? selectedAgent.split('-')[0] : 'Select Agent'
+                  selectedAgent
+                    ? allAttLabels[selectedAgent] || selectedAgent.split('-')[0]
+                    : 'Select Agent'
                 }
                 className="w-full"
                 endIcon={<ChevronDownIcon className="size-4 text-gray-500" />}
@@ -1299,7 +1300,7 @@ export function BasIntegration() {
                 className="w-full"
               />
             </div>
-            <div className="flex items-center w-full">
+            <div className="flex w-full items-center">
               <Tooltip
                 title={
                   selectedAgent === '' || selectedPlatform === ''
@@ -1354,14 +1355,14 @@ export function BasIntegration() {
                       key={index}
                     >
                       <div className="flex flex-row justify-start border-gray-200">
-                        <div className="w-full flex items-center">
+                        <div className="flex w-full items-center">
                           <div className="w-full">
                             <Loader
                               className="h-[36px] w-[100px]"
                               isLoading={basLabelAttributesStatus === 'pending'}
                             >
                               <InputText
-                                className="w-full border-0 ring-0 border-b border-gray-300"
+                                className="w-full border-0 border-b border-gray-300 ring-0"
                                 placeholder="Agent Name"
                                 name={attributeMeta.name}
                                 onChange={event => {
@@ -1377,11 +1378,11 @@ export function BasIntegration() {
                             </Loader>
                           </div>
 
-                          <p className="text-xs mt-auto mb-1">
+                          <p className="mb-1 mt-auto text-xs">
                             {attributeMeta.name.split('-')[0]}
                           </p>
                         </div>
-                        <div className="ml-3 py-2 bg-gray-50 border-gray-200 flex shrink-0 border-l ">
+                        <div className="ml-3 flex shrink-0 border-l border-gray-200 bg-gray-50 py-2 ">
                           {Object.values(systemTypes).map((system, index) => {
                             function handleCopy() {
                               const filename =
