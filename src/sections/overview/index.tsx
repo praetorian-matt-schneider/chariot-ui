@@ -156,12 +156,14 @@ export function Overview() {
                     isLoading={moduleData.isLoading}
                   >
                     <ConditionalRender
-                      condition={Boolean(moduleData.route)}
+                      condition={Boolean(
+                        moduleData.route && moduleData.enabled
+                      )}
                       conditionalWrapper={() => {
                         return (
                           <Link
                             buttonClass={cn(
-                              'mb-2 text-6xl',
+                              'mb-2 p-0 text-6xl',
                               moduleData.enabled && moduleData.noOfRisk > 0
                                 ? ''
                                 : 'text-gray-400'
