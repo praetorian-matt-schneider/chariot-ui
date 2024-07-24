@@ -98,7 +98,6 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     name: 'CISA KEV',
     description: '',
     logo: '/icons/kev.svg',
-    connected: true,
     inputs: [],
     markup: (
       <div className="text-default-light">
@@ -121,7 +120,6 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     name: 'Command & Control',
     description: 'Create an agent.',
     logo: '/icons/logo.png',
-    connected: true,
     inputs: [],
     markup: <BasIntegration />,
   },
@@ -130,7 +128,6 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     name: 'ServiceNow',
     description: 'Push assets and risks to Chariot.',
     logo: '/icons/ServiceNow.svg',
-    connected: true,
     inputs: [
       {
         name: 'username',
@@ -193,7 +190,6 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     name: 'Inbound Webhook',
     description: 'Push assets and risks to Chariot.',
     logo: '/icons/logo.png',
-    connected: true,
     inputs: [
       {
         name: 'username',
@@ -219,7 +215,6 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     },
     description: 'Receive Slack notifications when new risks are discovered.',
     logo: '/icons/Slack.svg',
-    connected: true,
     inputs: [
       {
         name: 'username',
@@ -263,7 +258,6 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     },
     description: 'Track and manage risks directly within your Jira project.',
     logo: '/icons/Jira.svg',
-    connected: true,
     inputs: [
       {
         name: 'username',
@@ -346,7 +340,6 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     },
     description: "Discover your GitHub organization's repositories and risks.",
     logo: '/icons/GitHub.svg',
-    connected: true,
     multiple: true,
     inputs: [
       {
@@ -390,7 +383,6 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     description:
       'Discover and scan assets hosted within your AWS organization.',
     logo: '/icons/AWS.svg',
-    connected: true,
     multiple: true,
     inputs: [
       {
@@ -432,7 +424,6 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     },
     description: 'Discover and scan assets managed within your NS1 tenant',
     logo: '/icons/NS1.svg',
-    connected: true,
     inputs: [
       {
         name: 'username',
@@ -468,7 +459,6 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     description:
       'Discover and scan assets hosted within your GCP organization.',
     logo: '/icons/GoogleCloud.svg',
-    connected: true,
     multiple: true,
     inputs: [
       {
@@ -515,7 +505,6 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     description:
       'Discover and scan assets hosted within your Azure organization',
     logo: '/icons/Azure.svg',
-    connected: true,
     multiple: true,
     inputs: [
       {
@@ -557,7 +546,6 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     description:
       'Import your assets from CrowdStrike and identify policy risks',
     logo: '/icons/Crowdstrike.svg',
-    connected: true,
     inputs: [
       {
         name: 'username',
@@ -597,7 +585,6 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     },
     description: "Discover your GitLab organization's repositories and risks",
     logo: '/icons/GitLab.svg',
-    connected: true,
     multiple: true,
     inputs: [
       {
@@ -637,23 +624,13 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     description:
       'Industry-standard vulnerability scanner for comprehensive security assessments.',
     logo: '/icons/Nessus.svg',
-    connected: false,
     markup: <NessusInstructions />,
-  },
-  qualys: {
-    id: Integration.qualys,
-    name: 'Qualys',
-    description:
-      'Offers cloud-based solutions for security and compliance across networks.',
-    logo: '/icons/Qualys.svg',
-    connected: false,
   },
   zulip: {
     id: Integration.zulip,
     name: 'Zulip',
     description: 'Receive Zulip notifications when new risks are discovered.',
     logo: '/icons/Zulip.svg',
-    connected: true,
     inputs: [
       {
         name: 'username',

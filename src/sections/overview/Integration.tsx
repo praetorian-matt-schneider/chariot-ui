@@ -1,5 +1,3 @@
-import { Integrations } from '@/sections/overview/Module';
+import { Integration } from '@/types';
 
-export const AvailableIntegrations = Object.values(Integrations)
-  .filter(integration => integration.id && integration.connected)
-  .map(integration => integration.id) as string[];
+export const AvailableIntegrations = Object.values(Integration) as string[];

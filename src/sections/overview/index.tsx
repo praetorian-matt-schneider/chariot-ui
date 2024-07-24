@@ -593,7 +593,7 @@ const IntegrationComponent = (props: IntegrationComponentProps) => {
   return (
     <div className="mt-4 w-full px-4">
       <div className="flex min-h-11 items-center gap-2">
-        <div className="flex flex-row items-center space-x-2 justify-center mb-4">
+        <div className="mb-4 flex flex-row items-center justify-center space-x-2">
           {logo && <img src={logo} alt={name} className="size-10" />}
           {name && (
             <h3 className="text-xl font-medium text-gray-700">
