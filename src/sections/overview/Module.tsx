@@ -136,7 +136,11 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     logo: '/icons/logo.png',
     connected: true,
     inputs: [],
-    customIntegration: <BasIntegration />,
+    markup: <BasIntegration />,
+    help: {
+      href: 'https://github.com/praetorian-inc/chariot-bas',
+      label: 'For more information, please visit our - GitHub repository.',
+    },
   },
   webhook: {
     id: Integration.webhook,
@@ -900,6 +904,12 @@ export function useGetModuleData(): {
     query: '#source#nessus',
   });
 
+  const isManagedServiceAccount = Boolean(
+    accounts.find(account => {
+      return account.member === 'managed_services@praetorian.com';
+    })
+  );
+
   const basAssetAttribute = basAttributes.filter(({ source, value }) => {
     return source.startsWith('#asset') && value === 'bas';
   });
@@ -994,7 +1004,7 @@ export function useGetModuleData(): {
     CPT: {
       noOfRisk: 0,
       noOfAsset: 0,
-      enabled: isIntegrationsConnected(Module.CPT),
+      enabled: isManagedServiceAccount,
       assetAttributes: [],
       riskAttributes: [],
       isLoading: false,

@@ -170,6 +170,7 @@ export function Overview() {
                 </div>
                 {moduleKey === Module.CPT ? (
                   <Button
+                    className={cn(moduleData.enabled ? 'invisible' : '')}
                     styleType="header"
                     onClick={() => {
                       upgradeState.onOpenChange(true);
@@ -517,7 +518,6 @@ const IntegrationComponent = (props: IntegrationComponentProps) => {
     message = '',
     warning = false,
     help,
-    customIntegration,
   } = integration;
 
   const { integrationsData } = useGetModuleData();
@@ -559,10 +559,9 @@ const IntegrationComponent = (props: IntegrationComponentProps) => {
           </div>
         </div>
       )}
-      {(showInputs || message || markup || warning || customIntegration) && (
+      {(showInputs || message || markup || warning) && (
         <div className="mt-4 flex">
           <div className=" w-full rounded-sm border-gray-200">
-            {customIntegration}
             {message && <div className="mb-4 text-gray-500">{message}</div>}
             {(showInputs || markup) && (
               <div>
