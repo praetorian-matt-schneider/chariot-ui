@@ -41,6 +41,8 @@ import {
 import { cn } from '@/utils/classname';
 import { generateUuid } from '@/utils/uuid.util';
 
+const unlockButtonStyle = 'text-[.8rem] h-9';
+
 export function Overview() {
   const {
     modal: { module: moduleState, upgrade: upgradeState },
@@ -193,7 +195,10 @@ export function Overview() {
                 {moduleKey === Module.CPT ? (
                   <Button
                     isLoading={moduleData.isLoading}
-                    className={cn(moduleData.enabled ? 'invisible' : '')}
+                    className={cn(
+                      moduleData.enabled ? 'invisible' : '',
+                      !moduleData.isLoading && unlockButtonStyle
+                    )}
                     styleType="header"
                     onClick={() => {
                       upgradeState.onOpenChange(true);
@@ -204,7 +209,12 @@ export function Overview() {
                 ) : (
                   <Button
                     isLoading={moduleData.isLoading}
-                    className={cn('m-auto w-full')}
+                    className={cn(
+                      'm-auto w-full',
+                      !moduleData.isLoading &&
+                        !moduleData.enabled &&
+                        unlockButtonStyle
+                    )}
                     styleType={moduleData.enabled ? 'primary' : 'header'}
                     onClick={() => {
                       moduleState.onValueChange({
