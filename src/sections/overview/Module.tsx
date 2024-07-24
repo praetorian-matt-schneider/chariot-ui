@@ -1261,18 +1261,42 @@ export function BasIntegration() {
   return (
     <form className="size-full" id="overviewForm" onSubmit={handleEditLabel}>
       {!isEnabled && (
-        <Button
-          isLoading={
-            createBulkAssetStatus === 'pending' ||
-            createBulkAttributeStatus === 'pending'
-          }
-          disabled={BAS.isLoading}
-          styleType="secondary"
-          className="m-auto mt-20 px-8 py-4 text-3xl font-bold"
-          onClick={handleEnable}
-        >
-          Enable
-        </Button>
+        <div className="mb-4 flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-gray-50 p-8 pb-2">
+          <h2 className="mb-4 text-center text-xl font-semibold text-gray-800">
+            Breach and Attack Simulation
+          </h2>
+          <ul className="mb-6 list-inside list-disc text-gray-600">
+            <li className="mb-4 flex justify-center">
+              <Button
+                isLoading={
+                  createBulkAssetStatus === 'pending' ||
+                  createBulkAttributeStatus === 'pending'
+                }
+                disabled={BAS.isLoading}
+                styleType="secondary"
+                className="rounded-sm bg-brand px-6 py-3 text-lg font-semibold text-white"
+                onClick={handleEnable}
+              >
+                Create Agents
+              </Button>
+            </li>
+            <li className="mb-4">
+              Each agent will be assigned a unique identifier. Assign custom
+              hostnames for easier management.
+            </li>
+            <li className="mb-4">
+              Upload your TTP binaries to these agents to simulate breaches.
+            </li>
+            <li className="mb-4">
+              Use the provided curl command to execute on your machines, sending
+              data back to our system.
+            </li>
+            <li>
+              Analyze the collected data to gain insights into vulnerabilities
+              and defense effectiveness.
+            </li>
+          </ul>
+        </div>
       )}
       {isEnabled && (
         <div>
