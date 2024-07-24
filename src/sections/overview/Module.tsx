@@ -200,6 +200,16 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
         name: 'pin',
         hidden: true,
       },
+      {
+        label: 'Source',
+        value: '',
+        placeholder: 'internal',
+        name: 'source',
+        required: false,
+        info: {
+          text: 'Adds an optional source attribute to the message',
+        },
+      },
     ],
     markup: <WebhookExample defaultPin={defaultPin} />,
   },
