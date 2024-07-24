@@ -138,7 +138,7 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     id: Integration.webhook,
     name: 'Service Now',
     description: 'Push assets and risks to Chariot.',
-    logo: '/icons/logo.png',
+    logo: '/icons/ServiceNow.svg',
     connected: true,
     inputs: [
       {

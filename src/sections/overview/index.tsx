@@ -560,6 +560,7 @@ const IntegrationComponent = (props: IntegrationComponentProps) => {
   const {
     markup = '',
     inputs = [],
+    logo = '',
     name = '',
     multiple = false,
     message = '',
@@ -592,12 +593,15 @@ const IntegrationComponent = (props: IntegrationComponentProps) => {
   return (
     <div className="mt-4 w-full px-4">
       <div className="flex min-h-11 items-center gap-2">
-        {name && (
-          <h3 className="text-xl font-medium text-gray-700">
-            {nameReformatter(name)}
-          </h3>
-        )}
-        {isConnected && <CheckCircleIcon className="size-6 text-green-500" />}
+        <div className="flex flex-row items-center space-x-2 justify-center mb-4">
+          {logo && <img src={logo} alt={name} className="size-10" />}
+          {name && (
+            <h3 className="text-xl font-medium text-gray-700">
+              {nameReformatter(name)}
+            </h3>
+          )}
+          {isConnected && <CheckCircleIcon className="size-6 text-green-500" />}
+        </div>
       </div>
 
       {help && (
@@ -605,11 +609,11 @@ const IntegrationComponent = (props: IntegrationComponentProps) => {
           <p className="mb-2 text-sm font-bold">Need help?</p>
           <div className="flex flex-col space-y-2">
             <Link
-              styleType="textPrimary"
+              styleType="text"
               to={help.href}
               target="_blank"
               rel="noopener noreferrer"
-              buttonClass="p-0 hover:underline"
+              buttonClass="p-0 hover:underline text-indigo-600 font-normal"
             >
               <InformationCircleIcon className="size-5" />
               <span>{help.label}</span>
