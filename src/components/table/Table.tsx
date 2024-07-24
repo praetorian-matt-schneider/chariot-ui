@@ -343,7 +343,7 @@ export function Table<TData>(props: TableProps<TData>) {
                 }
               />
 
-              <div className="flex flex-nowrap">
+              <div className="flex h-full flex-nowrap">
                 {parsedPrimaryAction && (
                   <Button
                     {...parsedPrimaryAction}
@@ -353,7 +353,7 @@ export function Table<TData>(props: TableProps<TData>) {
                 )}
 
                 {parsedActions && (
-                  <div className="relative origin-bottom-right">
+                  <div className="relative h-full origin-bottom-right">
                     <Tooltip
                       title={
                         selectedRows.length === 0
@@ -365,7 +365,7 @@ export function Table<TData>(props: TableProps<TData>) {
                         disabled={selectedRows.length === 0}
                         className={cn(
                           parsedPrimaryAction &&
-                            'relative rounded-none rounded-r-[2px] bg-header-dark disabled:bg-header-dark disabled:cursor-not-allowed'
+                            'h-full relative rounded-none rounded-r-[2px] bg-header-dark disabled:bg-header-dark disabled:cursor-not-allowed'
                         )}
                         styleType="header"
                         endIcon={
