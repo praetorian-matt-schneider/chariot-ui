@@ -36,6 +36,10 @@ export interface TableProps<TData> {
   }[];
   skipHeader?: boolean;
   resize?: boolean;
+  search?: {
+    value: string;
+    onChange: (value: string) => void;
+  };
 }
 
 export interface Column<TData> {

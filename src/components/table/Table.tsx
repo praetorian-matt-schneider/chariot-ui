@@ -2,7 +2,7 @@
 /* TODO: Fix the types for the Table component */
 
 import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
-import { MoveDown } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 import {
   ChevronDownIcon,
   ExclamationCircleIcon,
@@ -10,6 +10,7 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { notUndefined, useVirtualizer } from '@tanstack/react-virtual';
+import { MoveDown } from 'lucide-react';
 
 import { Button } from '@/components/Button';
 import { Dropdown } from '@/components/Dropdown';
@@ -34,8 +35,6 @@ import {
 } from '@/sections/AuthenticatedApp';
 import { cn } from '@/utils/classname';
 import { useStorage } from '@/utils/storage/useStorage.util';
-import { useSearchParams } from 'react-router-dom';
-import { set } from 'date-fns';
 
 // eslint-disable-next-line complexity
 export function Table<TData>(props: TableProps<TData>) {
@@ -61,9 +60,18 @@ export function Table<TData>(props: TableProps<TData>) {
     primaryAction,
     skipHeader,
     resize = false,
+    search: controlledSearch,
   } = props;
   const [searchParams, addSearchParams] = useSearchParams();
-  const [searchValue, setSearchValue] = useState('');
+  const controlledSearchValue = controlledSearch?.value;
+  const onControlledSearchChange = controlledSearch?.onChange;
+  const [search, setSearch] = useStorage(
+    {
+      parentState: controlledSearchValue,
+      onParentStateChange: onControlledSearchChange,
+    },
+    ''
+  );
   const [expandedGroups, setExpandedGroups] = useState(
     groupBy?.map(group => group.label) || []
   );
@@ -102,10 +110,10 @@ export function Table<TData>(props: TableProps<TData>) {
         : indexedData;
 
     return groupedData.filter(item => {
-      // filter by searchValue
-      if (searchValue && searchValue.length > 0) {
+      // filter by search
+      if (search && search.length > 0 && !controlledSearchValue) {
         return Object.values(item).some(value =>
-          String(value).toLowerCase().includes(searchValue.toLowerCase())
+          String(value).toLowerCase().includes(search.toLowerCase())
         );
       }
       return true;
@@ -115,7 +123,8 @@ export function Table<TData>(props: TableProps<TData>) {
     JSON.stringify(indexedData),
     JSON.stringify(expandedGroups),
     status,
-    searchValue,
+    search,
+    controlledSearchValue,
   ]);
 
   const parentRef = useRef<HTMLDivElement>(null);
@@ -326,9 +335,9 @@ export function Table<TData>(props: TableProps<TData>) {
               <Input
                 name="search"
                 placeholder={`Search ${tableName}`}
-                className="h-9 w-64 justify-end rounded-sm border-gray-900 bg-header-light p-2 text-sm text-white  ring-0"
-                value={searchValue}
-                onChange={e => setSearchValue(e.target.value)}
+                className="h-11 w-64 justify-end rounded-sm border-gray-900 bg-header-light p-2 text-sm text-white  ring-0"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
                 startIcon={
                   <MagnifyingGlassIcon className="size-5 stroke-2 text-default-light" />
                 }
@@ -366,15 +375,15 @@ export function Table<TData>(props: TableProps<TData>) {
                       ></Dropdown>
                     </Tooltip>
                     {reviewStep === '2' && (
-                      <div className="absolute bottom-full right-0 text-left w-80 p-4 pr-3 bg-white rounded-t-md -shadow-lg z-0">
+                      <div className="-shadow-lg absolute bottom-full right-0 z-0 w-80 rounded-t-md bg-white p-4 pr-3 text-left">
                         <button
                           onClick={() => {
                             searchParams.delete('review');
                             addSearchParams(searchParams);
                           }}
-                          className="absolute top-2 right-2"
+                          className="absolute right-2 top-2"
                         >
-                          <XMarkIcon className="w-4 h-4 " />
+                          <XMarkIcon className="size-4 " />
                         </button>
                         <div className="flex items-start">
                           <div className="flex-1">
@@ -386,7 +395,7 @@ export function Table<TData>(props: TableProps<TData>) {
                               Click here to remediate all selected items.
                             </p>
                           </div>
-                          <MoveDown className="w-6 h-6 ml-2 mt-auto" />
+                          <MoveDown className="ml-2 mt-auto size-6" />
                         </div>
                       </div>
                     )}
@@ -433,7 +442,7 @@ export function Table<TData>(props: TableProps<TData>) {
           <thead
             className={cn(
               'sticky bg-layer0',
-              isTableView && !skipHeader ? 'top-16' : 'top-0'
+              isTableView && !skipHeader ? 'top-[4.5rem]' : 'top-0'
             )}
             style={{ zIndex: 1 }}
           >
@@ -449,19 +458,19 @@ export function Table<TData>(props: TableProps<TData>) {
                     />
                     <TableCheckBoxIcon isChecked={isAllRowSelected} />
                     {reviewStep === '1' && (
-                      <div className=" absolute bottom-full translate-y-3 left-0 text-left w-80 p-4 pt-2 pl-3 bg-white rounded-t-md -shadow-lg z-10">
+                      <div className=" -shadow-lg absolute bottom-full left-0 z-10 w-80 translate-y-3 rounded-t-md bg-white p-4 pl-3 pt-2 text-left">
                         <button
                           onClick={e => {
                             e.preventDefault();
                             searchParams.delete('review');
                             addSearchParams(searchParams);
                           }}
-                          className="absolute top-2 right-2"
+                          className="absolute right-2 top-2"
                         >
-                          <XMarkIcon className="w-4 h-4 " />
+                          <XMarkIcon className="size-4 " />
                         </button>
                         <div className="flex items-start">
-                          <MoveDown className="w-6 h-6 mr-2 mt-auto" />
+                          <MoveDown className="mr-2 mt-auto size-6" />
                           <div>
                             <p className="text-sm ">
                               Step 1:{' '}

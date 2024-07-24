@@ -40,7 +40,8 @@ import {
 } from '@/types';
 import { cn } from '@/utils/classname';
 import { generateUuid } from '@/utils/uuid.util';
-import { useNavigate } from 'react-router-dom';
+
+const unlockButtonStyle = 'text-[.8rem] h-9';
 
 export function Overview() {
   const {
@@ -52,7 +53,6 @@ export function Overview() {
   const { data: accounts, status: accountsStatus } = useMy({
     resource: 'account',
   });
-  const navigate = useNavigate();
 
   const displayName =
     useGetDisplayName(accounts) || friend.displayName || friend.email || me;
@@ -90,7 +90,11 @@ export function Overview() {
               My
               <span className="text-gray-400"> Chariot</span>
             </p>
-            <Loader isLoading={accountsStatus === 'pending'}>
+            <Loader
+              styleType="header"
+              isLoading={accountsStatus === 'pending'}
+              className="mt-2 h-[36px]"
+            >
               <p className="mt-2 w-full text-left text-3xl">
                 {displayName}&apos;s Organization
               </p>
@@ -110,23 +114,34 @@ export function Overview() {
           const module = Modules[moduleKey];
           const moduleData = modulesData[moduleKey];
 
+          const isCpt = moduleKey === Module.CPT;
+
+          const riskContent = moduleData.enabled ? (
+            moduleData.noOfRisk
+          ) : (
+            <LockClosedIcon className="size-16 text-gray-400" />
+          );
+
           return (
             <div
               key={index}
               className={cn(
                 'relative w-full',
-                !moduleData.enabled && '-translate-y-4'
+                !moduleData.isLoading && !moduleData.enabled && '-translate-y-4'
               )}
             >
               <div
                 className={cn(
                   'flex flex-col gap-2 overflow-hidden rounded-md p-4 shadow-lg',
-                  moduleData.enabled ? 'bg-white' : 'bg-gray-200'
+                  moduleData.isLoading || moduleData.enabled
+                    ? 'bg-white'
+                    : 'bg-gray-200'
                 )}
               >
                 <div className="space-between flex h-12 w-full items-center text-5xl font-bold text-default">
                   <p>{module.name}</p>
-                  {moduleData.enabled &&
+                  {!moduleData.isLoading &&
+                    moduleData.enabled &&
                     (moduleData.noOfRisk === 0 ? (
                       <CheckCircleIcon className="ml-auto block size-12 text-green-500" />
                     ) : (
@@ -138,38 +153,62 @@ export function Overview() {
                 </div>
 
                 <div className="flex h-36  w-full flex-col items-center justify-center text-center">
-                  <Loader isLoading={moduleData.isLoading}>
-                    <button
-                      className={cn(
-                        'mb-2 text-6xl text-default',
-                        moduleData.enabled && moduleData.noOfRisk > 0
-                          ? 'text-brand'
-                          : 'text-gray-400'
+                  <Loader
+                    className="mb-5 mt-3 h-[60px] w-3/4"
+                    isLoading={moduleData.isLoading}
+                  >
+                    <ConditionalRender
+                      condition={Boolean(
+                        moduleData.route && moduleData.enabled
                       )}
-                      onClick={() => {
-                        if (!moduleData.enabled) {
-                          moduleState.onValueChange({
-                            module: moduleKey as Module,
-                            integration: '',
-                          });
-                        } else {
-                          navigate(moduleData.route);
-                        }
+                      conditionalWrapper={() => {
+                        return (
+                          <Link
+                            buttonClass={cn(
+                              'mb-2 p-0 text-6xl',
+                              moduleData.enabled && moduleData.noOfRisk > 0
+                                ? ''
+                                : 'text-gray-400'
+                            )}
+                            to={moduleData.route}
+                          >
+                            {riskContent}
+                          </Link>
+                        );
                       }}
                     >
-                      {moduleData.enabled ? (
-                        moduleData.noOfRisk
-                      ) : (
-                        <LockClosedIcon className="size-16 text-gray-400" />
-                      )}
-                    </button>
+                      <button
+                        className={cn('mb-2 text-6xl text-gray-400')}
+                        onClick={() => {
+                          if (isCpt) {
+                            upgradeState.onOpenChange(true);
+
+                            return;
+                          }
+
+                          if (!moduleData.enabled) {
+                            moduleState.onValueChange({
+                              module: moduleKey as Module,
+                              integration: '',
+                            });
+                          }
+                        }}
+                      >
+                        {riskContent}
+                      </button>
+                    </ConditionalRender>
                   </Loader>
                   <p className="text-sm font-medium text-default-light">
                     Risks
                   </p>
                 </div>
-                {moduleKey === Module.CPT ? (
+                {isCpt ? (
                   <Button
+                    isLoading={moduleData.isLoading}
+                    className={cn(
+                      moduleData.enabled ? 'invisible' : '',
+                      !moduleData.isLoading && unlockButtonStyle
+                    )}
                     styleType="header"
                     onClick={() => {
                       upgradeState.onOpenChange(true);
@@ -179,7 +218,13 @@ export function Overview() {
                   </Button>
                 ) : (
                   <Button
-                    className={cn('m-auto w-full')}
+                    isLoading={moduleData.isLoading}
+                    className={cn(
+                      'm-auto w-full',
+                      !moduleData.isLoading &&
+                        !moduleData.enabled &&
+                        unlockButtonStyle
+                    )}
                     styleType={moduleData.enabled ? 'primary' : 'header'}
                     onClick={() => {
                       moduleState.onValueChange({
@@ -204,7 +249,10 @@ export function ModulesModal() {
   const {
     modal: { module: moduleState },
   } = useGlobalState();
-  const { integrationsData, isLoading } = useGetModuleData();
+
+  const { integrationsData, isLoading } = useGetModuleData({
+    enabled: Boolean(moduleState.value),
+  });
 
   const [formData, setFormData] = useState<Values[]>([]);
 
@@ -301,9 +349,19 @@ export function ModulesModal() {
 
   if (!moduleState.value?.module) return null;
 
-  const renderForm = !(
-    [Integration.kev, Integration.nessus] as string[]
-  ).includes(moduleState.value?.integration);
+  const renderForm =
+    Boolean(moduleState.value?.integration) &&
+    !([Integration.kev, Integration.nessus] as string[]).includes(
+      moduleState.value?.integration
+    );
+
+  const featuredModules = [
+    Module.PM,
+    Module.ASM,
+    Module.BAS,
+    Module.CTI,
+    Module.VM,
+  ];
 
   return (
     <Modal
@@ -359,7 +417,7 @@ export function ModulesModal() {
           }}
         >
           <Tabs
-            tabs={Object.values(Module).map((module, index) => {
+            tabs={featuredModules.map((module, index) => {
               const isPM = index === 0;
 
               // If PM update design
@@ -502,12 +560,12 @@ const IntegrationComponent = (props: IntegrationComponentProps) => {
   const {
     markup = '',
     inputs = [],
+    logo = '',
     name = '',
     multiple = false,
     message = '',
     warning = false,
     help,
-    customIntegration,
   } = integration;
 
   const { integrationsData } = useGetModuleData();
@@ -521,19 +579,29 @@ const IntegrationComponent = (props: IntegrationComponentProps) => {
 
   const showInputs = inputs.length > 0;
 
+  const nameReformatter = (name: string) => {
+    if (name === 'Command & Control') {
+      return 'Agents';
+    }
+    return name;
+  };
+
   useEffect(() => {
     setCount(connectedIntegration.length || 1);
   }, [connectedIntegration.length]);
 
-  if (customIntegration) {
-    return customIntegration;
-  }
-
   return (
     <div className="mt-4 w-full px-4">
       <div className="flex min-h-11 items-center gap-2">
-        {name && <h3 className="text-xl font-medium text-gray-700">{name}</h3>}
-        {isConnected && <CheckCircleIcon className="size-6 text-green-500" />}
+        <div className="flex flex-row items-center space-x-2 justify-center mb-4">
+          {logo && <img src={logo} alt={name} className="size-10" />}
+          {name && (
+            <h3 className="text-xl font-medium text-gray-700">
+              {nameReformatter(name)}
+            </h3>
+          )}
+          {isConnected && <CheckCircleIcon className="size-6 text-green-500" />}
+        </div>
       </div>
 
       {help && (
@@ -541,11 +609,11 @@ const IntegrationComponent = (props: IntegrationComponentProps) => {
           <p className="mb-2 text-sm font-bold">Need help?</p>
           <div className="flex flex-col space-y-2">
             <Link
-              styleType="textPrimary"
+              styleType="text"
               to={help.href}
               target="_blank"
               rel="noopener noreferrer"
-              buttonClass="p-0 hover:underline"
+              buttonClass="p-0 hover:underline text-indigo-600 font-normal"
             >
               <InformationCircleIcon className="size-5" />
               <span>{help.label}</span>

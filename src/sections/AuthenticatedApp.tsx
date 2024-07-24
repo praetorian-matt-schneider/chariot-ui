@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import React, { ReactNode, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 
@@ -15,7 +15,7 @@ import { NewUserSeedModal } from '@/sections/NewUserSeedModal';
 import { ModulesModal } from '@/sections/overview';
 import { ProofOfExploit } from '@/sections/ProofOfExploit';
 import { TopNavBar } from '@/sections/topNavBar/TopNavBar';
-import { Upgrade, UpgradeModal } from '@/sections/Upgrade';
+import { UpgradeModal } from '@/sections/Upgrade';
 import { useAuth } from '@/state/auth';
 import { useBreadCrumbsContext } from '@/state/breadcrumbs';
 import { cn } from '@/utils/classname';
@@ -34,16 +34,9 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
   const { useBreadCrumb } = useBreadCrumbsContext();
   const { me, friend } = useAuth();
 
-  const { data: accounts, status: accountsStatus } = useMy({
+  const { data: accounts } = useMy({
     resource: 'account',
   });
-
-  const showUpgrade = useMemo(() => {
-    return Boolean(
-      friend.email === '' &&
-        !accounts.some(account => account.member.endsWith('praetorian.com'))
-    );
-  }, [accountsStatus, JSON.stringify(accounts), JSON.stringify(friend)]);
 
   const displayName = useGetDisplayName(accounts);
 
@@ -119,7 +112,6 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
       <AddFile />
       <ModulesModal />
       <UpgradeModal />
-      {accountsStatus === 'success' && showUpgrade && <Upgrade />}
     </div>
   );
 }

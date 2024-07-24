@@ -1,4 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { To } from 'react-router-dom';
+import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import {
   ClipboardList,
   Crosshair,
@@ -9,20 +11,22 @@ import {
 } from 'lucide-react';
 
 import { Button } from '@/components/Button';
-import { CopyToClipboard } from '@/components/CopyToClipboard';
-import { Dropzone } from '@/components/Dropzone';
+import { Dropdown } from '@/components/Dropdown';
 import { Input } from '@/components/form/Input';
 import { InputText } from '@/components/form/InputText';
+import { Link } from '@/components/Link';
 import { Loader } from '@/components/Loader';
-import { MarkdownPreview } from '@/components/markdown/MarkdownPreview';
-import { OverflowText } from '@/components/OverflowText';
+import { Tooltip } from '@/components/Tooltip';
 import WebhookExample from '@/components/ui/WebhookExample';
-import { useMy } from '@/hooks';
+import { useMy, useUploadFile } from '@/hooks';
 import { useBulkAddAsset } from '@/hooks/useAssets';
 import { useBulkAddAttributes } from '@/hooks/useAttribute';
 import { useCounts } from '@/hooks/useCounts';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
+import { useBulkReRunJob } from '@/hooks/useJobs';
+import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { parseKeys } from '@/sections/SearchByType';
+import { useAuth } from '@/state/auth';
 import {
   Account,
   Attribute,
@@ -32,30 +36,67 @@ import {
   ModuleMeta,
 } from '@/types';
 import { useMergeStatus } from '@/utils/api';
+import { cn } from '@/utils/classname';
+import { copyToClipboard } from '@/utils/copyToClipboard.util';
+import { getRoute } from '@/utils/route.util';
 import { generateUuid } from '@/utils/uuid.util';
 
-const nessusMarkdown = `
-Use our open-source command line interface (CLI) to import assets and risks from Nessus scans.
+const NessusInstructions = () => {
+  return (
+    <div>
+      <p className="mb-4">
+        You can use our open-source command line interface (CLI) to seamlessly
+        import assets and risks from Nessus scans. Follow the steps below to get
+        started.
+      </p>
 
-1. Install the CLI using the following command:
-    \`\`\`
-    pip install praetorian-cli
-    \`\`\`
-2. Follow the instructions on our GitHub repo to configure the CLI:
-    \`\`\`
-    Visit: https://github.com/praetorian-inc/praetorian-cli
-   \`\`\`
-3. Run one of the following commands to import Nessus results:
-    
-    \`\`\`
-    Using Nessus API: praetorian chariot plugin nessus-api
-    Using Nessus XML export files: praetorian chariot plugin nessus-sml
-    \`\`\`
-`;
+      <h2 className="mb-2 text-lg font-semibold">1. Install the CLI</h2>
+      <p className="mb-2">Use the following command to install the CLI:</p>
+      <pre className="mb-4 rounded-md bg-gray-100 p-4">
+        <code>pip install praetorian-cli</code>
+      </pre>
 
-const defaultPin = (
-  Math.floor(Math.random() * (99999 - 10000 + 1)) + 10000
-).toString();
+      <h2 className="mb-2 mt-4 text-lg font-semibold">2. Configure the CLI</h2>
+      <pre className="mb-4 rounded-md bg-gray-100 p-4">
+        <code>praetorian configure</code>
+      </pre>
+
+      <h2 className="mb-2 mt-4 text-lg font-semibold">
+        3. Import Nessus Results
+      </h2>
+      <p className="mb-2">
+        Run one of the following commands to import Nessus results:
+      </p>
+
+      <h3 className="mb-2 mt-4 text-lg font-medium">Using Nessus API</h3>
+      <pre className="mb-4 rounded-md bg-gray-100 p-4">
+        <code>praetorian chariot plugin nessus-api</code>
+      </pre>
+
+      <h3 className="mb-2 mt-4 text-lg font-medium">
+        Using Nessus XML Export Files
+      </h3>
+      <pre className="mb-4 rounded-md bg-gray-100 p-4">
+        <code>praetorian chariot plugin nessus-XML</code>
+      </pre>
+
+      <p className="text-sm">
+        For more information, please visit our{' '}
+        <a
+          href="https://github.com/praetorian-inc/praetorian-cli"
+          className="text-blue-500 underline"
+          target="_blank"
+          rel="noreferrer noopener"
+        >
+          GitHub repository
+        </a>
+        .
+      </p>
+    </div>
+  );
+};
+
+const defaultPin = generateUuid();
 const uuid = generateUuid();
 
 export const Integrations: Record<Integration, IntegrationMeta> = {
@@ -67,29 +108,96 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     connected: true,
     inputs: [],
     markup: (
-      <div>
-        Known Exploited Vulnerabilities - The Cybersecurity & Infrastructure
-        Security Agency (CISA) maintains the knowledge on cybersecurity risks
-        that are being exploited in the real world. Each Known Exploited Risk
-        (KEV), moves a cybersecurity vulnerability from theoretical to
-        practical. Chariot shows you whether your organization is susceptible to
-        KEVs so that you can focus attention on protecting against attacks that
-        are being used now.
+      <div className="text-default-light">
+        <div>
+          Known Exploited Vulnerabilities - The Cybersecurity & Infrastructure
+          Security Agency (CISA) maintains the knowledge on cybersecurity risks
+          that are being exploited in the real world.
+        </div>
+        <div className="mt-2">
+          Each Known Exploited Risk (KEV), moves a cybersecurity vulnerability
+          from theoretical to practical. Chariot shows you whether your
+          organization is susceptible to KEVs so that you can focus attention on
+          protecting against attacks that are being used now.
+        </div>
       </div>
     ),
   },
   basAgent: {
     id: Integration.basAgent,
-    name: 'Agents',
+    name: 'Command & Control',
     description: 'Create an agent.',
     logo: '/icons/logo.png',
     connected: true,
     inputs: [],
-    customIntegration: <BasIntegration />,
+    markup: <BasIntegration />,
+  },
+  webhook: {
+    id: Integration.webhook,
+    name: 'ServiceNow',
+    description: 'Push assets and risks to Chariot.',
+    logo: '/icons/ServiceNow.svg',
+    connected: true,
+    inputs: [
+      {
+        name: 'username',
+        value: Integration.webhook,
+        hidden: true,
+      },
+      {
+        name: 'value',
+        value: 'servicenow',
+        hidden: true,
+      },
+      {
+        label: 'Severity',
+        value: 'MHC',
+        placeholder: 'Select a minimum severity level for your Slack alerts',
+        name: 'severities',
+        required: true,
+        type: Input.Type.SELECT,
+        options: [
+          { label: 'Info', value: 'ILMHC' },
+          { label: 'Low', value: 'LMHC' },
+          { label: 'Medium', value: 'MHC' },
+          { label: 'High', value: 'HC' },
+          { label: 'Critical', value: 'C' },
+        ],
+      },
+      {
+        label: 'Scripted REST API',
+        value: '',
+        placeholder: 'https://webhook.com/services/',
+        name: 'webhook',
+        required: true,
+        info: {
+          text: 'The url to POST data to',
+        },
+      },
+      {
+        label: 'Basic Authentication Credentials',
+        value: 'Authorization',
+        placeholder: 'Content-Type: application/json',
+        name: 'header',
+        required: true,
+        disabled: true,
+        hidden: true,
+      },
+      {
+        label: 'Token',
+        value: '',
+        placeholder: 'Bearer token',
+        name: 'token',
+        required: true,
+        info: {
+          text: 'Optional, the value to populate `header` with',
+        },
+      },
+    ],
   },
   hook: {
     id: Integration.hook,
-    name: 'Chariot Webhook',
+    name: 'Inbound Webhook',
     description: 'Push assets and risks to Chariot.',
     logo: '/icons/logo.png',
     connected: true,
@@ -537,7 +645,7 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
       'Industry-standard vulnerability scanner for comprehensive security assessments.',
     logo: '/icons/Nessus.svg',
     connected: false,
-    markup: <MarkdownPreview source={nessusMarkdown} />,
+    markup: <NessusInstructions />,
   },
   qualys: {
     id: Integration.qualys,
@@ -612,6 +720,7 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
     ),
     integrations: [
       Integrations.hook,
+      Integrations.webhook,
       Integrations.slack,
       Integrations.jira,
       Integrations.zulip,
@@ -626,14 +735,13 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
       <div className="p-4">
         <h3 className="text-2xl font-semibold">Attack Surface Management</h3>
         <p className="mt-2 text-default-light">
-          Gain visibility into your expanding attack surface through continuous
-          discovery, identification, and monitoring of your evolving digital
-          landscape.
+          When you provide an Asset as a starting point, Chariot’s comprehensive
+          scan protocols the digital doors to your organization. Using tools
+          like subfinder, assetfinder, Massscan, whois, and and others, Chariot
+          seeks, finds, and presents a picture of your Assets.
         </p>
         <p className="mt-2 text-default-light">
-          ASM helps you proactively manage potential vulnerabilities and
-          exposures, ensuring your organization&apos;s security measures keep
-          pace with the dynamic threat environment.
+          {`Continuous ASM helps you proactively manage potential vulnerabilities and exposures, ensuring your organization's security measures keep pace with the dynamic threat environment.`}
         </p>
       </div>
     ),
@@ -656,12 +764,12 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
       <div className="p-4">
         <h3 className="text-2xl font-semibold">Breach & Attack Simulation</h3>
         <p className="mt-2 text-default-light">
-          BAS allows you to simulate real-world attack scenarios in a controlled
-          environment, identifying vulnerabilities before attackers can exploit
-          them.
+          Upload custom TTPs to Chariot to measure your detection and response
+          to MITRE ATT&CK techniques. Deploy a 1-kilobyte agent on any device
+          and schedule jobs for immediate execution.
         </p>
         <p className="mt-2 text-default-light">
-          Enhance your threat detection and response capabilities by
+          Stress test your threat detection and response capabilities by
           continuously testing your defenses against the latest attack
           techniques.
         </p>
@@ -678,13 +786,14 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
       <div className="p-4">
         <h3 className="text-2xl font-semibold">Cyber Threat Intelligence</h3>
         <p className="mt-2 text-default-light">
-          Chariot monitors emerging threats, providing detailed analysis of new
-          vulnerabilities, exploits, and attack vectors from a variety of
-          trusted sources.
+          Chariot tags Known Exploited Vulnerabilities–risks we know are being
+          used to hack into networks– to elevate the Risks that matter most to
+          your business.
         </p>
         <p className="mt-2 text-default-light">
-          Empower your organization with actionable intelligence to anticipate,
-          prepare for, and respond to evolving cyber threats.
+          We monitor emerging threat intelligence from a variety of trusted
+          sources and provide detailed analysis of new vulnerabilities,
+          exploits, and attack vectors.
         </p>
       </div>
     ),
@@ -699,12 +808,13 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
       <div className="p-4">
         <h3 className="text-2xl font-semibold">Vulnerability Management</h3>
         <p className="mt-2 text-default-light">
-          VM services help you identify, prioritize, and remediate security
-          vulnerabilities to protect your organization from potential threats.
+          VM services take the CVEs found on your Attack Surface–the Risks that
+          represent the most potential harm to your organization–and present the
+          most efficient approach to securing your Assets.
         </p>
         <p className="mt-2 text-default-light">
-          Enhance your security posture by proactively managing vulnerabilities
-          across your IT infrastructure.
+          Chariot provides the data, up front, in a way that allows a tailored
+          remediation approach.
         </p>
       </div>
     ),
@@ -721,12 +831,12 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
           Continuous Penetration Testing
         </h3>
         <p className="mt-2 text-default-light">
-          CPT solutions offer continuous assessment of your security posture,
-          enabling proactive identification and mitigation of potential threats.
+          {`Leverage Praetorian's security engineer expertise to enhance your operations and focus security where your business needs it most.`}
         </p>
         <p className="mt-2 text-default-light">
-          Improve your security by leveraging advanced testing methodologies and
-          automated responses to address vulnerabilities effectively.
+          MSP services provide end-to-end management, including proactive
+          monitoring, maintenance, and support to ensure optimal performance and
+          security.
         </p>
       </div>
     ),
@@ -738,7 +848,17 @@ export type IntegrationData = { isConnected: true; accounts: Account[] };
 
 export type IntegrationsData = Record<Integration, IntegrationData>;
 
-export function useGetModuleData(): {
+enum systemTypes {
+  darwin = 'darwin',
+  windows = 'windows',
+  linux = 'linux',
+}
+
+interface GetModuleDataProps {
+  enabled?: boolean;
+}
+
+export function useGetModuleData(props?: GetModuleDataProps): {
   data: Record<
     Module,
     {
@@ -748,36 +868,73 @@ export function useGetModuleData(): {
       assetAttributes: Attribute[];
       riskAttributes: Attribute[];
       isLoading: boolean;
-      route: string;
+      route: To;
     }
   >;
   integrationsData: IntegrationsData;
   isLoading: boolean;
 } {
-  const { data: assetCount, status: assetCountStatus } = useCounts({
-    resource: 'asset',
-  });
-  const { data: riskCount, status: riskCountStatus } = useCounts({
-    resource: 'risk',
-  });
+  const { enabled = true } = props || {};
 
-  const { data: cveRisksGenericSearch } = useGenericSearch({ query: 'CVE' });
+  const { data: assetCount, status: assetCountStatus } = useCounts(
+    {
+      resource: 'asset',
+    },
+    { enabled }
+  );
+  const { data: riskCount, status: riskCountStatus } = useCounts(
+    {
+      resource: 'risk',
+    },
+    { enabled }
+  );
 
-  const { data: accounts, status: accountStatus } = useMy({
-    resource: 'account',
-  });
-  const { data: basAttributes, status: basAttributesStatus } = useMy({
-    resource: 'attribute',
-    query: '#source#bas',
-  });
-  const { data: kevAttributes, status: ctiAttributeStatus } = useMy({
-    resource: 'attribute',
-    query: '#source#kev',
-  });
-  const { data: nessusAttributes, status: nessusAttributesStatus } = useMy({
-    resource: 'attribute',
-    query: '#source#nessus',
-  });
+  const { data: cveRisksGenericSearch } = useGenericSearch(
+    { query: 'CVE' },
+    { enabled }
+  );
+
+  const { data: accounts, status: accountStatus } = useMy(
+    {
+      resource: 'account',
+    },
+    { enabled }
+  );
+  const { data: basAttributes, status: basAttributesStatus } = useMy(
+    {
+      resource: 'attribute',
+      query: '#source#bas',
+    },
+    { enabled }
+  );
+  const { data: kevAttributes, status: ctiAttributeStatus } = useMy(
+    {
+      resource: 'attribute',
+      query: '#source#kev',
+    },
+    { enabled }
+  );
+  const { data: nessusAttributes, status: nessusAttributesStatus } = useMy(
+    {
+      resource: 'attribute',
+      query: '#source#nessus',
+    },
+    { enabled }
+  );
+
+  const allPraetorianRiskUsernames = Object.keys(
+    riskCount?.source || {}
+  ).filter(key => key.endsWith('@praetorian.com'));
+
+  const cptRisks = allPraetorianRiskUsernames.reduce((acc, key) => {
+    return acc + (riskCount?.source?.[key] || 0);
+  }, 0);
+
+  const isManagedServiceAccount = Boolean(
+    accounts.find(account => {
+      return account.member === 'managed_services@praetorian.com';
+    })
+  );
 
   const basAssetAttribute = basAttributes.filter(({ source, value }) => {
     return source.startsWith('#asset') && value === 'bas';
@@ -859,7 +1016,10 @@ export function useGetModuleData(): {
       riskAttributes: [],
       isLoading:
         riskCountStatus === 'pending' || assetCountStatus === 'pending',
-      route: '/app/risks?risk-status=%5B"O"%5D',
+      route: {
+        pathname: getRoute(['app', 'risks']),
+        search: 'risk-status=%5B"O"%5D',
+      },
     },
     BAS: {
       noOfRisk: basRiskAttribute.length,
@@ -868,16 +1028,21 @@ export function useGetModuleData(): {
       assetAttributes: basAssetAttribute,
       riskAttributes: basRiskAttribute,
       isLoading: basAttributesStatus === 'pending',
-      route: '',
+      route: {
+        pathname: getRoute(['app', 'risks']),
+      },
     },
     CPT: {
-      noOfRisk: 0,
+      noOfRisk: cptRisks,
       noOfAsset: 0,
-      enabled: isIntegrationsConnected(Module.CPT),
+      enabled: isManagedServiceAccount,
       assetAttributes: [],
       riskAttributes: [],
-      isLoading: false,
-      route: '',
+      isLoading: accountStatus === 'pending' || riskCountStatus === 'pending',
+      route: {
+        pathname: getRoute(['app', 'risks']),
+        search: `?risk-sources=${encodeURIComponent(JSON.stringify(allPraetorianRiskUsernames))}`,
+      },
     },
     CTI: {
       noOfRisk: ctiRiskAttribute.length,
@@ -886,7 +1051,10 @@ export function useGetModuleData(): {
       assetAttributes: ctiAssetAttribute,
       riskAttributes: ctiRiskAttribute,
       isLoading: ctiAttributeStatus === 'pending',
-      route: '/app/risks?risk-status=%5B""%5D&risk-intel=%5B"cisa_kev"%5D',
+      route: {
+        pathname: getRoute(['app', 'risks']),
+        search: 'risk-status=%5B""%5D&risk-intel=%5B"cisa_kev"%5D',
+      },
     },
     PM: {
       noOfRisk: 0,
@@ -932,18 +1100,41 @@ export function useGetModuleData(): {
 }
 
 export function BasIntegration() {
+  const { me, friend } = useAuth();
+
   const {
     data: { BAS },
     isLoading,
   } = useGetModuleData();
+
+  const { getAssetDrawerLink } = getDrawerLink();
 
   const { data: basLabelAttributes, status: basLabelAttributesStatus } = useMy({
     resource: 'attribute',
     query: '#source#labelBas',
   });
 
+  const { data: malwares } = useMy({
+    resource: 'file',
+    query: '#malware',
+  });
+
+  const malwareMap = useMemo(() => {
+    return malwares.reduce(
+      (acc, malware) => {
+        return {
+          ...acc,
+          [malware.name]: malware.name,
+        };
+      },
+      {} as Record<string, string>
+    );
+  }, [JSON.stringify(malwares)]);
+
   const { mutateAsync: createBulkAsset, status: createBulkAssetStatus } =
     useBulkAddAsset();
+  const { mutateAsync: uploadFile } = useUploadFile();
+  const { mutateAsync: bulkReRunJobs } = useBulkReRunJob();
 
   const {
     mutateAsync: createBulkAttribute,
@@ -967,7 +1158,7 @@ export function BasIntegration() {
   const [attLabels, setAttLabels] = useState<Record<string, string>>({});
 
   async function handleEnable() {
-    const basAgents = 10;
+    const basAgents = 5;
 
     const assets = Array(basAgents)
       .fill(0)
@@ -985,6 +1176,51 @@ export function BasIntegration() {
 
     await createBulkAttribute(attributes);
   }
+
+  async function handleFileDrop(files: { content: ArrayBuffer; file: File }[]) {
+    const { content } = files[0];
+
+    const fileName = `malware/${selectedAgent}-${selectedPlatform}`;
+    await uploadFile({
+      name: fileName,
+      content,
+    });
+
+    const jobs = [
+      {
+        dns: selectedAgent,
+        capability: fileName,
+      },
+    ];
+
+    await bulkReRunJobs(jobs);
+  }
+
+  const [selectedAgent, setSelectedAgent] = useState<string>('');
+  const [selectedPlatform, setSelectedPlatform] = useState<string>('');
+
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const arrayBuffer = await file.arrayBuffer();
+      await handleFileDrop([{ content: arrayBuffer, file }]);
+    }
+  };
+
+  const handleDrop = async (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const file = event.dataTransfer.files?.[0];
+    if (file) {
+      const arrayBuffer = await file.arrayBuffer();
+      await handleFileDrop([{ content: arrayBuffer, file }]);
+    }
+  };
+
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+  };
 
   async function handleEditLabel(event: FormEvent) {
     event.preventDefault();
@@ -1023,68 +1259,253 @@ export function BasIntegration() {
   const isEnabled = BAS.assetAttributes.length > 0;
 
   return (
-    <form id="overviewForm" onSubmit={handleEditLabel}>
-      <div className="flex min-h-11 items-center gap-2">
-        <h3 className="text-xl font-medium text-gray-700">Manage Agents</h3>
-        {!isEnabled && (
-          <Button
-            isLoading={
-              createBulkAssetStatus === 'pending' ||
-              createBulkAttributeStatus === 'pending'
-            }
-            disabled={BAS.isLoading}
-            styleType="text"
-            className="ml-auto"
-            onClick={handleEnable}
-          >
-            Enable
-          </Button>
-        )}
-      </div>
-      <Dropzone onFilesDrop={() => {}} type="string" />
-      <div className="flex flex-col gap-2 pt-4">
-        <Loader isLoading={isLoading}>
-          {BAS.assetAttributes
-            .sort((a, b) => {
-              const bDate = new Date(b.updated);
-              const aDate = new Date(a.updated);
+    <form className="size-full" id="overviewForm" onSubmit={handleEditLabel}>
+      {!isEnabled && (
+        <div className="mb-4 flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-gray-50 p-8 pb-2">
+          <h2 className="mb-4 text-center text-xl font-semibold text-gray-800">
+            Breach and Attack Simulation
+          </h2>
+          <ul className="mb-6 list-inside list-disc text-gray-600">
+            <li className="mb-4 flex justify-center">
+              <Button
+                isLoading={
+                  createBulkAssetStatus === 'pending' ||
+                  createBulkAttributeStatus === 'pending'
+                }
+                disabled={BAS.isLoading}
+                styleType="primary"
+                className=" px-6 py-3 text-lg font-semibold"
+                onClick={handleEnable}
+              >
+                Create Agents
+              </Button>
+            </li>
+            <li className="mb-4">
+              Each agent will be assigned a unique identifier. Assign custom
+              hostnames for easier management.
+            </li>
+            <li className="mb-4">
+              Upload your TTP binaries to these agents to simulate breaches.
+            </li>
+            <li className="mb-4">
+              Use the provided curl command to execute on your machines, sending
+              data back to our system.
+            </li>
+            <li>
+              Analyze the collected data to gain insights into vulnerabilities
+              and defense effectiveness.
+            </li>
+          </ul>
+        </div>
+      )}
+      {isEnabled && (
+        <div>
+          <div className="">
+            <p className="-mt-2 text-sm text-gray-700">
+              {`Upload your TTP (Tactics, Techniques, and Procedures) binary for Chariot's internal assessments. Ensure the file is correctly prepared before uploading.`}
+            </p>
+          </div>
+          <label className="mt-4 block text-sm font-medium leading-6 text-gray-900">
+            Tactics, Techniques, and Procedures (TTP)
+          </label>
+          <div className="flex flex-col items-center space-y-2 rounded-sm border border-gray-200 p-4">
+            <div className="flex w-full flex-row space-x-4">
+              <Dropdown
+                menu={{
+                  items: BAS.assetAttributes.map(attribute => {
+                    const attributeMeta = parseKeys.attributeKey(attribute.key);
 
-              return bDate.getTime() - aDate.getTime();
-            })
-            .map((attribute, index) => {
-              const attributeMeta = parseKeys.attributeKey(attribute.key);
-
-              return (
-                <div className="flex gap-2" key={index}>
-                  <Loader
-                    className="h-[36px] w-[100px]"
-                    isLoading={basLabelAttributesStatus === 'pending'}
+                    return {
+                      label:
+                        allAttLabels[attributeMeta.name] ||
+                        attributeMeta.name.split('-')[0],
+                      value: attributeMeta.name,
+                      onClick: () => {
+                        setSelectedAgent(attributeMeta.name);
+                      },
+                    };
+                  }),
+                }}
+                label={
+                  selectedAgent
+                    ? allAttLabels[selectedAgent] || selectedAgent.split('-')[0]
+                    : 'Select Agent'
+                }
+                className="w-full"
+                endIcon={
+                  <ChevronDownIcon className="ml-auto size-4 text-gray-500" />
+                }
+                value={selectedAgent}
+              />
+              <Dropdown
+                menu={{
+                  items: Object.values(systemTypes).map(system => {
+                    return {
+                      icon: (
+                        <img
+                          className="size-4"
+                          src={`/icons/${system}.svg`}
+                          alt={system}
+                        />
+                      ),
+                      label: <div className="w-full capitalize">{system}</div>,
+                      value: system,
+                      onClick: () => {
+                        setSelectedPlatform(system);
+                      },
+                    };
+                  }),
+                }}
+                startIcon={
+                  selectedPlatform && (
+                    <img
+                      className="size-4"
+                      src={`/icons/${selectedPlatform}.svg`}
+                      alt={selectedPlatform}
+                    />
+                  )
+                }
+                label={selectedPlatform || 'Select Platform'}
+                endIcon={
+                  <ChevronDownIcon className="ml-auto size-4 text-gray-500" />
+                }
+                value={selectedPlatform}
+                className="w-full capitalize"
+              />
+            </div>
+            <div className="flex w-full items-center">
+              <Tooltip
+                title={
+                  selectedAgent === '' || selectedPlatform === ''
+                    ? 'Please select an agent and platform'
+                    : 'Drag and drop or click to upload'
+                }
+              >
+                <div
+                  className="w-full text-center"
+                  onDrop={handleDrop}
+                  onDragOver={handleDragOver}
+                  onClick={() => document.getElementById('fileInput')?.click()}
+                >
+                  <input
+                    type="file"
+                    id="fileInput"
+                    className="hidden"
+                    onChange={handleFileChange}
+                    disabled={selectedAgent === '' || selectedPlatform === ''}
+                  />
+                  <p
+                    className={cn(
+                      'w-full text-white p-4 text-sm font-medium',
+                      selectedAgent === '' || selectedPlatform === ''
+                        ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                        : 'bg-brand text-white cursor-pointer'
+                    )}
                   >
-                    <InputText
-                      className="w-[100px]"
-                      name={attributeMeta.name}
-                      onChange={event => {
-                        setAttLabels(prev => {
-                          return {
-                            ...prev,
-                            [attributeMeta.name]: event.target.value,
-                          };
-                        });
-                      }}
-                      value={attLabels[attributeMeta.name] || ''}
-                    />
-                  </Loader>
-                  <CopyToClipboard className="w-full overflow-hidden">
-                    <OverflowText
-                      text={attribute.key.split('#')[6]}
-                      className="mr-1 text-nowrap font-medium text-brand"
-                    />
-                  </CopyToClipboard>
+                    Upload Executable
+                  </p>
                 </div>
-              );
-            })}
-        </Loader>
-      </div>
+              </Tooltip>
+            </div>
+          </div>
+
+          <div className="flex flex-col pt-4">
+            <Loader isLoading={isLoading}>
+              {BAS.assetAttributes
+                .sort((a, b) => {
+                  const bDate = new Date(b.updated);
+                  const aDate = new Date(a.updated);
+
+                  return bDate.getTime() - aDate.getTime();
+                })
+                .map((attribute, index) => {
+                  const attributeMeta = parseKeys.attributeKey(attribute.key);
+
+                  return (
+                    <div
+                      key={index}
+                      className="flex flex-row justify-start border-gray-200"
+                    >
+                      <div className="flex w-full items-center">
+                        <div className="w-full">
+                          <Loader
+                            className="h-[36px] w-[100px]"
+                            isLoading={basLabelAttributesStatus === 'pending'}
+                          >
+                            <InputText
+                              className="w-full border-0 border-b border-gray-300 ring-0"
+                              placeholder="Agent Name"
+                              name={attributeMeta.name}
+                              onChange={event => {
+                                setAttLabels(prev => {
+                                  return {
+                                    ...prev,
+                                    [attributeMeta.name]: event.target.value,
+                                  };
+                                });
+                              }}
+                              value={attLabels[attributeMeta.name] || ''}
+                            />
+                          </Loader>
+                        </div>
+
+                        <Link
+                          className="mb-1 mt-auto text-xs"
+                          to={getAssetDrawerLink({
+                            name: attributeMeta.name,
+                            dns: attributeMeta.name,
+                          })}
+                        >
+                          {attributeMeta.name.split('-')[0]}
+                        </Link>
+                      </div>
+                      <div className="ml-3 flex shrink-0 border-l border-gray-200 bg-gray-50 py-2 ">
+                        {Object.values(systemTypes).map((system, index) => {
+                          const malwareAvailable =
+                            malwareMap[
+                              `malware/${attributeMeta.name}-${system}`
+                            ];
+
+                          function handleCopy() {
+                            const filename =
+                              system === 'windows' ? 'agent.ps1' : 'agent.sh';
+                            copyToClipboard(
+                              `curl -o ${filename} https://preview.chariot.praetorian.com/${friend.email || me}/${attributeMeta.name}/${system}`
+                            );
+                          }
+
+                          return (
+                            <Tooltip
+                              title={
+                                malwareAvailable
+                                  ? `Copy ${system} command`
+                                  : 'Upload TTP Binary to copy executable command'
+                              }
+                              key={index}
+                            >
+                              <img
+                                onClick={
+                                  malwareAvailable ? handleCopy : undefined
+                                }
+                                className={cn(
+                                  'm-1 size-[28px] cursor-pointer p-1',
+                                  malwareAvailable
+                                    ? ''
+                                    : 'cursor-not-allowed opacity-20'
+                                )}
+                                src={`/icons/${system}.svg`}
+                              />
+                            </Tooltip>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+            </Loader>
+          </div>
+        </div>
+      )}
     </form>
   );
 }

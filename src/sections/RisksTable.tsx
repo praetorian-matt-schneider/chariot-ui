@@ -11,6 +11,7 @@ import {
   ChevronDoubleUpIcon,
   ChevronUpIcon,
 } from '@heroicons/react/24/outline';
+import { useDebounce } from 'use-debounce';
 
 import { Dropdown } from '@/components/Dropdown';
 import { RisksIcon } from '@/components/icons';
@@ -26,6 +27,7 @@ import { ClosedStateModal } from '@/components/ui/ClosedStateModal';
 import { riskStatusFilterOptions } from '@/components/ui/RiskDropdown';
 import { useGetKev } from '@/hooks/kev';
 import { useFilter } from '@/hooks/useFilter';
+import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useMy } from '@/hooks/useMy';
 import { useBulkUpdateRisk } from '@/hooks/useRisks';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
@@ -144,18 +146,24 @@ export function Risks() {
     'risk-severity',
     setSelectedRows
   );
-
   const [intelFilter, setIntelFilter] = useFilter(
     [''],
     'risk-intel',
     setSelectedRows
   );
-
   const [sourcesFilter, setSourcesFilter] = useFilter(
     [''],
     'risk-sources',
     setSelectedRows
   );
+
+  const [search, setSearch] = useState('');
+  const [debouncedSearch] = useDebounce(search, 500);
+  const { data: dataDebouncedSearch, status: statusDebouncedSearch } =
+    useGenericSearch(
+      { query: `name:${debouncedSearch}` },
+      { enabled: Boolean(debouncedSearch) }
+    );
 
   const [isClosedSubStateModalOpen, setIsClosedSubStateModalOpen] =
     useState(false);
@@ -173,7 +181,7 @@ export function Risks() {
   const reviewStep = searchParams.get('review');
 
   const {
-    data: risks = [],
+    data: risksUseMy = [],
     status: risksStatus,
     error,
     isFetchingNextPage,
@@ -182,8 +190,14 @@ export function Risks() {
     resource: 'risk',
     filterByGlobalSearch: true,
   });
+  const risks: Risk[] = debouncedSearch
+    ? dataDebouncedSearch?.risks || []
+    : risksUseMy;
 
-  const status = useMergeStatus(risksStatus, threatsStatus);
+  const status = useMergeStatus(
+    debouncedSearch ? statusDebouncedSearch : risksStatus,
+    threatsStatus
+  );
 
   const filteredRisks = useMemo(() => {
     let filteredRisks = risks;
@@ -371,6 +385,10 @@ export function Risks() {
     <div className="flex w-full flex-col">
       <Table
         name={'risks'}
+        search={{
+          value: search,
+          onChange: setSearch,
+        }}
         resize={true}
         filters={
           <div className="flex gap-4">

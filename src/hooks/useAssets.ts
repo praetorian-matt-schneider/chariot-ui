@@ -187,7 +187,15 @@ export const useBulkAddAsset = () => {
         invalidateAsset();
       }
 
-      return response;
+      if (validResults.length < response.length) {
+        Snackbar({
+          title: `Failed to add ${response.length - validResults.length} assets`,
+          description: '',
+          variant: 'error',
+        });
+      }
+
+      return validResults;
     },
   });
 };

@@ -14,6 +14,7 @@ import {
   HomeIcon,
   MagnifyingGlassIcon,
   PhotoIcon,
+  ShieldCheckIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { EllipsisVerticalIcon } from '@heroicons/react/24/solid';
@@ -63,11 +64,11 @@ const TreeData: Folder[] = [
   //   query: 'threats',
   //   icon: <GlobeAltIcon className="size-6" />,
   // },
-  // {
-  //   label: 'Proof of Exploits',
-  //   query: 'assets',
-  //   icon: <ShieldCheckIcon className="size-6" />,
-  // },
+  {
+    label: 'Proof of Exploits',
+    query: 'proofs',
+    icon: <ShieldCheckIcon className="size-6" />,
+  },
   // {
   //   label: 'Risk Definitions',
   //   query: 'definitions',
@@ -181,6 +182,7 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
 }) => {
   const { query = '', children } = currentFolder;
   const { mutateAsync: uploadFile } = useUploadFile();
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [showFileUpload, setShowFileUpload] = useState(false);
   const [filename, setFilename] = useState('');
   const [filetype, setFiletype] = useState('');
@@ -231,6 +233,40 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
     () => files.filter(file => favorites.includes(file.name)),
     [files, favorites]
   );
+
+  const onFilesDrop = (
+    files: { content: string | ArrayBuffer; file: File }[]
+  ) => {
+    files.forEach(({ content, file }) => {
+      setUploadProgress(0); // Reset progress
+      uploadFile({
+        name: `${currentFolder.query}/${file.name}`,
+        content: content ?? '',
+        onProgress: progressEvent => {
+          const progress =
+            (progressEvent.loaded / (progressEvent.total ?? 1)) * 100;
+          setUploadProgress(progress >= 100 ? null : progress);
+        },
+      })
+        .then(() => {
+          Snackbar({
+            title: file.name,
+            description: 'The file has been uploaded successfully.',
+            variant: 'success',
+          });
+          setUploadProgress(null); // Reset progress on success
+          setShowFileUpload(false); // Hide Dropzone
+        })
+        .catch(() => {
+          Snackbar({
+            title: file.name,
+            description: 'Failed to upload the file.',
+            variant: 'error',
+          });
+          setUploadProgress(null); // Reset progress on error
+        });
+    });
+  };
 
   return (
     <div className="rounded-sm bg-layer0 shadow-sm">
@@ -319,37 +355,38 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
                   {currentFolder.label.replace('My ', '').slice(0, -1)}
                 </span>
               </p>
-              <Dropzone
-                type="string"
-                className="mt-1"
-                onFilesDrop={files => {
-                  files.forEach(({ content, file }) => {
-                    uploadFile({
-                      ignoreSnackbar: true,
-                      name: `${currentFolder.query}/${file.name}`,
-                      content: content ?? '',
-                    })
-                      .then(() => {
-                        Snackbar({
-                          title: file.name,
-                          description:
-                            'The file has been uploaded successfully.',
-                          variant: 'success',
-                        });
-                        setShowFileUpload(false);
-                      })
-                      .catch(() => {
-                        Snackbar({
-                          title: file.name,
-                          description: 'Failed to upload the file.',
-                          variant: 'error',
-                        });
-                      });
-                  });
-                }}
-                title={`Click or drag and drop here.`}
-                subTitle=""
-              />
+              {uploadProgress === null ? (
+                <Dropzone
+                  type="string"
+                  className="mt-1"
+                  onFilesDrop={onFilesDrop}
+                  title={`Click or drag and drop here.`}
+                  subTitle=""
+                />
+              ) : (
+                <div className="w-full">
+                  <div className="relative pt-1">
+                    <div className="mb-2 flex items-center justify-between">
+                      <div>
+                        <span className="inline-block px-2 py-1 text-xs font-semibold uppercase text-default">
+                          Uploading...
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <span className="inline-block text-xs font-semibold text-brand">
+                          {Math.round(uploadProgress)}%
+                        </span>
+                      </div>
+                    </div>
+                    <div className="mb-4 flex h-2 overflow-hidden rounded bg-brand-light text-xs">
+                      <div
+                        style={{ width: `${uploadProgress}%` }}
+                        className="flex flex-col justify-center whitespace-nowrap bg-brand text-center text-white shadow-none"
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -422,7 +459,6 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
                   variant: 'error',
                 });
               });
-            console.log('save', filename, content);
           },
         }}
       >
