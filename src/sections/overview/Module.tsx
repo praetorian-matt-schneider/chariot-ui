@@ -891,6 +891,9 @@ export function useGetModuleData(): {
   const { data: accounts, status: accountStatus } = useMy({
     resource: 'account',
   });
+  const { data: allRisks, status: allRisksStatus } = useMy({
+    resource: 'risk',
+  });
   const { data: basAttributes, status: basAttributesStatus } = useMy({
     resource: 'attribute',
     query: '#source#bas',
@@ -902,6 +905,12 @@ export function useGetModuleData(): {
   const { data: nessusAttributes, status: nessusAttributesStatus } = useMy({
     resource: 'attribute',
     query: '#source#nessus',
+  });
+
+  const cptRisks = allRisks.filter(risk => {
+    return (
+      risk.username.endsWith('@praetorian.com') && risk.status.startsWith('O')
+    );
   });
 
   const isManagedServiceAccount = Boolean(
@@ -1002,7 +1011,7 @@ export function useGetModuleData(): {
       route: '',
     },
     CPT: {
-      noOfRisk: 0,
+      noOfRisk: cptRisks.length,
       noOfAsset: 0,
       enabled: isManagedServiceAccount,
       assetAttributes: [],
@@ -1057,7 +1066,8 @@ export function useGetModuleData(): {
         ctiAttributeStatus,
         assetCountStatus,
         riskCountStatus,
-        nessusAttributesStatus
+        nessusAttributesStatus,
+        allRisksStatus
       ) === 'pending',
   };
 }
