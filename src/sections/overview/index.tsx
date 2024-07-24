@@ -353,7 +353,10 @@ export function ModulesModal() {
     Boolean(moduleState.value?.integration) &&
     !([Integration.kev, Integration.nessus] as string[]).includes(
       moduleState.value?.integration
-    );
+    ) &&
+    (moduleState.value?.integration === Integration.basAgent
+      ? integrationsData.basAgent.isConnected
+      : true);
 
   const featuredModules = [
     Module.PM,
