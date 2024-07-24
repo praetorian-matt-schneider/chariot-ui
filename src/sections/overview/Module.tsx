@@ -737,8 +737,8 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
           <p className="text-default-light">
             When you provide an Asset as a starting point, Chariot’s
             comprehensive scan protocols the digital doors to your organization.
-            Using tools like subfinder, assetfinder, Massscan, whois, and
-            others, Chariot seeks, finds, and presents a picture of your Assets.
+            Using tools like subfinder, assetfinder, masscan, whois, and others,
+            Chariot seeks, finds, and presents a picture of your Assets.
           </p>
         </div>
         <div className="rounded-md bg-gray-100 p-4 shadow-sm">
