@@ -45,41 +45,34 @@ const NessusInstructions = () => {
   return (
     <div>
       <p className="mb-4">
-        You can use our open-source command line interface (CLI) to seamlessly
-        import assets and risks from Nessus scans. Follow the steps below to get
-        started.
+        Chariot import scan results from Nessus using the command line interface
+        (CLI).
       </p>
-
-      <h2 className="mb-2 text-lg font-semibold">1. Install the CLI</h2>
-      <p className="mb-2">Use the following command to install the CLI:</p>
+      <h1 className="mb-2 text-xl font-bold">
+        Install the CLI and configure it by:
+      </h1>
       <pre className="mb-4 rounded-md bg-gray-100 p-4">
         <code>pip install praetorian-cli</code>
-      </pre>
-
-      <h2 className="mb-2 mt-4 text-lg font-semibold">2. Configure the CLI</h2>
-      <pre className="mb-4 rounded-md bg-gray-100 p-4">
+        <br />
         <code>praetorian configure</code>
       </pre>
-
-      <h2 className="mb-2 mt-4 text-lg font-semibold">
-        3. Import Nessus Results
-      </h2>
-      <p className="mb-2">
-        Run one of the following commands to import Nessus results:
-      </p>
-
-      <h3 className="mb-2 mt-4 text-lg font-medium">Using Nessus API</h3>
-      <pre className="mb-4 rounded-md bg-gray-100 p-4">
-        <code>praetorian chariot plugin nessus-api</code>
-      </pre>
-
-      <h3 className="mb-2 mt-4 text-lg font-medium">
-        Using Nessus XML Export Files
-      </h3>
-      <pre className="mb-4 rounded-md bg-gray-100 p-4">
-        <code>praetorian chariot plugin nessus-XML</code>
-      </pre>
-
+      <h1 className="mb-2 mt-4 text-xl font-bold">
+        Import Nessus results in one of two ways:
+      </h1>
+      <div className="">
+        <h2 className="mb-2 mt-4 text-lg font-semibold">
+          1. Connecting to a Nessus server:
+        </h2>
+        <pre className="mb-4 rounded-md bg-gray-100 p-4">
+          <code>praetorian chariot plugin nessus-api</code>
+        </pre>
+        <h2 className="mb-2 mt-4 text-lg font-medium">
+          2. Using an XML export file:
+        </h2>
+        <pre className="mb-4 rounded-md bg-gray-100 p-4">
+          <code>praetorian chariot plugin nessus-xml</code>
+        </pre>
+      </div>
       <p className="text-sm">
         For more information, please visit our{' '}
         <a
