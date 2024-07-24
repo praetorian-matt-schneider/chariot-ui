@@ -57,18 +57,9 @@ const NessusInstructions = () => {
       </pre>
 
       <h2 className="mb-2 mt-4 text-lg font-semibold">2. Configure the CLI</h2>
-      <p className="mb-2">
-        Refer to our{' '}
-        <a
-          href="https://github.com/praetorian-inc/praetorian-cli"
-          className="text-blue-500 underline"
-          target="_blank"
-          rel="noreferrer noopener"
-        >
-          GitHub repository
-        </a>{' '}
-        for detailed configuration instructions.
-      </p>
+      <pre className="mb-4 rounded-md bg-gray-100 p-4">
+        <code>praetorian configure</code>
+      </pre>
 
       <h2 className="mb-2 mt-4 text-lg font-semibold">
         3. Import Nessus Results
