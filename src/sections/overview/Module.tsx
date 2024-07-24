@@ -1,6 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { To } from 'react-router-dom';
-import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import {
   BookOpen,
   ClipboardList,
@@ -15,7 +14,7 @@ import {
 import { Flag } from 'lucide-react';
 
 import { Button } from '@/components/Button';
-import { Dropdown } from '@/components/Dropdown';
+import { Dropzone, Files } from '@/components/Dropzone';
 import { Input } from '@/components/form/Input';
 import { InputText } from '@/components/form/InputText';
 import { Link } from '@/components/Link';
@@ -1266,50 +1265,26 @@ export function BasIntegration() {
     await createBulkAttribute(attributes);
   }
 
-  async function handleFileDrop(files: { content: ArrayBuffer; file: File }[]) {
-    const { content } = files[0];
+  async function handleFileDrop(files: Files<'arrayBuffer'>) {
+    const { content, file } = files[0];
 
-    const fileName = `malware/${selectedAgent}-${selectedPlatform}`;
+    const fileName = `malware/${file.name}`;
     await uploadFile({
       name: fileName,
       content,
     });
 
-    const jobs = [
-      {
-        dns: selectedAgent,
+    const jobs = BAS.assetAttributes.map(attribute => {
+      const attMeta = parseKeys.attributeKey(attribute.key);
+
+      return {
+        dns: attMeta.name,
         capability: fileName,
-      },
-    ];
+      };
+    });
 
     await bulkReRunJobs(jobs);
   }
-
-  const [selectedAgent, setSelectedAgent] = useState<string>('');
-  const [selectedPlatform, setSelectedPlatform] = useState<string>('');
-
-  const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const arrayBuffer = await file.arrayBuffer();
-      await handleFileDrop([{ content: arrayBuffer, file }]);
-    }
-  };
-
-  const handleDrop = async (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    const file = event.dataTransfer.files?.[0];
-    if (file) {
-      const arrayBuffer = await file.arrayBuffer();
-      await handleFileDrop([{ content: arrayBuffer, file }]);
-    }
-  };
-
-  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-  };
 
   async function handleEditLabel(event: FormEvent) {
     event.preventDefault();
@@ -1389,115 +1364,15 @@ export function BasIntegration() {
       )}
       {isEnabled && (
         <div>
-          <div className="">
-            <p className="-mt-2 text-sm text-gray-700">
-              Upload your TTP (Tactics, Techniques, and Procedures) executable
-              for Chariot&apos;s internal assessments.
-            </p>
-          </div>
-          <label className="mt-4 block text-sm font-medium leading-6 text-gray-900">
-            Tactics, Techniques, and Procedures (TTP)
-          </label>
-          <div className="flex flex-col items-center space-y-2 rounded-sm border border-gray-200 p-4">
-            <div className="flex w-full flex-row space-x-4">
-              <Dropdown
-                menu={{
-                  items: BAS.assetAttributes.map(attribute => {
-                    const attributeMeta = parseKeys.attributeKey(attribute.key);
-
-                    return {
-                      label:
-                        allAttLabels[attributeMeta.name] ||
-                        attributeMeta.name.slice(0, 5),
-                      value: attributeMeta.name,
-                      onClick: () => {
-                        setSelectedAgent(attributeMeta.name);
-                      },
-                    };
-                  }),
-                }}
-                label={
-                  selectedAgent
-                    ? allAttLabels[selectedAgent] || selectedAgent.slice(0, 5)
-                    : 'Select Agent'
-                }
-                className="w-full"
-                endIcon={
-                  <ChevronDownIcon className="ml-auto size-4 text-gray-500" />
-                }
-                value={selectedAgent}
-              />
-              <Dropdown
-                menu={{
-                  items: Object.values(systemTypes).map(system => {
-                    return {
-                      icon: (
-                        <img
-                          className="size-4"
-                          src={`/icons/${system}.svg`}
-                          alt={system}
-                        />
-                      ),
-                      label: <div className="w-full capitalize">{system}</div>,
-                      value: system,
-                      onClick: () => {
-                        setSelectedPlatform(system);
-                      },
-                    };
-                  }),
-                }}
-                startIcon={
-                  selectedPlatform && (
-                    <img
-                      className="size-4"
-                      src={`/icons/${selectedPlatform}.svg`}
-                      alt={selectedPlatform}
-                    />
-                  )
-                }
-                label={selectedPlatform || 'Select Platform'}
-                endIcon={
-                  <ChevronDownIcon className="ml-auto size-4 text-gray-500" />
-                }
-                value={selectedPlatform}
-                className="w-full capitalize"
-              />
-            </div>
-            <div className="flex w-full items-center">
-              <Tooltip
-                title={
-                  selectedAgent === '' || selectedPlatform === ''
-                    ? 'Please select an agent and platform'
-                    : 'Drag and drop or click to upload'
-                }
-              >
-                <div
-                  className="w-full text-center"
-                  onDrop={handleDrop}
-                  onDragOver={handleDragOver}
-                  onClick={() => document.getElementById('fileInput')?.click()}
-                >
-                  <input
-                    type="file"
-                    id="fileInput"
-                    className="hidden"
-                    onChange={handleFileChange}
-                    disabled={selectedAgent === '' || selectedPlatform === ''}
-                  />
-                  <p
-                    className={cn(
-                      'w-full text-white p-4 text-sm font-medium',
-                      selectedAgent === '' || selectedPlatform === ''
-                        ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
-                        : 'bg-brand text-white cursor-pointer'
-                    )}
-                  >
-                    Upload Executable
-                  </p>
-                </div>
-              </Tooltip>
-            </div>
-          </div>
+          <Dropzone
+            multiple={false}
+            onFilesDrop={handleFileDrop}
+            type="arrayBuffer"
+            title=""
+            subTitle={`Upload your TTP (Tactics, Techniques, and Procedures) executable
+              for Chariot's internal assessments.`}
+            className="m-0 mt-2 h-[200px]"
+          />
 
           <div className="flex flex-col pt-4">
             <Loader isLoading={isLoading}>
