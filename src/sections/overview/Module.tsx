@@ -23,7 +23,10 @@ import { Tooltip } from '@/components/Tooltip';
 import WebhookExample from '@/components/ui/WebhookExample';
 import { useMy, useUploadFile } from '@/hooks';
 import { useBulkAddAsset } from '@/hooks/useAssets';
-import { useBulkAddAttributes } from '@/hooks/useAttribute';
+import {
+  useBulkAddAttributes,
+  useBulkDeleteAttributes,
+} from '@/hooks/useAttribute';
 import { useCounts } from '@/hooks/useCounts';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useBulkReRunJob } from '@/hooks/useJobs';
@@ -1199,7 +1202,7 @@ export function BasIntegration() {
 
   const { data: basLabelAttributes, status: basLabelAttributesStatus } = useMy({
     resource: 'attribute',
-    query: '#source#labelBas',
+    query: '#basAgentName',
   });
 
   const { mutateAsync: createBulkAsset, status: createBulkAssetStatus } =
@@ -1211,6 +1214,11 @@ export function BasIntegration() {
     mutateAsync: createBulkAttribute,
     status: createBulkAttributeStatus,
   } = useBulkAddAttributes();
+
+  const {
+    mutateAsync: removeBulkAttribute,
+    status: removeBulkAttributeStatus,
+  } = useBulkDeleteAttributes({ showToast: false });
 
   const allAttLabels = useMemo(() => {
     return basLabelAttributes.reduce(
@@ -1251,7 +1259,7 @@ export function BasIntegration() {
   async function handleFileDrop(files: Files<'arrayBuffer'>) {
     const { content, file } = files[0];
 
-    const [, uuid, platform, extension] =
+    const [, uuid, platform] =
       file.name.match(/(.*)-(windows|darwin|linux)\.(.*)$/) || [];
 
     console.log('file', file);
@@ -1279,15 +1287,39 @@ export function BasIntegration() {
   async function handleEditLabel(event: FormEvent) {
     event.preventDefault();
 
-    const attributes = BAS.assetAttributes.map(({ key }) => {
+    const attributes = BAS.assetAttributes
+      .filter(({ key }) => {
+        const attributeMeta = parseKeys.attributeKey(key);
+
+        return attLabels[attributeMeta.name];
+      })
+      .map(({ key }) => {
+        const attributeMeta = parseKeys.attributeKey(key);
+
+        return {
+          key: `#asset#${attributeMeta.name}#${attributeMeta.name}`,
+          name: 'basAgentName',
+          value: `${attLabels[attributeMeta.name]}`,
+        };
+      });
+
+    const attToRemove = BAS.assetAttributes.filter(({ key }) => {
       const attributeMeta = parseKeys.attributeKey(key);
 
-      return {
-        key: `#asset#${attributeMeta.name}#${attributeMeta.name}`,
-        name: 'source',
-        value: `labelBas#${attLabels[attributeMeta.name]}`,
-      };
+      return allAttLabels[attributeMeta.name];
     });
+
+    if (attToRemove.length > 0) {
+      await removeBulkAttribute(
+        attToRemove.map(({ key, name }) => {
+          const attributeMeta = parseKeys.attributeKey(key);
+
+          return {
+            key: `#attribute#basAgentName#${allAttLabels[attributeMeta.name]}#asset#${attributeMeta.name}#${attributeMeta.name}`,
+          };
+        })
+      );
+    }
 
     await createBulkAttribute(attributes);
   }

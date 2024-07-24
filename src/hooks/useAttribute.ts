@@ -102,6 +102,57 @@ export const useBulkAddAttributes = () => {
   });
 };
 
+export const useBulkDeleteAttributes = (props?: { showToast?: boolean }) => {
+  const { showToast = true } = props || {};
+
+  const axios = useAxios();
+  const { invalidate: invalidateAttributeCounts } = useCounts(
+    { resource: 'attribute' },
+    { enabled: false }
+  );
+  const { invalidate: invalidateAttribute } = useMy(
+    { resource: 'attribute' },
+    { enabled: false }
+  );
+
+  return useMutation({
+    defaultErrorMessage: 'Failed to delete attributes',
+    mutationFn: async (attributes: { key: string }[]) => {
+      const response = await Promise.all<Attribute>(
+        attributes
+          .map(attribute => {
+            return axios.delete(`/attribute`, {
+              data: {
+                key: attribute.key,
+              },
+            });
+          })
+          // Note: Catch error so we can continue adding assets even if some fail
+          .map(p => p.catch(e => e))
+      );
+
+      const validResults = response.filter(
+        result => !(result instanceof Error)
+      );
+
+      if (validResults.length > 0) {
+        if (showToast) {
+          Snackbar({
+            title: `Removed ${validResults.length} Attributes`,
+            description: '',
+            variant: 'success',
+          });
+
+          invalidateAttributeCounts();
+          invalidateAttribute();
+        }
+      }
+
+      return response;
+    },
+  });
+};
+
 export const useAssetsWithAttributes = (attributes: string[]) => {
   const axios = useAxios();
   return useQueries({
