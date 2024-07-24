@@ -2,13 +2,17 @@ import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { To } from 'react-router-dom';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import {
+  BookOpen,
   ClipboardList,
   Crosshair,
   Fingerprint,
   GlobeLock,
   Goal,
+  Handshake,
   Radar,
+  RefreshCcwDot,
 } from 'lucide-react';
+import { Flag } from 'lucide-react';
 
 import { Button } from '@/components/Button';
 import { Dropdown } from '@/components/Dropdown';
@@ -702,17 +706,45 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
     name: 'ASM',
     description: `Attack surface management (ASM) refers to the proactive approach of identifying, analyzing, and managing potential points of attack on an organization's IT infrastructure, applications, and networks. The goal of ASM is to minimize the attack surface, which is the sum of all possible entry points that an attacker can exploit to gain unauthorized access or cause damage.`,
     defaultTab: (
-      <div className="p-4">
+      <div className="space-y-4 p-4">
         <h3 className="text-2xl font-semibold">Attack Surface Management</h3>
-        <p className="mt-2 text-default-light">
-          When you provide an Asset as a starting point, Chariot’s comprehensive
-          scan protocols the digital doors to your organization. Using tools
-          like subfinder, assetfinder, Massscan, whois, and and others, Chariot
-          seeks, finds, and presents a picture of your Assets.
+        <p className="text-default-light">
+          Attack surface management (ASM) refers to the proactive approach of
+          identifying, analyzing, and managing potential points of attack on an
+          organization&apos;s IT infrastructure, applications, and networks.
         </p>
-        <p className="mt-2 text-default-light">
-          {`Continuous ASM helps you proactively manage potential vulnerabilities and exposures, ensuring your organization's security measures keep pace with the dynamic threat environment.`}
-        </p>
+        <div className="rounded-md bg-gray-100 p-4 shadow-sm">
+          <h4 className="font-semibold ">
+            <Flag className="-mt-1 inline size-4" /> Goal of ASM
+          </h4>
+          <p className="text-default-light">
+            The goal of ASM is to provide visibility of all assets that are
+            exposed to external threats—the sum of all possible entry points
+            that an attacker can exploit to gain unauthorized access or cause
+            damage on your network.
+          </p>
+        </div>
+        <div className="rounded-md bg-gray-100 p-4 shadow-sm">
+          <h4 className="font-semibold">
+            <BookOpen className="-mt-1 inline size-4" /> How ASM Works
+          </h4>
+          <p className="text-default-light">
+            When you provide an Asset as a starting point, Chariot’s
+            comprehensive scan protocols the digital doors to your organization.
+            Using tools like subfinder, assetfinder, Massscan, whois, and
+            others, Chariot seeks, finds, and presents a picture of your Assets.
+          </p>
+        </div>
+        <div className="rounded-md bg-gray-100 p-4 shadow-sm">
+          <h4 className="font-semibold">
+            <RefreshCcwDot className="-mt-1 inline size-4" /> Continuous ASM
+          </h4>
+          <p className="text-default-light">
+            Continuous ASM helps you proactively manage potential
+            vulnerabilities and exposures, ensuring your organization&apos;s
+            security measures keep pace with the dynamic threat environment.
+          </p>
+        </div>
       </div>
     ),
     integrations: [
@@ -731,18 +763,43 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
     name: 'BAS',
     description: `Breach and Attack Simulation (BAS) uses automated tools to continuously simulate real-world cyber attacks, helping organizations identify vulnerabilities, improve threat detection, and enhance their overall security posture.`,
     defaultTab: (
-      <div className="p-4">
+      <div className="space-y-4 p-4">
         <h3 className="text-2xl font-semibold">Breach & Attack Simulation</h3>
-        <p className="mt-2 text-default-light">
-          Upload custom TTPs to Chariot to measure your detection and response
-          to MITRE ATT&CK techniques. Deploy a 1-kilobyte agent on any device
-          and schedule jobs for immediate execution.
+        <p className="text-default-light">
+          Breach and Attack Simulation (BAS) -- Chariot moves past external
+          threat identification and uses an automated approach to continuously
+          simulate real-world cyber attacks.
         </p>
-        <p className="mt-2 text-default-light">
-          Stress test your threat detection and response capabilities by
-          continuously testing your defenses against the latest attack
-          techniques.
-        </p>
+        <div className="rounded-md bg-gray-100 p-4 shadow-sm">
+          <h4 className="font-semibold ">
+            <Flag className="-mt-1 inline size-4" /> Goal of BAS
+          </h4>
+          <p className="text-default-light">
+            Continuous threat exposure testing will help organizations identify
+            vulnerabilities, improve threat detection, and enhance their overall
+            security posture at an extremely fast pace.
+          </p>
+        </div>
+        <div className="rounded-md bg-gray-100 p-4 shadow-sm">
+          <h4 className="font-semibold">
+            <BookOpen className="-mt-1 inline size-4" /> How BAS Works
+          </h4>
+          <p className="text-default-light">
+            Upload custom TTPs to Chariot to measure your detection and response
+            to MITRE ATT&CK techniques. Deploy a 1-kilobyte agent on any device
+            and schedule jobs for immediate execution.
+          </p>
+        </div>
+        <div className="rounded-md bg-gray-100 p-4 shadow-sm">
+          <h4 className="font-semibold">
+            <RefreshCcwDot className="-mt-1 inline size-4" /> Continuous BAS
+          </h4>
+          <p className="text-default-light">
+            Stress test your threat detection and response capabilities by
+            continuously testing your defenses against the latest attack
+            techniques.
+          </p>
+        </div>
       </div>
     ),
     integrations: [Integrations.basAgent],
@@ -753,18 +810,44 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
     name: 'CTI',
     description: `Cyber Threat Intelligence (CTI) involves the collection and analysis of information about potential or current attacks that threaten an organization, helping to inform security decisions and proactive defense strategies.`,
     defaultTab: (
-      <div className="p-4">
+      <div className="space-y-4 p-4">
         <h3 className="text-2xl font-semibold">Cyber Threat Intelligence</h3>
-        <p className="mt-2 text-default-light">
-          Chariot tags Known Exploited Vulnerabilities–risks we know are being
-          used to hack into networks– to elevate the Risks that matter most to
-          your business.
+        <p className="text-default-light">
+          Cyber Threat Intelligence (CTI) is the codified knowledge and
+          understanding of how risks and vulnerabilities affect the real world.
         </p>
-        <p className="mt-2 text-default-light">
-          We monitor emerging threat intelligence from a variety of trusted
-          sources and provide detailed analysis of new vulnerabilities,
-          exploits, and attack vectors.
-        </p>
+        <div className="rounded-md bg-gray-100 p-4 shadow-sm">
+          <h4 className="font-semibold ">
+            <Flag className="-mt-1 inline size-4" /> Goal of CTI
+          </h4>
+          <p className="text-default-light">
+            CTI ingests the collection and analysis of information on potential
+            or current attacks and tailors output in a way that provides
+            relevance that is tailored to real-world organizations. Tailored
+            intelligence informs security decisions and proactive defense
+            strategies.
+          </p>
+        </div>
+        <div className="rounded-md bg-gray-100 p-4 shadow-sm">
+          <h4 className="font-semibold">
+            <BookOpen className="-mt-1 inline size-4" /> How CTI Works
+          </h4>
+          <p className="text-default-light">
+            Chariot tags Known Exploited Vulnerabilities–risks we know are being
+            used to hack into networks– to elevate the Risks that matter most to
+            your business.
+          </p>
+        </div>
+        <div className="rounded-md bg-gray-100 p-4 shadow-sm">
+          <h4 className="font-semibold">
+            <RefreshCcwDot className="-mt-1 inline size-4" /> Continuous CTI
+          </h4>
+          <p className="text-default-light">
+            We monitor emerging threat intelligence from a variety of trusted
+            sources and provide detailed analysis of new vulnerabilities,
+            exploits, and attack vectors.
+          </p>
+        </div>
       </div>
     ),
     integrations: [Integrations.kev],
@@ -775,17 +858,42 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
     name: 'VM',
     description: `Our Vulnerability Management (VM) services include identifying, assessing, and mitigating security vulnerabilities across your IT infrastructure to ensure robust protection against potential threats.`,
     defaultTab: (
-      <div className="p-4">
+      <div className="space-y-4 p-4">
         <h3 className="text-2xl font-semibold">Vulnerability Management</h3>
-        <p className="mt-2 text-default-light">
-          VM services take the CVEs found on your Attack Surface–the Risks that
-          represent the most potential harm to your organization–and present the
-          most efficient approach to securing your Assets.
+        <p className="text-default-light">
+          Our Vulnerability Management (VM) services identify, assess, and
+          mitigate security vulnerabilities across your digital infrastructure.
         </p>
-        <p className="mt-2 text-default-light">
-          Chariot provides the data, up front, in a way that allows a tailored
-          remediation approach.
-        </p>
+        <div className="rounded-md bg-gray-100 p-4 shadow-sm">
+          <h4 className="font-semibold ">
+            <Flag className="-mt-1 inline size-4" /> Goal of VM
+          </h4>
+          <p className="text-default-light">
+            Seeing Risks Applied to your Assets is only the first step in the
+            security journey. Deciding which risks present the most potential
+            harm, specific to your business, is where Chariot Vulnerability
+            Management pays dividends.
+          </p>
+        </div>
+        <div className="rounded-md bg-gray-100 p-4 shadow-sm">
+          <h4 className="font-semibold">
+            <BookOpen className="-mt-1 inline size-4" /> How VM Works
+          </h4>
+          <p className="text-default-light">
+            VM services take the CVEs found on your Attack Surface–the Risks
+            that represent the most potential harm to your organization–and
+            present the most efficient approach to securing your Assets.
+          </p>
+        </div>
+        <div className="rounded-md bg-gray-100 p-4 shadow-sm">
+          <h4 className="font-semibold">
+            <Handshake className="-mt-1 inline size-4" /> Tailored Remediation
+          </h4>
+          <p className="text-default-light">
+            Chariot provides the data, up front, in a way that allows a tailored
+            remediation approach.
+          </p>
+        </div>
       </div>
     ),
     integrations: [Integrations.nessus],
