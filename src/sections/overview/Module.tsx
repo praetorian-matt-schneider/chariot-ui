@@ -96,9 +96,7 @@ const NessusInstructions = () => {
   );
 };
 
-const defaultPin = (
-  Math.floor(Math.random() * (99999 - 10000 + 1)) + 10000
-).toString();
+const defaultPin = generateUuid();
 const uuid = generateUuid();
 
 export const Integrations: Record<Integration, IntegrationMeta> = {
