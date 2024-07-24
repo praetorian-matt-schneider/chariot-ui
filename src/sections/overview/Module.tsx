@@ -674,7 +674,7 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
 
 export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
   PM: {
-    Icon: <ClipboardList className="size-10 text-default-light" />,
+    Icon: <ClipboardList className="size-10 text-default" />,
     name: 'Project Management',
     label: 'Integrate with your existing workflows',
     description: '',
@@ -701,7 +701,7 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
     ],
   },
   ASM: {
-    Icon: <Radar className="size-10 text-default-light" />,
+    Icon: <Radar className="size-10 text-default" />,
     label: 'Attack Surface Management',
     name: 'ASM',
     description: `Attack surface management (ASM) refers to the proactive approach of identifying, analyzing, and managing potential points of attack on an organization's IT infrastructure, applications, and networks. The goal of ASM is to minimize the attack surface, which is the sum of all possible entry points that an attacker can exploit to gain unauthorized access or cause damage.`,
@@ -758,7 +758,7 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
     ],
   },
   BAS: {
-    Icon: <Goal className="size-10 text-default-light" />,
+    Icon: <Goal className="size-10 text-default" />,
     label: 'Breach and Attack Simulation',
     name: 'BAS',
     description: `Breach and Attack Simulation (BAS) uses automated tools to continuously simulate real-world cyber attacks, helping organizations identify vulnerabilities, improve threat detection, and enhance their overall security posture.`,
@@ -805,7 +805,7 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
     integrations: [Integrations.basAgent],
   },
   CTI: {
-    Icon: <Crosshair className="size-10 text-default-light" />,
+    Icon: <Crosshair className="size-10 text-default" />,
     label: 'Cyber Threat Intelligence',
     name: 'CTI',
     description: `Cyber Threat Intelligence (CTI) involves the collection and analysis of information about potential or current attacks that threaten an organization, helping to inform security decisions and proactive defense strategies.`,
@@ -853,7 +853,7 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
     integrations: [Integrations.kev],
   },
   VM: {
-    Icon: <GlobeLock className="size-10 text-default-light" />,
+    Icon: <GlobeLock className="size-10 text-default" />,
     label: 'Vulnerability Management',
     name: 'VM',
     description: `Our Vulnerability Management (VM) services include identifying, assessing, and mitigating security vulnerabilities across your IT infrastructure to ensure robust protection against potential threats.`,
@@ -899,7 +899,7 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
     integrations: [Integrations.nessus],
   },
   CPT: {
-    Icon: <Fingerprint className="size-10 text-default-light" />,
+    Icon: <Fingerprint className="size-10 text-default" />,
     label: 'Continuous Penetration Testing',
     name: 'CPT',
     description: `Continuous Penetration Testing (CPT) solutions provide ongoing testing and validation of security measures, helping organizations identify and address vulnerabilities in real-time.`,
