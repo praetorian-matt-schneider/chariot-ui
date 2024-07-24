@@ -1,10 +1,7 @@
-import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import React, { ReactNode, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 
-import { BreadCrumbs } from '@/components/BreadCrumbs';
-import ImpersonationBanner from '@/components/ImpersonationBanner';
-import { Loader } from '@/components/Loader';
 import { ShortcutsHelper } from '@/components/ui/Shortcuts';
 import { useMy } from '@/hooks';
 import { useGetDisplayName } from '@/hooks/useAccounts';
@@ -13,9 +10,10 @@ import { AddFile } from '@/sections/add/AddFile';
 import { AddRisks } from '@/sections/add/AddRisks';
 import { DetailsDrawer } from '@/sections/detailsDrawer';
 import { NewUserSeedModal } from '@/sections/NewUserSeedModal';
+import { ModulesModal } from '@/sections/overview';
 import { ProofOfExploit } from '@/sections/ProofOfExploit';
 import { TopNavBar } from '@/sections/topNavBar/TopNavBar';
-import { Upgrade } from '@/sections/Upgrade';
+import { UpgradeModal } from '@/sections/Upgrade';
 import { useAuth } from '@/state/auth';
 import { useBreadCrumbsContext } from '@/state/breadcrumbs';
 import { cn } from '@/utils/classname';
@@ -34,16 +32,9 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
   const { useBreadCrumb } = useBreadCrumbsContext();
   const { me, friend } = useAuth();
 
-  const { data: accounts, status: accountsStatus } = useMy({
+  const { data: accounts } = useMy({
     resource: 'account',
   });
-
-  const showUpgrade = useMemo(() => {
-    return Boolean(
-      friend.email === '' &&
-        !accounts.some(account => account.member.endsWith('praetorian.com'))
-    );
-  }, [accountsStatus, JSON.stringify(accounts), JSON.stringify(friend)]);
 
   const displayName = useGetDisplayName(accounts);
 
@@ -111,13 +102,13 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
         <ShortcutsHelper onClose={() => setShortcutsHelper(false)} />
       )}
       <DetailsDrawer />
-      <ImpersonationBanner />
       <NewUserSeedModal />
       <ProofOfExploit />
       <AddRisks />
       <AddAsset />
       <AddFile />
-      {accountsStatus === 'success' && showUpgrade && <Upgrade />}
+      <ModulesModal />
+      <UpgradeModal />
     </div>
   );
 }
@@ -129,11 +120,10 @@ const HeaderPortalSections = {
 
 export function Header() {
   const { friend } = useAuth();
-  const { status: statusAccount } = useMy({ resource: 'account' });
   const { breadcrumbs } = useBreadCrumbsContext();
 
   // TODO: FIXME - this is a hack to not show sticky header on table pages
-  const showSticky = ['assets', 'risks', 'seeds', 'jobs', 'documents'].includes(
+  const showSticky = ['assets', 'risks', 'seeds', 'jobs'].includes(
     breadcrumbs[1]?.label?.toLowerCase()
   );
 
@@ -146,17 +136,6 @@ export function Header() {
       >
         <div className="w-full max-w-screen-xl">
           <TopNavBar />
-          <hr className="h-px bg-layer0 opacity-15" />
-          <div className={cn('flex items-center justify-between gap-10')}>
-            <Loader
-              styleType="header"
-              className="my-9 h-11 w-1/2"
-              isLoading={statusAccount === 'pending'}
-            >
-              <BreadCrumbs breadcrumbs={breadcrumbs} />
-            </Loader>
-            <div id={HeaderPortalSections.BREADCRUMBS} className="shrink-0" />
-          </div>
         </div>
       </div>
       <div
@@ -165,7 +144,7 @@ export function Header() {
       >
         <div
           id={HeaderPortalSections.EXTRA_CONTENT}
-          className="m-auto max-w-screen-xl [&:has(*)]:pb-9"
+          className="m-auto max-w-screen-xl text-[10px] [&:has(*)]:pb-7"
         />
       </div>
     </>

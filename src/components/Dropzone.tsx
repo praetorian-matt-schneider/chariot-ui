@@ -23,6 +23,7 @@ interface Props<T extends FileReadType> extends PropsWithChildren {
   subTitle?: string;
   className?: string;
   type: T;
+  multiple?: boolean;
 }
 
 export function Dropzone<T extends FileReadType>(props: Props<T>) {
@@ -33,6 +34,7 @@ export function Dropzone<T extends FileReadType>(props: Props<T>) {
     subTitle = 'Suggest file types: TXT, CSV, JSON, or XML',
     children,
     className,
+    multiple = true,
   } = props;
 
   const handleDrop = (files: File[]): void => {
@@ -74,6 +76,7 @@ export function Dropzone<T extends FileReadType>(props: Props<T>) {
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: handleDrop,
+    multiple,
   });
 
   return (

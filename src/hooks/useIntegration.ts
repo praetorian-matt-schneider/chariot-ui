@@ -1,8 +1,8 @@
 import { useCallback } from 'react';
 
 import { useMy } from '@/hooks/useMy';
+import { AvailableIntegrations } from '@/sections/overview/Integration';
 import { Asset } from '@/types';
-import { AvailableIntegrations } from '@/utils/availableIntegrations';
 
 export const useIntegration = () => {
   const { data: accounts, status: accountStatus } = useMy({
@@ -23,25 +23,7 @@ export const useIntegration = () => {
     [accountStatus]
   );
 
-  const isIntegrationConnected = useCallback(
-    (name: string) => {
-      return accounts.map(({ member }) => member).includes(name);
-    },
-    [accounts]
-  );
-
-  const getConnectedIntegration = useCallback(
-    (name: string) => {
-      return isIntegrationConnected(name)
-        ? accounts.filter(({ member }) => member === name)
-        : [];
-    },
-    [accounts]
-  );
-
   return {
     isIntegration,
-    isIntegrationConnected,
-    getConnectedIntegration,
   };
 };

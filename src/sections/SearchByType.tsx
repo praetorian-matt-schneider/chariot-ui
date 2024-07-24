@@ -318,6 +318,22 @@ export const parseKeys = {
   } {
     const [, , name, value, attributeType] = key.split('#');
 
+    if (name === 'basAgentName') {
+      const [, , , value, attributeType, name] = key.split('#');
+
+      return {
+        name,
+        value: value,
+        attributeType: attributeType as AttributeType,
+      };
+    }
+
+    if (name === 'source') {
+      const [, , , , , attributeType, name, value] = key.split('#');
+
+      return { name, value, attributeType: attributeType as AttributeType };
+    }
+
     return { name, value, attributeType: attributeType as AttributeType };
   },
   assetKey(key: string): {

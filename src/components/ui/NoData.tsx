@@ -16,7 +16,7 @@ export const NoData = ({
   description,
   className,
 }: NoDataProps) => (
-  <div className="flex h-full flex-col items-center justify-center gap-6 p-12">
+  <div className="flex size-full flex-col items-center justify-center gap-6 p-12">
     <div className="text-[240px]">{icon}</div>
     <h6 className={cn('text-3xl font-bold capitalize text-center', className)}>
       {title}

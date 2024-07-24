@@ -1,4 +1,4 @@
-import { AxiosHeaders } from 'axios';
+import { AxiosHeaders, AxiosProgressEvent } from 'axios';
 
 import { Snackbar } from '@/components/Snackbar';
 import {
@@ -17,6 +17,7 @@ interface UploadFilesProps {
   name: string;
   content: string | ArrayBuffer;
   ignoreSnackbar?: boolean;
+  onProgress?: (progressEvent: AxiosProgressEvent) => void;
 }
 
 export function useUploadFile() {
@@ -34,7 +35,7 @@ export function useUploadFile() {
   );
 
   return useMutation({
-    defaultErrorMessage: `Failed to Upload file`,
+    defaultErrorMessage: 'Failed to Upload file',
     mutationFn: async (props: UploadFilesProps) => {
       const res = await axios.put(`/file`, null, {
         params: {
@@ -54,6 +55,7 @@ export function useUploadFile() {
             Authorization: undefined,
           },
         } as unknown as AxiosHeaders,
+        onUploadProgress: props.onProgress,
       });
 
       return null;

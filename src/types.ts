@@ -1,3 +1,7 @@
+import { ReactNode } from 'react';
+
+import { InputsT } from '@/components/form/Inputs';
+
 export enum RiskScanMessage {
   Stop = 'Risk scanning will stop.',
   Start = 'Risk scanning will start automatically.',
@@ -289,7 +293,7 @@ export interface MyFile {
   name: string;
   updated: string;
   username: string;
-  class: 'report' | 'proof' | 'manual' | 'definition';
+  class?: 'report' | 'proof' | 'manual' | 'definition';
 }
 
 export interface Statistics {
@@ -461,3 +465,55 @@ export interface CognitoAuthStates {
 }
 
 export type ChartType = 'area' | 'bar' | 'line' | 'donut';
+
+export enum Module {
+  PM = 'PM',
+  ASM = 'ASM',
+  BAS = 'BAS',
+  CTI = 'CTI',
+  VM = 'VM',
+  CPT = 'CPT',
+}
+export interface ModuleMeta {
+  label: string;
+  name: string;
+  description: string;
+  defaultTab?: JSX.Element;
+  risks: number;
+  Icon: JSX.Element;
+  integrations: IntegrationMeta[];
+}
+
+export enum Integration {
+  hook = 'hook',
+  webhook = 'webhook',
+  slack = 'slack',
+  jira = 'jira',
+  github = 'github',
+  amazon = 'amazon',
+  ns1 = 'ns1',
+  gcp = 'gcp',
+  azure = 'azure',
+  crowdstrike = 'crowdstrike',
+  gitlab = 'gitlab',
+  nessus = 'nessus',
+  zulip = 'zulip',
+  basAgent = 'basAgent',
+  kev = 'kev',
+}
+
+export interface IntegrationMeta {
+  id: Integration;
+  name: string;
+  description?: ReactNode;
+  logo?: string;
+  inputs?: InputsT;
+  warning?: string;
+  message?: JSX.Element;
+  markup?: JSX.Element;
+  multiple?: boolean;
+  help?: {
+    href: string;
+    label: string;
+  };
+}

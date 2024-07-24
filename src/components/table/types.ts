@@ -12,7 +12,7 @@ export interface TableProps<TData> {
   tableClassName?: string;
   name: string;
   columns: Columns<TData>;
-  data: TData[];
+  data: (TData & { children?: TData[] })[];
   filters?: JSX.Element;
   selection?: {
     value?: string[];
@@ -36,6 +36,10 @@ export interface TableProps<TData> {
   }[];
   skipHeader?: boolean;
   resize?: boolean;
+  search?: {
+    value: string;
+    onChange: (value: string) => void;
+  };
 }
 
 export interface Column<TData> {

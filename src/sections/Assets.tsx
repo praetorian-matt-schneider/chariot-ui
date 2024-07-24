@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import { PlusIcon, PuzzlePieceIcon } from '@heroicons/react/24/outline';
+import { useDebounce } from 'use-debounce';
 
 import { Dropdown } from '@/components/Dropdown';
 import { AssetsIcon, RisksIcon } from '@/components/icons';
@@ -20,6 +21,7 @@ import {
   useUpdateAsset,
 } from '@/hooks/useAssets';
 import { useFilter } from '@/hooks/useFilter';
+import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useIntegration } from '@/hooks/useIntegration';
 import { AssetStatusWarning } from '@/sections/AssetStatusWarning';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
@@ -70,10 +72,23 @@ const Assets: React.FC = () => {
       asset: { onOpenChange: setShowAddAsset },
     },
   } = useGlobalState();
+  const [search, setSearch] = useState<string>('');
+  const [debouncedSearch] = useDebounce(search, 500);
+  const { data: dataDebouncedSearchName, status: statusDebouncedSearchName } =
+    useGenericSearch(
+      { query: `name:${debouncedSearch}` },
+      { enabled: Boolean(debouncedSearch) }
+    );
+  const { data: dataDebouncedSearchDns, status: statusDebouncedSearchDns } =
+    useGenericSearch(
+      { query: `dns:${debouncedSearch}` },
+      { enabled: Boolean(debouncedSearch) }
+    );
+
   const {
     isLoading,
     status: assetsStatus,
-    data: assets = [],
+    data: myAssets = [],
     refetch,
     error,
     isFetchingNextPage,
@@ -84,6 +99,21 @@ const Assets: React.FC = () => {
     resource: 'asset',
     filterByGlobalSearch: true,
   });
+  const assets: Asset[] = useMemo(
+    () =>
+      debouncedSearch
+        ? [
+            ...(dataDebouncedSearchName?.assets || []),
+            ...(dataDebouncedSearchDns?.assets || []),
+          ].reduce((acc, asset: Asset) => {
+            if (!acc.find(a => a.key === asset.key)) {
+              acc.push(asset);
+            }
+            return acc;
+          }, [] as Asset[])
+        : myAssets,
+    [debouncedSearch, dataDebouncedSearchName, dataDebouncedSearchDns, myAssets]
+  );
   const { data: risks = [], status: riskStatus } = useMy({ resource: 'risk' });
   const { isIntegration } = useIntegration();
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
@@ -101,7 +131,11 @@ const Assets: React.FC = () => {
     string[]
   >([]);
 
-  const status = useMergeStatus(riskStatus, assetsStatus);
+  const status = useMergeStatus(
+    ...(debouncedSearch
+      ? [statusDebouncedSearchDns, statusDebouncedSearchName, riskStatus]
+      : [riskStatus, assetsStatus])
+  );
   const { getAssetDrawerLink } = getDrawerLink();
   const openRiskDataset = useMemo(
     () => buildOpenRiskDataset(risks as Risk[]),
@@ -310,6 +344,10 @@ const Assets: React.FC = () => {
     <div className="flex w-full flex-col">
       <Table
         name="assets"
+        search={{
+          value: search,
+          onChange: setSearch,
+        }}
         filters={
           <div className="flex gap-4">
             <AttributeFilter
@@ -354,7 +392,7 @@ const Assets: React.FC = () => {
         selection={{ value: selectedRows, onChange: setSelectedRows }}
         primaryAction={() => {
           return {
-            label: 'Asset Discovery',
+            label: 'Add Asset',
             icon: <AssetsIcon className="size-5" />,
             startIcon: <PlusIcon className="size-5" />,
             onClick: () => {
