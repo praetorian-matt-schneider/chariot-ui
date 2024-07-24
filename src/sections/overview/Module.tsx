@@ -49,8 +49,8 @@ const NessusInstructions = () => {
   return (
     <div>
       <p className="mb-4">
-        Chariot import scan results from Nessus using the command line interface
-        (CLI).
+        Chariot imports scan results from Nessus using the command line
+        interface (CLI).
       </p>
       <h1 className="mb-2 text-xl font-bold">
         Install the CLI and configure it by:
@@ -178,9 +178,9 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
         hidden: true,
       },
       {
-        label: 'Token',
+        label: 'Basic Auth Token',
         value: '',
-        placeholder: 'Bearer token',
+        placeholder: 'QmFzaWMgQXV0aCBUb2tlbgo=',
         name: 'token',
         required: true,
         info: {

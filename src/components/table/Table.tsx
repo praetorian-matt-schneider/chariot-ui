@@ -327,7 +327,7 @@ export function Table<TData>(props: TableProps<TData>) {
             <div className="flex space-x-4">
               <Input
                 name="search"
-                placeholder={`Search ${tableName}`}
+                placeholder={`Go to ${tableName}`}
                 className="h-11 w-64 justify-end rounded-sm border-gray-900 bg-header-light p-2 text-sm text-white  ring-0"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
