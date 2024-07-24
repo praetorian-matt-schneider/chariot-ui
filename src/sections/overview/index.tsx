@@ -88,7 +88,11 @@ export function Overview() {
               My
               <span className="text-gray-400"> Chariot</span>
             </p>
-            <Loader isLoading={accountsStatus === 'pending'}>
+            <Loader
+              styleType="header"
+              isLoading={accountsStatus === 'pending'}
+              className="mt-2 h-[36px]"
+            >
               <p className="mt-2 w-full text-left text-3xl">
                 {displayName}&apos;s Organization
               </p>
@@ -119,18 +123,21 @@ export function Overview() {
               key={index}
               className={cn(
                 'relative w-full',
-                !moduleData.enabled && '-translate-y-4'
+                !moduleData.isLoading && !moduleData.enabled && '-translate-y-4'
               )}
             >
               <div
                 className={cn(
                   'flex flex-col gap-2 overflow-hidden rounded-md p-4 shadow-lg',
-                  moduleData.enabled ? 'bg-white' : 'bg-gray-200'
+                  moduleData.isLoading || moduleData.enabled
+                    ? 'bg-white'
+                    : 'bg-gray-200'
                 )}
               >
                 <div className="space-between flex h-12 w-full items-center text-5xl font-bold text-default">
                   <p>{module.name}</p>
-                  {moduleData.enabled &&
+                  {!moduleData.isLoading &&
+                    moduleData.enabled &&
                     (moduleData.noOfRisk === 0 ? (
                       <CheckCircleIcon className="ml-auto block size-12 text-green-500" />
                     ) : (
@@ -142,7 +149,10 @@ export function Overview() {
                 </div>
 
                 <div className="flex h-36  w-full flex-col items-center justify-center text-center">
-                  <Loader isLoading={moduleData.isLoading}>
+                  <Loader
+                    className="mb-5 mt-3 h-[60px] w-3/4"
+                    isLoading={moduleData.isLoading}
+                  >
                     <ConditionalRender
                       condition={Boolean(moduleData.route)}
                       conditionalWrapper={() => {
@@ -182,6 +192,7 @@ export function Overview() {
                 </div>
                 {moduleKey === Module.CPT ? (
                   <Button
+                    isLoading={moduleData.isLoading}
                     className={cn(moduleData.enabled ? 'invisible' : '')}
                     styleType="header"
                     onClick={() => {
@@ -192,6 +203,7 @@ export function Overview() {
                   </Button>
                 ) : (
                   <Button
+                    isLoading={moduleData.isLoading}
                     className={cn('m-auto w-full')}
                     styleType={moduleData.enabled ? 'primary' : 'header'}
                     onClick={() => {
