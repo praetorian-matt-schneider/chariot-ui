@@ -1273,8 +1273,8 @@ export function BasIntegration() {
                   createBulkAttributeStatus === 'pending'
                 }
                 disabled={BAS.isLoading}
-                styleType="secondary"
-                className="rounded-sm bg-brand px-6 py-3 text-lg font-semibold text-white"
+                styleType="primary"
+                className=" px-6 py-3 text-lg font-semibold"
                 onClick={handleEnable}
               >
                 Create Agents
