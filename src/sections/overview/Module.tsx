@@ -680,7 +680,10 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
     description: '',
     defaultTab: (
       <div className="p-4">
-        <h3 className="text-2xl font-semibold">Project Management</h3>
+        <h3 className="text-2xl font-semibold">
+          <ClipboardList className="inline size-8 text-default" /> Project
+          Management
+        </h3>
         <p className="mt-2 text-default-light">
           Security requires continuous management. Chariot makes project
           management easy by integrating with your existing communication and
@@ -707,7 +710,10 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
     description: `Attack surface management (ASM) refers to the proactive approach of identifying, analyzing, and managing potential points of attack on an organization's IT infrastructure, applications, and networks. The goal of ASM is to minimize the attack surface, which is the sum of all possible entry points that an attacker can exploit to gain unauthorized access or cause damage.`,
     defaultTab: (
       <div className="space-y-4 p-4">
-        <h3 className="text-2xl font-semibold">Attack Surface Management</h3>
+        <h3 className="text-2xl font-semibold">
+          <Radar className="inline size-8 text-default" /> Attack Surface
+          Management
+        </h3>
         <p className="text-default-light">
           Attack surface management (ASM) refers to the proactive approach of
           identifying, analyzing, and managing potential points of attack on an
@@ -764,7 +770,10 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
     description: `Breach and Attack Simulation (BAS) uses automated tools to continuously simulate real-world cyber attacks, helping organizations identify vulnerabilities, improve threat detection, and enhance their overall security posture.`,
     defaultTab: (
       <div className="space-y-4 p-4">
-        <h3 className="text-2xl font-semibold">Breach & Attack Simulation</h3>
+        <h3 className="text-2xl font-semibold">
+          <Goal className="inline size-8 text-default" /> Breach & Attack
+          Simulation
+        </h3>
         <p className="text-default-light">
           Breach and Attack Simulation (BAS) -- Chariot moves past external
           threat identification and uses an automated approach to continuously
@@ -811,7 +820,10 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
     description: `Cyber Threat Intelligence (CTI) involves the collection and analysis of information about potential or current attacks that threaten an organization, helping to inform security decisions and proactive defense strategies.`,
     defaultTab: (
       <div className="space-y-4 p-4">
-        <h3 className="text-2xl font-semibold">Cyber Threat Intelligence</h3>
+        <h3 className="text-2xl font-semibold">
+          <Crosshair className="inline size-8 text-default" /> Cyber Threat
+          Intelligence
+        </h3>
         <p className="text-default-light">
           Cyber Threat Intelligence (CTI) is the codified knowledge and
           understanding of how risks and vulnerabilities affect the real world.
@@ -859,7 +871,10 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
     description: `Our Vulnerability Management (VM) services include identifying, assessing, and mitigating security vulnerabilities across your IT infrastructure to ensure robust protection against potential threats.`,
     defaultTab: (
       <div className="space-y-4 p-4">
-        <h3 className="text-2xl font-semibold">Vulnerability Management</h3>
+        <h3 className="text-2xl font-semibold">
+          <GlobeLock className="inline size-8 text-default" /> Vulnerability
+          Management
+        </h3>
         <p className="text-default-light">
           Our Vulnerability Management (VM) services identify, assess, and
           mitigate security vulnerabilities across your digital infrastructure.
