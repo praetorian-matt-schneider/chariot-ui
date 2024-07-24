@@ -1097,11 +1097,27 @@ export function BasIntegration() {
     query: '#source#labelBas',
   });
 
+  const { data: malwares } = useMy({
+    resource: 'file',
+    query: '#malware',
+  });
+
+  const malwareMap = useMemo(() => {
+    return malwares.reduce(
+      (acc, malware) => {
+        return {
+          ...acc,
+          [malware.name]: malware.name,
+        };
+      },
+      {} as Record<string, string>
+    );
+  }, [JSON.stringify(malwares)]);
+
   const { mutateAsync: createBulkAsset, status: createBulkAssetStatus } =
     useBulkAddAsset();
   const { mutateAsync: uploadFile } = useUploadFile();
-  const { mutateAsync: bulkReRunJobs, status: bulkReRunJobsStatus } =
-    useBulkReRunJob();
+  const { mutateAsync: bulkReRunJobs } = useBulkReRunJob();
 
   const {
     mutateAsync: createBulkAttribute,
@@ -1145,21 +1161,20 @@ export function BasIntegration() {
   }
 
   async function handleFileDrop(files: { content: ArrayBuffer; file: File }[]) {
-    const { content, file } = files[0];
+    const { content } = files[0];
 
+    const fileName = `malware/${selectedAgent}-${selectedPlatform}`;
     await uploadFile({
-      name: `malware/${selectedAgent}-${selectedPlatform}`,
+      name: fileName,
       content,
     });
 
-    const jobs = BAS.assetAttributes.map(({ key }) => {
-      const attributeMeta = parseKeys.attributeKey(key);
-
-      return {
-        dns: attributeMeta.name,
-        capability: file.name,
-      };
-    });
+    const jobs = [
+      {
+        dns: selectedAgent,
+        capability: fileName,
+      },
+    ];
 
     await bulkReRunJobs(jobs);
   }
@@ -1366,71 +1381,84 @@ export function BasIntegration() {
                   const attributeMeta = parseKeys.attributeKey(attribute.key);
 
                   return (
-                    <Loader
-                      className="h-[36px] w-full"
-                      isLoading={bulkReRunJobsStatus === 'pending'}
+                    <div
                       key={index}
+                      className="flex flex-row justify-start border-gray-200"
                     >
-                      <div className="flex flex-row justify-start border-gray-200">
-                        <div className="flex w-full items-center">
-                          <div className="w-full">
-                            <Loader
-                              className="h-[36px] w-[100px]"
-                              isLoading={basLabelAttributesStatus === 'pending'}
-                            >
-                              <InputText
-                                className="w-full border-0 border-b border-gray-300 ring-0"
-                                placeholder="Agent Name"
-                                name={attributeMeta.name}
-                                onChange={event => {
-                                  setAttLabels(prev => {
-                                    return {
-                                      ...prev,
-                                      [attributeMeta.name]: event.target.value,
-                                    };
-                                  });
-                                }}
-                                value={attLabels[attributeMeta.name] || ''}
-                              />
-                            </Loader>
-                          </div>
-
-                          <Link
-                            className="mb-1 mt-auto text-xs"
-                            to={getAssetDrawerLink({
-                              name: attributeMeta.name,
-                              dns: attributeMeta.name,
-                            })}
+                      <div className="flex w-full items-center">
+                        <div className="w-full">
+                          <Loader
+                            className="h-[36px] w-[100px]"
+                            isLoading={basLabelAttributesStatus === 'pending'}
                           >
-                            {attributeMeta.name.split('-')[0]}
-                          </Link>
+                            <InputText
+                              className="w-full border-0 border-b border-gray-300 ring-0"
+                              placeholder="Agent Name"
+                              name={attributeMeta.name}
+                              onChange={event => {
+                                setAttLabels(prev => {
+                                  return {
+                                    ...prev,
+                                    [attributeMeta.name]: event.target.value,
+                                  };
+                                });
+                              }}
+                              value={attLabels[attributeMeta.name] || ''}
+                            />
+                          </Loader>
                         </div>
-                        <div className="ml-3 flex shrink-0 border-l border-gray-200 bg-gray-50 py-2 ">
-                          {Object.values(systemTypes).map((system, index) => {
-                            function handleCopy() {
-                              const filename =
-                                system === 'windows' ? 'agent.ps1' : 'agent.sh';
-                              copyToClipboard(
-                                `curl -o ${filename} https://preview.chariot.praetorian.com/${friend.email || me}/${attributeMeta.name}/${system}`
-                              );
-                            }
 
-                            return (
-                              <Tooltip
-                                title={`Copy ${system} command`}
-                                key={index}
-                              >
-                                <img
-                                  onClick={handleCopy}
-                                  className="m-1 size-[28px] cursor-pointer p-1"
-                                  src={`/icons/${system}.svg`}
-                                />
-                              </Tooltip>
-                            );
+                        <Link
+                          className="mb-1 mt-auto text-xs"
+                          to={getAssetDrawerLink({
+                            name: attributeMeta.name,
+                            dns: attributeMeta.name,
                           })}
-                        </div>
+                        >
+                          {attributeMeta.name.split('-')[0]}
+                        </Link>
                       </div>
-                    </Loader>
+                      <div className="ml-3 flex shrink-0 border-l border-gray-200 bg-gray-50 py-2 ">
+                        {Object.values(systemTypes).map((system, index) => {
+                          const malwareAvailable =
+                            malwareMap[
+                              `malware/${attributeMeta.name}-${system}`
+                            ];
+
+                          function handleCopy() {
+                            const filename =
+                              system === 'windows' ? 'agent.ps1' : 'agent.sh';
+                            copyToClipboard(
+                              `curl -o ${filename} https://preview.chariot.praetorian.com/${friend.email || me}/${attributeMeta.name}/${system}`
+                            );
+                          }
+
+                          return (
+                            <Tooltip
+                              title={
+                                malwareAvailable
+                                  ? `Copy ${system} command`
+                                  : 'Upload TTP Binary to copy executable command'
+                              }
+                              key={index}
+                            >
+                              <img
+                                onClick={
+                                  malwareAvailable ? handleCopy : undefined
+                                }
+                                className={cn(
+                                  'm-1 size-[28px] cursor-pointer p-1',
+                                  malwareAvailable
+                                    ? ''
+                                    : 'cursor-not-allowed opacity-20'
+                                )}
+                                src={`/icons/${system}.svg`}
+                              />
+                            </Tooltip>
+                          );
+                        })}
+                      </div>
+                    </div>
                   );
                 })}
             </Loader>
