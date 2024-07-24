@@ -217,7 +217,10 @@ export function ModulesModal() {
   const {
     modal: { module: moduleState },
   } = useGlobalState();
-  const { integrationsData, isLoading } = useGetModuleData();
+
+  const { integrationsData, isLoading } = useGetModuleData({
+    enabled: Boolean(moduleState.value),
+  });
 
   const [formData, setFormData] = useState<Values[]>([]);
 

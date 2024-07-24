@@ -864,7 +864,11 @@ enum systemTypes {
   linux = 'linux',
 }
 
-export function useGetModuleData(): {
+interface GetModuleDataProps {
+  enabled?: boolean;
+}
+
+export function useGetModuleData(props?: GetModuleDataProps): {
   data: Record<
     Module,
     {
@@ -880,30 +884,53 @@ export function useGetModuleData(): {
   integrationsData: IntegrationsData;
   isLoading: boolean;
 } {
-  const { data: assetCount, status: assetCountStatus } = useCounts({
-    resource: 'asset',
-  });
-  const { data: riskCount, status: riskCountStatus } = useCounts({
-    resource: 'risk',
-  });
+  const { enabled = true } = props || {};
 
-  const { data: cveRisksGenericSearch } = useGenericSearch({ query: 'CVE' });
+  const { data: assetCount, status: assetCountStatus } = useCounts(
+    {
+      resource: 'asset',
+    },
+    { enabled }
+  );
+  const { data: riskCount, status: riskCountStatus } = useCounts(
+    {
+      resource: 'risk',
+    },
+    { enabled }
+  );
 
-  const { data: accounts, status: accountStatus } = useMy({
-    resource: 'account',
-  });
-  const { data: basAttributes, status: basAttributesStatus } = useMy({
-    resource: 'attribute',
-    query: '#source#bas',
-  });
-  const { data: kevAttributes, status: ctiAttributeStatus } = useMy({
-    resource: 'attribute',
-    query: '#source#kev',
-  });
-  const { data: nessusAttributes, status: nessusAttributesStatus } = useMy({
-    resource: 'attribute',
-    query: '#source#nessus',
-  });
+  const { data: cveRisksGenericSearch } = useGenericSearch(
+    { query: 'CVE' },
+    { enabled }
+  );
+
+  const { data: accounts, status: accountStatus } = useMy(
+    {
+      resource: 'account',
+    },
+    { enabled }
+  );
+  const { data: basAttributes, status: basAttributesStatus } = useMy(
+    {
+      resource: 'attribute',
+      query: '#source#bas',
+    },
+    { enabled }
+  );
+  const { data: kevAttributes, status: ctiAttributeStatus } = useMy(
+    {
+      resource: 'attribute',
+      query: '#source#kev',
+    },
+    { enabled }
+  );
+  const { data: nessusAttributes, status: nessusAttributesStatus } = useMy(
+    {
+      resource: 'attribute',
+      query: '#source#nessus',
+    },
+    { enabled }
+  );
 
   const allPraetorianRiskUsernames = Object.keys(
     riskCount?.source || {}
