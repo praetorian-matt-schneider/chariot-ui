@@ -6,7 +6,6 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { InformationCircleIcon } from '@heroicons/react/24/outline';
 import {
   ArrowRightCircleIcon,
@@ -52,7 +51,6 @@ export function Overview() {
   const { data: accounts, status: accountsStatus } = useMy({
     resource: 'account',
   });
-  const navigate = useNavigate();
 
   const displayName =
     useGetDisplayName(accounts) || friend.displayName || friend.email || me;
@@ -110,6 +108,12 @@ export function Overview() {
           const module = Modules[moduleKey];
           const moduleData = modulesData[moduleKey];
 
+          const riskContent = moduleData.enabled ? (
+            moduleData.noOfRisk
+          ) : (
+            <LockClosedIcon className="size-16 text-gray-400" />
+          );
+
           return (
             <div
               key={index}
@@ -139,30 +143,38 @@ export function Overview() {
 
                 <div className="flex h-36  w-full flex-col items-center justify-center text-center">
                   <Loader isLoading={moduleData.isLoading}>
-                    <button
-                      className={cn(
-                        'mb-2 text-6xl text-default',
-                        moduleData.enabled && moduleData.noOfRisk > 0
-                          ? 'text-brand'
-                          : 'text-gray-400'
-                      )}
-                      onClick={() => {
-                        if (!moduleData.enabled) {
-                          moduleState.onValueChange({
-                            module: moduleKey as Module,
-                            integration: '',
-                          });
-                        } else {
-                          navigate(moduleData.route);
-                        }
+                    <ConditionalRender
+                      condition={Boolean(moduleData.route)}
+                      conditionalWrapper={() => {
+                        return (
+                          <Link
+                            buttonClass={cn(
+                              'mb-2 text-6xl',
+                              moduleData.enabled && moduleData.noOfRisk > 0
+                                ? ''
+                                : 'text-gray-400'
+                            )}
+                            to={moduleData.route}
+                          >
+                            {riskContent}
+                          </Link>
+                        );
                       }}
                     >
-                      {moduleData.enabled ? (
-                        moduleData.noOfRisk
-                      ) : (
-                        <LockClosedIcon className="size-16 text-gray-400" />
-                      )}
-                    </button>
+                      <button
+                        className={cn('mb-2 text-6xl text-gray-400')}
+                        onClick={() => {
+                          if (!moduleData.enabled) {
+                            moduleState.onValueChange({
+                              module: moduleKey as Module,
+                              integration: '',
+                            });
+                          }
+                        }}
+                      >
+                        {riskContent}
+                      </button>
+                    </ConditionalRender>
                   </Loader>
                   <p className="text-sm font-medium text-default-light">
                     Risks

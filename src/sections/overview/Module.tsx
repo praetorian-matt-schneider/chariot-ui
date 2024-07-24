@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { To } from 'react-router-dom';
 import {
   ClipboardList,
   Crosshair,
@@ -34,6 +35,7 @@ import {
 } from '@/types';
 import { useMergeStatus } from '@/utils/api';
 import { copyToClipboard } from '@/utils/copyToClipboard.util';
+import { getRoute } from '@/utils/route.util';
 import { generateUuid } from '@/utils/uuid.util';
 
 const NessusInstructions = () => {
@@ -873,7 +875,7 @@ export function useGetModuleData(): {
       assetAttributes: Attribute[];
       riskAttributes: Attribute[];
       isLoading: boolean;
-      route: string;
+      route: To;
     }
   >;
   integrationsData: IntegrationsData;
@@ -999,7 +1001,10 @@ export function useGetModuleData(): {
       riskAttributes: [],
       isLoading:
         riskCountStatus === 'pending' || assetCountStatus === 'pending',
-      route: '/app/risks?risk-status=%5B"O"%5D',
+      route: {
+        pathname: getRoute(['app', 'risks']),
+        search: 'risk-status=%5B"O"%5D',
+      },
     },
     BAS: {
       noOfRisk: basRiskAttribute.length,
@@ -1008,7 +1013,9 @@ export function useGetModuleData(): {
       assetAttributes: basAssetAttribute,
       riskAttributes: basRiskAttribute,
       isLoading: basAttributesStatus === 'pending',
-      route: '',
+      route: {
+        pathname: getRoute(['app', 'risks']),
+      },
     },
     CPT: {
       noOfRisk: cptRisks.length,
@@ -1017,7 +1024,9 @@ export function useGetModuleData(): {
       assetAttributes: [],
       riskAttributes: [],
       isLoading: accountStatus === 'pending' || allRisksStatus === 'pending',
-      route: '',
+      route: {
+        pathname: getRoute(['app', 'risks']),
+      },
     },
     CTI: {
       noOfRisk: ctiRiskAttribute.length,
@@ -1026,7 +1035,10 @@ export function useGetModuleData(): {
       assetAttributes: ctiAssetAttribute,
       riskAttributes: ctiRiskAttribute,
       isLoading: ctiAttributeStatus === 'pending',
-      route: '/app/risks?risk-status=%5B""%5D&risk-intel=%5B"cisa_kev"%5D',
+      route: {
+        pathname: getRoute(['app', 'risks']),
+        search: 'risk-status=%5B""%5D&risk-intel=%5B"cisa_kev"%5D',
+      },
     },
     PM: {
       noOfRisk: 0,
