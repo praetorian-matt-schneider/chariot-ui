@@ -1,28 +1,40 @@
 import { useState } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
+import { resendSignUpCode } from 'aws-amplify/auth';
 
 import { Button } from '@/components/Button';
 import { ModalWrapper } from '@/components/Modal';
 import { OTPInput } from '@/sections/signup/OTPInput';
 import { SSO } from '@/sections/signup/SSO';
+import { useAuth } from '@/state/auth';
 
 export const EmailConfirmation = () => {
+  const { credentials, confirmOTP, isLoading } = useAuth();
   const [open, setOpen] = useState(true);
+
+  async function resendEmail() {
+    await resendSignUpCode({
+      username: credentials.username,
+    });
+    setOpen(true);
+  }
 
   return (
     <>
       <div className="text-sm text-default-light">
         <p>
           An email was sent to{' '}
-          <span className="font-bold text-default">
-            janelongestname@acmerocketcompany.com
-          </span>
+          <span className="font-bold text-default">{credentials.username}</span>
         </p>
         <ul className="mt-4 list-disc">
           <li>{`Can't find it? Don't forget to check your spam box.`}</li>
           <li>
             {`If it's not received within 10 minutes, feel free to `}
-            <Button className="inline p-0" styleType="textPrimary">
+            <Button
+              className="inline p-0"
+              styleType="textPrimary"
+              onClick={resendEmail}
+            >
               send it again.
             </Button>
           </li>
@@ -48,8 +60,12 @@ export const EmailConfirmation = () => {
             Please copy & paste the six-digit code emailed to your business
             address.
           </p>
-          <OTPInput onSubmit={() => null} />
-          <Button className="mt-6 w-full" styleType="primary">
+          <OTPInput onSubmit={confirmOTP} />
+          <Button
+            disabled={isLoading}
+            className="mt-6 w-full"
+            styleType="primary"
+          >
             Submit
           </Button>
         </div>

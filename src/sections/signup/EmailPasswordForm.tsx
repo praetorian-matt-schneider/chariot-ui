@@ -1,7 +1,5 @@
-import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ExclamationCircleIcon } from '@heroicons/react/24/outline';
-import { signUp } from 'aws-amplify/auth';
 
 import { Button } from '@/components/Button';
 import { Input } from '@/components/form/Input';
@@ -11,32 +9,20 @@ import { SSO } from '@/sections/signup/SSO';
 import { useAuth } from '@/state/auth';
 import { getRoute } from '@/utils/route.util';
 
-export const EmailPasswordForm = () => {
+export const EmailPasswordForm = ({ onNext }: { onNext?: () => void }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { loginNew, error, setError } = useAuth();
   const isLogin = location.pathname.includes('login');
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
-
-  async function onSignup() {
-    try {
-      const { isSignUpComplete, userId, nextStep } = await signUp({
-        username: formData.email,
-        password: formData.password,
-      });
-      const { signUpStep } = nextStep;
-      if (!isSignUpComplete && signUpStep === 'CONFIRM_SIGN_UP') {
-        // navigate(getRoute(['signup', 'confirm'], { userId }));
-        // Goto next step
-        console.log(isSignUpComplete, userId);
-      }
-    } catch (error) {
-      error instanceof Error && error.message && setError(error.message);
-    }
-  }
+  const {
+    isLoading,
+    loginNew,
+    signupNew,
+    error,
+    setError,
+    credentials,
+    setCredentials,
+  } = useAuth();
+  const { username, password } = credentials;
 
   return (
     <form
@@ -44,22 +30,22 @@ export const EmailPasswordForm = () => {
       id="signup"
       onSubmit={e => {
         e.preventDefault();
-        isLogin && loginNew(formData.email, formData.password);
-        !isLogin && onSignup();
+        isLogin && loginNew();
+        !isLogin && signupNew(onNext);
       }}
     >
       <Inputs
         inputs={[
           {
             label: 'Business Email Address',
-            value: formData.email,
+            value: username,
             placeholder: 'janelongestname@acmerocketcompany.com',
-            name: 'email',
+            name: 'username',
             required: true,
           },
           {
             label: 'Password',
-            value: formData.password,
+            value: password,
             placeholder: '**************',
             name: 'password',
             type: Input.Type.PASSWORD,
@@ -68,10 +54,16 @@ export const EmailPasswordForm = () => {
         ]}
         onChange={values => {
           setError('');
-          setFormData(formData => ({ ...formData, ...values }));
+          setCredentials(credentials => ({ ...credentials, ...values }));
         }}
       />
-      <Button styleType="primary" className="w-full" type="submit" id="signup">
+      <Button
+        disabled={isLoading}
+        styleType="primary"
+        className="w-full"
+        type="submit"
+        id="signup"
+      >
         Continue
       </Button>
       {error && (

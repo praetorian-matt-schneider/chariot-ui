@@ -8,7 +8,13 @@ import React, {
 } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CognitoIdentityProvider } from '@aws-sdk/client-cognito-identity-provider';
-import { fetchAuthSession, signIn, signOut } from 'aws-amplify/auth';
+import {
+  confirmSignUp,
+  fetchAuthSession,
+  signIn,
+  signOut,
+  signUp,
+} from 'aws-amplify/auth';
 import { jwtDecode } from 'jwt-decode';
 
 import { queryClient } from '@/queryclient';
@@ -45,7 +51,11 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     { key: StorageKey.AUTH },
     emptyAuth
   );
-  const [isLoading, setIsLoading] = useState(true);
+  const [credentials, setCredentials] = useState({
+    username: '',
+    password: '',
+  });
+  const [isLoading, setIsLoading] = useState(false);
   const { backend, expiry, region, clientId } = auth;
 
   const [, setIsTabVisible] = useState(true);
@@ -138,24 +148,57 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }
 
-  async function loginNew(email = '', password = '') {
+  async function loginNew() {
     try {
-      setAuth(emptyAuth);
       setNewUserSeedModal(true);
-
+      setIsLoading(true);
       const { isSignedIn } = await signIn({
-        username: email,
-        password: password,
+        username: credentials.username,
+        password: credentials.password,
       });
-
-      console.log('isSignedIn', isSignedIn);
+      fetchToken();
       if (isSignedIn) {
+        setAuth({ ...emptyAuth, me: credentials.username });
+        setCredentials({ username: '', password: '' });
         navigate('/');
       }
     } catch (error) {
-      if (error instanceof Error && error.message) {
-        setError(error.message);
+      error instanceof Error && error.message && setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function signupNew(gotoNext = () => {}) {
+    try {
+      setIsLoading(true);
+      const { isSignUpComplete, nextStep } = await signUp({
+        username: credentials.username,
+        password: credentials.password,
+      });
+      const { signUpStep } = nextStep;
+      if (!isSignUpComplete && signUpStep === 'CONFIRM_SIGN_UP') {
+        gotoNext && gotoNext();
       }
+    } catch (error) {
+      error instanceof Error && error.message && setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function confirmOTP(otp: string = '') {
+    try {
+      setIsLoading(true);
+      const response = await confirmSignUp({
+        username: credentials.username,
+        confirmationCode: otp,
+      });
+      if (response.isSignUpComplete) {
+        loginNew();
+      }
+    } catch (error) {
+      error instanceof Error && error.message && setError(error.message);
     }
   }
 
@@ -211,6 +254,10 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setError,
       fetchToken,
       isLoading,
+      signupNew,
+      credentials,
+      setCredentials,
+      confirmOTP,
     }),
     [login, logout, JSON.stringify(auth)]
   );

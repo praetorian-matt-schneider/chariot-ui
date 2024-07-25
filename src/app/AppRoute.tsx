@@ -14,7 +14,7 @@ import Logout from '@/sections/Logout';
 import { Overview } from '@/sections/overview';
 import { Report } from '@/sections/Report';
 import { Risks } from '@/sections/RisksTable';
-import { Login, Signup } from '@/sections/signup';
+import { Login } from '@/sections/signup';
 import { useAuth } from '@/state/auth';
 import { validateRoutes } from '@/utils/route.util';
 import { getRoute } from '@/utils/route.util';
@@ -46,7 +46,7 @@ const appRoutes = {
     title: 'Login',
   },
   signup: {
-    element: <Signup />,
+    element: <Login />,
     title: 'Sign Up',
   },
   hello: {

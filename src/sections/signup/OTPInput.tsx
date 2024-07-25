@@ -79,6 +79,9 @@ export const OTPInput = ({ length = 6, onSubmit = () => {} }: Props) => {
       setOtp(newOtp);
       const nextFocusIndex = Math.min(index + pastedData.length, length - 1);
       inputRefs.current[nextFocusIndex].focus();
+      if (newOtp.length === length) {
+        onSubmit(newOtp.join(''));
+      }
     }
   };
 

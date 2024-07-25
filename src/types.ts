@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { Dispatch, ReactNode, SetStateAction } from 'react';
 
 import { InputsT } from '@/components/form/Inputs';
 
@@ -444,6 +444,7 @@ export interface AuthState {
   region: string;
   clientId: string;
   me: string;
+  password?: string;
   rToken?: string;
   expiry?: Date;
   friend: { email: string; displayName: string };
@@ -458,12 +459,18 @@ export interface AuthContextType extends AuthState {
   startImpersonation: (memberId: string, displayName: string) => void;
   stopImpersonation: () => void;
   // TODO: Remove the old functions, rename the new ones
-  loginNew: (login: string, password: string) => void;
+  loginNew: () => void;
   logoutNew: () => void;
   error: string;
   setError: (error: string) => void;
   fetchToken: () => void;
   isLoading: boolean;
+  signupNew: (gotoNext?: () => void) => void;
+  credentials: { username: string; password: string };
+  setCredentials: Dispatch<
+    SetStateAction<{ username: string; password: string }>
+  >;
+  confirmOTP: (opt: string) => void;
 }
 
 export interface CognitoAuthStates {
