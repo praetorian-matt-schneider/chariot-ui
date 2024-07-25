@@ -188,6 +188,10 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     name: 'Inbound Webhook',
     description: 'Push assets and risks to Chariot.',
     logo: '/icons/logo.png',
+    help: {
+      href: 'https://docs.praetorian.com/hc/en-us/articles/25815155351835-Chariot-Webhooks',
+      label: 'How to: Chariot Webhooks',
+    },
     inputs: [
       {
         name: 'username',
