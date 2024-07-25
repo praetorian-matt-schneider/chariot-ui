@@ -7,10 +7,9 @@ import {
   ChevronDownIcon,
   ExclamationCircleIcon,
   MagnifyingGlassIcon,
-  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { notUndefined, useVirtualizer } from '@tanstack/react-virtual';
-import { MoveDown } from 'lucide-react';
+import { ArrowDown } from 'lucide-react';
 
 import { Button } from '@/components/Button';
 import { Dropdown } from '@/components/Dropdown';
@@ -397,29 +396,7 @@ export function Table<TData>(props: TableProps<TData>) {
                       ></Dropdown>
                     </Tooltip>
                     {reviewStep === '2' && (
-                      <div className="-shadow-lg absolute bottom-full right-0 z-0 w-80 rounded-t-md bg-white p-4 pr-3 text-left">
-                        <button
-                          onClick={() => {
-                            searchParams.delete('review');
-                            addSearchParams(searchParams);
-                          }}
-                          className="absolute right-2 top-2"
-                        >
-                          <XMarkIcon className="size-4 " />
-                        </button>
-                        <div className="flex items-start">
-                          <div className="flex-1">
-                            <p className="text-sm ">
-                              Step 2:{' '}
-                              <span className="font-bold">Remediate</span>
-                            </p>
-                            <p className="mt-1 text-xs font-normal text-gray-600">
-                              Click here to remediate all selected items.
-                            </p>
-                          </div>
-                          <MoveDown className="ml-2 mt-auto size-6" />
-                        </div>
-                      </div>
+                      <ArrowDown className="absolute -top-2 left-3 z-20 -translate-x-1/2 -translate-y-full animate-bounce rounded-full bg-brand text-white shadow-lg" />
                     )}
                   </div>
                 )}
@@ -470,41 +447,22 @@ export function Table<TData>(props: TableProps<TData>) {
           >
             <tr className="relative">
               {enableCheckbox && (
-                <Th fixedWidth={CELL_WIDTHS.checkbox} align="center">
+                <Th
+                  fixedWidth={CELL_WIDTHS.checkbox}
+                  align="center"
+                  className={reviewStep === '1' ? 'relative' : ''}
+                >
+                  {reviewStep === '1' && (
+                    <ArrowDown className="absolute -top-2 left-3 -translate-x-1/2 -translate-y-full animate-bounce rounded-full bg-brand text-white shadow-lg" />
+                  )}
                   <label className="cursor-pointer">
                     <input
                       type="checkbox"
                       onChange={handleSelectAll}
-                      className={'hidden'}
+                      className="hidden"
                       checked={isAllRowSelected}
                     />
                     <TableCheckBoxIcon isChecked={isAllRowSelected} />
-                    {reviewStep === '1' && (
-                      <div className=" -shadow-lg absolute bottom-full left-0 z-10 w-80 translate-y-3 rounded-t-md bg-white p-4 pl-3 pt-2 text-left">
-                        <button
-                          onClick={e => {
-                            e.preventDefault();
-                            searchParams.delete('review');
-                            addSearchParams(searchParams);
-                          }}
-                          className="absolute right-2 top-2"
-                        >
-                          <XMarkIcon className="size-4 " />
-                        </button>
-                        <div className="flex items-start">
-                          <MoveDown className="mr-2 mt-auto size-6" />
-                          <div>
-                            <p className="text-sm ">
-                              Step 1:{' '}
-                              <span className="font-bold">Select All</span>
-                            </p>
-                            <p className="mt-1 text-xs font-normal text-gray-600">
-                              Click here to select all items for remediation.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
                   </label>
                 </Th>
               )}
