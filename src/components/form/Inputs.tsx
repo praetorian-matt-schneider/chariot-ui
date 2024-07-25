@@ -1,8 +1,7 @@
-import React, { ReactNode, useEffect } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 
 import { Input, InputEvent, InputProps } from '@/components/form/Input';
 import { Option } from '@/components/form/Select';
-import { useStorage } from '@/utils/storage/useStorage.util';
 
 export type Values = Record<string, InputProps['value']>;
 type InputType = Omit<InputProps, 'onChange'>;
@@ -15,29 +14,33 @@ interface Props {
   values?: Values;
 }
 
-export const getFormValues = (inputs: InputsT) => {
+export const getFormValues = (inputs: InputsT): Values => {
+  if (!Array.isArray(inputs)) {
+    return {};
+  }
+
   return inputs.reduce((acc, current) => {
     if (current.children) {
-      return acc;
+      return {
+        ...acc,
+        ...getFormValues(current.children as InputsT),
+      };
     }
     return {
       ...acc,
       [current.name]: current.value,
     };
-  }, {}) as Values;
+  }, {} as Values);
 };
 
 export const Inputs: React.FC<Props> = (props: Props) => {
   const { className, inputs } = props;
 
-  const [values, setValues] = useStorage(
-    { parentState: props.values, onParentStateChange: props.onChange },
-    getFormValues(inputs)
-  );
+  const [values, setValues] = useState<Values>(getFormValues(inputs));
 
   useEffect(() => {
     props.onChange(values);
-  }, []);
+  }, [values, props]);
 
   function handleChange(input: InputType) {
     return function (event: InputEvent) {
@@ -45,9 +48,9 @@ export const Inputs: React.FC<Props> = (props: Props) => {
         input.type === Input.Type.SELECT && input.options ? input.options : [];
       const number = options.some(({ value }) => typeof value === 'number');
       const { name, value } = event.target;
-      setValues(values => {
+      setValues(prevValues => {
         const newValues = {
-          ...values,
+          ...prevValues,
           [name]: number ? parseInt(value, 10) : value,
         };
         return newValues;
@@ -55,19 +58,25 @@ export const Inputs: React.FC<Props> = (props: Props) => {
     };
   }
 
-  return inputs.map(input => {
-    if (input.children) {
-      return input.children;
-    }
+  return (
+    <>
+      {inputs.map(input => {
+        if (input.children) {
+          return (
+            <React.Fragment key={input.name}>{input.children}</React.Fragment>
+          );
+        }
 
-    return (
-      <Input
-        {...input}
-        className={className}
-        key={input.name}
-        value={values[input.name]}
-        onChange={handleChange(input)}
-      />
-    );
-  });
+        return (
+          <Input
+            {...input}
+            className={className}
+            key={input.name}
+            value={values[input.name] || ''}
+            onChange={handleChange(input)}
+          />
+        );
+      })}
+    </>
+  );
 };
