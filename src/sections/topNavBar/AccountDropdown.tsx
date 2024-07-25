@@ -128,7 +128,7 @@ export const AccountDropdown: React.FC = () => {
       }}
     >
       <div className="flex h-5 flex-row items-center">
-        <div className="mr-0  p-2 text-xs">
+        <div className="mr-0  text-nowrap p-2 text-xs">
           {friend.displayName || friend.email || displayName || me}
         </div>
         <Hexagon>
