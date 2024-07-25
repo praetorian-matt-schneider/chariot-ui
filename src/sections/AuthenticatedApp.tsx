@@ -2,7 +2,6 @@ import React, { ReactNode, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 
-import MyInbox from '@/components/MyInbox';
 import { ShortcutsHelper } from '@/components/ui/Shortcuts';
 import { useMy } from '@/hooks';
 import { useGetDisplayName } from '@/hooks/useAccounts';
@@ -152,14 +151,6 @@ export function Header() {
       >
         <div className="w-full max-w-screen-xl">
           <TopNavBar notifyAssets={assetCount} notifyRisks={riskCount} />
-
-          <div className="flex flex-row">
-            <MyInbox
-              assets={assetCount}
-              risks={riskCount}
-              folder={breadcrumbs[breadcrumbs.length - 1]?.label}
-            />
-          </div>
         </div>
       </div>
       <div

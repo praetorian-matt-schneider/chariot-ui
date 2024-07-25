@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 import { LogoIcon } from '@/components/icons/Logo.icon';
+import MyInbox from '@/components/MyInbox';
 import { AccountDropdown } from '@/sections/topNavBar/AccountDropdown';
 import { Notifications } from '@/sections/topNavBar/Notifications';
 import { getRoute } from '@/utils/route.util';
@@ -57,6 +58,7 @@ export const TopNavBar: React.FC<Props> = ({ notifyAssets, notifyRisks }) => {
                 }}
                 onClick={() => setShowNotification(false)}
               />
+              <MyInbox assets={notifyAssets} risks={notifyRisks} />
               <AccountDropdown />
             </div>
           </div>
