@@ -133,13 +133,6 @@ const Assets: React.FC = () => {
     string[]
   >([]);
 
-  useEffect(() => {
-    const assetPriority = searchParams.get('asset-priority') ?? '';
-    if (assetPriority) {
-      setPriorityFilter([assetPriority]);
-    }
-  }, [searchParams]);
-
   const status = useMergeStatus(
     ...(debouncedSearch
       ? [statusDebouncedSearchDns, statusDebouncedSearchName, riskStatus]

@@ -4,7 +4,7 @@ import { Divider } from '@tremor/react';
 import { Inbox } from 'lucide-react';
 
 import { Button } from '@/components/Button';
-import { RiskStatus } from '@/types';
+import { AssetStatus, RiskStatus } from '@/types';
 import { getRoute } from '@/utils/route.util';
 
 interface Props {
@@ -71,7 +71,9 @@ const MyInbox: React.FC<Props> = ({ risks, assets }) => {
                       navigate({
                         pathname: getRoute(['app', 'assets']),
                         search: createSearchParams({
-                          'asset-priority': 'AL',
+                          'asset-priority': JSON.stringify([
+                            AssetStatus.ActiveLow,
+                          ]),
                           review: '1',
                         }).toString(),
                       });
