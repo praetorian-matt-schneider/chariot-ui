@@ -151,10 +151,7 @@ export function Header() {
         )}
       >
         <div className="w-full max-w-screen-xl">
-          <TopNavBar
-            notifyAssets={assetCount > 0}
-            notifyRisks={riskCount > 0}
-          />
+          <TopNavBar notifyAssets={assetCount} notifyRisks={riskCount} />
 
           <div className="flex flex-row">
             <MyInbox
