@@ -139,7 +139,8 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
       {
         label: 'Severity',
         value: 'MHC',
-        placeholder: 'Select a minimum severity level for your ServiceNow alerts',
+        placeholder:
+          'Select a minimum severity level for your ServiceNow alerts',
         name: 'severities',
         required: true,
         type: Input.Type.SELECT,
@@ -621,6 +622,10 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     description:
       'Industry-standard vulnerability scanner for comprehensive security assessments.',
     logo: '/icons/Nessus.svg',
+    help: {
+      href: 'https://docs.praetorian.com/hc/en-us/articles/25815092236443-Asset-Ingestion-Nessus-NS1-and-CrowdStrike#01J1TEBGSSDAA1KKXJQEATKJ22',
+      label: 'How to: Asset Ingestion - Nessus',
+    },
     markup: <NessusInstructions />,
   },
   zulip: {
@@ -677,8 +682,7 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
       {
         label: 'Webhook URL',
         value: '',
-        placeholder:
-          'https://xxxxxxx.logic.azure.com:443/workflows/xxxxxxx',
+        placeholder: 'https://xxxxxxx.logic.azure.com:443/workflows/xxxxxxx',
         name: 'webhook',
         required: true,
         info: {
@@ -1498,7 +1502,11 @@ export function BasIntegration() {
             </a>
           </p>
 
-          <div className="flex flex-col pt-4">
+          <div className="flex flex-col pt-6">
+            <div className="text-md flex flex-row justify-between border-b border-gray-200 px-2 font-bold">
+              <p>Agent Identifier</p>
+              <p>Installer</p>
+            </div>
             <Loader isLoading={isLoading}>
               {BAS.assetAttributes
                 .sort((a, b) => {
