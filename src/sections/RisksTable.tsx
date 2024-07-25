@@ -506,26 +506,31 @@ export function Risks() {
                 {
                   label: RiskStatusLabel[RiskStatus.Triaged],
                   icon: getRiskStatusIcon(RiskStatus.Triaged),
-                  onClick: () =>
+                  onClick: () => {
                     updateRisk({
                       selectedRows,
                       status: RiskStatus.Triaged,
-                    }),
+                    });
+                    setSelectedRows([]);
+                  },
                 },
                 {
                   label: RiskStatusLabel[RiskStatus.Opened],
                   icon: getRiskStatusIcon(RiskStatus.Opened),
-                  onClick: () =>
+                  onClick: () => {
                     updateRisk({
                       selectedRows,
                       status: RiskStatus.Opened,
                     }),
+                      setSelectedRows([]);
+                  },
                 },
                 {
                   label: 'Closed',
                   icon: getRiskStatusIcon(RiskStatus.Resolved),
                   onClick: () => {
                     setIsClosedSubStateModalOpen(true);
+                    setSelectedRows([]);
                   },
                 },
                 {
@@ -535,47 +540,57 @@ export function Risks() {
                 {
                   label: 'Critical',
                   icon: <ChevronDoubleUpIcon />,
-                  onClick: () =>
+                  onClick: () => {
                     updateRisk({
                       selectedRows,
                       severity: RiskSeverity.Critical,
-                    }),
+                    });
+                    setSelectedRows([]);
+                  },
                 },
                 {
                   label: 'High',
                   icon: <ChevronUpIcon />,
-                  onClick: () =>
+                  onClick: () => {
                     updateRisk({
                       selectedRows,
                       severity: RiskSeverity.High,
                     }),
+                      setSelectedRows([]);
+                  },
                 },
                 {
                   label: 'Medium',
                   icon: <Bars2Icon />,
-                  onClick: () =>
+                  onClick: () => {
                     updateRisk({
                       selectedRows,
                       severity: RiskSeverity.Medium,
-                    }),
+                    });
+                    setSelectedRows([]);
+                  },
                 },
                 {
                   label: 'Low',
                   icon: <ChevronDownIcon />,
-                  onClick: () =>
+                  onClick: () => {
                     updateRisk({
                       selectedRows,
                       severity: RiskSeverity.Low,
-                    }),
+                    });
+                    setSelectedRows([]);
+                  },
                 },
                 {
                   label: 'Informational',
                   icon: <ChevronDoubleDownIcon />,
-                  onClick: () =>
+                  onClick: () => {
                     updateRisk({
                       selectedRows,
                       severity: RiskSeverity.Info,
-                    }),
+                    });
+                    setSelectedRows([]);
+                  },
                 },
               ],
             },
