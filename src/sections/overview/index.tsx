@@ -161,18 +161,17 @@ export function Overview() {
                         moduleData.route && moduleData.enabled
                       )}
                       conditionalWrapper={() => {
-                        return (
+                        return moduleData.enabled && moduleData.noOfRisk > 0 ? (
                           <Link
-                            buttonClass={cn(
-                              'mb-2 p-0 text-6xl',
-                              moduleData.enabled && moduleData.noOfRisk > 0
-                                ? ''
-                                : 'text-gray-400'
-                            )}
+                            buttonClass="mb-2 p-0 text-6xl"
                             to={moduleData.route}
                           >
                             {riskContent}
                           </Link>
+                        ) : (
+                          <p className="mb-2 p-0 text-center text-6xl text-gray-400">
+                            0
+                          </p>
                         );
                       }}
                     >
