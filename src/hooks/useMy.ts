@@ -62,6 +62,7 @@ export const useMy = <ResourceKey extends MyResourceKey>(
   const response = useInfiniteQuery<MyResource[ResourceKey], Error>({
     ...options,
     defaultErrorMessage: `Failed to fetch ${props.resource} data`,
+    retry: false,
     queryKey,
     queryFn: async ({ pageParam }) => {
       const { data } = await axios.get(`/my`, {
