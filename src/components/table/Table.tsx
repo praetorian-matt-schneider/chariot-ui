@@ -386,7 +386,8 @@ export function Table<TData>(props: TableProps<TData>) {
                         disabled={selectedRows.length === 0}
                         className={cn(
                           parsedPrimaryAction &&
-                            'h-full relative rounded-none rounded-r-[2px] bg-header-dark disabled:bg-header-dark disabled:cursor-not-allowed'
+                            'h-full relative rounded-none rounded-r-[2px] bg-header-dark disabled:bg-header-dark disabled:cursor-not-allowed',
+                          reviewStep === '2' && 'border border-brand'
                         )}
                         styleType="header"
                         endIcon={
@@ -396,7 +397,11 @@ export function Table<TData>(props: TableProps<TData>) {
                       ></Dropdown>
                     </Tooltip>
                     {reviewStep === '2' && (
-                      <ArrowDown className="absolute -top-2 left-3 z-20 -translate-x-1/2 -translate-y-full animate-bounce rounded-full bg-brand text-white shadow-lg" />
+                      <ArrowDown
+                        className={
+                          'absolute -top-2 left-3 z-20 -translate-x-1/2 -translate-y-full animate-bounce rounded-full bg-brand text-white shadow-lg'
+                        }
+                      />
                     )}
                   </div>
                 )}
@@ -455,7 +460,12 @@ export function Table<TData>(props: TableProps<TData>) {
                   {reviewStep === '1' && (
                     <ArrowDown className="absolute -top-2 left-3 -translate-x-1/2 -translate-y-full animate-bounce rounded-full bg-brand text-white shadow-lg" />
                   )}
-                  <label className="cursor-pointer">
+                  <label
+                    className={cn(
+                      'cursor-pointer',
+                      reviewStep === '1' && 'border border-brand'
+                    )}
+                  >
                     <input
                       type="checkbox"
                       onChange={handleSelectAll}

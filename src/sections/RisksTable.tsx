@@ -94,7 +94,8 @@ const getFilteredRisks = (
   }
 ) => {
   let filteredRisks = risks;
-  if (statusFilter?.filter(Boolean).length > 0) {
+  console.log('statusFilter', statusFilter);
+  if (statusFilter && statusFilter?.filter(Boolean).length > 0) {
     filteredRisks = filteredRisks.filter(({ status }) =>
       statusFilter.includes(`${getStatus(status)}`)
     );
@@ -177,13 +178,6 @@ export function Risks() {
 
   const { data: knownExploitedThreats = [], status: threatsStatus } =
     useGetKev();
-
-  useEffect(() => {
-    const riskStatus = (searchParams.get('risk-status') ?? '') as RiskStatus;
-    if (riskStatus) {
-      setStatusesFilter([riskStatus]);
-    }
-  }, [searchParams]);
 
   const reviewStep = searchParams.get('review');
 
