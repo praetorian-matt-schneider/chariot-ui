@@ -56,8 +56,8 @@ export enum AssetStatus {
 
 export const AssetStatusLabel: Record<AssetStatus, string> = {
   [AssetStatus.ActiveHigh]: 'Comprehensive Scan',
-  [AssetStatus.Active]: 'Standard Scan',
-  [AssetStatus.ActiveLow]: 'Asset Discovery',
+  [AssetStatus.Active]: 'Vulnerability Scan',
+  [AssetStatus.ActiveLow]: 'Enumeration Only',
   [AssetStatus.Frozen]: 'Excluded',
   [AssetStatus.Deleted]: 'Deleted',
 };
