@@ -88,7 +88,7 @@ export const RiskDropdown: React.FC<Props> = ({
   const [isClosedSubStateModalOpen, setIsClosedSubStateModalOpen] =
     useState(false);
 
-  const updateRisk = useBulkUpdateRisk();
+  const { handleUpdate: updateRisk } = useBulkUpdateRisk();
 
   const data =
     selectedRowsData && selectedRowsData.length > 1 ? selectedRowsData : [risk];

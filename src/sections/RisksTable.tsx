@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ChevronDownIcon,
@@ -127,7 +127,8 @@ const getFilteredRisks = (
 
 export function Risks() {
   const { getRiskDrawerLink } = getDrawerLink();
-  const updateRisk = useBulkUpdateRisk();
+  const { handleUpdate: updateRisk, status: updateRiskStatus } =
+    useBulkUpdateRisk();
 
   const {
     modal: { risk },
@@ -154,6 +155,12 @@ export function Risks() {
     'risk-sources',
     setSelectedRows
   );
+
+  useEffect(() => {
+    if (updateRiskStatus === 'success') {
+      setSelectedRows([]);
+    }
+  }, [updateRiskStatus]);
 
   const [search, setSearch] = useState('');
   const [debouncedSearch] = useDebounce(search, 500);
@@ -511,26 +518,22 @@ export function Risks() {
                       selectedRows,
                       status: RiskStatus.Triaged,
                     });
-                    setSelectedRows([]);
                   },
                 },
                 {
                   label: RiskStatusLabel[RiskStatus.Opened],
                   icon: getRiskStatusIcon(RiskStatus.Opened),
-                  onClick: () => {
+                  onClick: () =>
                     updateRisk({
                       selectedRows,
                       status: RiskStatus.Opened,
                     }),
-                      setSelectedRows([]);
-                  },
                 },
                 {
                   label: 'Closed',
                   icon: getRiskStatusIcon(RiskStatus.Resolved),
                   onClick: () => {
                     setIsClosedSubStateModalOpen(true);
-                    setSelectedRows([]);
                   },
                 },
                 {
@@ -545,7 +548,6 @@ export function Risks() {
                       selectedRows,
                       severity: RiskSeverity.Critical,
                     });
-                    setSelectedRows([]);
                   },
                 },
                 {
@@ -555,8 +557,7 @@ export function Risks() {
                     updateRisk({
                       selectedRows,
                       severity: RiskSeverity.High,
-                    }),
-                      setSelectedRows([]);
+                    });
                   },
                 },
                 {
@@ -567,7 +568,6 @@ export function Risks() {
                       selectedRows,
                       severity: RiskSeverity.Medium,
                     });
-                    setSelectedRows([]);
                   },
                 },
                 {
@@ -578,7 +578,6 @@ export function Risks() {
                       selectedRows,
                       severity: RiskSeverity.Low,
                     });
-                    setSelectedRows([]);
                   },
                 },
                 {
@@ -589,7 +588,6 @@ export function Risks() {
                       selectedRows,
                       severity: RiskSeverity.Info,
                     });
-                    setSelectedRows([]);
                   },
                 },
               ],
