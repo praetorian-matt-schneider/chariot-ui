@@ -185,7 +185,7 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
   },
   hook: {
     id: Integration.hook,
-    name: 'Inbound Webhook',
+    name: 'Webhook',
     description: 'Push assets and risks to Chariot.',
     logo: '/icons/logo.png',
     help: {
@@ -733,7 +733,6 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
       </div>
     ),
     integrations: [
-      Integrations.hook,
       Integrations.webhook,
       Integrations.slack,
       Integrations.jira,
@@ -792,6 +791,7 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
       </div>
     ),
     integrations: [
+      Integrations.hook,
       Integrations.github,
       Integrations.amazon,
       Integrations.ns1,
