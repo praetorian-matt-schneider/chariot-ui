@@ -1,17 +1,13 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
-import { Hexagon } from '@/components/Hexagon';
 import { LogoIcon } from '@/components/icons/Logo.icon';
 import { AccountDropdown } from '@/sections/topNavBar/AccountDropdown';
 import { Notifications } from '@/sections/topNavBar/Notifications';
 import { getRoute } from '@/utils/route.util';
 
-export function TopNavBar(props: {
-  notifyAssets?: boolean;
-  notifyRisks?: boolean;
-}) {
-  const [showNotification, setShowNotification] = useState<boolean>(false);
+export function TopNavBar() {
+  const [, setShowNotification] = useState<boolean>(false);
   const location = useLocation();
 
   const currentPage = location.pathname.split('/').pop();
@@ -24,7 +20,7 @@ export function TopNavBar(props: {
       <div className="flex flex-col items-center justify-between py-3 md:flex-row">
         <div className="flex w-full items-center">
           <div className="flex w-full flex-nowrap items-center">
-            <Link to={getRoute(['app', 'risks'])}>
+            <Link to={getRoute(['app', 'overview'])}>
               <LogoIcon className="mr-4 size-9" />
             </Link>
 
@@ -36,7 +32,7 @@ export function TopNavBar(props: {
                     'app',
                     link as 'overview' | 'assets' | 'risks',
                   ])}
-                  className={`relative ${linkSize} mt-1 border-b-2 pb-1 text-sm font-medium capitalize transition-colors 
+                  className={`${linkSize} mt-1 border-b-2 pb-1 text-sm font-medium capitalize transition-colors 
                   hover:text-gray-100 ${
                     isCurrentPage(link)
                       ? 'border-layer0 hover:border-layer0'
@@ -44,23 +40,19 @@ export function TopNavBar(props: {
                   }`}
                 >
                   {link}
-                  {link === 'assets' && props.notifyAssets && (
-                    <span className="absolute top-0 right-0 mr-1.5 h-2 w-2 rounded-full bg-brand-light"></span>
-                  )}
-                  {link === 'risks' && props.notifyRisks && (
-                    <span className="absolute top-0 right-0 mr-1.5 h-2 w-2 rounded-full bg-brand-light"></span>
-                  )}
                 </Link>
               ))}
             </nav>
 
-            <Notifications
-              onNotify={shouldShow => {
-                setShowNotification(shouldShow);
-              }}
-              onClick={() => setShowNotification(false)}
-            />
-            <AccountDropdown />
+            <div className="ml-auto flex items-center space-x-4">
+              <Notifications
+                onNotify={shouldShow => {
+                  setShowNotification(shouldShow);
+                }}
+                onClick={() => setShowNotification(false)}
+              />
+              <AccountDropdown />
+            </div>
           </div>
         </div>
       </div>

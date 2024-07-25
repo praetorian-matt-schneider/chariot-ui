@@ -32,6 +32,7 @@ import { Tabs } from '@/sections/overview/Tab';
 import { useAuth } from '@/state/auth';
 import { useGlobalState } from '@/state/global.state';
 import {
+  Account,
   AccountMetadata,
   Integration,
   IntegrationMeta,
@@ -104,9 +105,12 @@ export function Overview() {
 
         <p className="m-auto mb-20 w-2/3 text-center text-gray-300">
           Proactively identify and address exploitable vulnerabilities in your
-          organization with our comprehensive suite of cybersecurity solutions.
-          From point-in-time assessments to our continuous managed security
-          offering, experience the Praetorian difference.
+          organization with our comprehensive suite of continuous cybersecurity
+          solutions.{' '}
+          <span className="font-medium">
+            Experience the Praetorian difference
+          </span>
+          .
         </p>
       </div>
       <div className="mb-10 flex justify-center gap-5">
@@ -162,18 +166,17 @@ export function Overview() {
                         moduleData.route && moduleData.enabled
                       )}
                       conditionalWrapper={() => {
-                        return (
+                        return moduleData.enabled && moduleData.noOfRisk > 0 ? (
                           <Link
-                            buttonClass={cn(
-                              'mb-2 p-0 text-6xl',
-                              moduleData.enabled && moduleData.noOfRisk > 0
-                                ? ''
-                                : 'text-gray-400'
-                            )}
+                            buttonClass="mb-2 p-0 text-6xl"
                             to={moduleData.route}
                           >
                             {riskContent}
                           </Link>
+                        ) : (
+                          <p className="mb-2 p-0 text-center text-6xl text-gray-400">
+                            0
+                          </p>
                         );
                       }}
                     >
@@ -278,7 +281,7 @@ export function ModulesModal() {
     if (integrationData) {
       const accounts = integrationData.accounts;
 
-      return accounts.map(account => {
+      return accounts.map((account: Account) => {
         if (account.config) {
           Object.keys(account.config).forEach((key: string) => {
             if (account.config[key as keyof AccountMetadata] === '') {
@@ -295,7 +298,7 @@ export function ModulesModal() {
 
   async function handleDisconnect() {
     if (selectedIntegration.length > 0) {
-      const promises = selectedIntegration.map(account =>
+      const promises = selectedIntegration.map((account: Account) =>
         unlink({
           username: account.member,
           member: account.member,
@@ -353,7 +356,10 @@ export function ModulesModal() {
     Boolean(moduleState.value?.integration) &&
     !([Integration.kev, Integration.nessus] as string[]).includes(
       moduleState.value?.integration
-    );
+    ) &&
+    (moduleState.value?.integration === Integration.basAgent
+      ? integrationsData.basAgent.isConnected
+      : true);
 
   const featuredModules = [
     Module.PM,
@@ -593,7 +599,7 @@ const IntegrationComponent = (props: IntegrationComponentProps) => {
   return (
     <div className="mt-4 w-full px-4">
       <div className="flex min-h-11 items-center gap-2">
-        <div className="flex flex-row items-center space-x-2 justify-center mb-4">
+        <div className="mb-4 flex flex-row items-center justify-center space-x-2">
           {logo && <img src={logo} alt={name} className="size-10" />}
           {name && (
             <h3 className="text-xl font-medium text-gray-700">

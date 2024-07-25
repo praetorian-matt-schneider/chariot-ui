@@ -1,30 +1,38 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { To } from 'react-router-dom';
-import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import {
+  ArrowPathIcon,
+  InformationCircleIcon,
+} from '@heroicons/react/24/outline';
+import {
+  BookOpen,
   ClipboardList,
   Crosshair,
   Fingerprint,
   GlobeLock,
   Goal,
   Radar,
+  RefreshCcwDot,
 } from 'lucide-react';
+import { Flag } from 'lucide-react';
 
 import { Button } from '@/components/Button';
-import { Dropdown } from '@/components/Dropdown';
+import { Dropzone, Files } from '@/components/Dropzone';
 import { Input } from '@/components/form/Input';
 import { InputText } from '@/components/form/InputText';
-import { Link } from '@/components/Link';
 import { Loader } from '@/components/Loader';
+import { Snackbar } from '@/components/Snackbar';
 import { Tooltip } from '@/components/Tooltip';
 import WebhookExample from '@/components/ui/WebhookExample';
 import { useMy, useUploadFile } from '@/hooks';
 import { useBulkAddAsset } from '@/hooks/useAssets';
-import { useBulkAddAttributes } from '@/hooks/useAttribute';
+import {
+  useBulkAddAttributes,
+  useBulkDeleteAttributes,
+} from '@/hooks/useAttribute';
 import { useCounts } from '@/hooks/useCounts';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useBulkReRunJob } from '@/hooks/useJobs';
-import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { parseKeys } from '@/sections/SearchByType';
 import { useAuth } from '@/state/auth';
 import {
@@ -45,53 +53,34 @@ const NessusInstructions = () => {
   return (
     <div>
       <p className="mb-4">
-        You can use our open-source command line interface (CLI) to seamlessly
-        import assets and risks from Nessus scans. Follow the steps below to get
-        started.
+        Chariot imports scan results from Nessus using the command line
+        interface (CLI).
       </p>
-
-      <h2 className="mb-2 text-lg font-semibold">1. Install the CLI</h2>
-      <p className="mb-2">Use the following command to install the CLI:</p>
+      <h1 className="mb-2 text-xl font-bold">
+        Install the CLI and configure it by:
+      </h1>
       <pre className="mb-4 rounded-md bg-gray-100 p-4">
         <code>pip install praetorian-cli</code>
-      </pre>
-
-      <h2 className="mb-2 mt-4 text-lg font-semibold">2. Configure the CLI</h2>
-      <pre className="mb-4 rounded-md bg-gray-100 p-4">
+        <br />
         <code>praetorian configure</code>
       </pre>
-
-      <h2 className="mb-2 mt-4 text-lg font-semibold">
-        3. Import Nessus Results
-      </h2>
-      <p className="mb-2">
-        Run one of the following commands to import Nessus results:
-      </p>
-
-      <h3 className="mb-2 mt-4 text-lg font-medium">Using Nessus API</h3>
-      <pre className="mb-4 rounded-md bg-gray-100 p-4">
-        <code>praetorian chariot plugin nessus-api</code>
-      </pre>
-
-      <h3 className="mb-2 mt-4 text-lg font-medium">
-        Using Nessus XML Export Files
-      </h3>
-      <pre className="mb-4 rounded-md bg-gray-100 p-4">
-        <code>praetorian chariot plugin nessus-XML</code>
-      </pre>
-
-      <p className="text-sm">
-        For more information, please visit our{' '}
-        <a
-          href="https://github.com/praetorian-inc/praetorian-cli"
-          className="text-blue-500 underline"
-          target="_blank"
-          rel="noreferrer noopener"
-        >
-          GitHub repository
-        </a>
-        .
-      </p>
+      <h1 className="mb-2 mt-4 text-xl font-bold">
+        Import Nessus results in one of two ways:
+      </h1>
+      <div className="">
+        <h2 className="mb-2 mt-4 text-lg font-semibold">
+          1. Connecting to a Nessus server:
+        </h2>
+        <pre className="mb-4 rounded-md bg-gray-100 p-4">
+          <code>praetorian chariot plugin nessus-api</code>
+        </pre>
+        <h2 className="mb-2 mt-4 text-lg font-medium">
+          2. Using an XML export file:
+        </h2>
+        <pre className="mb-4 rounded-md bg-gray-100 p-4">
+          <code>praetorian chariot plugin nessus-xml</code>
+        </pre>
+      </div>
     </div>
   );
 };
@@ -105,7 +94,6 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     name: 'CISA KEV',
     description: '',
     logo: '/icons/kev.svg',
-    connected: true,
     inputs: [],
     markup: (
       <div className="text-default-light">
@@ -128,16 +116,14 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     name: 'Command & Control',
     description: 'Create an agent.',
     logo: '/icons/logo.png',
-    connected: true,
     inputs: [],
     markup: <BasIntegration />,
   },
   webhook: {
     id: Integration.webhook,
     name: 'ServiceNow',
-    description: 'Push assets and risks to Chariot.',
+    description: 'Push opened risks to ServiceNow.',
     logo: '/icons/ServiceNow.svg',
-    connected: true,
     inputs: [
       {
         name: 'username',
@@ -152,7 +138,8 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
       {
         label: 'Severity',
         value: 'MHC',
-        placeholder: 'Select a minimum severity level for your Slack alerts',
+        placeholder:
+          'Select a minimum severity level for your ServiceNow alerts',
         name: 'severities',
         required: true,
         type: Input.Type.SELECT,
@@ -184,9 +171,9 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
         hidden: true,
       },
       {
-        label: 'Token',
+        label: 'Basic Auth Token',
         value: '',
-        placeholder: 'Bearer token',
+        placeholder: 'QmFzaWMgQXV0aCBUb2tlbgo=',
         name: 'token',
         required: true,
         info: {
@@ -197,10 +184,13 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
   },
   hook: {
     id: Integration.hook,
-    name: 'Inbound Webhook',
+    name: 'Webhook',
     description: 'Push assets and risks to Chariot.',
     logo: '/icons/logo.png',
-    connected: true,
+    help: {
+      href: 'https://docs.praetorian.com/hc/en-us/articles/25815155351835-Chariot-Webhooks',
+      label: 'How to: Chariot Webhooks',
+    },
     inputs: [
       {
         name: 'username',
@@ -226,7 +216,6 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     },
     description: 'Receive Slack notifications when new risks are discovered.',
     logo: '/icons/Slack.svg',
-    connected: true,
     inputs: [
       {
         name: 'username',
@@ -270,7 +259,6 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     },
     description: 'Track and manage risks directly within your Jira project.',
     logo: '/icons/Jira.svg',
-    connected: true,
     inputs: [
       {
         name: 'username',
@@ -353,7 +341,6 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     },
     description: "Discover your GitHub organization's repositories and risks.",
     logo: '/icons/GitHub.svg',
-    connected: true,
     multiple: true,
     inputs: [
       {
@@ -397,7 +384,6 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     description:
       'Discover and scan assets hosted within your AWS organization.',
     logo: '/icons/AWS.svg',
-    connected: true,
     multiple: true,
     inputs: [
       {
@@ -439,7 +425,6 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     },
     description: 'Discover and scan assets managed within your NS1 tenant',
     logo: '/icons/NS1.svg',
-    connected: true,
     inputs: [
       {
         name: 'username',
@@ -475,7 +460,6 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     description:
       'Discover and scan assets hosted within your GCP organization.',
     logo: '/icons/GoogleCloud.svg',
-    connected: true,
     multiple: true,
     inputs: [
       {
@@ -522,7 +506,6 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     description:
       'Discover and scan assets hosted within your Azure organization',
     logo: '/icons/Azure.svg',
-    connected: true,
     multiple: true,
     inputs: [
       {
@@ -564,7 +547,6 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     description:
       'Import your assets from CrowdStrike and identify policy risks',
     logo: '/icons/Crowdstrike.svg',
-    connected: true,
     inputs: [
       {
         name: 'username',
@@ -604,7 +586,6 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     },
     description: "Discover your GitLab organization's repositories and risks",
     logo: '/icons/GitLab.svg',
-    connected: true,
     multiple: true,
     inputs: [
       {
@@ -644,23 +625,17 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     description:
       'Industry-standard vulnerability scanner for comprehensive security assessments.',
     logo: '/icons/Nessus.svg',
-    connected: false,
+    help: {
+      href: 'https://docs.praetorian.com/hc/en-us/articles/25815092236443-Asset-Ingestion-Nessus-NS1-and-CrowdStrike#01J1TEBGSSDAA1KKXJQEATKJ22',
+      label: 'How to: Asset Ingestion - Nessus',
+    },
     markup: <NessusInstructions />,
-  },
-  qualys: {
-    id: Integration.qualys,
-    name: 'Qualys',
-    description:
-      'Offers cloud-based solutions for security and compliance across networks.',
-    logo: '/icons/Qualys.svg',
-    connected: false,
   },
   zulip: {
     id: Integration.zulip,
     name: 'Zulip',
     description: 'Receive Zulip notifications when new risks are discovered.',
     logo: '/icons/Zulip.svg',
-    connected: true,
     inputs: [
       {
         name: 'username',
@@ -696,56 +671,126 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
       },
     ],
   },
+  teams: {
+    id: Integration.teams,
+    name: 'Microsoft Teams',
+    description: 'Receive Teams notifications when new risks are discovered.',
+    logo: '/icons/Teams.svg',
+    inputs: [
+      {
+        name: 'username',
+        value: 'teams',
+        hidden: true,
+      },
+      {
+        label: 'Webhook URL',
+        value: '',
+        placeholder: 'https://xxxxxxx.logic.azure.com:443/workflows/xxxxxxx',
+        name: 'webhook',
+        required: true,
+        info: {
+          url: 'https://support.microsoft.com/en-us/office/post-a-workflow-when-a-webhook-request-is-received-in-microsoft-teams-8ae491c7-0394-4861-ba59-055e33f75498',
+          text: 'Learn more',
+        },
+      },
+      {
+        label: 'Severity',
+        value: 'MHC',
+        placeholder: 'Select a minimum severity level for your Teams alerts',
+        name: 'severities',
+        required: true,
+        type: Input.Type.SELECT,
+        options: [
+          { label: 'Info', value: 'ILMHC' },
+          { label: 'Low', value: 'LMHC' },
+          { label: 'Medium', value: 'MHC' },
+          { label: 'High', value: 'HC' },
+          { label: 'Critical', value: 'C' },
+        ],
+      },
+    ],
+  },
 };
 
 export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
   PM: {
-    Icon: <ClipboardList className="size-10 text-default-light" />,
+    Icon: <ClipboardList className="size-10 text-default" />,
     name: 'Project Management',
     label: 'Integrate with your existing workflows',
     description: '',
     defaultTab: (
       <div className="p-4">
-        <h3 className="text-2xl font-semibold">Project Management</h3>
+        <h3 className="text-2xl font-semibold">
+          <ClipboardList className="inline size-8 text-default" /> Project
+          Management
+        </h3>
         <p className="mt-2 text-default-light">
           Security requires continuous management. Chariot makes project
           management easy by integrating with your existing communication and
           remediation applications.
         </p>
-        <p className="mt-2 text-default-light">
-          Workflow integrations bring Chariot threat management to your existing
-          project management workflow.
-        </p>
       </div>
     ),
     integrations: [
-      Integrations.hook,
       Integrations.webhook,
       Integrations.slack,
       Integrations.jira,
       Integrations.zulip,
+      Integrations.teams,
     ],
   },
   ASM: {
-    Icon: <Radar className="size-10 text-default-light" />,
+    Icon: <Radar className="size-10 text-default" />,
     label: 'Attack Surface Management',
     name: 'ASM',
     description: `Attack surface management (ASM) refers to the proactive approach of identifying, analyzing, and managing potential points of attack on an organization's IT infrastructure, applications, and networks. The goal of ASM is to minimize the attack surface, which is the sum of all possible entry points that an attacker can exploit to gain unauthorized access or cause damage.`,
     defaultTab: (
-      <div className="p-4">
-        <h3 className="text-2xl font-semibold">Attack Surface Management</h3>
-        <p className="mt-2 text-default-light">
-          When you provide an Asset as a starting point, Chariot’s comprehensive
-          scan protocols the digital doors to your organization. Using tools
-          like subfinder, assetfinder, Massscan, whois, and and others, Chariot
-          seeks, finds, and presents a picture of your Assets.
+      <div className="space-y-4 p-4">
+        <h3 className="text-2xl font-semibold">
+          <Radar className="inline size-8 text-default" /> Attack Surface
+          Management
+        </h3>
+        <p className="text-default-light">
+          Attack surface management (ASM) refers to the proactive approach of
+          identifying, analyzing, and managing potential points of attack on an
+          organization&apos;s IT infrastructure, applications, and networks.
         </p>
-        <p className="mt-2 text-default-light">
-          {`Continuous ASM helps you proactively manage potential vulnerabilities and exposures, ensuring your organization's security measures keep pace with the dynamic threat environment.`}
-        </p>
+        <div className="rounded-md bg-gray-100 p-4 shadow-sm">
+          <h4 className="font-semibold ">
+            <Flag className="-mt-1 inline size-4" /> Goal of ASM
+          </h4>
+          <p className="text-default-light">
+            The goal of ASM is to provide visibility of all assets that are
+            exposed to external threats—the sum of all possible entry points
+            that an attacker can exploit to gain unauthorized access or cause
+            damage on your network.
+          </p>
+        </div>
+        <div className="rounded-md bg-gray-100 p-4 shadow-sm">
+          <h4 className="font-semibold">
+            <BookOpen className="-mt-1 inline size-4" /> How ASM Works
+          </h4>
+          <p className="text-default-light">
+            When you provide an Asset as a starting point, Chariot’s
+            comprehensive scan protocols the digital doors to your organization.
+            Using tools like subfinder, assetfinder, masscan, whois, and others,
+            Chariot seeks, finds, and presents a picture of your Assets.
+          </p>
+        </div>
+        <div className="rounded-md bg-gray-100 p-4 shadow-sm">
+          <h4 className="font-semibold">
+            <RefreshCcwDot className="-mt-1 inline size-4" /> Continuous ASM
+          </h4>
+          <p className="text-default-light">
+            Continuous ASM helps you proactively manage potential
+            vulnerabilities and exposures, ensuring your organization&apos;s
+            security measures keep pace with the dynamic threat environment.
+          </p>
+        </div>
       </div>
     ),
     integrations: [
+      Integrations.hook,
       Integrations.github,
       Integrations.amazon,
       Integrations.ns1,
@@ -756,72 +801,157 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
     ],
   },
   BAS: {
-    Icon: <Goal className="size-10 text-default-light" />,
+    Icon: <Goal className="size-10 text-default" />,
     label: 'Breach and Attack Simulation',
     name: 'BAS',
     description: `Breach and Attack Simulation (BAS) uses automated tools to continuously simulate real-world cyber attacks, helping organizations identify vulnerabilities, improve threat detection, and enhance their overall security posture.`,
     defaultTab: (
-      <div className="p-4">
-        <h3 className="text-2xl font-semibold">Breach & Attack Simulation</h3>
-        <p className="mt-2 text-default-light">
-          Upload custom TTPs to Chariot to measure your detection and response
-          to MITRE ATT&CK techniques. Deploy a 1-kilobyte agent on any device
-          and schedule jobs for immediate execution.
+      <div className="space-y-4 p-4">
+        <h3 className="text-2xl font-semibold">
+          <Goal className="inline size-8 text-default" /> Breach & Attack
+          Simulation
+        </h3>
+        <p className="text-default-light">
+          Breach and Attack Simulation (BAS) -- Chariot moves past external
+          threat identification and uses an automated approach to continuously
+          simulate real-world cyber attacks.
         </p>
-        <p className="mt-2 text-default-light">
-          Stress test your threat detection and response capabilities by
-          continuously testing your defenses against the latest attack
-          techniques.
-        </p>
+        <div className="rounded-md bg-gray-100 p-4 shadow-sm">
+          <h4 className="font-semibold ">
+            <Flag className="-mt-1 inline size-4" /> Goal of BAS
+          </h4>
+          <p className="text-default-light">
+            Continuous threat exposure testing will help organizations identify
+            vulnerabilities, improve threat detection, and enhance their overall
+            security posture at an extremely fast pace.
+          </p>
+        </div>
+        <div className="rounded-md bg-gray-100 p-4 shadow-sm">
+          <h4 className="font-semibold">
+            <BookOpen className="-mt-1 inline size-4" /> How BAS Works
+          </h4>
+          <p className="text-default-light">
+            Upload custom TTPs to Chariot to measure your detection and response
+            to MITRE ATT&CK techniques. Deploy a 1-kilobyte agent on any device
+            and schedule jobs for immediate execution.
+          </p>
+        </div>
+        <div className="rounded-md bg-gray-100 p-4 shadow-sm">
+          <h4 className="font-semibold">
+            <RefreshCcwDot className="-mt-1 inline size-4" /> Continuous BAS
+          </h4>
+          <p className="text-default-light">
+            Stress test your threat detection and response capabilities by
+            continuously testing your defenses against the latest attack
+            techniques.
+          </p>
+        </div>
       </div>
     ),
     integrations: [Integrations.basAgent],
   },
   CTI: {
-    Icon: <Crosshair className="size-10 text-default-light" />,
+    Icon: <Crosshair className="size-10 text-default" />,
     label: 'Cyber Threat Intelligence',
     name: 'CTI',
     description: `Cyber Threat Intelligence (CTI) involves the collection and analysis of information about potential or current attacks that threaten an organization, helping to inform security decisions and proactive defense strategies.`,
     defaultTab: (
-      <div className="p-4">
-        <h3 className="text-2xl font-semibold">Cyber Threat Intelligence</h3>
-        <p className="mt-2 text-default-light">
-          Chariot tags Known Exploited Vulnerabilities–risks we know are being
-          used to hack into networks– to elevate the Risks that matter most to
-          your business.
+      <div className="space-y-4 p-4">
+        <h3 className="text-2xl font-semibold">
+          <Crosshair className="inline size-8 text-default" /> Cyber Threat
+          Intelligence
+        </h3>
+        <p className="text-default-light">
+          Cyber Threat Intelligence (CTI) is the codified knowledge and
+          understanding of how risks and vulnerabilities affect the real world.
         </p>
-        <p className="mt-2 text-default-light">
-          We monitor emerging threat intelligence from a variety of trusted
-          sources and provide detailed analysis of new vulnerabilities,
-          exploits, and attack vectors.
-        </p>
+        <div className="rounded-md bg-gray-100 p-4 shadow-sm">
+          <h4 className="font-semibold ">
+            <Flag className="-mt-1 inline size-4" /> Goal of CTI
+          </h4>
+          <p className="text-default-light">
+            CTI ingests the collection and analysis of information on potential
+            or current attacks and tailors output in a way that provides
+            relevance that is tailored to real-world organizations. Tailored
+            intelligence informs security decisions and proactive defense
+            strategies.
+          </p>
+        </div>
+        <div className="rounded-md bg-gray-100 p-4 shadow-sm">
+          <h4 className="font-semibold">
+            <BookOpen className="-mt-1 inline size-4" /> How CTI Works
+          </h4>
+          <p className="text-default-light">
+            Chariot tags Known Exploited Vulnerabilities–risks we know are being
+            used to hack into networks– to elevate the Risks that matter most to
+            your business.
+          </p>
+        </div>
+        <div className="rounded-md bg-gray-100 p-4 shadow-sm">
+          <h4 className="font-semibold">
+            <RefreshCcwDot className="-mt-1 inline size-4" /> Continuous CTI
+          </h4>
+          <p className="text-default-light">
+            We monitor emerging threat intelligence from a variety of trusted
+            sources and provide detailed analysis of new vulnerabilities,
+            exploits, and attack vectors.
+          </p>
+        </div>
       </div>
     ),
     integrations: [Integrations.kev],
   },
   VM: {
-    Icon: <GlobeLock className="size-10 text-default-light" />,
+    Icon: <GlobeLock className="size-10 text-default" />,
     label: 'Vulnerability Management',
     name: 'VM',
     description: `Our Vulnerability Management (VM) services include identifying, assessing, and mitigating security vulnerabilities across your IT infrastructure to ensure robust protection against potential threats.`,
     defaultTab: (
-      <div className="p-4">
-        <h3 className="text-2xl font-semibold">Vulnerability Management</h3>
-        <p className="mt-2 text-default-light">
-          VM services take the CVEs found on your Attack Surface–the Risks that
-          represent the most potential harm to your organization–and present the
-          most efficient approach to securing your Assets.
+      <div className="space-y-4 p-4">
+        <h3 className="text-2xl font-semibold">
+          <GlobeLock className="inline size-8 text-default" /> Vulnerability
+          Management
+        </h3>
+        <p className="text-default-light">
+          Our Vulnerability Management (VM) services identify, assess, and
+          mitigate security vulnerabilities across your digital infrastructure.
         </p>
-        <p className="mt-2 text-default-light">
-          Chariot provides the data, up front, in a way that allows a tailored
-          remediation approach.
-        </p>
+        <div className="rounded-md bg-gray-100 p-4 shadow-sm">
+          <h4 className="font-semibold ">
+            <Flag className="-mt-1 inline size-4" /> Goal of VM
+          </h4>
+          <p className="text-default-light">
+            Seeing Risks Applied to your Assets is only the first step in the
+            security journey. Deciding which risks present the most potential
+            harm, specific to your business, is where Chariot Vulnerability
+            Management pays dividends.
+          </p>
+        </div>
+        <div className="rounded-md bg-gray-100 p-4 shadow-sm">
+          <h4 className="font-semibold">
+            <BookOpen className="-mt-1 inline size-4" /> How VM Works
+          </h4>
+          <p className="text-default-light">
+            VM services take the CVEs found on your Attack Surface–the Risks
+            that represent the most potential harm to your organization–and
+            present the most efficient approach to securing your Assets.
+          </p>
+        </div>
+        <div className="rounded-md bg-gray-100 p-4 shadow-sm">
+          <h4 className="font-semibold">
+            <RefreshCcwDot className="-mt-1 inline size-4" /> Continuous VM
+          </h4>
+          <p className="text-default-light">
+            Chariot provides the data, up front, in a way that allows a tailored
+            remediation approach.
+          </p>
+        </div>
       </div>
     ),
     integrations: [Integrations.nessus],
   },
   CPT: {
-    Icon: <Fingerprint className="size-10 text-default-light" />,
+    Icon: <Fingerprint className="size-10 text-default" />,
     label: 'Continuous Penetration Testing',
     name: 'CPT',
     description: `Continuous Penetration Testing (CPT) solutions provide ongoing testing and validation of security measures, helping organizations identify and address vulnerabilities in real-time.`,
@@ -1107,29 +1237,10 @@ export function BasIntegration() {
     isLoading,
   } = useGetModuleData();
 
-  const { getAssetDrawerLink } = getDrawerLink();
-
   const { data: basLabelAttributes, status: basLabelAttributesStatus } = useMy({
     resource: 'attribute',
-    query: '#source#labelBas',
+    query: '#basAgentName',
   });
-
-  const { data: malwares } = useMy({
-    resource: 'file',
-    query: '#malware',
-  });
-
-  const malwareMap = useMemo(() => {
-    return malwares.reduce(
-      (acc, malware) => {
-        return {
-          ...acc,
-          [malware.name]: malware.name,
-        };
-      },
-      {} as Record<string, string>
-    );
-  }, [JSON.stringify(malwares)]);
 
   const { mutateAsync: createBulkAsset, status: createBulkAssetStatus } =
     useBulkAddAsset();
@@ -1140,6 +1251,12 @@ export function BasIntegration() {
     mutateAsync: createBulkAttribute,
     status: createBulkAttributeStatus,
   } = useBulkAddAttributes();
+
+  const { mutateAsync: removeBulkAttribute } = useBulkDeleteAttributes({
+    showToast: false,
+  });
+  const [progress, setProgress] = useState<null | number>(null);
+  const [updatingIndex, setUpdatingIndex] = useState<null | number>(null);
 
   const allAttLabels = useMemo(() => {
     return basLabelAttributes.reduce(
@@ -1177,65 +1294,102 @@ export function BasIntegration() {
     await createBulkAttribute(attributes);
   }
 
-  async function handleFileDrop(files: { content: ArrayBuffer; file: File }[]) {
-    const { content } = files[0];
+  async function handleFileDrop(files: Files<'arrayBuffer'>) {
+    const { content, file } = files[0];
 
-    const fileName = `malware/${selectedAgent}-${selectedPlatform}`;
-    await uploadFile({
-      name: fileName,
-      content,
-    });
+    const [, uuid, platform] =
+      file.name.match(/(.*)-(windows|darwin|linux)(?:\.(.*))?$/) || [];
 
-    const jobs = [
-      {
-        dns: selectedAgent,
-        capability: fileName,
-      },
-    ];
+    if (uuid && platform) {
+      setProgress(0);
+      const fileName = `malware/${uuid}-${platform}`;
+      await uploadFile({
+        name: fileName,
+        content,
+        onProgress: progressEvent => {
+          const progress =
+            (progressEvent.loaded / (progressEvent.total ?? 1)) * 100;
+          setProgress(progress >= 100 ? null : progress);
+        },
+      })
+        .then(() => {
+          updateAgents();
+          Snackbar({
+            title: fileName,
+            description: 'The file has been uploaded successfully.',
+            variant: 'success',
+          });
+          setProgress(null); // Reset progress on success
+        })
+        .catch(() => {
+          Snackbar({
+            title: fileName,
+            description: 'Failed to upload the file.',
+            variant: 'error',
+          });
+          setProgress(null); // Reset progress on error
+        });
 
-    await bulkReRunJobs(jobs);
+      const jobs = BAS.assetAttributes.map(attribute => {
+        const attMeta = parseKeys.attributeKey(attribute.key);
+
+        return {
+          dns: attMeta.name,
+          capability: uuid,
+        };
+      });
+
+      await bulkReRunJobs(jobs);
+    }
   }
-
-  const [selectedAgent, setSelectedAgent] = useState<string>('');
-  const [selectedPlatform, setSelectedPlatform] = useState<string>('');
-
-  const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const arrayBuffer = await file.arrayBuffer();
-      await handleFileDrop([{ content: arrayBuffer, file }]);
-    }
-  };
-
-  const handleDrop = async (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    const file = event.dataTransfer.files?.[0];
-    if (file) {
-      const arrayBuffer = await file.arrayBuffer();
-      await handleFileDrop([{ content: arrayBuffer, file }]);
-    }
-  };
-
-  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-  };
 
   async function handleEditLabel(event: FormEvent) {
     event.preventDefault();
 
-    const attributes = BAS.assetAttributes.map(({ key }) => {
+    const attributes = BAS.assetAttributes
+      .filter(({ key }) => {
+        const attributeMeta = parseKeys.attributeKey(key);
+
+        return attLabels[attributeMeta.name];
+      })
+      .map(({ key }) => {
+        const attributeMeta = parseKeys.attributeKey(key);
+
+        return {
+          key: `#asset#${attributeMeta.name}#${attributeMeta.name}`,
+          name: 'basAgentName',
+          value: `${attLabels[attributeMeta.name]}`,
+        };
+      });
+
+    const attToRemove = BAS.assetAttributes.filter(({ key }) => {
       const attributeMeta = parseKeys.attributeKey(key);
 
-      return {
-        key: `#asset#${attributeMeta.name}#${attributeMeta.name}`,
-        name: 'source',
-        value: `labelBas#${attLabels[attributeMeta.name]}`,
-      };
+      return allAttLabels[attributeMeta.name];
     });
 
+    if (attToRemove.length > 0) {
+      await removeBulkAttribute(
+        attToRemove.map(({ key }) => {
+          const attributeMeta = parseKeys.attributeKey(key);
+
+          return {
+            key: `#attribute#basAgentName#${allAttLabels[attributeMeta.name]}#asset#${attributeMeta.name}#${attributeMeta.name}`,
+          };
+        })
+      );
+    }
+
     await createBulkAttribute(attributes);
+  }
+
+  async function updateAgents() {
+    for (let i = 0; i < BAS.assetAttributes.length; i++) {
+      setUpdatingIndex(i);
+      const randomDelay = Math.floor(Math.random() * 1000) + 500; // Random delay between 500ms to 1500ms
+      await new Promise(resolve => setTimeout(resolve, randomDelay));
+    }
+    setUpdatingIndex(null);
   }
 
   useEffect(() => {
@@ -1300,116 +1454,59 @@ export function BasIntegration() {
       )}
       {isEnabled && (
         <div>
-          <div className="">
-            <p className="-mt-2 text-sm text-gray-700">
-              {`Upload your TTP (Tactics, Techniques, and Procedures) binary for Chariot's internal assessments. Ensure the file is correctly prepared before uploading.`}
-            </p>
-          </div>
-          <label className="mt-4 block text-sm font-medium leading-6 text-gray-900">
-            Tactics, Techniques, and Procedures (TTP)
-          </label>
-          <div className="flex flex-col items-center space-y-2 rounded-sm border border-gray-200 p-4">
-            <div className="flex w-full flex-row space-x-4">
-              <Dropdown
-                menu={{
-                  items: BAS.assetAttributes.map(attribute => {
-                    const attributeMeta = parseKeys.attributeKey(attribute.key);
-
-                    return {
-                      label:
-                        allAttLabels[attributeMeta.name] ||
-                        attributeMeta.name.split('-')[0],
-                      value: attributeMeta.name,
-                      onClick: () => {
-                        setSelectedAgent(attributeMeta.name);
-                      },
-                    };
-                  }),
-                }}
-                label={
-                  selectedAgent
-                    ? allAttLabels[selectedAgent] || selectedAgent.split('-')[0]
-                    : 'Select Agent'
-                }
-                className="w-full"
-                endIcon={
-                  <ChevronDownIcon className="ml-auto size-4 text-gray-500" />
-                }
-                value={selectedAgent}
-              />
-              <Dropdown
-                menu={{
-                  items: Object.values(systemTypes).map(system => {
-                    return {
-                      icon: (
-                        <img
-                          className="size-4"
-                          src={`/icons/${system}.svg`}
-                          alt={system}
-                        />
-                      ),
-                      label: <div className="w-full capitalize">{system}</div>,
-                      value: system,
-                      onClick: () => {
-                        setSelectedPlatform(system);
-                      },
-                    };
-                  }),
-                }}
-                startIcon={
-                  selectedPlatform && (
-                    <img
-                      className="size-4"
-                      src={`/icons/${selectedPlatform}.svg`}
-                      alt={selectedPlatform}
-                    />
-                  )
-                }
-                label={selectedPlatform || 'Select Platform'}
-                endIcon={
-                  <ChevronDownIcon className="ml-auto size-4 text-gray-500" />
-                }
-                value={selectedPlatform}
-                className="w-full capitalize"
-              />
-            </div>
-            <div className="flex w-full items-center">
-              <Tooltip
-                title={
-                  selectedAgent === '' || selectedPlatform === ''
-                    ? 'Please select an agent and platform'
-                    : 'Drag and drop or click to upload'
-                }
-              >
-                <div
-                  className="w-full text-center"
-                  onDrop={handleDrop}
-                  onDragOver={handleDragOver}
-                  onClick={() => document.getElementById('fileInput')?.click()}
-                >
-                  <input
-                    type="file"
-                    id="fileInput"
-                    className="hidden"
-                    onChange={handleFileChange}
-                    disabled={selectedAgent === '' || selectedPlatform === ''}
-                  />
-                  <p
-                    className={cn(
-                      'w-full text-white p-4 text-sm font-medium',
-                      selectedAgent === '' || selectedPlatform === ''
-                        ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
-                        : 'bg-brand text-white cursor-pointer'
-                    )}
-                  >
-                    Upload Executable
-                  </p>
+          {progress !== null ? (
+            <div className="w-full">
+              <div className="relative pt-1">
+                <div className="mb-2 flex items-center justify-between">
+                  <div>
+                    <span className="inline-block px-2 py-1 text-xs font-semibold uppercase text-default">
+                      Uploading...
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="inline-block text-xs font-semibold text-brand">
+                      {Math.round(progress)}%
+                    </span>
+                  </div>
                 </div>
-              </Tooltip>
+                <div className="mb-4 flex h-2 overflow-hidden rounded bg-brand-light text-xs">
+                  <div
+                    style={{ width: `${progress}%` }}
+                    className="flex flex-col justify-center whitespace-nowrap bg-brand text-center text-white shadow-none"
+                  ></div>
+                </div>
+              </div>
             </div>
-          </div>
+          ) : (
+            <Dropzone
+              multiple={false}
+              onFilesDrop={handleFileDrop}
+              type="arrayBuffer"
+              title=""
+              subTitle={
+                'Upload a security test to launch an internal assessment'
+              }
+              className="m-0 mt-2 h-[200px]"
+            />
+          )}
+          <p className="mt-1 text-sm text-gray-500">
+            <InformationCircleIcon className="mr-2 inline size-4" />
+            Learn to write your own tests:{' '}
+            <a
+              href="https://github.com/praetorian-inc/chariot-bas"
+              target="_blank"
+              rel="noreferrer noopener"
+              className="font-medium text-brand"
+            >
+              praetorian-inc/chariot-bas
+            </a>
+          </p>
 
-          <div className="flex flex-col pt-4">
+          <div className="flex flex-col pt-6">
+            <div className="text-md flex flex-row justify-between border-b border-gray-200 px-2 font-bold">
+              <p>Agent Identifier</p>
+              <p>Installer</p>
+            </div>
             <Loader isLoading={isLoading}>
               {BAS.assetAttributes
                 .sort((a, b) => {
@@ -1427,13 +1524,16 @@ export function BasIntegration() {
                       className="flex flex-row justify-start border-gray-200"
                     >
                       <div className="flex w-full items-center">
-                        <div className="w-full">
+                        <div className="relative w-full">
                           <Loader
                             className="h-[36px] w-[100px]"
                             isLoading={basLabelAttributesStatus === 'pending'}
                           >
                             <InputText
-                              className="w-full border-0 border-b border-gray-300 ring-0"
+                              className={cn(
+                                'w-full border-0 border-b border-gray-300 ring-0',
+                                updatingIndex === index && 'italic'
+                              )}
                               placeholder="Agent Name"
                               name={attributeMeta.name}
                               onChange={event => {
@@ -1444,54 +1544,42 @@ export function BasIntegration() {
                                   };
                                 });
                               }}
-                              value={attLabels[attributeMeta.name] || ''}
+                              value={
+                                updatingIndex === index
+                                  ? 'Updating...'
+                                  : attLabels[attributeMeta.name] || ''
+                              }
+                              disabled={updatingIndex === index}
                             />
                           </Loader>
+                          {updatingIndex == index && (
+                            <div className="absolute inset-y-0 right-0 flex animate-spin items-center justify-center">
+                              <ArrowPathIcon className="size-6 text-gray-400" />
+                            </div>
+                          )}
                         </div>
 
-                        <Link
-                          className="mb-1 mt-auto text-xs"
-                          to={getAssetDrawerLink({
-                            name: attributeMeta.name,
-                            dns: attributeMeta.name,
-                          })}
-                        >
-                          {attributeMeta.name.split('-')[0]}
-                        </Link>
+                        <p className="mt-4 text-sm font-medium">
+                          {attributeMeta.name.slice(0, 5)}
+                        </p>
                       </div>
                       <div className="ml-3 flex shrink-0 border-l border-gray-200 bg-gray-50 py-2 ">
                         {Object.values(systemTypes).map((system, index) => {
-                          const malwareAvailable =
-                            malwareMap[
-                              `malware/${attributeMeta.name}-${system}`
-                            ];
-
                           function handleCopy() {
-                            const filename =
-                              system === 'windows' ? 'agent.ps1' : 'agent.sh';
                             copyToClipboard(
-                              `curl -o ${filename} https://preview.chariot.praetorian.com/${friend.email || me}/${attributeMeta.name}/${system}`
+                              `https://d0qcl2e18h.execute-api.us-east-2.amazonaws.com/chariot/${friend.email || me}/${attributeMeta.name}/${system}`
                             );
                           }
 
                           return (
                             <Tooltip
-                              title={
-                                malwareAvailable
-                                  ? `Copy ${system} command`
-                                  : 'Upload TTP Binary to copy executable command'
-                              }
+                              title={`Copy ${system} command`}
                               key={index}
                             >
                               <img
-                                onClick={
-                                  malwareAvailable ? handleCopy : undefined
-                                }
+                                onClick={handleCopy}
                                 className={cn(
-                                  'm-1 size-[28px] cursor-pointer p-1',
-                                  malwareAvailable
-                                    ? ''
-                                    : 'cursor-not-allowed opacity-20'
+                                  'm-1 size-[28px] cursor-pointer p-1'
                                 )}
                                 src={`/icons/${system}.svg`}
                               />

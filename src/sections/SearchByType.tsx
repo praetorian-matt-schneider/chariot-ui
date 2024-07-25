@@ -318,15 +318,17 @@ export const parseKeys = {
   } {
     const [, , name, value, attributeType] = key.split('#');
 
-    if (name === 'source' && value === 'labelBas') {
-      const [, , , , basLabel, attributeType, name] = key.split('#');
+    if (name === 'basAgentName') {
+      const [, , , value, attributeType, name] = key.split('#');
 
       return {
         name,
-        value: basLabel,
+        value: value,
         attributeType: attributeType as AttributeType,
       };
-    } else if (name === 'source') {
+    }
+
+    if (name === 'source') {
       const [, , , , , attributeType, name, value] = key.split('#');
 
       return { name, value, attributeType: attributeType as AttributeType };

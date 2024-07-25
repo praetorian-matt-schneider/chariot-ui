@@ -128,8 +128,9 @@ const getFilteredRisks = (
 
 export function Risks() {
   const { getRiskDrawerLink } = getDrawerLink();
-  const updateRisk = useBulkUpdateRisk();
   const { searchParams, removeSearchParams } = useSearchParams();
+  const { handleUpdate: updateRisk, status: updateRiskStatus } =
+    useBulkUpdateRisk();
 
   const {
     modal: { risk },
@@ -156,6 +157,12 @@ export function Risks() {
     'risk-sources',
     setSelectedRows
   );
+
+  useEffect(() => {
+    if (updateRiskStatus === 'success') {
+      setSelectedRows([]);
+    }
+  }, [updateRiskStatus]);
 
   const [search, setSearch] = useState('');
   const [debouncedSearch] = useDebounce(search, 500);
@@ -517,11 +524,12 @@ export function Risks() {
                 {
                   label: RiskStatusLabel[RiskStatus.Triaged],
                   icon: getRiskStatusIcon(RiskStatus.Triaged),
-                  onClick: () =>
+                  onClick: () => {
                     updateRisk({
                       selectedRows,
                       status: RiskStatus.Triaged,
-                    }),
+                    });
+                  },
                 },
                 {
                   label: RiskStatusLabel[RiskStatus.Opened],
@@ -567,47 +575,52 @@ export function Risks() {
                 {
                   label: 'Critical',
                   icon: <ChevronDoubleUpIcon />,
-                  onClick: () =>
+                  onClick: () => {
                     updateRisk({
                       selectedRows,
                       severity: RiskSeverity.Critical,
-                    }),
+                    });
+                  },
                 },
                 {
                   label: 'High',
                   icon: <ChevronUpIcon />,
-                  onClick: () =>
+                  onClick: () => {
                     updateRisk({
                       selectedRows,
                       severity: RiskSeverity.High,
-                    }),
+                    });
+                  },
                 },
                 {
                   label: 'Medium',
                   icon: <Bars2Icon />,
-                  onClick: () =>
+                  onClick: () => {
                     updateRisk({
                       selectedRows,
                       severity: RiskSeverity.Medium,
-                    }),
+                    });
+                  },
                 },
                 {
                   label: 'Low',
                   icon: <ChevronDownIcon />,
-                  onClick: () =>
+                  onClick: () => {
                     updateRisk({
                       selectedRows,
                       severity: RiskSeverity.Low,
-                    }),
+                    });
+                  },
                 },
                 {
                   label: 'Informational',
                   icon: <ChevronDoubleDownIcon />,
-                  onClick: () =>
+                  onClick: () => {
                     updateRisk({
                       selectedRows,
                       severity: RiskSeverity.Info,
-                    }),
+                    });
+                  },
                 },
               ],
             },

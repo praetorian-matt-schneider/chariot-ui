@@ -321,6 +321,7 @@ const Assets: React.FC = () => {
         },
         {
           onSuccess: () => {
+            setSelectedRows([]);
             if (showBulk) {
               Snackbar({
                 title: `${assets.length} assets ${AssetsSnackbarTitle[status]}`,

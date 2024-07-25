@@ -497,10 +497,10 @@ export enum Integration {
   crowdstrike = 'crowdstrike',
   gitlab = 'gitlab',
   nessus = 'nessus',
-  qualys = 'qualys',
   zulip = 'zulip',
   basAgent = 'basAgent',
   kev = 'kev',
+  teams = 'teams',
 }
 
 export interface IntegrationMeta {
@@ -508,7 +508,6 @@ export interface IntegrationMeta {
   name: string;
   description?: ReactNode;
   logo?: string;
-  connected?: boolean;
   inputs?: InputsT;
   warning?: string;
   message?: JSX.Element;

@@ -153,7 +153,7 @@ const useBulkUpdateRiskHook = () => {
 };
 
 export function useBulkUpdateRisk() {
-  const { mutate: updateRisk } = useBulkUpdateRiskHook();
+  const { mutate: updateRisk, status } = useBulkUpdateRiskHook();
 
   function handleUpdate({
     selectedRows,
@@ -164,7 +164,7 @@ export function useBulkUpdateRisk() {
     status?: RiskStatus;
     severity?: string;
   }) {
-    updateRisk(
+    return updateRisk(
       selectedRows.map(item => {
         const riskComposite = item.key.split('#');
         const finding = riskComposite[3];
@@ -185,7 +185,7 @@ export function useBulkUpdateRisk() {
     );
   }
 
-  return handleUpdate;
+  return { handleUpdate, status };
 }
 
 interface ReportRiskProps {
