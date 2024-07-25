@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { createSearchParams, useNavigate } from 'react-router-dom';
 import { Divider } from '@tremor/react';
-import { ChevronDown, Inbox } from 'lucide-react'; // Assuming lucide-react is already installed
+import { Inbox } from 'lucide-react';
 
 import { Button } from '@/components/Button';
 import { RiskStatus } from '@/types';
 import { getRoute } from '@/utils/route.util';
-import { useStorage } from '@/utils/storage/useStorage.util';
 
 interface Props {
   assets: number;
@@ -17,7 +16,6 @@ const MyInbox: React.FC<Props> = ({ risks, assets }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [shouldRenderDropdown, setShouldRenderDropdown] = useState(false);
   const navigate = useNavigate();
-  const [, setFilter] = useStorage({ queryKey: 'risk-status' }, '');
 
   const toggleDropdown = () => {
     if (dropdownOpen) {
@@ -32,7 +30,7 @@ const MyInbox: React.FC<Props> = ({ risks, assets }) => {
   const totalItems = assets + risks;
 
   return (
-    <div className="relative">
+    <div className="relative  border-r border-dashed border-gray-700 pr-4">
       <div
         className="flex cursor-pointer items-center"
         onClick={toggleDropdown}
@@ -45,7 +43,6 @@ const MyInbox: React.FC<Props> = ({ risks, assets }) => {
             </span>
           )}
         </div>
-        <ChevronDown className="ml-2 size-4 text-gray-700" />
       </div>
       {shouldRenderDropdown && (
         <div
