@@ -41,7 +41,7 @@ export const emptyAuth: AuthState = {
   me: '',
   friend: { email: '', displayName: '' },
   isImpersonating: false,
-  userPoolId: '',
+  userPoolId: 'us-east-2_BJ6QHVG2L',
 };
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
