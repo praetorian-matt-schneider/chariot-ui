@@ -11,23 +11,24 @@ const Data = {
 
 export const CustomerQuote = () => {
   return (
-    <div className="relative flex basis-3/5 flex-col justify-center overflow-hidden bg-header">
+    <div className="relative flex basis-0 flex-col justify-center overflow-hidden bg-header max-md:hidden md:basis-1/2 xl:basis-3/5">
       <LogoIcon className="absolute -left-24 mr-4 size-[120%] opacity-30" />
-      <div className="relative flex w-full items-center justify-center">
-        <div className="relative m-16 w-1/2">
+      <div className="relative flex w-full flex-col items-center justify-center xl:flex-row">
+        <div className="relative m-16 w-1/2 xl:order-last">
+          <Quotes className="absolute -left-10 -top-10" />
+          <Quotes className="absolute -bottom-10 -right-10 rotate-180" />
+          <h1 className="relative text-xl font-bold text-layer0 xl:text-3xl">
+            {Data.quote}
+          </h1>
+        </div>
+        <hr className="w-1/2 rounded border-t-4 border-default xl:hidden" />
+        <div className="h-1/2 rounded border-l-4 border-default max-xl:hidden xl:order-2" />
+        <div className="relative m-16 w-1/2 xl:order-first">
           <img src={Data.avatar} alt="Signup avatar" />
           <div className="absolute bottom-12 right-0">
             <h3 className="mb-1 font-bold text-layer0">{Data.name}</h3>
             <p className="text-xs text-default-light">{Data.designation}</p>
           </div>
-        </div>
-        <div className="h-1/2 rounded border-0 border-l-4 border-default" />
-        <div className="relative m-16 w-1/2">
-          <Quotes className="absolute -left-10 -top-10" />
-          <Quotes className="absolute -bottom-10 -right-10 rotate-180" />
-          <h1 className="relative text-3xl font-bold text-layer0">
-            {Data.quote}
-          </h1>
         </div>
       </div>
     </div>
