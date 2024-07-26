@@ -5,9 +5,11 @@ import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ChevronDownIcon,
   ExclamationCircleIcon,
+  InformationCircleIcon,
   MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
 import { notUndefined, useVirtualizer } from '@tanstack/react-virtual';
+import { Slash } from 'lucide-react';
 
 import { Button } from '@/components/Button';
 import { Dropdown } from '@/components/Dropdown';
@@ -61,7 +63,6 @@ export function Table<TData>(props: TableProps<TData>) {
   } = props;
   const controlledSearchValue = controlledSearch?.value;
   const onControlledSearchChange = controlledSearch?.onChange;
-  const searchInputRef = useRef<HTMLInputElement>(null);
   const [search, setSearch] = useStorage(
     {
       parentState: controlledSearchValue,
@@ -350,12 +351,25 @@ export function Table<TData>(props: TableProps<TData>) {
             <div className="flex space-x-4">
               <Input
                 name="search"
-                placeholder={`Type [/] to search ${tableName}`}
+                placeholder={`Go to ${tableName}`}
                 className="h-11 w-64 justify-end rounded-sm border-gray-900 bg-header-light p-2 text-sm text-white  ring-0"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 startIcon={
                   <MagnifyingGlassIcon className="size-5 stroke-2 text-default-light" />
+                }
+                endIcon={
+                  <Tooltip
+                    title={
+                      <span className="text-md">
+                        Press{' '}
+                        <Slash className="inline h-4 w-2.5 rounded-sm border-[1.5px] border-gray-500 text-lg text-gray-400" />{' '}
+                        to focus search
+                      </span>
+                    }
+                  >
+                    <InformationCircleIcon className="size-5 stroke-2 text-default-light" />
+                  </Tooltip>
                 }
               />
 
