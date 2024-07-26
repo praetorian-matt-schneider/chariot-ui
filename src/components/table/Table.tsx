@@ -10,7 +10,7 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { notUndefined, useVirtualizer } from '@tanstack/react-virtual';
-import { ArrowDown } from 'lucide-react';
+import { ArrowDown, CircleCheck } from 'lucide-react';
 
 import { Button } from '@/components/Button';
 import { Dropdown } from '@/components/Dropdown';
@@ -437,11 +437,23 @@ export function Table<TData>(props: TableProps<TData>) {
       )}
 
       {reviewStep && (
-        <div className="sticky z-10 m-auto w-[300px] rounded-t-sm border border-default bg-white">
-          <div className="flex flex-row p-2">
-            <p className="w-full">
-              <span className="font-normal text-gray-700">Condition:</span>{' '}
-              <span className="font-bold">a1b2c3d4</span>
+        <div className="border-b-1 sticky top-[4.5rem] z-10 m-auto w-full rounded-t-sm border-default border-b-gray-400 bg-layer0 font-medium shadow-md">
+          <div className="flex flex-row items-center p-2">
+            {reviewStep === '1' && (
+              <div className="mr-2 pl-1">
+                <ArrowDown className="animate-bounce rounded-full bg-brand pt-1 text-white shadow-lg" />
+              </div>
+            )}
+            {reviewStep === '2' && (
+              <div className="mr-2 pl-1">
+                <CircleCheck className="size-6 text-default-light" />
+              </div>
+            )}
+            <p className="w-full text-sm">
+              Condition (<span className="font-bold">a1b2c3d4</span>):{' '}
+              <span className="text-gray-700">
+                Discovered assets are not being scanned for risks
+              </span>
             </p>
             <div>
               <XMarkIcon
@@ -466,7 +478,11 @@ export function Table<TData>(props: TableProps<TData>) {
           <thead
             className={cn(
               'sticky bg-layer0',
-              isTableView && !skipHeader ? 'top-[4.5rem]' : 'top-0'
+              isTableView && !skipHeader
+                ? reviewStep
+                  ? 'top-[7rem]'
+                  : 'top-[4.5rem]'
+                : 'top-0'
             )}
             style={{ zIndex: 1 }}
           >
@@ -477,9 +493,6 @@ export function Table<TData>(props: TableProps<TData>) {
                   align="center"
                   className={reviewStep === '1' ? 'relative' : ''}
                 >
-                  {reviewStep === '1' && (
-                    <ArrowDown className="absolute -top-2 left-3 z-30 -translate-x-1/2 -translate-y-full animate-bounce rounded-full bg-brand text-white shadow-lg" />
-                  )}
                   <label
                     className={cn(
                       'cursor-pointer',
