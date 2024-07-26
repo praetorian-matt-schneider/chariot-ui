@@ -67,6 +67,22 @@ export function App() {
       Cognito: {
         userPoolClientId: emptyAuth.clientId,
         userPoolId: emptyAuth.userPoolId,
+
+        loginWith: {
+          oauth: {
+            domain: `praetorian-${emptyAuth.backend}.auth.${emptyAuth.region}.amazoncognito.com`,
+            scopes: ['email', 'openid'],
+            redirectSignIn: [
+              'https://localhost:3000/hello',
+              'https://preview.chariot.praetorian.com/',
+            ],
+            redirectSignOut: [
+              'https://localhost:3000/goodbye',
+              'https://preview.chariot.praetorian.com/',
+            ],
+            responseType: 'code',
+          },
+        },
       },
     },
 

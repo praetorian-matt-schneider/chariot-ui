@@ -1,3 +1,5 @@
+import { signInWithRedirect } from 'aws-amplify/auth';
+
 import { Button } from '@/components/Button';
 
 export const SSO = () => {
@@ -9,8 +11,16 @@ export const SSO = () => {
           OR
         </span>
       </div>
-      <Button styleType="secondary" className="w-full">
-        Sign Up With Google
+      <Button
+        styleType="secondary"
+        onClick={() => signInWithRedirect({ provider: 'Google' })}
+      >
+        <img
+          src="/icons/GoogleSSO.svg"
+          alt="Google SSO"
+          className="mr-2 size-5"
+        />
+        <span>Sign in with Google</span>
       </Button>
     </>
   );

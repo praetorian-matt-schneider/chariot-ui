@@ -430,11 +430,12 @@ export interface BackendSections {
 }
 
 export interface BackendType {
-  api: string;
-  client_id: string;
   name: string;
+  client_id: string;
+  api: string;
   username?: string;
   password?: string;
+  userPoolId?: string;
 }
 
 export interface AuthState {
