@@ -395,7 +395,10 @@ export function ModulesModal() {
               form: 'overviewForm',
               disconnect: selectedIntegration.length
                 ? {
-                    text: 'Disconnect All',
+                    text:
+                      selectedIntegration.length === 1
+                        ? 'Disconnect'
+                        : 'Disconnect All',
                     onClick: handleDisconnect,
                     isLoading: unlinkStatus === 'pending',
                   }

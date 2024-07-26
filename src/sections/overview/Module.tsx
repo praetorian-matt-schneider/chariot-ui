@@ -1230,7 +1230,7 @@ export function useGetModuleData(props?: GetModuleDataProps): {
 }
 
 export function BasIntegration() {
-  const { me, friend } = useAuth();
+  const { me, friend, api } = useAuth();
 
   const {
     data: { BAS },
@@ -1567,7 +1567,7 @@ export function BasIntegration() {
                         {Object.values(systemTypes).map((system, index) => {
                           function handleCopy() {
                             copyToClipboard(
-                              `https://d0qcl2e18h.execute-api.us-east-2.amazonaws.com/chariot/${friend.email || me}/${attributeMeta.name}/${system}`
+                              `${api}/${friend.email || me}/${attributeMeta.name}/${system}`
                             );
                           }
 

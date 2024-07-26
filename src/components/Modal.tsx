@@ -3,6 +3,7 @@ import React, {
   PropsWithChildren,
   ReactNode,
   useEffect,
+  useState,
 } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { Dialog, Transition } from '@headlessui/react';
@@ -64,6 +65,7 @@ export const Modal: React.FC<Props> = props => {
     closeOnOutsideClick = true,
   } = props;
   const isDialog = style === 'dialog';
+  const [confirmDisconnect, setConfirmDisconnect] = useState(false);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -135,47 +137,84 @@ export const Modal: React.FC<Props> = props => {
             isDialog && 'pt-6'
           )}
         >
-          <div>
+          <div
+            className={cn(
+              'ml-auto',
+              confirmDisconnect ? 'w-[460px]' : 'w-[260px]'
+            )}
+          >
             {footer?.left}
-            {footer?.disconnect && (
-              <Button
-                onClick={footer?.disconnect?.onClick}
-                styleType="secondary"
-                className={cn(
-                  ' text-red-700 hover:bg-layer0',
-                  footer?.className
-                )}
-                isLoading={footer?.disconnect?.isLoading}
-                disabled={footer?.disconnect?.disabled}
-              >
-                {footer?.disconnect?.text}
-              </Button>
-            )}
-          </div>
-          <div className="flex gap-2">
-            <Button
-              onClick={onClose}
-              styleType="secondary"
-              className="!m-0 w-24 bg-layer0 hover:bg-layer0"
-            >
-              Cancel
-            </Button>
+            {confirmDisconnect ? (
+              <div className="flex items-center space-x-2">
+                <span className="flex-1">
+                  Are you sure you want to disconnect?
+                </span>
 
-            {footer?.text && (
-              <Button
-                onClick={footer?.onClick}
-                startIcon={footer?.startIcon}
-                styleType={footer.styleType || 'primary'}
-                className={cn('ml-2 w-24', footer?.className)}
-                form={footer?.form}
-                type={footer?.form ? 'submit' : undefined}
-                isLoading={footer?.isLoading}
-                disabled={footer?.disabled}
-              >
-                {footer.text}
-              </Button>
+                <Button
+                  onClick={() => setConfirmDisconnect(false)}
+                  styleType="secondary"
+                  className={cn(footer?.className)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => {
+                    footer?.disconnect?.onClick &&
+                      footer?.disconnect?.onClick();
+                    setConfirmDisconnect(false);
+                  }}
+                  styleType="secondary"
+                  className={cn(
+                    'text-red-700 hover:bg-layer0 border-red-700',
+                    footer?.className
+                  )}
+                >
+                  Yes
+                </Button>
+              </div>
+            ) : (
+              footer?.disconnect && (
+                <Button
+                  onClick={() => setConfirmDisconnect(true)}
+                  styleType="secondary"
+                  className={cn(
+                    'text-red-700 hover:bg-layer0',
+                    footer?.className
+                  )}
+                  isLoading={footer?.disconnect?.isLoading}
+                  disabled={footer?.disconnect?.disabled}
+                >
+                  {footer?.disconnect?.text}
+                </Button>
+              )
             )}
           </div>
+          {!confirmDisconnect && (
+            <div className="flex gap-2">
+              <Button
+                onClick={onClose}
+                styleType="secondary"
+                className="!m-0 w-24 bg-layer0 hover:bg-layer0"
+              >
+                Cancel
+              </Button>
+
+              {footer?.text && (
+                <Button
+                  onClick={footer?.onClick}
+                  startIcon={footer?.startIcon}
+                  styleType={footer.styleType || 'primary'}
+                  className={cn('ml-2 w-24', footer?.className)}
+                  form={footer?.form}
+                  type={footer?.form ? 'submit' : undefined}
+                  isLoading={footer?.isLoading}
+                  disabled={footer?.disabled}
+                >
+                  {footer.text}
+                </Button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </ModalWrapper>

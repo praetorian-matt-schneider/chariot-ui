@@ -57,24 +57,7 @@ export const DrawerList = (props: Props) => {
           {value}
         </a>
       );
-    } else if (label?.toLowerCase() === 'host') {
-      const domain = props.dns;
-      const ip = value?.toString().split(':')[0] ?? '';
-      return (
-        <button
-          onClick={() => {
-            navigate(
-              getAssetDrawerLink({
-                dns: domain,
-                name: ip,
-              })
-            );
-          }}
-        >
-          {value}
-        </button>
-      );
-    } else if (label?.toLowerCase() === 'seed') {
+    } else if (label?.toLowerCase() === 'source') {
       return (
         <button
           onClick={() => {
