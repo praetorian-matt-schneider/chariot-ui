@@ -464,7 +464,6 @@ export function Table<TData>(props: TableProps<TData>) {
               </div>
             )}
             <p className="w-full text-sm">
-              Condition (<span className="font-bold">a1b2c3d4</span>):{' '}
               <span className="text-gray-700">
                 Discovered assets are not being scanned for risks
               </span>
@@ -510,7 +509,7 @@ export function Table<TData>(props: TableProps<TData>) {
                   <label
                     className={cn(
                       'cursor-pointer',
-                      reviewStep === '1' && 'border border-brand bg-brand-light'
+                      reviewStep === '1' && 'border border-brand'
                     )}
                   >
                     <input

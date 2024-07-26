@@ -13,7 +13,7 @@ const isAssetStatus = (status: string): boolean => {
 };
 
 const getStatusParam = (status: string): string => {
-  return isAssetStatus(status) ? 'asset-status' : 'risk-status';
+  return isAssetStatus(status) ? 'asset-priority' : 'risk-status';
 };
 
 const getEnumKeyByValue = (
@@ -48,7 +48,7 @@ const MyInbox: React.FC = () => {
     const status = query.split(':')[1];
     const statusParam = getStatusParam(status);
     const statusValue =
-      statusParam === 'asset-status'
+      statusParam === 'asset-priority'
         ? getEnumKeyByValue(AssetStatus, status)
         : getEnumKeyByValue(RiskStatus, status);
 
@@ -57,7 +57,7 @@ const MyInbox: React.FC = () => {
     navigate({
       pathname: getRoute([
         'app',
-        statusParam === 'asset-status' ? 'assets' : 'risks',
+        statusParam === 'asset-priority' ? 'assets' : 'risks',
       ]),
       search: createSearchParams({
         [statusParam]: JSON.stringify([statusValue]),
