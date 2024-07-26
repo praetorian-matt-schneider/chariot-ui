@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import { ShortcutsHelper } from '@/components/ui/Shortcuts';
 import { useMy } from '@/hooks';
 import { useGetDisplayName } from '@/hooks/useAccounts';
-import { useCounts } from '@/hooks/useCounts';
 import { AddAsset } from '@/sections/add/AddAsset';
 import { AddFile } from '@/sections/add/AddFile';
 import { AddRisks } from '@/sections/add/AddRisks';
@@ -121,13 +120,6 @@ const HeaderPortalSections = {
 };
 
 export function Header() {
-  const { data: assetCounts } = useCounts({
-    resource: 'asset',
-  });
-
-  const { data: riskCounts } = useCounts({
-    resource: 'risk',
-  });
   const { friend } = useAuth();
   const { breadcrumbs } = useBreadCrumbsContext();
 
@@ -135,12 +127,6 @@ export function Header() {
   const showSticky = ['assets', 'risks', 'seeds', 'jobs'].includes(
     breadcrumbs[1]?.label?.toLowerCase()
   );
-
-  const assetCount = assetCounts?.status?.AL ?? 0;
-
-  const riskCount = Object.keys(riskCounts?.status ?? {})
-    .filter(key => key.startsWith('T'))
-    .reduce((acc, key) => acc + (riskCounts?.status?.[key] ?? 0), 0);
 
   return (
     <>
@@ -150,7 +136,7 @@ export function Header() {
         )}
       >
         <div className="w-full max-w-screen-xl">
-          <TopNavBar notifyAssets={assetCount} notifyRisks={riskCount} />
+          <TopNavBar />
         </div>
       </div>
       <div

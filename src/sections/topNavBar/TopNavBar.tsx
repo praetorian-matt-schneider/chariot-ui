@@ -7,11 +7,7 @@ import { AccountDropdown } from '@/sections/topNavBar/AccountDropdown';
 import { Notifications } from '@/sections/topNavBar/Notifications';
 import { getRoute } from '@/utils/route.util';
 
-interface Props {
-  notifyAssets: number;
-  notifyRisks: number;
-}
-export const TopNavBar: React.FC<Props> = ({ notifyAssets, notifyRisks }) => {
+export const TopNavBar: React.FC = () => {
   const [, setShowNotification] = useState<boolean>(false);
   const location = useLocation();
 
@@ -56,7 +52,7 @@ export const TopNavBar: React.FC<Props> = ({ notifyAssets, notifyRisks }) => {
                 }}
                 onClick={() => setShowNotification(false)}
               />
-              <MyInbox assets={notifyAssets} risks={notifyRisks} />
+              <MyInbox />
               <AccountDropdown />
             </div>
           </div>

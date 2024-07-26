@@ -11,6 +11,7 @@ export enum RiskScanMessage {
 
 export enum UniqueQueryKeys {
   Backends = 'backends',
+  ACCOUNT_ALERTS = 'ACCOUNT_ALERTS',
   MY = 'MY',
   GENERIC_MY_SEARCH = 'GENERIC_MY_SEARCH',
   GET_FILE = 'GET_FILE',

@@ -455,7 +455,7 @@ export function Table<TData>(props: TableProps<TData>) {
           <div className="flex flex-row items-center p-2">
             {reviewStep === '1' && (
               <div className="mr-2 pl-1">
-                <ArrowDown className="animate-bounce rounded-full bg-brand pt-1 text-white shadow-lg" />
+                <ArrowDown className="size-6 animate-bounce text-brand" />
               </div>
             )}
             {reviewStep === '2' && (
@@ -510,7 +510,7 @@ export function Table<TData>(props: TableProps<TData>) {
                   <label
                     className={cn(
                       'cursor-pointer',
-                      reviewStep === '1' && 'border border-brand'
+                      reviewStep === '1' && 'border border-brand bg-brand-light'
                     )}
                   >
                     <input
