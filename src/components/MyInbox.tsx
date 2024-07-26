@@ -68,6 +68,7 @@ const MyInbox: React.FC<Props> = ({ risks, assets }) => {
                     styleType="secondary"
                     className="mt-2 rounded-sm border border-gray-300 py-2 font-normal text-gray-700 hover:bg-gray-100"
                     onClick={() => {
+                      setDropdownOpen(false);
                       navigate({
                         pathname: getRoute(['app', 'assets']),
                         search: createSearchParams({
@@ -99,6 +100,7 @@ const MyInbox: React.FC<Props> = ({ risks, assets }) => {
                       styleType="secondary"
                       className="mt-2 rounded-sm border border-gray-300 py-2 font-normal text-gray-700 hover:bg-gray-100"
                       onClick={() => {
+                        setDropdownOpen(false);
                         navigate({
                           pathname: getRoute(['app', 'risks']),
                           search: createSearchParams({
@@ -106,7 +108,6 @@ const MyInbox: React.FC<Props> = ({ risks, assets }) => {
                             review: '1',
                           }).toString(),
                         });
-                        toggleDropdown(); // Close dropdown after action
                       }}
                     >
                       Review

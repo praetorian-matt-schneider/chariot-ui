@@ -7,6 +7,7 @@ import {
   ChevronDownIcon,
   ExclamationCircleIcon,
   MagnifyingGlassIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { notUndefined, useVirtualizer } from '@tanstack/react-virtual';
 import { ArrowDown } from 'lucide-react';
@@ -351,7 +352,6 @@ export function Table<TData>(props: TableProps<TData>) {
         <RenderHeaderExtraContentSection>
           <div className="flex justify-between">
             {filters}
-
             <div className="flex space-x-4">
               <Input
                 name="search"
@@ -435,6 +435,26 @@ export function Table<TData>(props: TableProps<TData>) {
           icon={noData?.icon}
         />
       )}
+
+      {reviewStep && (
+        <div className="sticky z-10 m-auto w-[300px] rounded-t-sm border border-default bg-white">
+          <div className="flex flex-row p-2">
+            <p className="w-full">
+              <span className="font-normal text-gray-700">Condition:</span>{' '}
+              <span className="font-bold">a1b2c3d4</span>
+            </p>
+            <div>
+              <XMarkIcon
+                className="size-6 cursor-pointer"
+                onClick={() => {
+                  searchParams.delete('review');
+                  addSearchParams(searchParams);
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
       {isLoadingOrHaveData && (
         <table
           className={cn(
@@ -458,7 +478,7 @@ export function Table<TData>(props: TableProps<TData>) {
                   className={reviewStep === '1' ? 'relative' : ''}
                 >
                   {reviewStep === '1' && (
-                    <ArrowDown className="absolute -top-2 left-3 -translate-x-1/2 -translate-y-full animate-bounce rounded-full bg-brand text-white shadow-lg" />
+                    <ArrowDown className="absolute -top-2 left-3 z-30 -translate-x-1/2 -translate-y-full animate-bounce rounded-full bg-brand text-white shadow-lg" />
                   )}
                   <label
                     className={cn(

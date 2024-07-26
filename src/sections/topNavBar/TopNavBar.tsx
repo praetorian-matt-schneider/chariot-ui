@@ -12,8 +12,6 @@ interface Props {
   notifyRisks: number;
 }
 export const TopNavBar: React.FC<Props> = ({ notifyAssets, notifyRisks }) => {
-  console.log(notifyAssets, notifyRisks);
-
   const [, setShowNotification] = useState<boolean>(false);
   const location = useLocation();
 
