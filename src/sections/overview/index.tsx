@@ -125,17 +125,42 @@ export function Overview() {
             <LockClosedIcon className="size-16 text-gray-400" />
           );
 
+          const isLink = moduleData.enabled && moduleData.noOfRisk > 0;
+          const to =
+            moduleData.enabled && moduleData.noOfRisk > 0
+              ? moduleData.route
+              : '';
+
+          const Container = isLink ? Link : Button;
+          const containerClass = cn(
+            'relative w-full p-0 m-0',
+            !moduleData.isLoading && !moduleData.enabled && '-translate-y-4'
+          );
+
           return (
-            <div
+            <Container
               key={index}
-              className={cn(
-                'relative w-full',
-                !moduleData.isLoading && !moduleData.enabled && '-translate-y-4'
-              )}
+              styleType="none"
+              to={to}
+              {...(isLink
+                ? { buttonClass: containerClass, className: 'w-full' }
+                : {
+                    className: containerClass,
+                    onClick: () => {
+                      if (isCpt) {
+                        upgradeState.onOpenChange(true);
+                      } else {
+                        moduleState.onValueChange({
+                          module: moduleKey as Module,
+                          integration: '',
+                        });
+                      }
+                    },
+                  })}
             >
               <div
                 className={cn(
-                  'flex flex-col gap-2 overflow-hidden rounded-md p-4 shadow-lg',
+                  'w-full flex flex-col gap-2 overflow-hidden rounded-md p-4 shadow-lg hover:bg-gray-50',
                   moduleData.isLoading || moduleData.enabled
                     ? 'bg-white'
                     : 'bg-gray-200'
@@ -160,45 +185,28 @@ export function Overview() {
                     className="mb-5 mt-3 h-[60px] w-3/4"
                     isLoading={moduleData.isLoading}
                   >
-                    <ConditionalRender
-                      condition={Boolean(
-                        moduleData.route && moduleData.enabled
+                    <div
+                      className={cn(
+                        'mb-2 text-6xl',
+                        to ? 'text-brand' : 'text-gray-400'
                       )}
-                      conditionalWrapper={() => {
-                        return moduleData.enabled && moduleData.noOfRisk > 0 ? (
-                          <Link
-                            buttonClass="mb-2 p-0 text-6xl"
-                            to={moduleData.route}
-                          >
-                            {riskContent}
-                          </Link>
-                        ) : (
-                          <p className="mb-2 p-0 text-center text-6xl text-gray-400">
-                            0
-                          </p>
-                        );
+                      onClick={() => {
+                        if (isCpt) {
+                          upgradeState.onOpenChange(true);
+
+                          return;
+                        }
+
+                        if (!moduleData.enabled) {
+                          moduleState.onValueChange({
+                            module: moduleKey as Module,
+                            integration: '',
+                          });
+                        }
                       }}
                     >
-                      <button
-                        className={cn('mb-2 text-6xl text-gray-400')}
-                        onClick={() => {
-                          if (isCpt) {
-                            upgradeState.onOpenChange(true);
-
-                            return;
-                          }
-
-                          if (!moduleData.enabled) {
-                            moduleState.onValueChange({
-                              module: moduleKey as Module,
-                              integration: '',
-                            });
-                          }
-                        }}
-                      >
-                        {riskContent}
-                      </button>
-                    </ConditionalRender>
+                      {riskContent}
+                    </div>
                   </Loader>
                   <p className="text-sm font-medium text-default-light">
                     Risks
@@ -212,7 +220,10 @@ export function Overview() {
                       !moduleData.isLoading && unlockButtonStyle
                     )}
                     styleType="header"
-                    onClick={() => {
+                    onClick={event => {
+                      event.preventDefault();
+                      event.stopPropagation();
+
                       upgradeState.onOpenChange(true);
                     }}
                   >
@@ -228,7 +239,10 @@ export function Overview() {
                         unlockButtonStyle
                     )}
                     styleType={moduleData.enabled ? 'primary' : 'header'}
-                    onClick={() => {
+                    onClick={event => {
+                      event.preventDefault();
+                      event.stopPropagation();
+
                       moduleState.onValueChange({
                         module: moduleKey as Module,
                         integration: '',
@@ -239,7 +253,7 @@ export function Overview() {
                   </Button>
                 )}
               </div>
-            </div>
+            </Container>
           );
         })}
       </div>
