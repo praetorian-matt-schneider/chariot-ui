@@ -12,6 +12,7 @@ export const SSO = () => {
         </span>
       </div>
       <Button
+        className="w-full"
         styleType="secondary"
         onClick={() => signInWithRedirect({ provider: 'Google' })}
       >

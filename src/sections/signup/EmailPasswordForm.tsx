@@ -1,10 +1,10 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ExclamationCircleIcon } from '@heroicons/react/24/outline';
 
 import { Button } from '@/components/Button';
 import { Input } from '@/components/form/Input';
 import { Inputs } from '@/components/form/Inputs';
 import { Disclaimer } from '@/sections/signup/Disclaimer';
+import { SignupError } from '@/sections/signup/SignupError';
 import { SSO } from '@/sections/signup/SSO';
 import { useAuth } from '@/state/auth';
 import { getRoute } from '@/utils/route.util';
@@ -57,6 +57,15 @@ export const EmailPasswordForm = ({ onNext }: { onNext?: () => void }) => {
           setCredentials(credentials => ({ ...credentials, ...values }));
         }}
       />
+      <div className="text-xs">
+        <Button
+          onClick={() => navigate(getRoute(['forgot-password']))}
+          className="p-0 text-xs"
+          styleType="textPrimary"
+        >
+          Forgot Password ?
+        </Button>
+      </div>
       <Button
         disabled={isLoading}
         styleType="primary"
@@ -66,12 +75,7 @@ export const EmailPasswordForm = ({ onNext }: { onNext?: () => void }) => {
       >
         Continue
       </Button>
-      {error && (
-        <div className="flex items-center gap-2 rounded bg-yellow-100 p-2 text-xs text-yellow-600">
-          <ExclamationCircleIcon className="inline size-4 text-yellow-700" />
-          <span>{error}</span>
-        </div>
-      )}
+      <SignupError error={error} />
       {isLogin && (
         <p className="text-xs">
           {`Need an account ? `}

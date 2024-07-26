@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 
 import { EmailConfirmation } from '@/sections/signup/EmailConfirmation';
 import { EmailPasswordForm } from '@/sections/signup/EmailPasswordForm';
+import { ForgotPassword } from '@/sections/signup/ForgotPassword';
 import { PageWrapper } from '@/sections/signup/PageWrapper';
 import { cn } from '@/utils/classname';
 
@@ -18,6 +19,17 @@ export const Login = () => {
     );
   }
 
+  if (location.pathname.includes('forgot-password')) {
+    return (
+      <PageWrapper
+        title="Forgot your password?"
+        description="Enter your Email below and we will send a message to reset your password"
+      >
+        <ForgotPassword />
+      </PageWrapper>
+    );
+  }
+
   // Signup flow
   return (
     <PageWrapper title="Sign Up for a Free Account">
@@ -27,12 +39,10 @@ export const Login = () => {
             {
               title: 'Step One',
               description: 'Input Your Information',
-              Content: EmailPasswordForm,
             },
             {
               title: 'Step Two',
               description: 'Confirm Your Email',
-              Content: EmailConfirmation,
             },
           ].map((step, currentIndex) => (
             <div

@@ -49,6 +49,10 @@ const appRoutes = {
     element: <Login />,
     title: 'Sign Up',
   },
+  'forgot-password': {
+    element: <Login />,
+    title: 'Forgot Password',
+  },
   hello: {
     element: <Hello />,
     title: 'Hello',
