@@ -33,7 +33,6 @@ import {
 import { useCounts } from '@/hooks/useCounts';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useBulkReRunJob } from '@/hooks/useJobs';
-import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { parseKeys } from '@/sections/SearchByType';
 import { useAuth } from '@/state/auth';
 import {
@@ -1238,8 +1237,6 @@ export function BasIntegration() {
     isLoading,
   } = useGetModuleData();
 
-  const { getAssetDrawerLink } = getDrawerLink();
-
   const { data: basLabelAttributes, status: basLabelAttributesStatus } = useMy({
     resource: 'attribute',
     query: '#basAgentName',
@@ -1255,10 +1252,9 @@ export function BasIntegration() {
     status: createBulkAttributeStatus,
   } = useBulkAddAttributes();
 
-  const {
-    mutateAsync: removeBulkAttribute,
-    status: removeBulkAttributeStatus,
-  } = useBulkDeleteAttributes({ showToast: false });
+  const { mutateAsync: removeBulkAttribute } = useBulkDeleteAttributes({
+    showToast: false,
+  });
   const [progress, setProgress] = useState<null | number>(null);
   const [updatingIndex, setUpdatingIndex] = useState<null | number>(null);
 
