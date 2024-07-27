@@ -4,6 +4,7 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { RenderRoutes } from '@/components/route/RenderRoutes';
 import { Body } from '@/components/ui/Body';
 import Account from '@/sections/Account';
+import Alerts from '@/sections/Alerts';
 import Assets from '@/sections/Assets';
 import { AuthenticatedApp } from '@/sections/AuthenticatedApp';
 import Files from '@/sections/Files';
@@ -60,6 +61,14 @@ const appRoutes = {
         </Body>
       ),
       title: 'Widgets',
+    },
+    alerts: {
+      element: (
+        <Body>
+          <Alerts />
+        </Body>
+      ),
+      title: 'Alerts',
     },
     assets: {
       element: <Assets />,
