@@ -194,7 +194,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
         isInitialLoading ? null : (
           <DetailsDrawerHeader
             title={asset.name}
-            subtitle={assetType === 'seed' ? asset.username : asset.dns}
+            subtitle={asset.dns}
             prefix={<AssetsIcon className="size-5" />}
             tag={
               <div className="flex justify-center text-sm text-gray-400">
@@ -389,5 +389,5 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }: Props) => {
 function useGetAssetType(asset: Asset) {
   const { isIntegration } = useIntegration();
 
-  return isIntegration(asset) ? 'integration' : asset.seed ? 'seed' : 'asset';
+  return isIntegration(asset) ? 'integration' : 'asset';
 }

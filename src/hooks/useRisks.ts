@@ -142,7 +142,6 @@ const useBulkUpdateRiskHook = () => {
 
       if (validResults.length !== risks.length) {
         const firstError = response.find(result => result instanceof Error);
-        // Note: Some seeds failed to add, so throwing the first error, and useMutation will handle the error toast
 
         throw firstError;
       }

@@ -3,7 +3,7 @@ import { XMarkIcon } from '@heroicons/react/20/solid';
 
 import Chart from '@/components/charts/Chart';
 import { useMy } from '@/hooks';
-import { Account, Asset, ChartType, MyResourceKey, Risk, Seed } from '@/types';
+import { Account, Asset, ChartType, MyResourceKey, Risk } from '@/types';
 import { aggregates as accountAggregates } from '@/utils/aggregates/account';
 import { getAggregates, runAggregate } from '@/utils/aggregates/aggregate';
 import { aggregates as assetAggregates } from '@/utils/aggregates/asset';
@@ -44,10 +44,7 @@ const ChartWrapper: React.FC<ChartWrapperProps> = ({
           return {};
       }
     };
-    const run = (
-      aggregate: string,
-      data: Account[] | Risk[] | Seed[] | Asset[]
-    ) => {
+    const run = (aggregate: string, data: Account[] | Risk[] | Asset[]) => {
       switch (endpoint) {
         case 'account':
           return runAggregate(accountAggregates, aggregate, data as Account[]);

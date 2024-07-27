@@ -1,111 +1,220 @@
 import React, { useState } from 'react';
-import { createSearchParams, useNavigate } from 'react-router-dom';
 import { Divider } from '@tremor/react';
-import { Inbox } from 'lucide-react';
+import { Check, ChevronDown, ChevronRight, Inbox, Square } from 'lucide-react';
 
 import { Button } from '@/components/Button';
-import { useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
-import { AssetStatus, RiskStatus } from '@/types';
-import { getRoute } from '@/utils/route.util';
-
-const isAssetStatus = (status: string): boolean => {
-  return Object.values(AssetStatus).includes(status as AssetStatus);
-};
-
-const getStatusParam = (status: string): string => {
-  return isAssetStatus(status) ? 'asset-priority' : 'risk-status';
-};
-
-const getEnumKeyByValue = (
-  enumObj: Record<string, string>,
-  value: string
-): string | null => {
-  const keys = Object.keys(enumObj).filter(key => enumObj[key] === value);
-  return keys.length > 0 ? enumObj[keys[0]] : null;
-};
+import { Link } from '@/components/Link';
+import { useGenericSearch } from '@/hooks/useGenericSearch';
+import { Alert, useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
+import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
+import { Asset, AssetStatus, Risk } from '@/types';
 
 const MyInbox: React.FC = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [shouldRenderDropdown, setShouldRenderDropdown] = useState(false);
-  const navigate = useNavigate();
-
+  const [expandedSection, setExpandedSection] = useState<string | null>(null);
+  const [query, setQuery] = useState<string | null>(null);
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const { data: alerts } = useGetAccountAlerts();
+  const { getRiskDrawerLink, getAssetDrawerLink } = getDrawerLink();
 
   const toggleDropdown = () => {
-    if (dropdownOpen) {
-      setDropdownOpen(false);
-      setTimeout(() => setShouldRenderDropdown(false), 300); // Match the duration of your transition
+    setDropdownOpen(prev => !prev);
+    if (!dropdownOpen) setShouldRenderDropdown(true);
+  };
+
+  const handleCategoryClick = (query: string, section: string) => {
+    if (expandedSection === section) {
+      setExpandedSection(null);
+      setQuery(null);
     } else {
-      setShouldRenderDropdown(true);
-      setTimeout(() => setDropdownOpen(true), 0); // Allow time for mount
+      setQuery(query);
+      setExpandedSection(section);
     }
   };
 
-  const totalItems =
-    alerts?.reduce((total, alert) => total + alert.count, 0) || 0;
+  const { data } = useGenericSearch(
+    {
+      query: query ?? '',
+    },
+    {
+      enabled: !!query,
+    }
+  );
 
-  const handleReviewClick = (query: string) => {
-    const status = query.split(':')[1];
-    const statusParam = getStatusParam(status);
-    const statusValue =
-      statusParam === 'asset-priority'
-        ? getEnumKeyByValue(AssetStatus, status)
-        : getEnumKeyByValue(RiskStatus, status);
-
-    if (!statusValue) return;
-
-    navigate({
-      pathname: getRoute([
-        'app',
-        statusParam === 'asset-priority' ? 'assets' : 'risks',
-      ]),
-      search: createSearchParams({
-        [statusParam]: JSON.stringify([statusValue]),
-        review: '1',
-      }).toString(),
-    });
+  const setAssetScanning = (type: string) => {
+    console.log(`Setting selected assets to ${type}:`, selectedItems);
+    setSelectedItems([]);
   };
 
-  return (
-    <div className="relative border-r border-dashed border-gray-700 pr-4">
+  const setRiskStatus = (status: string) => {
+    console.log(`Setting selected risks to ${status}:`, selectedItems);
+    setSelectedItems([]);
+  };
+
+  const toggleSelectItem = (id: string) => {
+    setSelectedItems(prev =>
+      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+    );
+  };
+
+  const renderItemDetails = (item: Asset | Risk) => {
+    const isAsset = (item: Asset | Risk): item is Asset =>
+      Object.values(AssetStatus).includes(item.status as AssetStatus);
+
+    const isSelected = selectedItems.includes(
+      isAsset(item) ? item.dns : item.key
+    );
+
+    return (
       <div
-        className="flex cursor-pointer items-center"
-        onClick={toggleDropdown}
+        className={`flex cursor-pointer items-center justify-between rounded-md px-2 duration-200 hover:border-gray-200 hover:bg-gray-50 ${isSelected ? 'border-green-500' : 'border-gray-50 bg-white'}`}
+        onClick={e => {
+          e.stopPropagation();
+          toggleSelectItem(isAsset(item) ? item.dns : item.key);
+        }}
       >
-        <div className="relative">
-          <Inbox className="size-6 stroke-1 text-gray-200" />
+        <div className="flex items-center space-x-2">
+          {isSelected ? (
+            <Check className="text-green-500" />
+          ) : (
+            <Square className="text-gray-400" />
+          )}
+          <span className="text-sm font-medium text-gray-800">
+            {item.name ?? (isAsset(item) ? item.dns : item.key)}
+          </span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <span className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-700">
+            {item.source}
+          </span>
+          <Link
+            to={
+              isAsset(item) ? getAssetDrawerLink(item) : getRiskDrawerLink(item)
+            }
+            className="text-sm text-brand hover:text-brand-dark"
+            onClick={e => e.stopPropagation()}
+          >
+            View
+          </Link>
+        </div>
+      </div>
+    );
+  };
+
+  const totalItems = (alerts as Array<Alert>)?.reduce(
+    (acc, alert) => acc + alert.count,
+    0
+  );
+
+  return (
+    <div className="relative h-full">
+      <div className="flex items-center justify-between p-4">
+        <button
+          onClick={toggleDropdown}
+          className="flex items-center text-white focus:outline-none"
+        >
+          <Inbox className="size-6 stroke-1" />
           {totalItems > 0 && (
-            <span className="absolute -right-4 -top-3 inline-flex items-center justify-center rounded-full bg-red-600 px-2 py-1 text-xs font-bold leading-none text-white">
+            <span className="ml-2 inline-flex items-center justify-center rounded-full bg-red-500 px-2 py-1 text-xs font-bold leading-none text-white">
               {totalItems}
             </span>
           )}
-        </div>
+        </button>
       </div>
       {shouldRenderDropdown && (
-        <div
-          className={`absolute right-0 z-10 mt-2 w-[550px] rounded-sm border border-gray-300 bg-white shadow-lg transition-all duration-100 ease-[cubic-bezier(0.95,0.05,0.795,0.035)]
-            ${dropdownOpen ? 'translate-y-0 opacity-100' : '-translate-y-2 opacity-0'}
-          `}
-          style={{ transitionProperty: 'opacity, transform' }}
-        >
-          <div className="space-y-4 p-4">
-            {alerts?.map((alert, index) => (
+        <div className="absolute right-0 z-10 mt-2 w-[550px] rounded-md border border-gray-300 bg-white shadow-lg transition-all duration-100 ease-in-out">
+          <div className="p-4">
+            {(alerts as Array<Alert>)?.map((alert, index) => (
               <React.Fragment key={index}>
                 {index > 0 && <Divider />}
-                <div className="text-gray-700">
-                  <div className="flex flex-row items-center space-x-2">
-                    <p className="w-16 border-r border-gray-300 text-2xl font-extrabold">
-                      {alert.count}
-                    </p>
-                    <p className="w-full text-sm">{alert.label}</p>
-                    <Button
-                      styleType="secondary"
-                      className="mt-2 rounded-sm border border-gray-300 py-2 font-normal text-gray-700 hover:bg-gray-100"
-                      onClick={() => handleReviewClick(alert.query)}
-                    >
-                      Review
-                    </Button>
+                <div
+                  className="flex cursor-pointer flex-col space-y-2"
+                  onClick={() => handleCategoryClick(alert.query, alert.label)}
+                >
+                  <div className="flex items-center justify-between space-x-4">
+                    <div className="flex items-center space-x-2">
+                      <p className="text-lg font-bold text-gray-800">
+                        {alert.count}
+                      </p>
+                      <div className="flex-1">
+                        <p className="text-md text-gray-800">{alert.label}</p>
+                      </div>
+                    </div>
+                    {expandedSection === alert.label ? (
+                      <ChevronDown className="size-5 text-gray-500" />
+                    ) : (
+                      <ChevronRight className="size-5 text-gray-500" />
+                    )}
                   </div>
+                  {expandedSection === alert.label && (
+                    <div className="mt-2">
+                      {data?.assets && (
+                        <>
+                          <div className="flex flex-col space-y-1">
+                            {data.assets.map((item, index) => (
+                              <div key={`asset-${index}`}>
+                                {renderItemDetails(item)}
+                              </div>
+                            ))}
+                          </div>
+                          {selectedItems.length > 0 && (
+                            <div className="mt-4 flex space-x-2">
+                              <Button
+                                styleType="primary"
+                                className="w-1/2 py-2 text-sm"
+                                onClick={() =>
+                                  setAssetScanning('Standard Scanning')
+                                }
+                              >
+                                Standard Scan
+                              </Button>
+                              <Button
+                                styleType="secondary"
+                                className="w-1/2 border border-brand py-2 text-sm text-brand"
+                                onClick={() =>
+                                  setAssetScanning('Comprehensive Scanning')
+                                }
+                              >
+                                Comprehensive Scan
+                              </Button>
+                            </div>
+                          )}
+                        </>
+                      )}
+                      {data?.risks && (
+                        <div className="">
+                          <div className="flex flex-col space-y-1">
+                            {data.risks.map((item, index) => (
+                              <div key={`risk-${index}`}>
+                                {renderItemDetails(item)}
+                              </div>
+                            ))}
+                          </div>
+                          {selectedItems.length > 0 && (
+                            <>
+                              <div className="flex space-x-2">
+                                <Button
+                                  styleType="primary"
+                                  className="w-1/2 py-2 text-sm"
+                                  onClick={() => setRiskStatus('Open')}
+                                >
+                                  Open
+                                </Button>
+                                <Button
+                                  styleType="secondary"
+                                  className="w-1/2 border border-brand py-2 text-sm text-brand"
+                                  onClick={() => setRiskStatus('Closed')}
+                                >
+                                  Closed
+                                </Button>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </React.Fragment>
             ))}
