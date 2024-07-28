@@ -196,7 +196,7 @@ const Alerts: React.FC = () => {
   return (
     <div className="flex h-screen border border-default">
       {/* Sidebar */}
-      <div className="h-full w-1/4 overflow-auto border-r border-gray-200 bg-gray-50 p-4 ">
+      <div className="h-full w-1/4 overflow-auto border-r border-gray-200 bg-zinc-50 bg-gradient-to-l p-4 ">
         <h2 className="mb-6 flex items-center px-3 py-4 text-lg font-medium text-gray-800">
           <Inbox className="mr-2 size-6 stroke-[2.5px]" />
           <span className="mr-2 text-xl">All Alerts</span>
