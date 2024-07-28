@@ -182,7 +182,7 @@ const Alerts: React.FC = () => {
       : [];
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen border border-default">
       {/* Sidebar */}
       <div className="h-full w-1/4 overflow-auto border-r border-gray-300 bg-gray-50 p-4">
         <h2 className="mb-6 flex items-center px-3 py-4 text-lg font-semibold text-gray-800">
