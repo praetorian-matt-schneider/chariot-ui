@@ -125,7 +125,15 @@ const Alerts: React.FC = () => {
           )}
           <CopyToClipboard textToCopy={isAsset(item) ? item.dns : item.key}>
             <div>
-              <span className="text-md mr-2 font-medium text-gray-800 hover:text-gray-900">
+              <span
+                role="button"
+                onClick={e => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  toggleSelectItem(isAsset(item) ? item.dns : item.key);
+                }}
+                className="text-md mr-2 select-none font-medium text-gray-800 hover:text-gray-900"
+              >
                 {item.name ?? (isAsset(item) ? item.dns : item.key)}
               </span>
               <span className="text-xs text-gray-500">
@@ -219,7 +227,7 @@ const Alerts: React.FC = () => {
                 handleCategoryClick(alert.query);
               }}
             >
-              <p className="text-md font-medium">{alert.label}</p>
+              <p className="text-md select-none font-medium">{alert.label}</p>
 
               <span className="text-md font-medium">{alert.count}</span>
             </div>
@@ -243,7 +251,7 @@ const Alerts: React.FC = () => {
           <div className="flex h-full flex-col">
             <div className="flex items-center space-x-2 border-b border-gray-200 bg-gray-50 px-8 py-4">
               <div
-                className="flex flex-1 cursor-pointer items-center space-x-2"
+                className="flex flex-1 cursor-pointer select-none items-center space-x-2"
                 onClick={toggleSelectAll}
               >
                 {selectedItems.length === items.length ? (
