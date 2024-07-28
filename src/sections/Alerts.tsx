@@ -134,7 +134,7 @@ const Alerts: React.FC = () => {
             {formatDate(item.updated)}
           </span>
         </div>
-        <div className="ml-auto rounded border border-gray-300 px-3 py-1 text-xs text-gray-700">
+        <div className="ml-auto rounded border border-gray-200 px-3 py-1 text-xs text-gray-700">
           {item.source}
         </div>
       </div>
@@ -190,19 +190,19 @@ const Alerts: React.FC = () => {
   return (
     <div className="flex h-screen border border-default">
       {/* Sidebar */}
-      <div className="h-full w-1/4 overflow-auto border-r border-gray-300 bg-gray-50 p-4">
+      <div className="h-full w-1/4 overflow-auto border-r border-gray-200 bg-gray-50 p-4">
         <h2 className="mb-6 flex items-center px-3 py-4 text-lg font-semibold text-gray-800">
           <Inbox className="mr-3 size-6 stroke-2" />
-          My Alerts ({totalItems})
+          My Alerts
         </h2>
         <div className="space-y-2">
           {(alerts as Array<Alert>)?.map((alert, index) => (
             <div
               key={index}
               className={cn(
-                'flex cursor-pointer items-center justify-between rounded-md p-3 shadow-sm',
+                'flex cursor-pointer items-center justify-between rounded-sm p-3',
                 query === alert.query
-                  ? 'bg-blue-100 border-l-4 border-blue-600'
+                  ? 'bg-highlight/10 border-l-[3px] border-brand'
                   : 'hover:bg-gray-100'
               )}
               onClick={() => {
@@ -212,13 +212,11 @@ const Alerts: React.FC = () => {
                 handleCategoryClick(alert.query);
               }}
             >
-              <p className="text-md font-medium text-gray-800">{alert.label}</p>
+              <p className="text-md font-medium">{alert.label}</p>
 
               <div className="flex items-center space-x-2">
-                <span className="text-md font-medium text-gray-800">
-                  {alert.count}
-                </span>
-                <ChevronRight className="size-5 text-gray-500" />
+                <span className="text-md font-medium">{alert.count}</span>
+                <ChevronRight className="size-5 text-gray-600" />
               </div>
             </div>
           ))}
@@ -226,25 +224,25 @@ const Alerts: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-hidden border-l border-gray-300 bg-white">
+      <div className="flex-1 overflow-hidden border-l border-gray-200 bg-white">
         {selectedAlert && (
-          <div className="border-b border-gray-300 bg-gray-50 px-8 py-6">
+          <div className="border-b border-gray-200 bg-gray-50 px-8 py-6">
             <div className="flex items-center justify-between">
               <h2 className="text-3xl font-semibold capitalize text-gray-800">
-                <span className="font-extrabold">{items.length}</span>{' '}
-                <span className="font-normal">
+                <span className="mr-1 font-extrabold">{items.length}</span>{' '}
+                <span className="font-light">
                   {isAsset(items[0]) ? 'assets' : 'risks'} found
                 </span>
               </h2>
             </div>
-            <div className="pt-2 text-sm text-gray-600">
+            <div className="pt-2 text-sm text-gray-500">
               {selectedAlert.label}
             </div>
           </div>
         )}
         {query && (
           <div className="flex h-full flex-col">
-            <div className="flex items-center space-x-2 border-b border-gray-300 bg-gray-50 px-8 py-4">
+            <div className="flex items-center space-x-2 border-b border-gray-200 bg-gray-50 px-8 py-4">
               <div
                 className="flex flex-1 cursor-pointer items-center space-x-2"
                 onClick={toggleSelectAll}
@@ -259,10 +257,17 @@ const Alerts: React.FC = () => {
                 <span className="text-light text-gray-800">
                   {selectedItems.length > 0 ? (
                     <span className="text-gray-600">
-                      {selectedItems.length} selected
+                      {selectedItems.length === items.length ? (
+                        `All ${isAsset(items[0]) ? 'assets' : 'risks'} selected`
+                      ) : (
+                        <span>
+                          {selectedItems.length} of {items.length}{' '}
+                          {isAsset(items[0]) ? 'assets' : 'risks'} selected
+                        </span>
+                      )}
                     </span>
                   ) : (
-                    <span className="italic text-gray-500">
+                    <span className="italic text-gray-600">
                       Select {isAsset(items[0]) ? 'asset' : 'risk'}s to
                       remediate
                     </span>
