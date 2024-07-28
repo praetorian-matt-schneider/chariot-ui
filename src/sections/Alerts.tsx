@@ -6,7 +6,9 @@ import { ChevronRightIcon, Inbox, Square, SquareMinus } from 'lucide-react';
 
 import { CopyToClipboard } from '@/components/CopyToClipboard';
 import { Dropdown } from '@/components/Dropdown';
+import { getAssetStatusIcon } from '@/components/icons/AssetStatus.icon';
 import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
+import { getRiskStatusIcon } from '@/components/icons/RiskStatus.icon';
 import { MenuItemProps } from '@/components/Menu';
 import { Tooltip } from '@/components/Tooltip';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
@@ -180,6 +182,7 @@ const Alerts: React.FC = () => {
               value,
               label,
               color: 'default',
+              icon: getAssetStatusIcon(value as AssetStatus),
             }))
         : Object.entries(RiskStatusLabel)
             .filter(([value]) => value !== items[0].status[0])
@@ -187,6 +190,7 @@ const Alerts: React.FC = () => {
               value,
               label,
               color: 'default',
+              icon: getRiskStatusIcon(value as RiskStatus),
             }))
       : [];
 
@@ -279,6 +283,11 @@ const Alerts: React.FC = () => {
                   }}
                   disabled={selectedItems.length === 0}
                   endIcon={<ChevronDownIcon className="size-5" />}
+                  startIcon={
+                    isAsset(items[0])
+                      ? getAssetStatusIcon(items[0].status as AssetStatus)
+                      : getRiskStatusIcon(items[0].status[0] as RiskStatus)
+                  }
                 >
                   Change Status
                 </Dropdown>
