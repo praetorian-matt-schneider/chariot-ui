@@ -187,7 +187,7 @@ const Alerts: React.FC = () => {
       <div className="h-full w-1/4 overflow-auto border-r border-gray-200 bg-gray-50 p-4">
         <h2 className="mb-6 flex items-center px-3 py-4 text-lg font-medium text-gray-800">
           <Inbox className="mr-2 size-6 stroke-[2.5px]" />
-          <span className="mr-2 text-xl">Alerts</span>
+          <span className="mr-2 text-xl">All Alerts</span>
           <span className="ml-auto">{totalItems}</span>
         </h2>
         <div className="space-y-2">
