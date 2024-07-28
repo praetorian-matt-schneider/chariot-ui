@@ -4,11 +4,13 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { Check, ChevronRight, Inbox, Square } from 'lucide-react';
 
 import { Button } from '@/components/Button';
+import { SeverityBadge } from '@/components/GlobalSearch';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { Alert, useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
-import { Asset, AssetStatus, Risk } from '@/types';
+import { Asset, AssetStatus, Risk, RiskSeverity } from '@/types';
 import { cn } from '@/utils/classname';
+import { formatDate } from '@/utils/date.util';
 
 const isAsset = (item: Asset | Risk): item is Asset => {
   return Object.values(AssetStatus).includes(item?.status as AssetStatus);
@@ -98,8 +100,16 @@ const Alerts: React.FC = () => {
               <Square className="text-gray-400" />
             )}
           </div>
+          {!isAsset(item) && (
+            <span className="text-xs font-medium text-gray-500">
+              <SeverityBadge severity={item.status?.[1] as RiskSeverity} />
+            </span>
+          )}
           <span className="text-sm font-medium text-gray-800 hover:text-gray-900">
             {item.name ?? (isAsset(item) ? item.dns : item.key)}
+          </span>
+          <span className="text-xs text-gray-500">
+            {formatDate(item.updated)}
           </span>
         </div>
         <div className="ml-auto rounded border border-gray-300 px-2 py-1 text-xs text-gray-700">
@@ -125,21 +135,27 @@ const Alerts: React.FC = () => {
     overscan: 5,
   });
 
+  const selectedAlert = (alerts as Array<Alert>)?.find(
+    alert => alert.query === query
+  );
+
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen space-x-4">
       {/* Sidebar */}
-      <div className="h-full w-1/2 overflow-auto border border-r-0 border-gray-300 bg-white p-4">
-        <h2 className="mb-4 flex items-center text-lg font-semibold">
-          <Inbox className="mr-2 size-6 stroke-1 text-gray-700" />
+      <div className="h-full w-1/3 overflow-auto border border-gray-300 bg-white">
+        <h2 className="mb-4 flex items-center px-6 py-4 text-3xl font-normal">
+          <Inbox className="mr-2 size-10 stroke-[2.5px]" />
           My Alerts ({totalItems})
         </h2>
-        <div className="space-y-2">
+        <div className="space-y-1">
           {(alerts as Array<Alert>)?.map((alert, index) => (
             <div
               key={index}
               className={cn(
-                'flex cursor-pointer items-center justify-between rounded-sm p-2',
-                query === alert.query ? 'bg-gray-200' : 'hover:bg-gray-100'
+                'flex text-sm cursor-pointer items-center justify-between rounded-sm p-4',
+                query === alert.query
+                  ? 'bg-brand-lighter border-l-4 border-brand'
+                  : 'hover:bg-gray-100'
               )}
               onClick={() => {
                 searchParams.set('query', alert.query);
@@ -150,7 +166,7 @@ const Alerts: React.FC = () => {
               <p className="text-md font-medium text-gray-800">{alert.label}</p>
 
               <div className="flex items-center space-x-2">
-                <span className="text-md font-medium text-gray-800">
+                <span className="text-md font-extrabold text-gray-800">
                   {alert.count}
                 </span>
                 <ChevronRight className="size-5 text-gray-500" />
@@ -161,10 +177,29 @@ const Alerts: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-auto border border-gray-300 bg-white p-4">
+      <div className="flex-1 overflow-hidden border border-gray-300 bg-white ">
+        {selectedAlert && (
+          <div className="border-b border-default px-8 py-4 ">
+            <div className="flex items-center justify-between ">
+              <h2 className="text-3xl font-semibold capitalize text-default">
+                <span className="font-extrabold">{items.length}</span>{' '}
+                <span className="font-normal">
+                  {isAsset(items[0]) ? 'assets' : 'risks'} found
+                </span>
+              </h2>
+
+              <Button styleType="primary" className="px-4 py-2 text-sm">
+                {isAsset(items[0]) ? 'Standard Scan for All' : 'Open for All'}
+              </Button>
+            </div>
+            <div className="pt-2 text-sm text-gray-500">
+              {selectedAlert.label}
+            </div>
+          </div>
+        )}
         {query && (
           <div className="flex h-full flex-col">
-            <div className="mb-4 flex h-12 items-center space-x-2 border-b border-gray-300 pb-2">
+            <div className="flex items-center space-x-2 border-b border-gray-300 bg-gray-50 px-8 py-4">
               <div
                 className="flex cursor-pointer items-center space-x-2"
                 onClick={toggleSelectAll}
@@ -196,7 +231,7 @@ const Alerts: React.FC = () => {
                 {isAsset(items[0]) ? 'Standard Scan' : 'Open'}
               </Button>
             </div>
-            <div ref={parentRef} className="grow overflow-auto">
+            <div ref={parentRef} className="grow overflow-auto px-6">
               <div
                 className="relative"
                 style={{
