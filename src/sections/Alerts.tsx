@@ -203,9 +203,9 @@ const Alerts: React.FC = () => {
       : [];
 
   return (
-    <div className="flex h-screen border border-default">
+    <div className="flex h-screen">
       {/* Sidebar */}
-      <div className="h-full w-1/4 overflow-auto border-r border-gray-200 bg-zinc-50 bg-gradient-to-l p-4 ">
+      <div className="h-full w-1/4 overflow-auto rounded-l-md border border-r-0 border-gray-200 bg-zinc-50 bg-gradient-to-l p-4 ">
         <h2 className="mb-6 flex items-center px-3 py-4 text-lg font-medium text-gray-800">
           <Inbox className="mr-2 size-6 stroke-[2.5px]" />
           <span className="mr-2 text-xl">All Alerts</span>
@@ -236,7 +236,7 @@ const Alerts: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-hidden border-l border-gray-200 bg-white shadow-2xl">
+      <div className="-my-1 flex-1 overflow-hidden rounded-sm border-l border-zinc-200 bg-white shadow-2xl">
         {selectedAlert && (
           <div className="relative border-b border-gray-200 bg-white px-8 py-4 pb-9 ">
             <div className="pt-2 text-3xl font-light text-default">
@@ -249,7 +249,7 @@ const Alerts: React.FC = () => {
         )}
         {query && (
           <div className="flex h-full flex-col">
-            <div className="flex items-center space-x-2 border-b border-gray-200 bg-gray-50 px-8 py-4">
+            <div className="flex items-center space-x-2 border-gray-200 bg-gray-50 px-8 py-4">
               <div
                 className="flex flex-1 cursor-pointer select-none items-center space-x-2"
                 onClick={toggleSelectAll}
