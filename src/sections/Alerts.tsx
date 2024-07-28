@@ -6,7 +6,7 @@ import { ChevronRightIcon, Inbox, Square, SquareMinus } from 'lucide-react';
 
 import { CopyToClipboard } from '@/components/CopyToClipboard';
 import { Dropdown } from '@/components/Dropdown';
-import { SeverityBadge } from '@/components/GlobalSearch';
+import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
 import { MenuItemProps } from '@/components/Menu';
 import { Tooltip } from '@/components/Tooltip';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
@@ -116,7 +116,11 @@ const Alerts: React.FC = () => {
               <Square className="size-6 text-gray-400" />
             )}
           </div>
-
+          {!isAsset(item) && (
+            <Tooltip title="Severity">
+              {getRiskSeverityIcon(item.status[1] as RiskSeverity)}
+            </Tooltip>
+          )}
           <CopyToClipboard textToCopy={isAsset(item) ? item.dns : item.key}>
             <div>
               <span className="text-md mr-2 font-medium text-gray-800 hover:text-gray-900">
@@ -128,13 +132,6 @@ const Alerts: React.FC = () => {
             </div>
           </CopyToClipboard>
         </div>
-        {!isAsset(item) && (
-          <Tooltip title="Severity">
-            <span className="text-xs font-medium text-gray-500">
-              <SeverityBadge severity={item.status?.[1] as RiskSeverity} />
-            </span>
-          </Tooltip>
-        )}
         <Tooltip title="Status">
           <span className="ml-1 rounded border border-red-400 px-2 py-1 text-xs font-medium text-red-500">
             {isAsset(item)
@@ -275,7 +272,7 @@ const Alerts: React.FC = () => {
 
               {currentStatus && (
                 <Dropdown
-                  styleType="error"
+                  styleType="primary"
                   menu={{
                     items: dropdownItems,
                     onClick: handleStatusChange,
