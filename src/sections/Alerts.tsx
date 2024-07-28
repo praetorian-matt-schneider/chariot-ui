@@ -2,7 +2,13 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { Check, ChevronRight, Inbox, Square } from 'lucide-react';
+import {
+  ChevronRight,
+  Inbox,
+  Square,
+  SquareCheck,
+  SquareMinus,
+} from 'lucide-react';
 
 import { Dropdown } from '@/components/Dropdown';
 import { SeverityBadge } from '@/components/GlobalSearch';
@@ -111,7 +117,7 @@ const Alerts: React.FC = () => {
             }}
           >
             {isSelected ? (
-              <Check className="text-green-500" />
+              <SquareCheck className="text-green-500" />
             ) : (
               <Square className="text-gray-400" />
             )}
@@ -244,9 +250,11 @@ const Alerts: React.FC = () => {
                 onClick={toggleSelectAll}
               >
                 {selectedItems.length === items.length ? (
-                  <Check className="text-green-500" />
-                ) : (
+                  <SquareCheck className="text-green-500" />
+                ) : selectedItems.length === 0 ? (
                   <Square className="text-gray-400" />
+                ) : (
+                  <SquareMinus className="text-gray-400" />
                 )}
                 <span className="text-light text-gray-800">
                   {selectedItems.length > 0 ? (
