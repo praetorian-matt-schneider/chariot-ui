@@ -2,13 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import {
-  ChevronRight,
-  Inbox,
-  Square,
-  SquareCheck,
-  SquareMinus,
-} from 'lucide-react';
+import { Inbox, Square, SquareCheck, SquareMinus } from 'lucide-react';
 
 import { Dropdown } from '@/components/Dropdown';
 import { SeverityBadge } from '@/components/GlobalSearch';
@@ -191,16 +185,17 @@ const Alerts: React.FC = () => {
     <div className="flex h-screen border border-default">
       {/* Sidebar */}
       <div className="h-full w-1/4 overflow-auto border-r border-gray-200 bg-gray-50 p-4">
-        <h2 className="mb-6 flex items-center px-3 py-4 text-lg font-semibold text-gray-800">
-          <Inbox className="mr-3 size-6 stroke-2" />
-          My Alerts
+        <h2 className="mb-6 flex items-center px-3 py-4 text-lg font-medium text-gray-800">
+          <Inbox className="mr-2 size-6 stroke-[2.5px]" />
+          <span className="mr-2 text-xl">Alerts</span>
+          <span className="ml-auto">{totalItems}</span>
         </h2>
         <div className="space-y-2">
           {(alerts as Array<Alert>)?.map((alert, index) => (
             <div
               key={index}
               className={cn(
-                'flex cursor-pointer items-center justify-between rounded-sm p-3',
+                'flex cursor-pointer items-center justify-between rounded-sm p-3 space-x-2',
                 query === alert.query
                   ? 'bg-highlight/10 border-l-[3px] border-brand'
                   : 'hover:bg-gray-100'
@@ -214,10 +209,7 @@ const Alerts: React.FC = () => {
             >
               <p className="text-md font-medium">{alert.label}</p>
 
-              <div className="flex items-center space-x-2">
-                <span className="text-md font-medium">{alert.count}</span>
-                <ChevronRight className="size-5 text-gray-600" />
-              </div>
+              <span className="text-md font-medium">{alert.count}</span>
             </div>
           ))}
         </div>
@@ -285,7 +277,7 @@ const Alerts: React.FC = () => {
                   disabled={selectedItems.length === 0}
                   endIcon={<ChevronDownIcon className="size-5" />}
                 >
-                  {currentStatus}
+                  Change Status
                 </Dropdown>
               )}
             </div>
