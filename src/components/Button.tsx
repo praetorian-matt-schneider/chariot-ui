@@ -60,7 +60,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         case 'none':
           return '';
         case 'error': {
-          return 'bg-red-100 hover:bg-red-200 border border-red-500 text-red-800';
+          return 'bg-red-100 hover:bg-red-200 border border-red-500 text-red-800 disabled:border-default';
         }
         default:
           return 'bg-default-light text-default';

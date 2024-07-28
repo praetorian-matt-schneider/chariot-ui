@@ -1,14 +1,24 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Check, ChevronRight, Inbox, Square } from 'lucide-react';
 
-import { Button } from '@/components/Button';
+import { Dropdown } from '@/components/Dropdown';
 import { SeverityBadge } from '@/components/GlobalSearch';
+import { MenuItemProps } from '@/components/Menu';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { Alert, useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
-import { Asset, AssetStatus, Risk, RiskSeverity } from '@/types';
+import {
+  Asset,
+  AssetStatus,
+  AssetStatusLabel,
+  Risk,
+  RiskSeverity,
+  RiskStatus,
+  RiskStatusLabel,
+} from '@/types';
 import { cn } from '@/utils/classname';
 import { formatDate } from '@/utils/date.util';
 
@@ -68,6 +78,12 @@ const Alerts: React.FC = () => {
     }
   };
 
+  const handleStatusChange = (newStatus?: string) => {
+    console.log(`Changing status of selected items to ${newStatus}`);
+    // Implement status change logic for all selected items
+    setSelectedItems([]);
+  };
+
   const renderItemDetails = (item: Asset | Risk) => {
     const isSelected = selectedItems.includes(
       isAsset(item) ? item.dns : item.key
@@ -79,14 +95,14 @@ const Alerts: React.FC = () => {
 
     return (
       <div
-        className="flex w-full cursor-pointer flex-row items-center justify-between rounded-sm bg-white px-2 py-4 hover:bg-gray-50"
+        className="flex w-full cursor-pointer flex-row items-center justify-between border-b border-gray-200 bg-white px-8 py-4 hover:bg-gray-50"
         onClick={e => {
           e.preventDefault();
           e.stopPropagation();
           navigate(handleViewLink);
         }}
       >
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-3">
           <div
             onClick={e => {
               e.preventDefault();
@@ -105,14 +121,14 @@ const Alerts: React.FC = () => {
               <SeverityBadge severity={item.status?.[1] as RiskSeverity} />
             </span>
           )}
-          <span className="text-sm font-medium text-gray-800 hover:text-gray-900">
+          <span className="text-md font-medium text-gray-800 hover:text-gray-900">
             {item.name ?? (isAsset(item) ? item.dns : item.key)}
           </span>
           <span className="text-xs text-gray-500">
             {formatDate(item.updated)}
           </span>
         </div>
-        <div className="ml-auto rounded border border-gray-300 px-2 py-1 text-xs text-gray-700">
+        <div className="ml-auto rounded border border-gray-300 px-3 py-1 text-xs text-gray-700">
           {item.source}
         </div>
       </div>
@@ -131,7 +147,7 @@ const Alerts: React.FC = () => {
   const virtualizer = useVirtualizer({
     count: items.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 50,
+    estimateSize: () => 60,
     overscan: 5,
   });
 
@@ -139,26 +155,53 @@ const Alerts: React.FC = () => {
     alert => alert.query === query
   );
 
+  const currentStatus =
+    items.length > 0
+      ? isAsset(items[0])
+        ? AssetStatusLabel[items[0].status as AssetStatus]
+        : RiskStatusLabel[items[0].status[0] as RiskStatus]
+      : '';
+
+  const dropdownItems: MenuItemProps[] =
+    items.length > 0
+      ? isAsset(items[0])
+        ? Object.entries(AssetStatusLabel)
+            .filter(([value]) => value !== items[0].status)
+            .map(([value, label]) => ({
+              value,
+              label,
+              color: 'default',
+            }))
+        : Object.entries(RiskStatusLabel)
+            .filter(([value]) => value !== items[0].status[0])
+            .map(([value, label]) => ({
+              value,
+              label,
+              color: 'default',
+            }))
+      : [];
+
   return (
-    <div className="flex h-screen space-x-4">
+    <div className="flex h-screen">
       {/* Sidebar */}
-      <div className="h-full w-1/3 overflow-auto border border-gray-300 bg-white">
-        <h2 className="mb-4 flex items-center px-6 py-4 text-3xl font-normal">
-          <Inbox className="mr-2 size-10 stroke-[2.5px]" />
+      <div className="h-full w-1/4 overflow-auto border-r border-gray-300 bg-gray-50 p-4">
+        <h2 className="mb-6 flex items-center px-3 py-4 text-lg font-semibold text-gray-800">
+          <Inbox className="mr-3 size-6 stroke-2" />
           My Alerts ({totalItems})
         </h2>
-        <div className="space-y-1">
+        <div className="space-y-2">
           {(alerts as Array<Alert>)?.map((alert, index) => (
             <div
               key={index}
               className={cn(
-                'flex text-sm cursor-pointer items-center justify-between rounded-sm p-4',
+                'flex cursor-pointer items-center justify-between rounded-md p-3 shadow-sm',
                 query === alert.query
-                  ? 'bg-brand-lighter border-l-4 border-brand'
+                  ? 'bg-blue-100 border-l-4 border-blue-600'
                   : 'hover:bg-gray-100'
               )}
               onClick={() => {
                 searchParams.set('query', alert.query);
+                setSelectedItems([]);
                 setSearchParams(searchParams);
                 handleCategoryClick(alert.query);
               }}
@@ -166,7 +209,7 @@ const Alerts: React.FC = () => {
               <p className="text-md font-medium text-gray-800">{alert.label}</p>
 
               <div className="flex items-center space-x-2">
-                <span className="text-md font-extrabold text-gray-800">
+                <span className="text-md font-medium text-gray-800">
                   {alert.count}
                 </span>
                 <ChevronRight className="size-5 text-gray-500" />
@@ -177,22 +220,18 @@ const Alerts: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-hidden border border-gray-300 bg-white ">
+      <div className="flex-1 overflow-hidden border-l border-gray-300 bg-white">
         {selectedAlert && (
-          <div className="border-b border-default px-8 py-4 ">
-            <div className="flex items-center justify-between ">
-              <h2 className="text-3xl font-semibold capitalize text-default">
+          <div className="border-b border-gray-300 bg-gray-50 px-8 py-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-3xl font-semibold capitalize text-gray-800">
                 <span className="font-extrabold">{items.length}</span>{' '}
                 <span className="font-normal">
                   {isAsset(items[0]) ? 'assets' : 'risks'} found
                 </span>
               </h2>
-
-              <Button styleType="primary" className="px-4 py-2 text-sm">
-                {isAsset(items[0]) ? 'Standard Scan for All' : 'Open for All'}
-              </Button>
             </div>
-            <div className="pt-2 text-sm text-gray-500">
+            <div className="pt-2 text-sm text-gray-600">
               {selectedAlert.label}
             </div>
           </div>
@@ -201,7 +240,7 @@ const Alerts: React.FC = () => {
           <div className="flex h-full flex-col">
             <div className="flex items-center space-x-2 border-b border-gray-300 bg-gray-50 px-8 py-4">
               <div
-                className="flex cursor-pointer items-center space-x-2"
+                className="flex flex-1 cursor-pointer items-center space-x-2"
                 onClick={toggleSelectAll}
               >
                 {selectedItems.length === items.length ? (
@@ -209,29 +248,35 @@ const Alerts: React.FC = () => {
                 ) : (
                   <Square className="text-gray-400" />
                 )}
-                <span className="text-sm font-medium capitalize text-gray-800">
-                  all {isAsset(items[0]) ? 'assets' : 'risks'}
+                <span className="text-light text-gray-800">
+                  {selectedItems.length > 0 ? (
+                    <span className="text-gray-600">
+                      {selectedItems.length} selected
+                    </span>
+                  ) : (
+                    <span className="italic text-gray-500">
+                      Select {isAsset(items[0]) ? 'asset' : 'risk'}s to
+                      remediate
+                    </span>
+                  )}
                 </span>
               </div>
-              <div className="grow"></div>
-              <Button
-                styleType="secondary"
-                className="py-2 text-sm"
-                onClick={() => setItemStatus('Closed')}
-                disabled={selectedItems.length === 0}
-              >
-                {isAsset(items[0]) ? 'Comprehensive Scan' : 'Closed'}
-              </Button>
-              <Button
-                styleType="primary"
-                className="py-2 text-sm"
-                onClick={() => setItemStatus('Open')}
-                disabled={selectedItems.length === 0}
-              >
-                {isAsset(items[0]) ? 'Standard Scan' : 'Open'}
-              </Button>
+
+              {currentStatus && (
+                <Dropdown
+                  styleType="error"
+                  menu={{
+                    items: dropdownItems,
+                    onClick: handleStatusChange,
+                  }}
+                  disabled={selectedItems.length === 0}
+                  endIcon={<ChevronDownIcon className="size-5" />}
+                >
+                  {currentStatus}
+                </Dropdown>
+              )}
             </div>
-            <div ref={parentRef} className="grow overflow-auto px-6">
+            <div ref={parentRef} className="grow overflow-auto">
               <div
                 className="relative"
                 style={{
