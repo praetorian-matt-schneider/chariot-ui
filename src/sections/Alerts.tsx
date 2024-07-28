@@ -2,11 +2,13 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { Inbox, Square, SquareCheck, SquareMinus } from 'lucide-react';
+import { ChevronRightIcon, Inbox, Square, SquareMinus } from 'lucide-react';
 
+import { CopyToClipboard } from '@/components/CopyToClipboard';
 import { Dropdown } from '@/components/Dropdown';
 import { SeverityBadge } from '@/components/GlobalSearch';
 import { MenuItemProps } from '@/components/Menu';
+import { Tooltip } from '@/components/Tooltip';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { Alert, useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
@@ -90,14 +92,17 @@ const Alerts: React.FC = () => {
 
     return (
       <div
-        className="flex w-full cursor-pointer flex-row items-center justify-between border-b border-gray-200 bg-white px-8 py-4 hover:bg-gray-50"
+        className={cn(
+          'flex w-full cursor-pointer flex-row items-center justify-between border-t border-gray-200 bg-white px-8 py-4 hover:bg-gray-50',
+          isSelected && 'bg-highlight/10 hover:bg-highlight/2s0'
+        )}
         onClick={e => {
           e.preventDefault();
           e.stopPropagation();
           navigate(handleViewLink);
         }}
       >
-        <div className="flex items-center space-x-3">
+        <div className="mr-2 flex items-center space-x-3">
           <div
             onClick={e => {
               e.preventDefault();
@@ -106,26 +111,43 @@ const Alerts: React.FC = () => {
             }}
           >
             {isSelected ? (
-              <SquareCheck className="text-green-500" />
+              <Square className="size-6 text-brand" fill="rgb(95,71,183)" />
             ) : (
-              <Square className="text-gray-400" />
+              <Square className="size-6 text-gray-400" />
             )}
           </div>
-          {!isAsset(item) && (
+
+          <CopyToClipboard textToCopy={isAsset(item) ? item.dns : item.key}>
+            <div>
+              <span className="text-md mr-2 font-medium text-gray-800 hover:text-gray-900">
+                {item.name ?? (isAsset(item) ? item.dns : item.key)}
+              </span>
+              <span className="text-xs text-gray-500">
+                {formatDate(item.updated)}
+              </span>
+            </div>
+          </CopyToClipboard>
+        </div>
+        {!isAsset(item) && (
+          <Tooltip title="Severity">
             <span className="text-xs font-medium text-gray-500">
               <SeverityBadge severity={item.status?.[1] as RiskSeverity} />
             </span>
-          )}
-          <span className="text-md font-medium text-gray-800 hover:text-gray-900">
-            {item.name ?? (isAsset(item) ? item.dns : item.key)}
+          </Tooltip>
+        )}
+        <Tooltip title="Status">
+          <span className="ml-1 rounded border border-red-400 px-2 py-1 text-xs font-medium text-red-500">
+            {isAsset(item)
+              ? AssetStatusLabel[item.status as AssetStatus]
+              : RiskStatusLabel[item.status[0] as RiskStatus]}
           </span>
-          <span className="text-xs text-gray-500">
-            {formatDate(item.updated)}
-          </span>
-        </div>
-        <div className="ml-auto rounded border border-gray-200 px-3 py-1 text-xs text-gray-700">
-          {item.source}
-        </div>
+        </Tooltip>
+        <Tooltip title="Source">
+          <div className="ml-1 mr-auto rounded border border-gray-400 px-3 py-1 text-xs capitalize text-gray-700">
+            {item.source}
+          </div>
+        </Tooltip>
+        <ChevronRightIcon className="size-5 text-gray-500" />
       </div>
     );
   };
@@ -174,7 +196,7 @@ const Alerts: React.FC = () => {
   return (
     <div className="flex h-screen border border-default">
       {/* Sidebar */}
-      <div className="h-full w-1/4 overflow-auto border-r border-gray-200 bg-gray-50 p-4">
+      <div className="h-full w-1/4 overflow-auto border-r border-gray-200 bg-gray-50 p-4 ">
         <h2 className="mb-6 flex items-center px-3 py-4 text-lg font-medium text-gray-800">
           <Inbox className="mr-2 size-6 stroke-[2.5px]" />
           <span className="mr-2 text-xl">All Alerts</span>
@@ -205,18 +227,13 @@ const Alerts: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-hidden border-l border-gray-200 bg-white">
+      <div className="flex-1 overflow-hidden border-l border-gray-200 bg-white shadow-2xl">
         {selectedAlert && (
-          <div className="border-b border-gray-200 bg-gray-50 px-8 py-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-3xl font-semibold capitalize text-gray-800">
-                <span className="mr-1 font-extrabold">{items.length}</span>{' '}
-                <span className="font-light">
-                  {isAsset(items[0]) ? 'assets' : 'risks'} found
-                </span>
-              </h2>
-            </div>
-            <div className="pt-2 text-sm text-gray-500">
+          <div className="relative border-b border-gray-200 bg-white px-8 py-4 pb-9 ">
+            <div className="pt-2 text-3xl font-light text-default">
+              <span className="mr-2 font-extrabold">
+                {items.length?.toLocaleString()}
+              </span>{' '}
               {selectedAlert.label}
             </div>
           </div>
@@ -229,15 +246,15 @@ const Alerts: React.FC = () => {
                 onClick={toggleSelectAll}
               >
                 {selectedItems.length === items.length ? (
-                  <SquareCheck className="text-green-500" />
+                  <Square className="text-brand" fill="rgb(95,71,183)" />
                 ) : selectedItems.length === 0 ? (
                   <Square className="text-gray-400" />
                 ) : (
                   <SquareMinus className="text-gray-400" />
                 )}
-                <span className="text-light text-gray-800">
+                <span className="text-md font-medium text-default">
                   {selectedItems.length > 0 ? (
-                    <span className="text-gray-600">
+                    <span>
                       {selectedItems.length === items.length ? (
                         `All ${isAsset(items[0]) ? 'assets' : 'risks'} selected`
                       ) : (
@@ -248,8 +265,8 @@ const Alerts: React.FC = () => {
                       )}
                     </span>
                   ) : (
-                    <span className="italic text-gray-600">
-                      Select {isAsset(items[0]) ? 'asset' : 'risk'}s to
+                    <span className="italic">
+                      Select all {isAsset(items[0]) ? 'asset' : 'risk'}s to
                       remediate
                     </span>
                   )}
