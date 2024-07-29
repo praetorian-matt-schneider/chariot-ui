@@ -1,15 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { ChevronRightIcon, Inbox, Square, SquareMinus } from 'lucide-react';
+import { ChevronRightIcon, Inbox } from 'lucide-react';
 
-import { CopyToClipboard } from '@/components/CopyToClipboard';
-import { Dropdown } from '@/components/Dropdown';
-import { getAssetStatusIcon } from '@/components/icons/AssetStatus.icon';
+import { Button } from '@/components/Button';
 import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
-import { getRiskStatusIcon } from '@/components/icons/RiskStatus.icon';
-import { MenuItemProps } from '@/components/Menu';
 import { Tooltip } from '@/components/Tooltip';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { Alert, useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
@@ -32,7 +27,7 @@ const isAsset = (item: Asset | Risk): item is Asset => {
 
 const Alerts: React.FC = () => {
   const [query, setQuery] = useState<string | null>(null);
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+
   const { data: alerts } = useGetAccountAlerts();
   const { getRiskDrawerLink, getAssetDrawerLink } = getDrawerLink();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -60,101 +55,69 @@ const Alerts: React.FC = () => {
     }
   );
 
-  const toggleSelectItem = (id: string) => {
-    setSelectedItems(prev =>
-      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
-    );
-  };
-
-  const toggleSelectAll = () => {
-    if (selectedItems.length === items.length) {
-      setSelectedItems([]);
-    } else {
-      const allItemIds = items.map(item =>
-        isAsset(item) ? item.dns : item.key
-      );
-      setSelectedItems(allItemIds);
-    }
-  };
-
-  const handleStatusChange = (newStatus?: string) => {
-    console.log(`Changing status of selected items to ${newStatus}`);
-    // Implement status change logic for all selected items
-    setSelectedItems([]);
-  };
-
   const renderItemDetails = (item: Asset | Risk) => {
-    const isSelected = selectedItems.includes(
-      isAsset(item) ? item.dns : item.key
-    );
-
     const handleViewLink = isAsset(item)
       ? getAssetDrawerLink(item)
       : getRiskDrawerLink(item);
 
     return (
       <div
-        className={cn(
-          'flex w-full cursor-pointer flex-row items-center justify-between border-t border-gray-200 bg-white px-8 py-4 hover:bg-gray-50',
-          isSelected && 'bg-highlight/10 hover:bg-highlight/2s0'
-        )}
+        className="flex w-full cursor-pointer space-x-4 border-b border-gray-200 bg-white p-4 hover:bg-gray-50"
         onClick={e => {
           e.preventDefault();
           e.stopPropagation();
           navigate(handleViewLink);
         }}
       >
-        <div className="mr-2 flex items-center space-x-3">
-          <div
-            onClick={e => {
-              e.preventDefault();
-              e.stopPropagation();
-              toggleSelectItem(isAsset(item) ? item.dns : item.key);
-            }}
-          >
-            {isSelected ? (
-              <Square className="size-6 text-brand" fill="rgb(95,71,183)" />
-            ) : (
-              <Square className="size-6 text-gray-400" />
-            )}
-          </div>
+        <div className="flex space-x-2">
+          {isAsset(item) ? (
+            <>
+              <Button styleType="primary">Enable</Button>
+              <Button styleType="secondary">Delete</Button>
+            </>
+          ) : (
+            <>
+              <Button styleType="primary">Open</Button>
+              <Button styleType="secondary">Reject</Button>
+            </>
+          )}
+        </div>
+        <div className="flex flex-1 items-center space-x-3">
           {!isAsset(item) && (
             <Tooltip title="Severity">
               {getRiskSeverityIcon(item.status[1] as RiskSeverity)}
             </Tooltip>
           )}
-          <CopyToClipboard textToCopy={isAsset(item) ? item.dns : item.key}>
-            <div>
-              <span
-                role="button"
-                onClick={e => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  toggleSelectItem(isAsset(item) ? item.dns : item.key);
-                }}
-                className="text-md mr-2 select-none font-medium text-gray-800 hover:text-gray-900"
-              >
-                {item.name ?? (isAsset(item) ? item.dns : item.key)}
-              </span>
-              <span className="text-xs text-gray-500">
-                {formatDate(item.updated)}
-              </span>
-            </div>
-          </CopyToClipboard>
-        </div>
-        <Tooltip title="Status">
-          <span className="ml-1 rounded border border-red-400 px-2 py-1 text-xs font-medium text-red-500">
-            {isAsset(item)
-              ? AssetStatusLabel[item.status as AssetStatus]
-              : RiskStatusLabel[item.status[0] as RiskStatus]}
-          </span>
-        </Tooltip>
-        <Tooltip title="Source">
-          <div className="ml-1 mr-auto rounded border border-gray-400 px-3 py-1 text-xs capitalize text-gray-700">
-            {item.source}
+          <div className="flex flex-col ">
+            <span className="text-md select-none font-medium text-gray-800 hover:text-gray-900">
+              {item.name ?? (isAsset(item) ? item.dns : item.key)}
+            </span>
+            <span className="text-xs text-gray-500">
+              {item.created !== item.updated ? (
+                <Tooltip title={`Created on ${formatDate(item.created)}`}>
+                  Updated on {formatDate(item.updated)}
+                </Tooltip>
+              ) : (
+                <span>Created on {formatDate(item.created)}</span>
+              )}
+            </span>
           </div>
-        </Tooltip>
-        <ChevronRightIcon className="size-5 text-gray-500" />
+        </div>
+        <div className="flex items-center space-x-2">
+          <span className="rounded-md border border-gray-300 p-1 text-xs capitalize">
+            {item.source}
+          </span>
+          <Tooltip title="Status">
+            <span className="rounded border border-red-400 px-2 py-1 text-xs font-medium text-red-500">
+              {isAsset(item)
+                ? AssetStatusLabel[item.status as AssetStatus]
+                : RiskStatusLabel[item.status[0] as RiskStatus]}
+            </span>
+          </Tooltip>
+        </div>
+        <div className="flex items-center space-x-2">
+          <ChevronRightIcon className="ml-auto size-5 text-gray-500" />
+        </div>
       </div>
     );
   };
@@ -166,41 +129,13 @@ const Alerts: React.FC = () => {
   const virtualizer = useVirtualizer({
     count: items.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 60,
+    estimateSize: () => 80, // Adjusted size to fit the new layout
     overscan: 5,
   });
 
   const selectedAlert = (alerts as Array<Alert>)?.find(
     alert => alert.query === query
   );
-
-  const currentStatus =
-    items.length > 0
-      ? isAsset(items[0])
-        ? AssetStatusLabel[items[0].status as AssetStatus]
-        : RiskStatusLabel[items[0].status[0] as RiskStatus]
-      : '';
-
-  const dropdownItems: MenuItemProps[] =
-    items.length > 0
-      ? isAsset(items[0])
-        ? Object.entries(AssetStatusLabel)
-            .filter(([value]) => value !== items[0].status)
-            .map(([value, label]) => ({
-              value,
-              label,
-              color: 'default',
-              icon: getAssetStatusIcon(value as AssetStatus),
-            }))
-        : Object.entries(RiskStatusLabel)
-            .filter(([value]) => value !== items[0].status[0])
-            .map(([value, label]) => ({
-              value,
-              label,
-              color: 'default',
-              icon: getRiskStatusIcon(value as RiskStatus),
-            }))
-      : [];
 
   return (
     <div className="flex h-screen">
@@ -222,7 +157,6 @@ const Alerts: React.FC = () => {
               )}
               onClick={() => {
                 searchParams.set('query', alert.query);
-                setSelectedItems([]);
                 setSearchParams(searchParams);
                 handleCategoryClick(alert.query);
               }}
@@ -249,58 +183,6 @@ const Alerts: React.FC = () => {
         )}
         {query && (
           <div className="flex h-full flex-col">
-            <div className="flex items-center space-x-2 border-gray-200 bg-gray-50 px-8 py-4">
-              <div
-                className="flex flex-1 cursor-pointer select-none items-center space-x-2"
-                onClick={toggleSelectAll}
-              >
-                {selectedItems.length === items.length ? (
-                  <Square className="text-brand" fill="rgb(95,71,183)" />
-                ) : selectedItems.length === 0 ? (
-                  <Square className="text-gray-400" />
-                ) : (
-                  <SquareMinus className="text-gray-400" />
-                )}
-                <span className="text-md font-medium text-default">
-                  {selectedItems.length > 0 ? (
-                    <span>
-                      {selectedItems.length === items.length ? (
-                        `All ${isAsset(items[0]) ? 'assets' : 'risks'} selected`
-                      ) : (
-                        <span>
-                          {selectedItems.length} of {items.length}{' '}
-                          {isAsset(items[0]) ? 'assets' : 'risks'} selected
-                        </span>
-                      )}
-                    </span>
-                  ) : (
-                    <span className="italic">
-                      Select all {isAsset(items[0]) ? 'asset' : 'risk'}s to
-                      remediate
-                    </span>
-                  )}
-                </span>
-              </div>
-
-              {currentStatus && (
-                <Dropdown
-                  styleType="primary"
-                  menu={{
-                    items: dropdownItems,
-                    onClick: handleStatusChange,
-                  }}
-                  disabled={selectedItems.length === 0}
-                  endIcon={<ChevronDownIcon className="size-5" />}
-                  startIcon={
-                    isAsset(items[0])
-                      ? getAssetStatusIcon(items[0].status as AssetStatus)
-                      : getRiskStatusIcon(items[0].status[0] as RiskStatus)
-                  }
-                >
-                  Change Status
-                </Dropdown>
-              )}
-            </div>
             <div ref={parentRef} className="grow overflow-auto">
               <div
                 className="relative"
