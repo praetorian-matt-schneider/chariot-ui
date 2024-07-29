@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { InfoIcon } from 'lucide-react';
 
 import { Input } from '@/components/form/Input';
 import { Inputs, Values } from '@/components/form/Inputs';
@@ -7,7 +8,7 @@ import { AssetsIcon } from '@/components/icons';
 import { Modal } from '@/components/Modal';
 import { useCreateAsset } from '@/hooks/useAssets';
 import { useGlobalState } from '@/state/global.state';
-import { Asset, AssetStatus, AssetStatusLabel } from '@/types';
+import { Asset, AssetStatus, AssetStatusLabel, Module } from '@/types';
 
 const AddAssetExamples = () => (
   <div className="text-md mt-4 rounded-md bg-gray-100 p-4 text-gray-700">
@@ -32,8 +33,10 @@ export function AddAsset() {
   const {
     modal: {
       asset: { open, onOpenChange },
+      module: moduleState,
     },
   } = useGlobalState();
+
   // eslint-disable-next-line
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [formData, setFormData] = useState<Values>({});
@@ -68,6 +71,21 @@ export function AddAsset() {
       closeOnOutsideClick={false}
       icon={<AssetsIcon className="size-6 text-default-light" />}
     >
+      <div className="mb-4 flex items-center space-x-2 rounded-md  border border-yellow-500 bg-yellow-50 p-3 text-gray-700">
+        <ExclamationTriangleIcon className="size-5 text-yellow-700" />
+        <span>Looking for integrations?</span>
+        <button
+          onClick={() => {
+            moduleState.onValueChange({
+              module: Module.ASM,
+              integration: '',
+            });
+          }}
+          className="font-medium text-blue-600 hover:underline"
+        >
+          Add Integration
+        </button>
+      </div>
       <Inputs
         values={formData}
         onChange={setFormData}
@@ -111,13 +129,13 @@ export function AddAsset() {
         ]}
       />
       <AddAssetExamples />
-      <p className="mt-4 rounded bg-yellow-100 p-2 text-sm text-yellow-600">
-        <ExclamationTriangleIcon className="mr-2 inline size-5 text-yellow-700" />
+      <p className="mt-4 rounded bg-blue-100 p-2 text-sm">
+        <InfoIcon className="mr-2 inline size-5 text-default" />
         <a
           href="https://github.com/praetorian-inc/praetorian-cli"
           target={'_blank'}
           rel={'noreferrer'}
-          className="inline p-0 text-yellow-900 no-underline"
+          className="inline p-0 underline"
         >
           Praetorian CLI
         </a>{' '}

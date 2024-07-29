@@ -1,4 +1,5 @@
 import React, { FormEvent, useEffect, useState } from 'react';
+import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { PlusIcon } from '@heroicons/react/24/solid';
 
 import { Button } from '@/components/Button';
@@ -12,7 +13,7 @@ import { useUploadFile } from '@/hooks';
 import { useCreateRisk } from '@/hooks/useRisks';
 import { parseKeys, TypeSearch } from '@/sections/SearchByType';
 import { useGlobalState } from '@/state/global.state';
-import { RiskCombinedStatus } from '@/types';
+import { Module, RiskCombinedStatus } from '@/types';
 
 const DEFAULT_FORM_VALUE = {
   key: '',
@@ -31,6 +32,7 @@ export const AddRisks = () => {
         selectedAssets,
         onSelectedAssetsChange,
       },
+      module: moduleState,
     },
   } = useGlobalState();
 
@@ -122,6 +124,21 @@ export const AddRisks = () => {
           form: 'addRisk',
         }}
       >
+        <div className="mb-4 flex items-center space-x-2 rounded-md  border border-yellow-500 bg-yellow-50 p-3 text-gray-700">
+          <ExclamationTriangleIcon className="size-5 text-yellow-700" />
+          <span>Looking for integrations?</span>
+          <button
+            onClick={() => {
+              moduleState.onValueChange({
+                module: Module.PM,
+                integration: '',
+              });
+            }}
+            className="font-medium text-blue-600 hover:underline"
+          >
+            Add Integration
+          </button>
+        </div>
         <div>
           <div className="flex flex-1 flex-col justify-center">
             <form id="addRisk" onSubmit={handleSubmit} className="space-y-4">
