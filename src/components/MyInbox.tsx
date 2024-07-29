@@ -15,13 +15,45 @@ const MyInbox: React.FC = () => {
     undefined
   );
 
-  const totalAlerts = alerts.reduce((acc, alert) => acc + alert.count, 0);
+  const totalAlerts =
+    (alerts || []).reduce((acc, alert) => acc + alert.count, 0) ?? 0;
 
   useEffect(() => {
     if (totalAlerts !== prevAlertCount) {
       setPrevAlertCount(totalAlerts);
     }
   }, [isPending, totalAlerts, prevAlertCount]);
+
+  const getMenuItems = () => {
+    if (alerts === null || alerts.length === 0) {
+      return [
+        {
+          label: 'No alerts found',
+          className: 'flex items-center text-gray-500 italic',
+          to: getRoute(['app', 'alerts']),
+        },
+      ];
+    } else {
+      return [
+        {
+          label: 'All Alerts',
+          labelSuffix: totalAlerts.toLocaleString(),
+          className: 'flex items-center',
+          to: getRoute(['app', 'alerts']),
+        },
+        {
+          label: 'Divider',
+          type: 'divider' as const,
+        },
+        ...alerts.map(alert => ({
+          label: alert.label,
+          labelSuffix: alert.count.toLocaleString(),
+          className: 'flex items-center',
+          to: `/app/alerts?query=${alert.query}`,
+        })),
+      ];
+    }
+  };
 
   return (
     <Dropdown
@@ -42,25 +74,7 @@ const MyInbox: React.FC = () => {
       }
       styleType="none"
       menu={{
-        width: 550,
-        items: [
-          {
-            label: 'All Alerts',
-            labelSuffix: totalAlerts.toLocaleString(),
-            className: 'flex items-center',
-            to: getRoute(['app', 'alerts']),
-          },
-          {
-            label: 'Divider',
-            type: 'divider',
-          },
-          ...alerts.map(alert => ({
-            label: alert.label,
-            labelSuffix: alert.count.toLocaleString(),
-            className: 'flex items-center',
-            to: `/app/alerts?query=${alert.query}`,
-          })),
-        ],
+        items: getMenuItems(),
       }}
     />
   );

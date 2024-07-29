@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { ChevronRightIcon, Inbox } from 'lucide-react';
+import { ChevronRightIcon, Inbox, ShieldCheck } from 'lucide-react';
 
 import { Button } from '@/components/Button';
 import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
 import { Tooltip } from '@/components/Tooltip';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
-import { Alert, useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
+import { useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import {
   Asset,
@@ -156,20 +156,23 @@ const Alerts: React.FC = () => {
     overscan: 5,
   });
 
-  const selectedAlert = (alerts as Array<Alert>)?.find(
-    alert => alert.query === query
-  );
+  const selectedAlert = (alerts ?? []).find(alert => alert.query === query);
 
   return (
     <div className="flex h-screen">
       {/* Sidebar */}
       <div className="h-full w-1/4 overflow-auto rounded-l-md border border-r-0 border-gray-200 bg-zinc-50 bg-gradient-to-l p-4">
-        <h2 className="mb-6 flex items-center px-3 py-4 text-lg font-medium text-gray-800">
+        <h2 className="mb-2 flex items-center px-3 py-4 text-lg font-medium text-gray-800">
           <Inbox className="mr-2 size-6 stroke-[2.5px]" />
           <span className="mr-2 text-xl">All Alerts</span>
         </h2>
+        {alerts === null && (
+          <div className="flex items-center justify-between px-3 italic text-gray-500">
+            <p className="text-md select-none font-medium">No alerts found</p>
+          </div>
+        )}
         <div className="space-y-2">
-          {(alerts as Array<Alert>)?.map((alert, index) => (
+          {(alerts ?? []).map((alert, index) => (
             <div
               key={index}
               className={cn(
@@ -189,13 +192,25 @@ const Alerts: React.FC = () => {
               <span className="text-md font-medium">{alert.count}</span>
             </div>
           ))}
+          {alerts?.length === 0 && (
+            <div
+              className="flex cursor-pointer items-center justify-between space-x-2 rounded-sm border-l-[3px] border-brand bg-highlight/10 p-3"
+              onClick={() => {
+                searchParams.set('query', '');
+                setSearchParams(searchParams);
+              }}
+            >
+              <p className="text-md select-none font-medium">No alerts found</p>
+              <span className="text-md font-medium">View Alerts</span>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="-my-1 flex-1 rounded-sm border-l border-zinc-200 bg-white shadow-2xl">
+      <div className="flex-1 rounded-sm border-l border-zinc-200 bg-white p-16 shadow-2xl">
         {selectedAlert && (
-          <div className="relative border-b border-gray-200 p-8">
+          <div className="relative border-b border-gray-200 pb-8">
             <div className="text-3xl font-light text-default">
               <span className="mr-2 font-extrabold">
                 {items.length?.toLocaleString()}
@@ -204,28 +219,55 @@ const Alerts: React.FC = () => {
             </div>
           </div>
         )}
+        {alerts === null && (
+          <div className="flex flex-1 items-center justify-center">
+            <div className="text-center">
+              <ShieldCheck className="mx-auto mb-4 size-52 stroke-[1px] text-gray-900" />
+              <h3 className="mt-10 text-5xl font-bold text-gray-900">
+                You’re all caught up!
+              </h3>
+              <p className="mt-4 text-lg text-gray-600">
+                No alerts to show. Enjoy your peace of mind!
+              </p>
+            </div>
+          </div>
+        )}
         {query && (
           <div className="flex h-full flex-col">
-            <div ref={parentRef} className="grow overflow-auto">
-              <div
-                className="relative"
-                style={{
-                  height: `${virtualizer.getTotalSize()}px`,
-                }}
-              >
-                {virtualizer.getVirtualItems().map(virtualItem => (
-                  <div
-                    key={virtualItem.key}
-                    className="absolute left-0 top-0 w-full"
-                    style={{
-                      transform: `translateY(${virtualItem.start}px)`,
-                    }}
-                  >
-                    {renderItemDetails(items[virtualItem.index])}
-                  </div>
-                ))}
+            {items.length === 0 ? (
+              <div className="flex flex-1 items-center justify-center">
+                <div className="text-center">
+                  <ShieldCheck className="mx-auto mb-4 size-32 text-blue-400" />
+                  <h3 className="mt-10 text-5xl font-bold text-gray-900">
+                    You’re all caught up!
+                  </h3>
+                  <p className="mt-4 text-lg text-gray-600">
+                    No alerts to show. Enjoy your peace of mind!
+                  </p>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div ref={parentRef} className="grow overflow-auto">
+                <div
+                  className="relative"
+                  style={{
+                    height: `${virtualizer.getTotalSize()}px`,
+                  }}
+                >
+                  {virtualizer.getVirtualItems().map(virtualItem => (
+                    <div
+                      key={virtualItem.key}
+                      className="absolute left-0 top-0 w-full"
+                      style={{
+                        transform: `translateY(${virtualItem.start}px)`,
+                      }}
+                    >
+                      {renderItemDetails(items[virtualItem.index])}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
