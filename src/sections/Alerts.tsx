@@ -147,6 +147,7 @@ const Alerts: React.FC = () => {
   };
 
   const items = useMemo(() => data?.assets || data?.risks || [], [data]);
+  const totalAlerts = alerts?.reduce((acc, alert) => acc + alert.count, 0);
 
   const parentRef = useRef<HTMLDivElement>(null);
 
@@ -165,7 +166,7 @@ const Alerts: React.FC = () => {
           <Inbox className="ml-3 mr-2 size-8 " />
           {alerts && alerts.length && (
             <span className="mr-2 text-2xl font-medium">
-              All Alerts ({alerts.length})
+              All Alerts ({totalAlerts})
             </span>
           )}
         </h2>
