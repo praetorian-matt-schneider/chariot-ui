@@ -4,7 +4,6 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { ChevronRightIcon, Inbox, ShieldCheck } from 'lucide-react';
 
 import { Button } from '@/components/Button';
-import { AssetsIcon, RisksIcon } from '@/components/icons';
 import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
 import { Tooltip } from '@/components/Tooltip';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
@@ -209,22 +208,7 @@ const Alerts: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 rounded-sm border-l border-zinc-200 bg-white shadow-2xl">
-        {selectedAlert && (
-          <div className="relative border-b border-gray-200 p-8 pb-4">
-            <div className="flex w-full flex-row items-center text-3xl font-light text-default">
-              {isAsset(items[0]) ? (
-                <AssetsIcon className="mr-2 inline size-12 text-default" />
-              ) : (
-                <RisksIcon className="mr-2 inline size-12 text-default" />
-              )}
-              <p className="font-medium">{selectedAlert.label}</p>
-            </div>
-            <p className="ml-auto mt-1 text-sm font-normal text-gray-500">
-              {items.length?.toLocaleString()} items match your alert criteria.
-            </p>
-          </div>
-        )}
+      <div className="flex-1 rounded-sm border-l border-zinc-200 bg-zinc-50 ">
         {alerts === null && (
           <div className="mt-16 flex flex-1 items-center justify-center">
             <div className="text-center">
