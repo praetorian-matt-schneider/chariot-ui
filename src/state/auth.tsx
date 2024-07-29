@@ -8,6 +8,7 @@ import React, {
 } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CognitoIdentityProvider } from '@aws-sdk/client-cognito-identity-provider';
+import { Amplify } from 'aws-amplify';
 import {
   confirmSignUp,
   fetchAuthSession,
@@ -17,6 +18,7 @@ import {
 } from 'aws-amplify/auth';
 import { jwtDecode } from 'jwt-decode';
 
+import { Snackbar } from '@/components/Snackbar';
 import { queryClient } from '@/queryclient';
 import {
   AuthContextType,
@@ -28,7 +30,7 @@ import { sToM } from '@/utils/date.util';
 import { getRoute } from '@/utils/route.util';
 import { StorageKey, useStorage } from '@/utils/storage/useStorage.util';
 
-const REGION_REGEX = /.*execute-api.(.*).amazonaws/;
+export const REGION_REGEX = /.*execute-api.(.*).amazonaws/;
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -39,6 +41,7 @@ export const emptyAuth: AuthState = {
   region: 'us-east-2',
   clientId: '795dnnr45so7m17cppta0b295o',
   me: '',
+  password: '',
   friend: { email: '', displayName: '' },
   isImpersonating: false,
   userPoolId: 'us-east-2_BJ6QHVG2L',
@@ -51,10 +54,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     { key: StorageKey.AUTH },
     emptyAuth
   );
-  const [credentials, setCredentials] = useState({
-    username: '',
-    password: '',
-  });
   const [isLoading, setIsLoading] = useState(false);
   const { backend, expiry, region, clientId } = auth;
 
@@ -148,33 +147,81 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }
 
-  async function loginNew() {
+  const setBackendStack = (backendStack?: BackendType) => {
+    const api = backendStack?.api || emptyAuth.api;
+    const backend = backendStack?.name || emptyAuth.backend;
+    const clientId = backendStack?.client_id || emptyAuth.clientId;
+    const me = backendStack?.username || auth.me || '';
+    const password = backendStack?.password || auth.password || '';
+    const userPoolId = backendStack?.userPoolId || emptyAuth.userPoolId;
+
+    Amplify.configure({
+      Auth: {
+        Cognito: {
+          userPoolClientId: clientId,
+          userPoolId,
+        },
+      },
+      API: {
+        REST: {
+          [backend]: {
+            endpoint: api,
+            region: REGION_REGEX.exec(api)?.[1] ?? 'us-east-2',
+          },
+        },
+      },
+    });
+
+    setAuth(prevAuth => ({
+      ...prevAuth,
+      backend,
+      clientId,
+      api,
+      me,
+      password,
+      userPoolId,
+    }));
+  };
+
+  const loginNew = async (backendStack?: BackendType) => {
     try {
-      setNewUserSeedModal(true);
-      setIsLoading(true);
-      const { isSignedIn } = await signIn({
-        username: credentials.username,
-        password: credentials.password,
-      });
-      fetchToken();
-      if (isSignedIn) {
-        setAuth({ ...emptyAuth, me: credentials.username });
-        setCredentials({ username: '', password: '' });
-        navigate('/');
+      backendStack && setBackendStack(backendStack);
+      const username = backendStack?.username || auth.me || '';
+      const password = backendStack?.password || auth.password || '';
+      if (username && password) {
+        setNewUserSeedModal(true);
+        setIsLoading(true);
+        const { isSignedIn } = await signIn({
+          username,
+          password,
+        });
+        fetchToken();
+        if (isSignedIn) {
+          setAuth(auth => ({ ...auth, password: '' }));
+          navigate('/');
+        }
       }
     } catch (error) {
       error instanceof Error && error.message && setError(error.message);
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   async function signupNew(gotoNext = () => {}) {
     try {
       setIsLoading(true);
+      if (emptyAuth.backend !== auth.backend) {
+        setBackendStack({
+          name: auth.backend,
+          client_id: auth.clientId,
+          api: auth.api,
+          userPoolId: auth.userPoolId,
+        });
+      }
       const { isSignUpComplete, nextStep } = await signUp({
-        username: credentials.username,
-        password: credentials.password,
+        username: auth.me,
+        password: auth.password || '',
       });
       const { signUpStep } = nextStep;
       if (!isSignUpComplete && signUpStep === 'CONFIRM_SIGN_UP') {
@@ -191,14 +238,22 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       setIsLoading(true);
       const response = await confirmSignUp({
-        username: credentials.username,
+        username: auth.me,
         confirmationCode: otp,
       });
       if (response.isSignUpComplete) {
         loginNew();
       }
     } catch (error) {
-      error instanceof Error && error.message && setError(error.message);
+      if (error instanceof Error && error.message) {
+        Snackbar({
+          variant: 'error',
+          title: 'Failed to confirm OTP',
+          description: error.message,
+        });
+      }
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -242,51 +297,25 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const value: AuthContextType = useMemo(
     (): AuthContextType => ({
       ...auth,
-      login,
-      logout,
+      confirmOTP,
+      error,
+      fetchToken,
       isImpersonating: auth.friend.email !== '',
+      isLoading,
+      login,
+      loginNew,
+      logout,
+      logoutNew,
+      setAuth,
+      setBackendStack,
       setCognitoAuthStates,
+      setError,
+      signupNew,
       startImpersonation,
       stopImpersonation,
-      logoutNew,
-      loginNew,
-      error,
-      setError,
-      fetchToken,
-      isLoading,
-      signupNew,
-      credentials,
-      setCredentials,
-      confirmOTP,
     }),
     [login, logout, JSON.stringify(auth)]
   );
-
-  // async function rTokenFn() {
-  //   try {
-  //     const cognito = new CognitoIdentityProvider({ region });
-  //     const response = await cognito.initiateAuth({
-  //       AuthFlow: 'REFRESH_TOKEN_AUTH',
-  //       AuthParameters: {
-  //         REFRESH_TOKEN: rToken ?? '',
-  //       },
-  //       ClientId: clientId,
-  //     });
-
-  //     if (response?.AuthenticationResult?.IdToken) {
-  //       setCognitoAuthStates({
-  //         idToken: response?.AuthenticationResult?.IdToken,
-  //         expiresIn: response?.AuthenticationResult?.ExpiresIn,
-  //         refreshToken: response?.AuthenticationResult?.RefreshToken,
-  //       });
-  //     }
-  //   } catch {
-  //     console.error('Token refresh failed');
-  //     logout();
-  //   } finally {
-  //     setIsTokenRefreshing(false);
-  //   }
-  // }
 
   function setCognitoAuthStates(props: CognitoAuthStates) {
     // Note: Below is for testing expiry. Setting it to 10.59secs for testing purposes
@@ -329,45 +358,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       ...authData,
     }));
   }
-
-  // useEffect(() => {
-  //   if (isTabVisible) {
-  //     if (rToken && !expiry) {
-  //       console.log(
-  //         'The token expiry has been misplaced. Using the refresh token to obtain a new one.'
-  //       );
-  //       rTokenFn();
-  //     } else if (rToken && expiry) {
-  //       if (isExpired(expiry)) {
-  //         console.log('The Token has expired on init.', {
-  //           expiry: new Date(expiry),
-  //           currentDate: new Date(),
-  //         });
-  //         rTokenFn();
-  //       } else {
-  //         const expiresInMs =
-  //           new Date(expiry).getTime() - getCurrentData().getTime();
-  //         console.log(
-  //           'The Token will expire in',
-  //           msToM(expiresInMs),
-  //           'minutes.'
-  //         );
-
-  //         const refreshTimeout = setTimeout(() => {
-  //           console.log('The token has expire, while using the app.', {
-  //             expiry: new Date(expiry),
-  //             currentDate: new Date(),
-  //           });
-  //           rTokenFn();
-  //         }, expiresInMs);
-
-  //         return () => {
-  //           clearTimeout(refreshTimeout);
-  //         };
-  //       }
-  //     }
-  //   }
-  // }, [token, rToken, expiry, isTabVisible]);
 
   useEffect(() => {
     document.addEventListener('visibilitychange', updateTabVisibility);

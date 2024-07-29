@@ -7,12 +7,14 @@ import { Input } from '@/components/form/Input';
 import { Inputs } from '@/components/form/Inputs';
 import { Disclaimer } from '@/sections/signup/Disclaimer';
 import { SignupError } from '@/sections/signup/SignupError';
+import { useAuth } from '@/state/auth';
 import { cn } from '@/utils/classname';
 import { getRoute } from '@/utils/route.util';
 
 export const ForgotPassword = () => {
+  const { me } = useAuth();
   const [stepIndex, setStepIndex] = useState<number>(0);
-  const [username, setUsername] = useState<string>('');
+  const [username, setUsername] = useState<string>(me);
   const [forgotPasswordForm, setForgotPasswordForm] = useState<{
     code: string;
     password: string;

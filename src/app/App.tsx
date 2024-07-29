@@ -74,11 +74,11 @@ export function App() {
             scopes: ['email', 'openid'],
             redirectSignIn: [
               'https://localhost:3000/hello',
-              'https://preview.chariot.praetorian.com/',
+              'https://preview.chariot.praetorian.com/hello',
             ],
             redirectSignOut: [
               'https://localhost:3000/goodbye',
-              'https://preview.chariot.praetorian.com/',
+              'https://preview.chariot.praetorian.com/goodbye',
             ],
             responseType: 'code',
           },

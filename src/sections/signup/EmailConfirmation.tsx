@@ -9,12 +9,12 @@ import { SSO } from '@/sections/signup/SSO';
 import { useAuth } from '@/state/auth';
 
 export const EmailConfirmation = () => {
-  const { credentials, confirmOTP, isLoading } = useAuth();
+  const { me, confirmOTP, isLoading } = useAuth();
   const [open, setOpen] = useState(true);
 
   async function resendEmail() {
     await resendSignUpCode({
-      username: credentials.username,
+      username: me,
     });
     setOpen(true);
   }
@@ -24,7 +24,7 @@ export const EmailConfirmation = () => {
       <div className="text-sm text-default-light">
         <p>
           An email was sent to{' '}
-          <span className="font-bold text-default">{credentials.username}</span>
+          <span className="font-bold text-default">{me}</span>
         </p>
         <ul className="mt-4 list-disc">
           <li>{`Can't find it? Don't forget to check your spam box.`}</li>

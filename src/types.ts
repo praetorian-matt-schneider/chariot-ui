@@ -454,24 +454,21 @@ export interface AuthState {
 }
 
 export interface AuthContextType extends AuthState {
-  setCognitoAuthStates: (props: CognitoAuthStates) => void;
-  login: (backend: BackendType) => Promise<void>;
-  logout: () => void;
-  startImpersonation: (memberId: string, displayName: string) => void;
-  stopImpersonation: () => void;
-  // TODO: Remove the old functions, rename the new ones
-  loginNew: () => void;
-  logoutNew: () => void;
+  confirmOTP: (opt: string) => void;
   error: string;
-  setError: (error: string) => void;
   fetchToken: () => void;
   isLoading: boolean;
+  login: (backend: BackendType) => Promise<void>;
+  loginNew: (backend?: BackendType) => void;
+  logout: () => void;
+  logoutNew: () => void;
+  setAuth: Dispatch<SetStateAction<AuthState>>;
+  setBackendStack: (backend?: BackendType) => void;
+  setCognitoAuthStates: (props: CognitoAuthStates) => void;
+  setError: (error: string) => void;
   signupNew: (gotoNext?: () => void) => void;
-  credentials: { username: string; password: string };
-  setCredentials: Dispatch<
-    SetStateAction<{ username: string; password: string }>
-  >;
-  confirmOTP: (opt: string) => void;
+  startImpersonation: (memberId: string, displayName: string) => void;
+  stopImpersonation: () => void;
 }
 
 export interface CognitoAuthStates {
