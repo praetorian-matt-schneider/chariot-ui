@@ -4,6 +4,7 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { ChevronRightIcon, Inbox, ShieldCheck } from 'lucide-react';
 
 import { Button } from '@/components/Button';
+import { AssetsIcon, RisksIcon } from '@/components/icons';
 import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
 import { Tooltip } from '@/components/Tooltip';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
@@ -156,14 +157,12 @@ const Alerts: React.FC = () => {
     overscan: 5,
   });
 
-  const selectedAlert = (alerts ?? []).find(alert => alert.query === query);
-
   return (
-    <div className="flex h-screen">
+    <div className="flex h-[60vh] shadow-sm">
       {/* Sidebar */}
-      <div className="h-full w-1/4 overflow-auto rounded-l-md border border-r-0 border-gray-200 bg-zinc-50 bg-gradient-to-l p-4">
+      <div className="w-1/4 overflow-auto rounded-l-md rounded-r-none border border-r-0 border-gray-200 bg-zinc-50 bg-gradient-to-l py-4">
         <h2 className="mb-2 flex items-center px-3 py-4 text-lg font-medium text-gray-800">
-          <Inbox className="mr-2 size-6 stroke-[2.5px]" />
+          <Inbox className="mr-2 size-6 " />
           <span className="mr-2 text-xl">All Alerts</span>
         </h2>
         {alerts === null && (
@@ -176,7 +175,7 @@ const Alerts: React.FC = () => {
             <div
               key={index}
               className={cn(
-                'flex cursor-pointer items-center justify-between rounded-sm p-3 space-x-2',
+                'flex cursor-pointer items-start rounded-sm py-2 pr-2 ',
                 query === alert.query
                   ? 'bg-highlight/10 border-l-[3px] border-brand'
                   : 'border-l-[3px] border-transparent hover:bg-gray-100'
@@ -187,9 +186,20 @@ const Alerts: React.FC = () => {
                 handleCategoryClick(alert.query);
               }}
             >
-              <p className="text-md select-none font-medium">{alert.label}</p>
+              <div>
+                {alert.count === 3 ? (
+                  <AssetsIcon className="mx-2 mt-1 size-6 text-gray-900" />
+                ) : (
+                  <RisksIcon className="mx-2 mt-1 size-6 text-gray-900" />
+                )}
+              </div>
+              <div className="flex flex-col space-y-1">
+                <p className="text-md select-none font-medium">{alert.label}</p>
 
-              <span className="text-md font-medium">{alert.count}</span>
+                <span className="text-xs font-normal text-gray-500">
+                  {alert.count} {alert.label.split(' ')[0].toLowerCase()}
+                </span>
+              </div>
             </div>
           ))}
           {alerts?.length === 0 && (
@@ -208,7 +218,7 @@ const Alerts: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 rounded-sm border-l border-zinc-200 bg-zinc-50 ">
+      <div className="border-l-none flex-1 rounded-sm rounded-l-none border border-gray-200 bg-white">
         {alerts === null && (
           <div className="mt-16 flex flex-1 items-center justify-center">
             <div className="text-center">
@@ -217,7 +227,7 @@ const Alerts: React.FC = () => {
                 You’re all caught up!
               </h3>
               <p className="mt-4 text-lg text-gray-600">
-                No alerts to show. Enjoy your peace of mind!
+                No alerts to show. Enjoy your peace of mind.
               </p>
             </div>
           </div>
