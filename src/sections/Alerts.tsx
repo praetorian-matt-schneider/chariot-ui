@@ -62,7 +62,7 @@ const Alerts: React.FC = () => {
 
     return (
       <div
-        className="flex w-full cursor-pointer space-x-4 border-b border-gray-200 bg-white p-4 hover:bg-gray-50"
+        className="flex w-full cursor-pointer items-center space-x-4 border-b border-gray-200 bg-white p-4 hover:bg-gray-100"
         onClick={e => {
           e.preventDefault();
           e.stopPropagation();
@@ -72,13 +72,21 @@ const Alerts: React.FC = () => {
         <div className="flex space-x-2">
           {isAsset(item) ? (
             <>
-              <Button styleType="primary">Enable</Button>
-              <Button styleType="secondary">Delete</Button>
+              <Button styleType="primary" className="h-8">
+                Enable
+              </Button>
+              <Button styleType="secondary" className="h-8">
+                Delete
+              </Button>
             </>
           ) : (
             <>
-              <Button styleType="primary">Open</Button>
-              <Button styleType="secondary">Reject</Button>
+              <Button styleType="primary" className="h-8">
+                Open
+              </Button>
+              <Button styleType="secondary" className="h-8">
+                Reject
+              </Button>
             </>
           )}
         </div>
@@ -88,17 +96,17 @@ const Alerts: React.FC = () => {
               {getRiskSeverityIcon(item.status[1] as RiskSeverity)}
             </Tooltip>
           )}
-          <div className="flex flex-col ">
-            <span className="text-md select-none font-medium text-gray-800 hover:text-gray-900">
+          <div className="flex flex-col">
+            <span className="text-lg font-semibold text-gray-800 hover:text-gray-900">
               {item.name ?? (isAsset(item) ? item.dns : item.key)}
             </span>
             <span className="text-xs text-gray-500">
               {item.created !== item.updated ? (
-                <Tooltip title={`Created ${formatDate(item.created)}`}>
-                  Updated {formatDate(item.updated)}
+                <Tooltip title={`Created on ${formatDate(item.created)}`}>
+                  Updated on {formatDate(item.updated)}
                 </Tooltip>
               ) : (
-                <span>Created {formatDate(item.created)}</span>
+                <span>Created on {formatDate(item.created)}</span>
               )}
             </span>
           </div>
@@ -115,9 +123,7 @@ const Alerts: React.FC = () => {
             </span>
           </Tooltip>
         </div>
-        <div className="flex items-center space-x-2">
-          <ChevronRightIcon className="ml-auto size-5 text-gray-500" />
-        </div>
+        <ChevronRightIcon className="ml-auto size-5 text-gray-500" />
       </div>
     );
   };
@@ -129,7 +135,7 @@ const Alerts: React.FC = () => {
   const virtualizer = useVirtualizer({
     count: items.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 80, // Adjusted size to fit the new layout
+    estimateSize: () => 77, // Adjusted size to fit the new layout
     overscan: 5,
   });
 
@@ -140,7 +146,7 @@ const Alerts: React.FC = () => {
   return (
     <div className="flex h-screen">
       {/* Sidebar */}
-      <div className="h-full w-1/4 overflow-auto rounded-l-md border border-r-0 border-gray-200 bg-zinc-50 bg-gradient-to-l p-4 ">
+      <div className="h-full w-1/4 overflow-auto rounded-l-md border border-r-0 border-gray-200 bg-zinc-50 bg-gradient-to-l p-4">
         <h2 className="mb-6 flex items-center px-3 py-4 text-lg font-medium text-gray-800">
           <Inbox className="mr-2 size-6 stroke-[2.5px]" />
           <span className="mr-2 text-xl">All Alerts</span>
