@@ -106,7 +106,14 @@ const Alerts: React.FC = () => {
                   Updated on {formatDate(item.updated)}
                 </Tooltip>
               ) : (
-                <span>Created on {formatDate(item.created)}</span>
+                <span>
+                  {isAsset(item)
+                    ? item.source === 'provided'
+                      ? 'Added'
+                      : 'Discovered'
+                    : 'Identified'}{' '}
+                  {formatDate(item.created)}
+                </span>
               )}
             </span>
           </div>
