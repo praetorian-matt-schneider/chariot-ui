@@ -160,7 +160,7 @@ const Alerts: React.FC = () => {
   return (
     <div className="flex h-[60vh] shadow-sm">
       {/* Sidebar */}
-      <div className="w-1/4 overflow-auto rounded-l-md rounded-r-none border border-r-0 border-gray-200 bg-zinc-50 bg-gradient-to-l py-4">
+      <div className="w-1/4 overflow-auto rounded-l-sm rounded-r-none border border-r-0 border-gray-200 bg-zinc-50 bg-gradient-to-l px-2 py-4">
         <h2 className="mb-4 flex items-center py-2 text-lg font-medium text-gray-800">
           <Inbox className="ml-3 mr-2 size-8 stroke-[2px] " />
           <span className="mr-2 text-xl font-bold">
