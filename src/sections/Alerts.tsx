@@ -4,7 +4,6 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { ChevronRightIcon, Inbox, ShieldCheck } from 'lucide-react';
 
 import { Button } from '@/components/Button';
-import { AssetsIcon, RisksIcon } from '@/components/icons';
 import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
 import { Tooltip } from '@/components/Tooltip';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
@@ -178,10 +177,10 @@ const Alerts: React.FC = () => {
             <div
               key={index}
               className={cn(
-                'flex cursor-pointer items-start py-4 pr-2 ',
+                'flex cursor-pointer items-start p-4 ',
                 query === alert.query
-                  ? 'bg-highlight/10 border-l-[3px] border-brand'
-                  : 'border-l-[3px] border-transparent hover:bg-gray-100'
+                  ? 'bg-highlight/10 '
+                  : ' hover:bg-gray-100'
               )}
               onClick={() => {
                 searchParams.set('query', alert.query);
@@ -189,13 +188,6 @@ const Alerts: React.FC = () => {
                 handleCategoryClick(alert.query);
               }}
             >
-              <div>
-                {alert.count === 3 ? (
-                  <AssetsIcon className="mx-2 mt-1 size-6 text-gray-900" />
-                ) : (
-                  <RisksIcon className="mx-2 mt-1 size-6 text-gray-900" />
-                )}
-              </div>
               <div className="flex flex-col space-y-1">
                 <p className="text-md select-none font-medium">{alert.label}</p>
 
