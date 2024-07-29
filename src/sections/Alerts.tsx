@@ -220,7 +220,7 @@ const Alerts: React.FC = () => {
           </div>
         )}
         {alerts === null && (
-          <div className="flex flex-1 items-center justify-center">
+          <div className="mt-16 flex flex-1 items-center justify-center">
             <div className="text-center">
               <ShieldCheck className="mx-auto mb-4 size-52 stroke-[1px] text-gray-900" />
               <h3 className="mt-10 text-5xl font-bold text-gray-900">
