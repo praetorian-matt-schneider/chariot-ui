@@ -12,7 +12,7 @@ export const Disclaimer = () => {
       </a>
       {` and allow the process of my personal data by Praetorian described in our `}
       <a
-        href="https://www.praetorian.com/terms-of-service/"
+        href="https://www.praetorian.com/privacy-policy/"
         target="_blank"
         rel="noopener noreferrer"
         className="font-semibold text-brand"
