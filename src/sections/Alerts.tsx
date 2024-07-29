@@ -112,7 +112,12 @@ const Alerts: React.FC = () => {
           </div>
         </div>
         <div className="flex items-center space-x-2">
-          <span className="rounded-md border border-gray-300 p-1 text-xs capitalize">
+          {!isAsset(item) && (
+            <span className="rounded-md border border-gray-300 p-1 text-xs">
+              {item.dns}
+            </span>
+          )}
+          <span className="rounded-md border border-gray-300 p-1 text-xs">
             {item.source}
           </span>
           <Tooltip title="Status">
