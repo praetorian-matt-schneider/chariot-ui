@@ -28,11 +28,11 @@ const MyInbox: React.FC = () => {
       className="h-7 border-r border-dashed border-gray-700 p-2"
       startIcon={
         <span className="relative inline-flex items-center space-x-2">
-          <Inbox className="mr-2 size-6 stroke-1 text-white" />
+          <Inbox className="mr-1 size-6 stroke-1 text-white" />
           <button
             type="button"
             className={cn(
-              'inline-flex items-center text-sm font-semibold leading-6 transition duration-150 ease-in-out',
+              'inline-flex items-center text-sm font-semibold transition duration-150 ease-in-out',
               totalAlerts === 0 ? 'text-gray-500' : 'text-white'
             )}
           >
@@ -42,7 +42,7 @@ const MyInbox: React.FC = () => {
       }
       styleType="none"
       menu={{
-        width: 450,
+        width: 550,
         items: [
           {
             label: 'All Alerts',
