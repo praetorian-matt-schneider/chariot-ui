@@ -62,7 +62,7 @@ const Alerts: React.FC = () => {
 
     return (
       <div
-        className="flex w-full cursor-pointer items-center space-x-4 border-b border-gray-200 bg-white p-4 hover:bg-gray-100"
+        className="flex w-full cursor-pointer items-center space-x-4 border-b border-gray-200 bg-white p-4 px-8 hover:bg-gray-100"
         onClick={e => {
           e.preventDefault();
           e.stopPropagation();
@@ -208,9 +208,9 @@ const Alerts: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 rounded-sm border-l border-zinc-200 bg-white p-16 shadow-2xl">
+      <div className="flex-1 rounded-sm border-l border-zinc-200 bg-white shadow-2xl">
         {selectedAlert && (
-          <div className="relative border-b border-gray-200 pb-8">
+          <div className="relative border-b border-gray-200 p-8">
             <div className="text-3xl font-light text-default">
               <span className="mr-2 font-extrabold">
                 {items.length?.toLocaleString()}
@@ -234,40 +234,26 @@ const Alerts: React.FC = () => {
         )}
         {query && (
           <div className="flex h-full flex-col">
-            {items.length === 0 ? (
-              <div className="flex flex-1 items-center justify-center">
-                <div className="text-center">
-                  <ShieldCheck className="mx-auto mb-4 size-32 text-blue-400" />
-                  <h3 className="mt-10 text-5xl font-bold text-gray-900">
-                    You’re all caught up!
-                  </h3>
-                  <p className="mt-4 text-lg text-gray-600">
-                    No alerts to show. Enjoy your peace of mind!
-                  </p>
-                </div>
+            <div ref={parentRef} className="grow overflow-auto">
+              <div
+                className="relative"
+                style={{
+                  height: `${virtualizer.getTotalSize()}px`,
+                }}
+              >
+                {virtualizer.getVirtualItems().map(virtualItem => (
+                  <div
+                    key={virtualItem.key}
+                    className="absolute left-0 top-0 w-full"
+                    style={{
+                      transform: `translateY(${virtualItem.start}px)`,
+                    }}
+                  >
+                    {renderItemDetails(items[virtualItem.index])}
+                  </div>
+                ))}
               </div>
-            ) : (
-              <div ref={parentRef} className="grow overflow-auto">
-                <div
-                  className="relative"
-                  style={{
-                    height: `${virtualizer.getTotalSize()}px`,
-                  }}
-                >
-                  {virtualizer.getVirtualItems().map(virtualItem => (
-                    <div
-                      key={virtualItem.key}
-                      className="absolute left-0 top-0 w-full"
-                      style={{
-                        transform: `translateY(${virtualItem.start}px)`,
-                      }}
-                    >
-                      {renderItemDetails(items[virtualItem.index])}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            </div>
           </div>
         )}
       </div>
