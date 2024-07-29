@@ -236,10 +236,10 @@ const Alerts: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="-my-1 flex-1 overflow-hidden rounded-sm border-l border-zinc-200 bg-white shadow-2xl">
+      <div className="-my-1 flex-1 rounded-sm border-l border-zinc-200 bg-white shadow-2xl">
         {selectedAlert && (
-          <div className="relative border-b border-gray-200 bg-white px-8 py-4 pb-9 ">
-            <div className="pt-2 text-3xl font-light text-default">
+          <div className="relative border-b border-gray-200 p-8">
+            <div className="text-3xl font-light text-default">
               <span className="mr-2 font-extrabold">
                 {items.length?.toLocaleString()}
               </span>{' '}
