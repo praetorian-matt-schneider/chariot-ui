@@ -6,8 +6,11 @@ import { ChevronRightIcon, Inbox, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/Button';
 import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
 import { Tooltip } from '@/components/Tooltip';
+import { ClosedStateModal } from '@/components/ui/ClosedStateModal';
+import { useUpdateAsset } from '@/hooks/useAssets';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
+import { useUpdateRisk } from '@/hooks/useRisks';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import {
   Asset,
@@ -28,10 +31,16 @@ const isAsset = (item: Asset | Risk): item is Asset => {
 const Alerts: React.FC = () => {
   const [query, setQuery] = useState<string | null>(null);
 
-  const { data: alerts } = useGetAccountAlerts();
+  const { data: alerts, refetch: refetchAlerts } = useGetAccountAlerts();
   const { getRiskDrawerLink, getAssetDrawerLink } = getDrawerLink();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  const { mutateAsync: updateAsset, status: updateAssetStatus } =
+    useUpdateAsset();
+  const [isClosedSubStateModalOpen, setIsClosedSubStateModalOpen] =
+    useState(false);
+  const { mutateAsync: updateRisk, status: updateRiskStatus } = useUpdateRisk();
 
   useEffect(() => {
     const initialQuery = searchParams.get('query');
@@ -46,7 +55,7 @@ const Alerts: React.FC = () => {
     setQuery(query);
   };
 
-  const { data } = useGenericSearch(
+  const { data, refetch: refetchData } = useGenericSearch(
     {
       query: query ?? '',
     },
@@ -54,6 +63,35 @@ const Alerts: React.FC = () => {
       enabled: !!query,
     }
   );
+
+  function handleAssetChange(asset: Asset, status: AssetStatus) {
+    updateAsset({
+      key: asset.key,
+      name: asset.name,
+      status,
+      showSnackbar: true,
+    }).then(() => {
+      refetchAlerts();
+      refetchData();
+    });
+  }
+
+  function handleRiskChange(
+    risk: Risk,
+    status: RiskStatus,
+    severity: RiskSeverity
+  ) {
+    updateRisk({
+      key: risk.key,
+      name: risk.name,
+      status: `${status}${severity}`,
+      showSnackbar: true,
+      comment: risk.comment,
+    }).then(() => {
+      refetchAlerts();
+      refetchData();
+    });
+  }
 
   const renderItemDetails = (item: Asset | Risk) => {
     const handleViewLink = isAsset(item)
@@ -72,19 +110,59 @@ const Alerts: React.FC = () => {
         <div className="flex space-x-2">
           {isAsset(item) ? (
             <>
-              <Button styleType="primary" className="h-8">
+              <Button
+                styleType="primary"
+                className="h-8"
+                onClick={e => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleAssetChange(item, AssetStatus.Active);
+                }}
+                disabled={updateAssetStatus === 'pending'}
+              >
                 Enable
               </Button>
-              <Button styleType="secondary" className="h-8">
+              <Button
+                styleType="secondary"
+                className="h-8"
+                onClick={e => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleAssetChange(item, AssetStatus.Deleted);
+                }}
+                disabled={updateAssetStatus === 'pending'}
+              >
                 Delete
               </Button>
             </>
           ) : (
             <>
-              <Button styleType="primary" className="h-8">
-                Open
+              <Button
+                styleType="primary"
+                className="h-8"
+                onClick={e => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleRiskChange(
+                    item,
+                    RiskStatus.Opened,
+                    item.status[1] as RiskSeverity
+                  );
+                }}
+                disabled={updateRiskStatus === 'pending'}
+              >
+                Accept
               </Button>
-              <Button styleType="secondary" className="h-8">
+              <Button
+                styleType="secondary"
+                className="h-8"
+                onClick={e => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsClosedSubStateModalOpen(true);
+                }}
+                disabled={updateRiskStatus === 'pending'}
+              >
                 Reject
               </Button>
             </>
@@ -141,6 +219,13 @@ const Alerts: React.FC = () => {
           </Tooltip>
         </div>
         <ChevronRightIcon className="ml-auto size-5 text-gray-500" />
+        <ClosedStateModal
+          isOpen={isClosedSubStateModalOpen}
+          onClose={() => setIsClosedSubStateModalOpen(false)}
+          onStatusChange={({ status }) => {
+            handleRiskChange(item, status, item.status[1] as RiskSeverity);
+          }}
+        />
       </div>
     );
   };
