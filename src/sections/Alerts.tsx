@@ -124,7 +124,12 @@ const Alerts: React.FC = () => {
               {item.dns}
             </span>
           )}
-          <span className="rounded-md border border-gray-300 p-1 text-xs">
+          <span
+            className={cn(
+              'rounded-md border border-gray-300 p-1 text-xs',
+              isAsset(item) && 'capitalize'
+            )}
+          >
             {item.source}
           </span>
           <Tooltip title="Status">
