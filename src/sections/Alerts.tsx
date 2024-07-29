@@ -218,7 +218,7 @@ const Alerts: React.FC = () => {
                 'flex cursor-pointer items-center justify-between rounded-sm p-3 space-x-2',
                 query === alert.query
                   ? 'bg-highlight/10 border-l-[3px] border-brand'
-                  : 'hover:bg-gray-100'
+                  : 'border-l-[3px] border-transparent hover:bg-gray-100'
               )}
               onClick={() => {
                 searchParams.set('query', alert.query);
