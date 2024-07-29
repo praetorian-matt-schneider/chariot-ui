@@ -210,13 +210,14 @@ const Alerts: React.FC = () => {
       {/* Main Content */}
       <div className="flex-1 rounded-sm border-l border-zinc-200 bg-white shadow-2xl">
         {selectedAlert && (
-          <div className="relative border-b border-gray-200 p-8">
-            <div className="text-3xl font-light text-default">
-              <span className="mr-2 font-extrabold">
-                {items.length?.toLocaleString()}
-              </span>{' '}
-              {selectedAlert.label}
+          <div className="relative border-b border-gray-200 p-8 pb-4">
+            <div className="flex w-full flex-row text-3xl font-light text-default">
+              <p className="font-semibold">{selectedAlert.label}</p>
             </div>
+            <p className="ml-auto mt-1 text-sm font-normal text-gray-500">
+              {items.length?.toLocaleString()} items matched your alert
+              criteria.
+            </p>
           </div>
         )}
         {alerts === null && (
