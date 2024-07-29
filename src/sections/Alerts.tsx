@@ -94,11 +94,11 @@ const Alerts: React.FC = () => {
             </span>
             <span className="text-xs text-gray-500">
               {item.created !== item.updated ? (
-                <Tooltip title={`Created on ${formatDate(item.created)}`}>
-                  Updated on {formatDate(item.updated)}
+                <Tooltip title={`Created ${formatDate(item.created)}`}>
+                  Updated {formatDate(item.updated)}
                 </Tooltip>
               ) : (
-                <span>Created on {formatDate(item.created)}</span>
+                <span>Created {formatDate(item.created)}</span>
               )}
             </span>
           </div>
