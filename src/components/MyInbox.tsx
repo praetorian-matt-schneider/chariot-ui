@@ -61,15 +61,16 @@ const MyInbox: React.FC = () => {
       startIcon={
         <span className="relative inline-flex items-center space-x-2">
           <Inbox className="mr-1 size-6 stroke-1 text-white" />
-          <button
-            type="button"
-            className={cn(
-              'inline-flex items-center text-sm font-semibold transition duration-150 ease-in-out',
-              totalAlerts === 0 ? 'text-gray-500' : 'text-white'
-            )}
-          >
-            {isPending ? '' : totalAlerts}
-          </button>
+          {totalAlerts > 0 && (
+            <span
+              role="label"
+              className={cn(
+                'text-white bg-red-500 rounded-full size-5 absolute -top-2 -right-1 flex justify-center items-center text-xs text-center font-semibold transition duration-150 ease-in-out'
+              )}
+            >
+              {totalAlerts}
+            </span>
+          )}
         </span>
       }
       styleType="none"
