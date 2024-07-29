@@ -445,7 +445,6 @@ export interface AuthState {
   region: string;
   clientId: string;
   me: string;
-  password?: string;
   rToken?: string;
   expiry?: Date;
   friend: { email: string; displayName: string };
@@ -469,6 +468,10 @@ export interface AuthContextType extends AuthState {
   signupNew: (gotoNext?: () => void) => void;
   startImpersonation: (memberId: string, displayName: string) => void;
   stopImpersonation: () => void;
+  credentials: { username: string; password: string };
+  setCredentials: Dispatch<
+    SetStateAction<{ username: string; password: string }>
+  >;
 }
 
 export interface CognitoAuthStates {

@@ -41,7 +41,6 @@ export const emptyAuth: AuthState = {
   region: 'us-east-2',
   clientId: '795dnnr45so7m17cppta0b295o',
   me: '',
-  password: '',
   friend: { email: '', displayName: '' },
   isImpersonating: false,
   userPoolId: 'us-east-2_BJ6QHVG2L',
@@ -50,7 +49,14 @@ export const emptyAuth: AuthState = {
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
   const [error, setError] = useState<string>('');
-  const [auth, setAuth] = useState<AuthState>(emptyAuth);
+  const [auth, setAuth] = useStorage<AuthState>(
+    { key: StorageKey.AUTH },
+    emptyAuth
+  );
+  const [credentials, setCredentials] = useState<{
+    username: string;
+    password: string;
+  }>({ username: '', password: '' });
   const [isLoading, setIsLoading] = useState(false);
   const { backend, expiry, region, clientId } = auth;
 
@@ -149,8 +155,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const api = backendStack?.api || emptyAuth.api;
     const backend = backendStack?.name || emptyAuth.backend;
     const clientId = backendStack?.client_id || emptyAuth.clientId;
-    const me = backendStack?.username || auth.me || '';
-    const password = backendStack?.password || auth.password || '';
     const userPoolId = backendStack?.userPoolId || emptyAuth.userPoolId;
     const region = REGION_REGEX.exec(api)?.[1] ?? 'us-east-2';
 
@@ -192,8 +196,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       backend,
       clientId,
       api,
-      me,
-      password,
       userPoolId,
     }));
   };
@@ -201,8 +203,8 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const loginNew = async (backendStack?: BackendType) => {
     try {
       backendStack && setBackendStack(backendStack);
-      const username = backendStack?.username || auth.me || '';
-      const password = backendStack?.password || auth.password || '';
+      const username = backendStack?.username || credentials.username || '';
+      const password = backendStack?.password || credentials.password || '';
       if (username && password) {
         setNewUserSeedModal(true);
         setIsLoading(true);
@@ -212,7 +214,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         });
         fetchToken();
         if (isSignedIn) {
-          setAuth(auth => ({ ...auth, password: '' }));
+          setAuth(auth => ({ ...auth, me: username }));
           navigate('/');
         }
       }
@@ -235,8 +237,8 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         });
       }
       const { isSignUpComplete, nextStep } = await signUp({
-        username: auth.me,
-        password: auth.password || '',
+        username: credentials.username,
+        password: credentials.password,
       });
       const { signUpStep } = nextStep;
       if (!isSignUpComplete && signUpStep === 'CONFIRM_SIGN_UP') {
@@ -253,7 +255,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       setIsLoading(true);
       const response = await confirmSignUp({
-        username: auth.me,
+        username: credentials.username,
         confirmationCode: otp,
       });
       if (response.isSignUpComplete) {
@@ -328,6 +330,8 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       signupNew,
       startImpersonation,
       stopImpersonation,
+      credentials,
+      setCredentials,
     }),
     [login, logout, JSON.stringify(auth)]
   );

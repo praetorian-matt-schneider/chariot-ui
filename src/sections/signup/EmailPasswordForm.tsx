@@ -13,15 +13,15 @@ export const EmailPasswordForm = ({ onNext }: { onNext?: () => void }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const isLogin = location.pathname.includes('login');
+
   const {
-    me,
-    password,
     isLoading,
     loginNew,
     signupNew,
     error,
     setError,
-    setAuth,
+    credentials,
+    setCredentials,
   } = useAuth();
 
   return (
@@ -38,14 +38,14 @@ export const EmailPasswordForm = ({ onNext }: { onNext?: () => void }) => {
         inputs={[
           {
             label: 'Business Email Address',
-            value: me,
+            value: credentials.username,
             placeholder: 'janelongestname@acmerocketcompany.com',
-            name: 'me',
+            name: 'username',
             required: true,
           },
           {
             label: 'Password',
-            value: password || '',
+            value: credentials.password || '',
             placeholder: '**************',
             name: 'password',
             type: Input.Type.PASSWORD,
@@ -54,7 +54,7 @@ export const EmailPasswordForm = ({ onNext }: { onNext?: () => void }) => {
         ]}
         onChange={values => {
           setError('');
-          setAuth(auth => ({ ...auth, ...values }));
+          setCredentials(auth => ({ ...auth, ...values }));
         }}
       />
       <div className="text-xs">
