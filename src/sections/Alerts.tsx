@@ -164,11 +164,9 @@ const Alerts: React.FC = () => {
       <div className="w-1/4 overflow-auto rounded-l-md rounded-r-none border border-r-0 border-gray-200 bg-zinc-50 bg-gradient-to-l py-4">
         <h2 className="mb-4 flex items-center py-2 text-lg font-medium text-gray-800">
           <Inbox className="ml-3 mr-2 size-8 stroke-[2px] " />
-          {alerts && alerts.length && (
-            <span className="mr-2 text-xl font-bold">
-              All Alerts ({totalAlerts})
-            </span>
-          )}
+          <span className="mr-2 text-xl font-bold">
+            All Alerts {alerts && alerts.length && <span>({totalAlerts})</span>}
+          </span>
         </h2>
         {alerts === null && (
           <div className="flex items-center justify-between px-3 italic text-gray-500">
