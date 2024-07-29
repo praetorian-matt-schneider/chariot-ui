@@ -50,10 +50,7 @@ export const emptyAuth: AuthState = {
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
   const [error, setError] = useState<string>('');
-  const [auth, setAuth] = useStorage<AuthState>(
-    { key: StorageKey.AUTH },
-    emptyAuth
-  );
+  const [auth, setAuth] = useState<AuthState>(emptyAuth);
   const [isLoading, setIsLoading] = useState(false);
   const { backend, expiry, region, clientId } = auth;
 
@@ -147,6 +144,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }
 
+  // This function is mainly to handle cases where the user is using their own stack
   const setBackendStack = (backendStack?: BackendType) => {
     const api = backendStack?.api || emptyAuth.api;
     const backend = backendStack?.name || emptyAuth.backend;
@@ -154,19 +152,36 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const me = backendStack?.username || auth.me || '';
     const password = backendStack?.password || auth.password || '';
     const userPoolId = backendStack?.userPoolId || emptyAuth.userPoolId;
+    const region = REGION_REGEX.exec(api)?.[1] ?? 'us-east-2';
 
     Amplify.configure({
       Auth: {
         Cognito: {
           userPoolClientId: clientId,
           userPoolId,
+
+          loginWith: {
+            oauth: {
+              domain: `praetorian-${backend}.auth.${region}.amazoncognito.com`,
+              scopes: ['email', 'openid'],
+              redirectSignIn: [
+                'https://localhost:3000/hello',
+                'https://preview.chariot.praetorian.com/hello',
+              ],
+              redirectSignOut: [
+                'https://localhost:3000/goodbye',
+                'https://preview.chariot.praetorian.com/goodbye',
+              ],
+              responseType: 'code',
+            },
+          },
         },
       },
       API: {
         REST: {
           [backend]: {
             endpoint: api,
-            region: REGION_REGEX.exec(api)?.[1] ?? 'us-east-2',
+            region,
           },
         },
       },
