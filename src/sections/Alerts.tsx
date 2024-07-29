@@ -170,12 +170,12 @@ const Alerts: React.FC = () => {
             <p className="text-md select-none font-medium">No alerts found</p>
           </div>
         )}
-        <div className="space-y-2">
+        <div>
           {(alerts ?? []).map((alert, index) => (
             <div
               key={index}
               className={cn(
-                'flex cursor-pointer items-start rounded-sm py-2 pr-2 ',
+                'flex cursor-pointer items-start py-4 pr-2 ',
                 query === alert.query
                   ? 'bg-highlight/10 border-l-[3px] border-brand'
                   : 'border-l-[3px] border-transparent hover:bg-gray-100'
@@ -204,7 +204,7 @@ const Alerts: React.FC = () => {
           ))}
           {alerts?.length === 0 && (
             <div
-              className="flex cursor-pointer items-center justify-between space-x-2 rounded-sm border-l-[3px] border-brand bg-highlight/10 p-3"
+              className="flex cursor-pointer items-center justify-between space-x-2 border-l-[3px] border-brand bg-highlight/10 p-3"
               onClick={() => {
                 searchParams.set('query', '');
                 setSearchParams(searchParams);
