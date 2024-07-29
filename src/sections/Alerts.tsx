@@ -215,8 +215,7 @@ const Alerts: React.FC = () => {
               <p className="font-semibold">{selectedAlert.label}</p>
             </div>
             <p className="ml-auto mt-1 text-sm font-normal text-gray-500">
-              {items.length?.toLocaleString()} items matched your alert
-              criteria.
+              {items.length?.toLocaleString()} items match your alert criteria.
             </p>
           </div>
         )}
