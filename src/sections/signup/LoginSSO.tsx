@@ -36,7 +36,7 @@ export const LoginSSO = () => {
         <Input
           label={'Email Address'}
           value={username}
-          placeholder={'janelongestname@acmerocketcompany.com'}
+          placeholder={'janelongestname@praetorian.com'}
           name={'username'}
           required={true}
           onChange={e => {
