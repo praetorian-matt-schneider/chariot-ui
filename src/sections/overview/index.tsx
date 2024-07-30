@@ -62,8 +62,8 @@ export function Overview() {
 
   const featuredModules = [
     Module.ASM,
-    Module.BAS,
     Module.CTI,
+    Module.BAS,
     Module.VM,
     Module.CPT,
   ];
@@ -364,8 +364,8 @@ export function ModulesModal() {
   const featuredModules = [
     Module.PM,
     Module.ASM,
-    Module.BAS,
     Module.CTI,
+    Module.BAS,
     Module.VM,
   ];
 

@@ -10,6 +10,7 @@ import { ClosedStateModal } from '@/components/ui/ClosedStateModal';
 import { useUpdateAsset } from '@/hooks/useAssets';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
+import { useReRunJob } from '@/hooks/useJobs';
 import { useUpdateRisk } from '@/hooks/useRisks';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import {
@@ -31,6 +32,7 @@ const isAsset = (item: Asset | Risk): item is Asset => {
 const Alerts: React.FC = () => {
   const [query, setQuery] = useState<string | null>(null);
 
+  const { mutateAsync: reRunJob, status: reRunJobStatus } = useReRunJob();
   const { data: alerts, refetch: refetchAlerts } = useGetAccountAlerts();
   const { getRiskDrawerLink, getAssetDrawerLink } = getDrawerLink();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -108,7 +110,7 @@ const Alerts: React.FC = () => {
         }}
       >
         <div className="flex space-x-2">
-          {isAsset(item) ? (
+          {isAsset(item) && item.status === AssetStatus.ActiveLow && (
             <>
               <Button
                 styleType="primary"
@@ -135,7 +137,8 @@ const Alerts: React.FC = () => {
                 Delete
               </Button>
             </>
-          ) : (
+          )}
+          {!isAsset(item) && item.status === RiskStatus.Triaged && (
             <>
               <Button
                 styleType="primary"
@@ -164,6 +167,37 @@ const Alerts: React.FC = () => {
                 disabled={updateRiskStatus === 'pending'}
               >
                 Reject
+              </Button>
+            </>
+          )}
+          {!isAsset(item) && item.status[0] === RiskStatus.Opened && (
+            <>
+              <Button
+                styleType="primary"
+                className="h-8"
+                onClick={e => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  reRunJob({
+                    capability: item.source,
+                    dns: item.dns,
+                  });
+                }}
+                disabled={reRunJobStatus === 'pending'}
+              >
+                Rescan
+              </Button>
+              <Button
+                styleType="secondary"
+                className="h-8"
+                onClick={e => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsClosedSubStateModalOpen(true);
+                }}
+                disabled={updateRiskStatus === 'pending'}
+              >
+                Close
               </Button>
             </>
           )}
