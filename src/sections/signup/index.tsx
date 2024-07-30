@@ -1,36 +1,34 @@
 import { useState } from 'react';
-import { useLocation } from 'react-router-dom';
 
 import { EmailConfirmation } from '@/sections/signup/EmailConfirmation';
 import { EmailPasswordForm } from '@/sections/signup/EmailPasswordForm';
-import { ForgotPassword } from '@/sections/signup/ForgotPassword';
+import { ForgotPasswordSteps } from '@/sections/signup/ForgotPasswordSteps';
 import { PageWrapper } from '@/sections/signup/PageWrapper';
 import { cn } from '@/utils/classname';
 
 export const Login = () => {
-  const location = useLocation();
+  const [credentials, setCredentials] = useState<{
+    username: string;
+    password: string;
+  }>({ username: '', password: '' });
+
+  return (
+    <PageWrapper title="Sign in with your email and password">
+      <EmailPasswordForm
+        credentials={credentials}
+        setCredentials={setCredentials}
+      />
+    </PageWrapper>
+  );
+};
+
+export const Signup = () => {
   const [stepIndex, setStepIndex] = useState<number>(0);
+  const [credentials, setCredentials] = useState<{
+    username: string;
+    password: string;
+  }>({ username: '', password: '' });
 
-  if (location.pathname.includes('login')) {
-    return (
-      <PageWrapper title="Sign in with your email and password">
-        <EmailPasswordForm />
-      </PageWrapper>
-    );
-  }
-
-  if (location.pathname.includes('forgot-password')) {
-    return (
-      <PageWrapper
-        title="Forgot your password?"
-        description="Enter your Email below and we will send a message to reset your password"
-      >
-        <ForgotPassword />
-      </PageWrapper>
-    );
-  }
-
-  // Signup flow
   return (
     <PageWrapper title="Sign Up for a Free Account">
       <div className="space-y-8">
@@ -73,11 +71,29 @@ export const Login = () => {
         </div>
         <hr className="border-t-2 border-default" />
         {stepIndex === 0 ? (
-          <EmailPasswordForm onNext={() => setStepIndex(step => step + 1)} />
+          <EmailPasswordForm
+            credentials={credentials}
+            setCredentials={setCredentials}
+            onNext={() => setStepIndex(step => step + 1)}
+          />
         ) : (
-          <EmailConfirmation />
+          <EmailConfirmation
+            username={credentials.username}
+            password={credentials.password}
+          />
         )}
       </div>
+    </PageWrapper>
+  );
+};
+
+export const ForgotPassword = () => {
+  return (
+    <PageWrapper
+      title="Forgot your password?"
+      description="Enter your Email below and we will send a message to reset your password"
+    >
+      <ForgotPasswordSteps />
     </PageWrapper>
   );
 };

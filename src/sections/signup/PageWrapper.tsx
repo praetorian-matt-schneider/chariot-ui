@@ -38,6 +38,8 @@ export const PageWrapper = ({
 
       if (sections.length > 0) {
         const backend = sections.shift() ?? '';
+        let username = '';
+        let password = '';
 
         const creds: BackendType = {
           name: config.get(backend, 'name').trim() as string,
@@ -50,11 +52,11 @@ export const PageWrapper = ({
           config.isHaveOption(backend, 'username') &&
           config.isHaveOption(backend, 'password')
         ) {
-          creds.username = config.get(backend, 'username').trim() as string;
-          creds.password = config.get(backend, 'password').trim() as string;
+          username = config.get(backend, 'username').trim() as string;
+          password = config.get(backend, 'password').trim() as string;
         }
 
-        loginNew(creds);
+        loginNew(username, password, creds);
       }
     };
     reader.readAsText(file);

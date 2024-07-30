@@ -7,13 +7,12 @@ import { Input } from '@/components/form/Input';
 import { Inputs } from '@/components/form/Inputs';
 import { Disclaimer } from '@/sections/signup/Disclaimer';
 import { SignupError } from '@/sections/signup/SignupError';
-import { useAuth } from '@/state/auth';
 import { cn } from '@/utils/classname';
 import { getRoute } from '@/utils/route.util';
 
-export const ForgotPassword = () => {
-  const { credentials, setCredentials } = useAuth();
+export const ForgotPasswordSteps = () => {
   const [stepIndex, setStepIndex] = useState<number>(0);
+  const [username, setUsername] = useState<string>('');
   const [forgotPasswordForm, setForgotPasswordForm] = useState<{
     code: string;
     password: string;
@@ -36,7 +35,7 @@ export const ForgotPassword = () => {
     }
   }, [forgotPasswordForm.password, forgotPasswordForm.passwordAgain]);
 
-  async function handleResetPassword(username: string) {
+  async function handleResetPassword() {
     try {
       setIsLoading(true);
       const output = await resetPassword({ username });
@@ -58,14 +57,10 @@ export const ForgotPassword = () => {
     try {
       setIsLoading(true);
       await confirmResetPassword({
-        username: credentials.username,
+        username: username,
         confirmationCode: forgotPasswordForm.code,
         newPassword: forgotPasswordForm.password,
       });
-      setCredentials(credentials => ({
-        ...credentials,
-        password: forgotPasswordForm.password,
-      }));
       navigate(getRoute(['login']));
     } catch (error) {
       error instanceof Error
@@ -120,21 +115,18 @@ export const ForgotPassword = () => {
           id="signup"
           onSubmit={e => {
             e.preventDefault();
-            handleResetPassword(credentials.username);
+            handleResetPassword();
           }}
         >
           <Input
             label={'Email Address'}
-            value={credentials.username}
+            value={username}
             placeholder={'janelongestname@acmerocketcompany.com'}
             name={'username'}
             required={true}
             onChange={e => {
               setError('');
-              setCredentials(credentials => ({
-                ...credentials,
-                username: e.target.value,
-              }));
+              setUsername(e.target.value);
             }}
           />
           <Button
@@ -162,8 +154,8 @@ export const ForgotPassword = () => {
       ) : (
         <div className="text-sm text-default-light">
           <p className="mb-4">
-            We have sent a password reset code by email to{' '}
-            {credentials.username}. Enter it below to reset your password.
+            We have sent a password reset code by email to {username}. Enter it
+            below to reset your password.
           </p>
           <form
             id="forgot-password"

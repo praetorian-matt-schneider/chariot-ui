@@ -8,13 +8,19 @@ import { OTPInput } from '@/sections/signup/OTPInput';
 import { SSO } from '@/sections/signup/SSO';
 import { useAuth } from '@/state/auth';
 
-export const EmailConfirmation = () => {
-  const { credentials, confirmOTP, isLoading } = useAuth();
+export const EmailConfirmation = ({
+  username,
+  password,
+}: {
+  username: string;
+  password: string;
+}) => {
+  const { confirmOTP, isLoading } = useAuth();
   const [open, setOpen] = useState(true);
 
   async function resendEmail() {
     await resendSignUpCode({
-      username: credentials.username,
+      username,
     });
     setOpen(true);
   }
@@ -24,7 +30,7 @@ export const EmailConfirmation = () => {
       <div className="text-sm text-default-light">
         <p>
           An email was sent to{' '}
-          <span className="font-bold text-default">{credentials.username}</span>
+          <span className="font-bold text-default">{username}</span>
         </p>
         <ul className="mt-4 list-disc">
           <li>{`Can't find it? Don't forget to check your spam box.`}</li>
@@ -60,7 +66,7 @@ export const EmailConfirmation = () => {
             Please copy & paste the six-digit code emailed to your business
             address.
           </p>
-          <OTPInput onSubmit={confirmOTP} />
+          <OTPInput onSubmit={otp => confirmOTP(username, password, otp)} />
           <Button
             disabled={isLoading}
             className="mt-6 w-full"

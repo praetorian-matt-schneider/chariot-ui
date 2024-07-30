@@ -53,10 +53,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     { key: StorageKey.AUTH },
     emptyAuth
   );
-  const [credentials, setCredentials] = useState<{
-    username: string;
-    password: string;
-  }>({ username: '', password: '' });
+
   const [isLoading, setIsLoading] = useState(false);
   const { backend, expiry, region, clientId } = auth;
 
@@ -200,11 +197,13 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }));
   };
 
-  const loginNew = async (backendStack?: BackendType) => {
+  const loginNew = async (
+    username = '',
+    password = '',
+    backendStack?: BackendType
+  ) => {
     try {
       backendStack && setBackendStack(backendStack);
-      const username = backendStack?.username || credentials.username || '';
-      const password = backendStack?.password || credentials.password || '';
       if (username && password) {
         setNewUserSeedModal(true);
         setIsLoading(true);
@@ -224,7 +223,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  async function signupNew(gotoNext = () => {}) {
+  async function signupNew(username = '', password = '', gotoNext = () => {}) {
     try {
       setIsLoading(true);
       if (emptyAuth.backend !== auth.backend) {
@@ -236,8 +235,8 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         });
       }
       const { isSignUpComplete, nextStep } = await signUp({
-        username: credentials.username,
-        password: credentials.password,
+        username,
+        password,
       });
       const { signUpStep } = nextStep;
       if (!isSignUpComplete && signUpStep === 'CONFIRM_SIGN_UP') {
@@ -250,15 +249,15 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }
 
-  async function confirmOTP(otp: string = '') {
+  async function confirmOTP(username = '', password = '', otp: string = '') {
     try {
       setIsLoading(true);
       const response = await confirmSignUp({
-        username: credentials.username,
+        username,
         confirmationCode: otp,
       });
       if (response.isSignUpComplete) {
-        loginNew();
+        loginNew(username, password);
       }
     } catch (error) {
       if (error instanceof Error && error.message) {
@@ -328,8 +327,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       signupNew,
       startImpersonation,
       stopImpersonation,
-      credentials,
-      setCredentials,
     }),
     [login, logout, JSON.stringify(auth)]
   );

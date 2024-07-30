@@ -1,3 +1,4 @@
+import { Dispatch, SetStateAction } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { Button } from '@/components/Button';
@@ -9,20 +10,25 @@ import { SSO } from '@/sections/signup/SSO';
 import { useAuth } from '@/state/auth';
 import { getRoute } from '@/utils/route.util';
 
-export const EmailPasswordForm = ({ onNext }: { onNext?: () => void }) => {
+interface Credentials {
+  username: string;
+  password: string;
+}
+
+export const EmailPasswordForm = ({
+  credentials,
+  setCredentials,
+  onNext,
+}: {
+  credentials: Credentials;
+  setCredentials: Dispatch<SetStateAction<Credentials>>;
+  onNext?: () => void;
+}) => {
+  const { username, password } = credentials;
   const navigate = useNavigate();
   const location = useLocation();
   const isLogin = location.pathname.includes('login');
-
-  const {
-    isLoading,
-    loginNew,
-    signupNew,
-    error,
-    setError,
-    credentials,
-    setCredentials,
-  } = useAuth();
+  const { isLoading, loginNew, signupNew, error, setError } = useAuth();
 
   return (
     <form
@@ -30,8 +36,8 @@ export const EmailPasswordForm = ({ onNext }: { onNext?: () => void }) => {
       id="signup"
       onSubmit={e => {
         e.preventDefault();
-        isLogin && loginNew();
-        !isLogin && signupNew(onNext);
+        isLogin && loginNew(username, password);
+        !isLogin && signupNew(username, password, onNext ? onNext : () => {});
       }}
     >
       <Inputs
