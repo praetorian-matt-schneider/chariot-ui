@@ -24,7 +24,7 @@ export const LoginSSO = () => {
   };
 
   return (
-    <PageWrapper title="Sign in with your Corporate ID">
+    <PageWrapper title="Sign in with SSO">
       <form
         className="flex flex-1 flex-col gap-4 space-y-4 p-2"
         id="signup"

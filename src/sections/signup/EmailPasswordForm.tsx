@@ -85,7 +85,7 @@ export const EmailPasswordForm = ({
       {isLogin && (
         <div>
           <p className="text-xs">
-            {`Signin with your Corporate ID ? `}
+            {`SSO user ? `}
             <Button
               onClick={() => navigate(getRoute(['login-sso']))}
               className="text-xs"
