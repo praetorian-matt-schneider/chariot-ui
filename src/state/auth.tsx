@@ -57,20 +57,15 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const [isTokenRefreshing, setIsTokenRefreshing] = useState(isExpired(expiry));
 
+  useEffect(() => {
+    setBackendStack();
+  }, []);
+
   const updateTabVisibility = useCallback(() => {
     const isVisible = document.visibilityState === 'visible';
 
     if (isVisible) {
-      if (isExpired(expiry)) {
-        console.log(
-          'The token has expired while tab is unfocused. So masking UI while refreshing the token',
-          {
-            expiry: expiry && new Date(expiry),
-            currentDate: new Date(),
-          }
-        );
-        setIsTokenRefreshing(true);
-      }
+      fetchToken();
     }
 
     setIsTabVisible(isVisible);
@@ -146,13 +141,8 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }));
   };
 
-  const login = async (
-    username = '',
-    password = '',
-    backendStack?: BackendType
-  ) => {
+  const login = async (username = '', password = '') => {
     try {
-      backendStack && setBackendStack(backendStack);
       if (username && password) {
         setNewUserSeedModal(true);
         setIsLoading(true);
@@ -221,13 +211,14 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   async function fetchToken() {
+    setIsTokenRefreshing(true);
     const session = await fetchAuthSession();
-
     setAuth(auth => ({
       ...auth,
       token: session.tokens?.idToken?.toString() ?? '',
       me: session.tokens?.idToken?.payload?.email?.toString() ?? '',
     }));
+    setIsTokenRefreshing(false);
   }
 
   async function logout() {
@@ -237,6 +228,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     await signOut();
     navigate(getRoute(['login']));
+    setBackendStack();
   }
 
   const value: AuthContextType = useMemo(

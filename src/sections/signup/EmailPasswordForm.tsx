@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { Button } from '@/components/Button';
 import { Input } from '@/components/form/Input';
@@ -19,15 +19,15 @@ export const EmailPasswordForm = ({
   credentials,
   setCredentials,
   onNext,
+  isLogin = false,
 }: {
   credentials: Credentials;
   setCredentials: Dispatch<SetStateAction<Credentials>>;
   onNext?: () => void;
+  isLogin?: boolean;
 }) => {
   const { username, password } = credentials;
   const navigate = useNavigate();
-  const location = useLocation();
-  const isLogin = location.pathname.includes('login');
   const { isLoading, login, signup, error, setError } = useAuth();
 
   return (
