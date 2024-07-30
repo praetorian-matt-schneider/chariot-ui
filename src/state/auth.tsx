@@ -57,6 +57,10 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const [isTokenRefreshing, setIsTokenRefreshing] = useState(isExpired(expiry));
 
+  useEffect(() => {
+    setBackendStack();
+  }, []);
+
   const updateTabVisibility = useCallback(() => {
     const isVisible = document.visibilityState === 'visible';
 
