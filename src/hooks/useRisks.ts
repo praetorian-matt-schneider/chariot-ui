@@ -158,10 +158,12 @@ export function useBulkUpdateRisk() {
     selectedRows,
     status,
     severity,
+    comment: newComment,
   }: {
     selectedRows: Risk[];
     status?: RiskStatus;
     severity?: string;
+    comment?: string;
   }) {
     return updateRisk(
       selectedRows.map(item => {
@@ -178,7 +180,7 @@ export function useBulkUpdateRisk() {
           key: item.key,
           name: finding,
           status: newStatus,
-          comment: item.comment,
+          comment: newComment || item.comment,
         };
       })
     );
