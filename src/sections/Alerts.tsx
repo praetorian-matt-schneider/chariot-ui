@@ -209,41 +209,49 @@ const Alerts: React.FC = () => {
             </Tooltip>
           )}
           <div className="flex flex-col">
-            <span className="text-lg font-semibold text-gray-800 hover:text-gray-900">
-              {item.name ?? (isAsset(item) ? item.dns : item.key)}
-            </span>
+            <Tooltip title="DNS">
+              <span className="text-lg font-semibold text-gray-800 hover:text-gray-900">
+                {item.name ?? (isAsset(item) ? item.dns : item.key)}
+              </span>
+            </Tooltip>
             <span className="text-xs text-gray-500">
               {item.created !== item.updated ? (
                 <Tooltip title={`Created on ${formatDate(item.created)}`}>
                   Updated on {formatDate(item.updated)}
                 </Tooltip>
               ) : (
-                <span>
-                  {isAsset(item)
-                    ? item.source === 'provided'
-                      ? 'Added'
-                      : 'Discovered'
-                    : 'Identified'}{' '}
-                  {formatDate(item.created)}
-                </span>
+                <Tooltip title="Source">
+                  <span>
+                    {isAsset(item)
+                      ? item.source === 'provided'
+                        ? 'Added'
+                        : 'Discovered'
+                      : 'Identified'}{' '}
+                    {formatDate(item.created)}
+                  </span>
+                </Tooltip>
               )}
             </span>
           </div>
         </div>
         <div className="flex items-center space-x-2">
           {!isAsset(item) && (
-            <span className="rounded-md border border-gray-300 p-1 text-xs">
-              {item.dns}
-            </span>
+            <Tooltip title="DNS">
+              <span className="rounded-md border border-gray-300 p-1 text-xs">
+                {item.dns}
+              </span>
+            </Tooltip>
           )}
-          <span
-            className={cn(
-              'rounded-md border border-gray-300 p-1 text-xs',
-              isAsset(item) && 'capitalize'
-            )}
-          >
-            {item.source}
-          </span>
+          <Tooltip title="Source">
+            <span
+              className={cn(
+                'rounded-md border border-gray-300 p-1 text-xs',
+                isAsset(item) && 'capitalize'
+              )}
+            >
+              {item.source}
+            </span>
+          </Tooltip>
           <Tooltip title="Status">
             <span className="rounded border border-red-400 px-2 py-1 text-xs font-medium text-red-500">
               {isAsset(item)
