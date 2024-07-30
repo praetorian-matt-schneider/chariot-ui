@@ -28,7 +28,7 @@ export const EmailPasswordForm = ({
   const navigate = useNavigate();
   const location = useLocation();
   const isLogin = location.pathname.includes('login');
-  const { isLoading, loginNew, signupNew, error, setError } = useAuth();
+  const { isLoading, login, signup, error, setError } = useAuth();
 
   return (
     <form
@@ -36,8 +36,8 @@ export const EmailPasswordForm = ({
       id="signup"
       onSubmit={e => {
         e.preventDefault();
-        isLogin && loginNew(username, password);
-        !isLogin && signupNew(username, password, onNext ? onNext : () => {});
+        isLogin && login(username, password);
+        !isLogin && signup(username, password, onNext ? onNext : () => {});
       }}
     >
       <Inputs

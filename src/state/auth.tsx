@@ -7,7 +7,6 @@ import React, {
   useState,
 } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CognitoIdentityProvider } from '@aws-sdk/client-cognito-identity-provider';
 import { Amplify } from 'aws-amplify';
 import {
   confirmSignUp,
@@ -16,17 +15,10 @@ import {
   signOut,
   signUp,
 } from 'aws-amplify/auth';
-import { jwtDecode } from 'jwt-decode';
 
 import { Snackbar } from '@/components/Snackbar';
 import { queryClient } from '@/queryclient';
-import {
-  AuthContextType,
-  AuthState,
-  BackendType,
-  CognitoAuthStates,
-} from '@/types';
-import { sToM } from '@/utils/date.util';
+import { AuthContextType, AuthState, BackendType } from '@/types';
 import { getRoute } from '@/utils/route.util';
 import { StorageKey, useStorage } from '@/utils/storage/useStorage.util';
 
@@ -55,7 +47,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   );
 
   const [isLoading, setIsLoading] = useState(false);
-  const { backend, expiry, region, clientId } = auth;
+  const { expiry } = auth;
 
   const [, setIsTabVisible] = useState(true);
   const [, setNewUserSeedModal] = useStorage(
@@ -103,49 +95,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
     window.location.assign('/app/account');
   };
-
-  async function login(backend: BackendType) {
-    const extracted_region = REGION_REGEX.exec(backend.api)?.[1] ?? 'us-east-2';
-
-    setAuth(prevAuth => ({
-      ...prevAuth,
-      backend: backend.name,
-      api: backend.api,
-      clientId: backend.client_id,
-      region: extracted_region,
-    }));
-
-    setNewUserSeedModal(true);
-
-    if (backend.username && backend.password) {
-      const cognito = new CognitoIdentityProvider({
-        region: extracted_region,
-      });
-      const response = await cognito.initiateAuth({
-        AuthFlow: 'USER_PASSWORD_AUTH',
-        AuthParameters: {
-          USERNAME: backend.username,
-          PASSWORD: backend.password,
-        },
-        ClientId: backend.client_id,
-      });
-      if (response?.AuthenticationResult?.IdToken) {
-        setCognitoAuthStates({
-          idToken: response?.AuthenticationResult?.IdToken,
-          expiresIn: response?.AuthenticationResult?.ExpiresIn,
-          refreshToken: response?.AuthenticationResult?.RefreshToken,
-        });
-      }
-      navigate('/');
-    } else {
-      // Redirect to hosted UI
-      const fqdn = `praetorian-${backend.name}.auth.${extracted_region}.amazoncognito.com`;
-      const redirect = `${window.location.host}${getRoute(['hello'])}`;
-      const hostedUI = `https://${fqdn}/oauth2/authorize?client_id=${backend.client_id}&response_type=code&scope=openid+email&redirect_uri=https%3A%2F%2F${redirect}`;
-      window.location.href = '/';
-      window.location.assign(hostedUI); // external navigation
-    }
-  }
 
   // This function is mainly to handle cases where the user is using their own stack
   const setBackendStack = (backendStack?: BackendType) => {
@@ -197,7 +146,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }));
   };
 
-  const loginNew = async (
+  const login = async (
     username = '',
     password = '',
     backendStack?: BackendType
@@ -223,7 +172,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  async function signupNew(username = '', password = '', gotoNext = () => {}) {
+  async function signup(username = '', password = '', gotoNext = () => {}) {
     try {
       setIsLoading(true);
       if (emptyAuth.backend !== auth.backend) {
@@ -257,7 +206,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         confirmationCode: otp,
       });
       if (response.isSignUpComplete) {
-        loginNew(username, password);
+        login(username, password);
       }
     } catch (error) {
       if (error instanceof Error && error.message) {
@@ -281,25 +230,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }));
   }
 
-  function logout() {
-    queryClient.clear();
-    setAuth(emptyAuth);
-
-    setNewUserSeedModal(false);
-
-    if (backend && region && clientId) {
-      // Redirect to hosted UI
-      const fqdn = `praetorian-${backend}.auth.${region}.amazoncognito.com`;
-      const redirect = `${window.location.host}/goodbye`;
-      const hostedUI = `https://${fqdn}/logout?client_id=${clientId}&response_type=code&logout_uri=https%3A%2F%2F${redirect}`;
-
-      setTimeout(() => {
-        window.location.assign(hostedUI);
-      }, 200);
-    }
-  }
-
-  async function logoutNew() {
+  async function logout() {
     queryClient.clear();
     setAuth(emptyAuth);
     setNewUserSeedModal(false);
@@ -317,61 +248,16 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       isImpersonating: auth.friend.email !== '',
       isLoading,
       login,
-      loginNew,
       logout,
-      logoutNew,
       setAuth,
       setBackendStack,
-      setCognitoAuthStates,
       setError,
-      signupNew,
+      signup,
       startImpersonation,
       stopImpersonation,
     }),
     [login, logout, JSON.stringify(auth)]
   );
-
-  function setCognitoAuthStates(props: CognitoAuthStates) {
-    // Note: Below is for testing expiry. Setting it to 10.59secs for testing purposes
-    // _.set(props, 'expiresIn', 659);
-    const parsedToken = jwtDecode(props.idToken);
-    const userEmail = (parsedToken as { email?: string })?.email;
-
-    const authData: {
-      token: string;
-      expiry?: Date;
-      rToken?: string;
-      me?: string;
-    } = {
-      token: props.idToken,
-    };
-
-    if (userEmail) {
-      authData.me = userEmail;
-    }
-
-    if (props?.expiresIn) {
-      if (props?.refreshToken) {
-        authData.rToken = props.refreshToken;
-      }
-      // Note: expiresInMinutes should be minimum of 1 minutes, setting it to 0 will cause infinity loop.
-      const expiresInMinutes = Math.max(sToM(props.expiresIn) - 10, 1);
-      const expiryDate = getExpiryDate(expiresInMinutes);
-
-      console.log(
-        'Fetched new Token, Token will expires in',
-        expiresInMinutes,
-        'minutes',
-        { expiry: new Date(expiryDate), currentDate: new Date() }
-      );
-      authData.expiry = expiryDate;
-    }
-
-    setAuth(prevAuth => ({
-      ...prevAuth,
-      ...authData,
-    }));
-  }
 
   useEffect(() => {
     document.addEventListener('visibilitychange', updateTabVisibility);
@@ -400,12 +286,6 @@ export const useAuth = () => {
 };
 
 export default AuthProvider;
-
-function getExpiryDate(expiresInMinutes: number): Date {
-  return new Date(
-    new Date().setMinutes(new Date().getMinutes() + expiresInMinutes)
-  );
-}
 
 function getCurrentData() {
   return new Date();

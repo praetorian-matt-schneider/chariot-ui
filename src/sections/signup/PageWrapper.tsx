@@ -21,13 +21,13 @@ export const PageWrapper = ({
 }: Props) => {
   const configIniParser = new ConfigIniParser();
   const { data: backends } = useBackends();
-  const { loginNew, setBackendStack, backend } = useAuth();
+  const { login, setBackendStack, backend } = useAuth();
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       processFile(acceptedFiles[0]);
     },
-    [backends, loginNew]
+    [backends, login]
   );
 
   const processFile = (file: File) => {
@@ -56,7 +56,7 @@ export const PageWrapper = ({
           password = config.get(backend, 'password').trim() as string;
         }
 
-        loginNew(username, password, creds);
+        login(username, password, creds);
       }
     };
     reader.readAsText(file);

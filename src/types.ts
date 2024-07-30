@@ -457,19 +457,12 @@ export interface AuthContextType extends AuthState {
   error: string;
   fetchToken: () => void;
   isLoading: boolean;
-  login: (backend: BackendType) => Promise<void>;
-  loginNew: (
-    username?: string,
-    password?: string,
-    backend?: BackendType
-  ) => void;
+  login: (username?: string, password?: string, backend?: BackendType) => void;
   logout: () => void;
-  logoutNew: () => void;
   setAuth: Dispatch<SetStateAction<AuthState>>;
   setBackendStack: (backend?: BackendType) => void;
-  setCognitoAuthStates: (props: CognitoAuthStates) => void;
   setError: (error: string) => void;
-  signupNew: (username: string, password: string, gotoNext: () => void) => void;
+  signup: (username: string, password: string, gotoNext: () => void) => void;
   startImpersonation: (memberId: string, displayName: string) => void;
   stopImpersonation: () => void;
 }
