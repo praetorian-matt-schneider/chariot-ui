@@ -45,7 +45,7 @@ export const EmailPasswordForm = ({
           {
             label: 'Email Address',
             value: credentials.username,
-            placeholder: 'janelongestname@acmerocketcompany.com',
+            placeholder: 'janelongestname@praetorian.com',
             name: 'username',
             required: true,
           },
