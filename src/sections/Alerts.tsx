@@ -138,7 +138,7 @@ const Alerts: React.FC = () => {
               </Button>
             </>
           )}
-          {!isAsset(item) && item.status === RiskStatus.Triaged && (
+          {!isAsset(item) && item.status[0] === RiskStatus.Triaged && (
             <>
               <Button
                 styleType="primary"
