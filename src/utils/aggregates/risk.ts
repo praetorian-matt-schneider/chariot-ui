@@ -15,6 +15,8 @@ const getDateFromISO = (isoDate: string): string => {
 */
 const riskStatus = (status: string): string => {
   switch (status[0]) {
+    case 'M':
+      return RiskStatusLabel[RiskStatus.Machine];
     case 'O':
       return RiskStatusLabel[RiskStatus.Opened];
     case 'C':
