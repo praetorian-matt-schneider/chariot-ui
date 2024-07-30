@@ -43,7 +43,7 @@ export const EmailPasswordForm = ({
       <Inputs
         inputs={[
           {
-            label: 'Business Email Address',
+            label: 'Email Address',
             value: credentials.username,
             placeholder: 'janelongestname@acmerocketcompany.com',
             name: 'username',
@@ -83,16 +83,28 @@ export const EmailPasswordForm = ({
       </Button>
       <SignupError error={error} />
       {isLogin && (
-        <p className="text-xs">
-          {`Need an account ? `}
-          <Button
-            onClick={() => navigate(getRoute(['signup']))}
-            className="text-xs"
-            styleType="textPrimary"
-          >
-            Sign Up
-          </Button>
-        </p>
+        <div>
+          <p className="text-xs">
+            {`Signin with your Corporate ID ? `}
+            <Button
+              onClick={() => navigate(getRoute(['login-sso']))}
+              className="text-xs"
+              styleType="textPrimary"
+            >
+              Sign In
+            </Button>
+          </p>
+          <p className="text-xs">
+            {`Need an account ? `}
+            <Button
+              onClick={() => navigate(getRoute(['signup']))}
+              className="text-xs"
+              styleType="textPrimary"
+            >
+              Sign Up
+            </Button>
+          </p>
+        </div>
       )}
       {!isLogin && (
         <p className="text-xs">

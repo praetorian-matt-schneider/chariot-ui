@@ -16,6 +16,7 @@ import { Overview } from '@/sections/overview';
 import { Report } from '@/sections/Report';
 import { Risks } from '@/sections/RisksTable';
 import { ForgotPassword, Login, Signup } from '@/sections/signup';
+import { LoginSSO } from '@/sections/signup/LoginSSO';
 import { useAuth } from '@/state/auth';
 import { validateRoutes } from '@/utils/route.util';
 import { getRoute } from '@/utils/route.util';
@@ -44,6 +45,10 @@ function CheckAuth(props: { children: ReactNode }) {
 const appRoutes = {
   login: {
     element: <Login />,
+    title: 'Login',
+  },
+  'login-sso': {
+    element: <LoginSSO />,
     title: 'Login',
   },
   signup: {
