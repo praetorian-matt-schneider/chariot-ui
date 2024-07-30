@@ -4,6 +4,7 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 import { ConfigIniParser } from 'config-ini-parser';
 
 import { AwsCloudformation } from '@/components/icons/AwsCloudformation';
+import { Snackbar } from '@/components/Snackbar';
 import { useBackends } from '@/hooks';
 import { CustomerQuote } from '@/sections/signup/CustomerQuote';
 import { emptyAuth, useAuth } from '@/state/auth';
@@ -25,7 +26,11 @@ export const PageWrapper = ({
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
-      processFile(acceptedFiles[0]);
+      try {
+        processFile(acceptedFiles[0]);
+      } catch (error) {
+        console.error('Error parsing file', error);
+      }
     },
     [backends, login]
   );
@@ -33,30 +38,52 @@ export const PageWrapper = ({
   const processFile = (file: File) => {
     const reader = new FileReader();
     reader.onload = (e: ProgressEvent<FileReader>) => {
-      const config = configIniParser.parse(e?.target?.result as string);
-      const sections = config.sections();
+      try {
+        const config = configIniParser.parse(e?.target?.result as string);
+        const sections = config.sections();
 
-      if (sections.length > 0) {
-        const backend = sections.shift() ?? '';
-        let username = '';
-        let password = '';
+        if (sections.length > 0) {
+          const backend = sections.shift() ?? '';
+          let username = '';
+          let password = '';
 
-        const creds: BackendType = {
-          name: config.get(backend, 'name').trim() as string,
-          client_id: config.get(backend, 'client_id').trim() as string,
-          api: config.get(backend, 'api').trim() as string,
-          userPoolId: config.get(backend, 'user_pool_id').trim() as string,
-        };
+          const creds: BackendType = {
+            name: config.get(backend, 'name').trim() as string,
+            client_id: config.get(backend, 'client_id').trim() as string,
+            api: config.get(backend, 'api').trim() as string,
+            userPoolId: config.get(backend, 'user_pool_id').trim() as string,
+          };
 
-        if (
-          config.isHaveOption(backend, 'username') &&
-          config.isHaveOption(backend, 'password')
-        ) {
-          username = config.get(backend, 'username').trim() as string;
-          password = config.get(backend, 'password').trim() as string;
+          if (
+            config.isHaveOption(backend, 'username') &&
+            config.isHaveOption(backend, 'password')
+          ) {
+            username = config.get(backend, 'username').trim() as string;
+            password = config.get(backend, 'password').trim() as string;
+          }
+
+          login(username, password, creds);
         }
-
-        login(username, password, creds);
+      } catch (error) {
+        if (error instanceof Error && error.message) {
+          Snackbar({
+            variant: 'error',
+            title: 'Failed to parse ini file',
+            description: (
+              <div>
+                <div>{`${error.message}. Please make sure the file is in the correct format`}</div>
+                <a
+                  className="text-brand"
+                  href={'/keychain.ini'}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  View sample .ini file
+                </a>
+              </div>
+            ),
+          });
+        }
       }
     };
     reader.readAsText(file);
