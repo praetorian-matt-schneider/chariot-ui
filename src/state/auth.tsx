@@ -214,7 +214,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         });
         fetchToken();
         if (isSignedIn) {
-          setAuth(auth => ({ ...auth, me: username }));
           navigate('/');
         }
       }
@@ -269,18 +268,17 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           description: error.message,
         });
       }
-    } finally {
       setIsLoading(false);
     }
   }
 
   async function fetchToken() {
-    setIsLoading(true);
     const session = await fetchAuthSession();
-    setIsLoading(false);
+
     setAuth(auth => ({
       ...auth,
       token: session.tokens?.idToken?.toString() ?? '',
+      me: session.tokens?.idToken?.payload?.email?.toString() ?? '',
     }));
   }
 

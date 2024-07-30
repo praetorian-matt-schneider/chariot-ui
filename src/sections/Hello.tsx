@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import 'aws-amplify/auth/enable-oauth-listener';
 
 import { useAuth } from '@/state/auth';
 import { getRoute } from '@/utils/route.util';
