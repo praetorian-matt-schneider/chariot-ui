@@ -7,25 +7,26 @@ import React, {
   useState,
 } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CognitoIdentityProvider } from '@aws-sdk/client-cognito-identity-provider';
-import { jwtDecode } from 'jwt-decode';
-
-import { queryClient } from '@/queryclient';
 import {
-  AuthContextType,
-  AuthState,
-  BackendType,
-  CognitoAuthStates,
-} from '@/types';
-import { msToM, sToM } from '@/utils/date.util';
+  confirmSignUp,
+  fetchAuthSession,
+  signIn,
+  signOut,
+  signUp,
+} from 'aws-amplify/auth';
+
+import { Snackbar } from '@/components/Snackbar';
+import { queryClient } from '@/queryclient';
+import { AuthContextType, AuthState, BackendType } from '@/types';
+import { initAmplify } from '@/utils/amplify.util';
 import { getRoute } from '@/utils/route.util';
 import { StorageKey, useStorage } from '@/utils/storage/useStorage.util';
 
-const REGION_REGEX = /.*execute-api.(.*).amazonaws/;
+export const REGION_REGEX = /.*execute-api.(.*).amazonaws/;
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const emptyAuth: AuthState = {
+export const emptyAuth: AuthState = {
   token: '',
   backend: 'chariot',
   api: 'https://d0qcl2e18h.execute-api.us-east-2.amazonaws.com/chariot',
@@ -34,18 +35,21 @@ const emptyAuth: AuthState = {
   me: '',
   friend: { email: '', displayName: '' },
   isImpersonating: false,
+  userPoolId: 'us-east-2_BJ6QHVG2L',
 };
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
+  const [error, setError] = useState<string>('');
   const [auth, setAuth] = useStorage<AuthState>(
     { key: StorageKey.AUTH },
     emptyAuth
   );
 
-  const { backend, token, rToken, expiry, region, clientId } = auth;
+  const [isLoading, setIsLoading] = useState(false);
+  const { expiry } = auth;
 
-  const [isTabVisible, setIsTabVisible] = useState(true);
+  const [, setIsTabVisible] = useState(true);
   const [, setNewUserSeedModal] = useStorage(
     { key: StorageKey.SHOW_NEW_USER_SEED_MODAL },
     false
@@ -57,16 +61,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const isVisible = document.visibilityState === 'visible';
 
     if (isVisible) {
-      if (isExpired(expiry)) {
-        console.log(
-          'The token has expired while tab is unfocused. So masking UI while refreshing the token',
-          {
-            expiry: expiry && new Date(expiry),
-            currentDate: new Date(),
-          }
-        );
-        setIsTokenRefreshing(true);
-      }
+      fetchToken();
     }
 
     setIsTabVisible(isVisible);
@@ -92,186 +87,140 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     window.location.assign('/app/account');
   };
 
-  async function login(backend: BackendType) {
-    const extracted_region = REGION_REGEX.exec(backend.api)?.[1] ?? 'us-east-2';
+  // This function is mainly to handle cases where the user is using their own stack
+  const setBackendStack = (backendStack?: BackendType) => {
+    const api = backendStack?.api || emptyAuth.api;
+    const backend = backendStack?.name || emptyAuth.backend;
+    const clientId = backendStack?.client_id || emptyAuth.clientId;
+    const userPoolId = backendStack?.userPoolId || emptyAuth.userPoolId;
+    const region = REGION_REGEX.exec(api)?.[1] ?? 'us-east-2';
+
+    initAmplify({
+      clientId,
+      userPoolId,
+      backend,
+      region,
+      api,
+    });
 
     setAuth(prevAuth => ({
       ...prevAuth,
-      backend: backend.name,
-      api: backend.api,
-      clientId: backend.client_id,
-      region: extracted_region,
+      backend,
+      clientId,
+      api,
+      userPoolId,
     }));
+  };
 
-    setNewUserSeedModal(true);
+  const login = async (username = '', password = '') => {
+    try {
+      if (username && password) {
+        setNewUserSeedModal(true);
+        setIsLoading(true);
+        const { isSignedIn } = await signIn({
+          username,
+          password,
+        });
+        fetchToken();
+        if (isSignedIn) {
+          navigate('/');
+        }
+      }
+    } catch (error) {
+      error instanceof Error && error.message && setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    if (backend.username && backend.password) {
-      const cognito = new CognitoIdentityProvider({
-        region: extracted_region,
-      });
-      const response = await cognito.initiateAuth({
-        AuthFlow: 'USER_PASSWORD_AUTH',
-        AuthParameters: {
-          USERNAME: backend.username,
-          PASSWORD: backend.password,
-        },
-        ClientId: backend.client_id,
-      });
-      if (response?.AuthenticationResult?.IdToken) {
-        setCognitoAuthStates({
-          idToken: response?.AuthenticationResult?.IdToken,
-          expiresIn: response?.AuthenticationResult?.ExpiresIn,
-          refreshToken: response?.AuthenticationResult?.RefreshToken,
+  async function signup(username = '', password = '', gotoNext = () => {}) {
+    try {
+      setIsLoading(true);
+      if (emptyAuth.backend !== auth.backend) {
+        setBackendStack({
+          name: auth.backend,
+          client_id: auth.clientId,
+          api: auth.api,
+          userPoolId: auth.userPoolId,
         });
       }
-      navigate('/');
-    } else {
-      // Redirect to hosted UI
-      const fqdn = `praetorian-${backend.name}.auth.${extracted_region}.amazoncognito.com`;
-      const redirect = `${window.location.host}${getRoute(['hello'])}`;
-      const hostedUI = `https://${fqdn}/oauth2/authorize?client_id=${backend.client_id}&response_type=code&scope=openid+email&redirect_uri=https%3A%2F%2F${redirect}`;
-      window.location.href = '/';
-      window.location.assign(hostedUI); // external navigation
+      const { isSignUpComplete, nextStep } = await signUp({
+        username,
+        password,
+      });
+      const { signUpStep } = nextStep;
+      if (!isSignUpComplete && signUpStep === 'CONFIRM_SIGN_UP') {
+        gotoNext && gotoNext();
+      }
+    } catch (error) {
+      error instanceof Error && error.message && setError(error.message);
+    } finally {
+      setIsLoading(false);
     }
   }
 
-  function logout() {
+  async function confirmOTP(username = '', password = '', otp: string = '') {
+    try {
+      setIsLoading(true);
+      const response = await confirmSignUp({
+        username,
+        confirmationCode: otp,
+      });
+      if (response.isSignUpComplete) {
+        login(username, password);
+      }
+    } catch (error) {
+      if (error instanceof Error && error.message) {
+        Snackbar({
+          variant: 'error',
+          title: 'Failed to confirm OTP',
+          description: error.message,
+        });
+      }
+      setIsLoading(false);
+    }
+  }
+
+  async function fetchToken() {
+    setIsTokenRefreshing(true);
+    const session = await fetchAuthSession();
+    setAuth(auth => ({
+      ...auth,
+      token: session.tokens?.idToken?.toString() ?? '',
+      me: session.tokens?.idToken?.payload?.email?.toString() ?? '',
+    }));
+    setIsTokenRefreshing(false);
+  }
+
+  async function logout() {
     queryClient.clear();
     setAuth(emptyAuth);
-
     setNewUserSeedModal(false);
 
-    if (backend && region && clientId) {
-      // Redirect to hosted UI
-      const fqdn = `praetorian-${backend}.auth.${region}.amazoncognito.com`;
-      const redirect = `${window.location.host}/goodbye`;
-      const hostedUI = `https://${fqdn}/logout?client_id=${clientId}&response_type=code&logout_uri=https%3A%2F%2F${redirect}`;
-
-      setTimeout(() => {
-        window.location.assign(hostedUI);
-      }, 200);
-    }
+    await signOut();
+    navigate(getRoute(['login']));
+    setBackendStack();
   }
 
   const value: AuthContextType = useMemo(
     (): AuthContextType => ({
       ...auth,
+      confirmOTP,
+      error,
+      fetchToken,
+      isImpersonating: auth.friend.email !== '',
+      isLoading,
       login,
       logout,
-      isImpersonating: auth.friend.email !== '',
-      setCognitoAuthStates,
+      setAuth,
+      setBackendStack,
+      setError,
+      signup,
       startImpersonation,
       stopImpersonation,
     }),
     [login, logout, JSON.stringify(auth)]
   );
-
-  async function rTokenFn() {
-    try {
-      const cognito = new CognitoIdentityProvider({ region });
-      const response = await cognito.initiateAuth({
-        AuthFlow: 'REFRESH_TOKEN_AUTH',
-        AuthParameters: {
-          REFRESH_TOKEN: rToken ?? '',
-        },
-        ClientId: clientId,
-      });
-
-      if (response?.AuthenticationResult?.IdToken) {
-        setCognitoAuthStates({
-          idToken: response?.AuthenticationResult?.IdToken,
-          expiresIn: response?.AuthenticationResult?.ExpiresIn,
-          refreshToken: response?.AuthenticationResult?.RefreshToken,
-        });
-      }
-    } catch {
-      console.error('Token refresh failed');
-      logout();
-    } finally {
-      setIsTokenRefreshing(false);
-    }
-  }
-
-  function setCognitoAuthStates(props: CognitoAuthStates) {
-    // Note: Below is for testing expiry. Setting it to 10.59secs for testing purposes
-    // _.set(props, 'expiresIn', 659);
-    const parsedToken = jwtDecode(props.idToken);
-    const userEmail = (parsedToken as { email?: string })?.email;
-
-    const authData: {
-      token: string;
-      expiry?: Date;
-      rToken?: string;
-      me?: string;
-    } = {
-      token: props.idToken,
-    };
-
-    if (userEmail) {
-      authData.me = userEmail;
-    }
-
-    if (props?.expiresIn) {
-      if (props?.refreshToken) {
-        authData.rToken = props.refreshToken;
-      }
-      // Note: expiresInMinutes should be minimum of 1 minutes, setting it to 0 will cause infinity loop.
-      const expiresInMinutes = Math.max(sToM(props.expiresIn) - 10, 1);
-      const expiryDate = getExpiryDate(expiresInMinutes);
-
-      console.log(
-        'Fetched new Token, Token will expires in',
-        expiresInMinutes,
-        'minutes',
-        { expiry: new Date(expiryDate), currentDate: new Date() }
-      );
-      authData.expiry = expiryDate;
-    }
-
-    setAuth(prevAuth => ({
-      ...prevAuth,
-      ...authData,
-    }));
-  }
-
-  useEffect(() => {
-    if (isTabVisible) {
-      if (rToken && !expiry) {
-        console.log(
-          'The token expiry has been misplaced. Using the refresh token to obtain a new one.'
-        );
-        rTokenFn();
-      } else if (rToken && expiry) {
-        if (isExpired(expiry)) {
-          console.log('The Token has expired on init.', {
-            expiry: new Date(expiry),
-            currentDate: new Date(),
-          });
-          rTokenFn();
-        } else {
-          const expiresInMs =
-            new Date(expiry).getTime() - getCurrentData().getTime();
-          console.log(
-            'The Token will expire in',
-            msToM(expiresInMs),
-            'minutes.'
-          );
-
-          const refreshTimeout = setTimeout(() => {
-            console.log('The token has expire, while using the app.', {
-              expiry: new Date(expiry),
-              currentDate: new Date(),
-            });
-            rTokenFn();
-          }, expiresInMs);
-
-          return () => {
-            clearTimeout(refreshTimeout);
-          };
-        }
-      }
-    }
-  }, [token, rToken, expiry, isTabVisible]);
 
   useEffect(() => {
     document.addEventListener('visibilitychange', updateTabVisibility);
@@ -300,12 +249,6 @@ export const useAuth = () => {
 };
 
 export default AuthProvider;
-
-function getExpiryDate(expiresInMinutes: number): Date {
-  return new Date(
-    new Date().setMinutes(new Date().getMinutes() + expiresInMinutes)
-  );
-}
 
 function getCurrentData() {
   return new Date();

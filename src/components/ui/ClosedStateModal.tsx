@@ -1,5 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { InformationCircleIcon } from '@heroicons/react/24/solid';
 
+import { Type } from '@/components/form/Input';
+import { InputText } from '@/components/form/InputText';
 import { Modal } from '@/components/Modal';
 import {
   RiskClosedStatus,
@@ -11,7 +14,7 @@ import {
 interface ClosedStateModal {
   isOpen: boolean;
   onClose: () => void;
-  onStatusChange: (data: { status: RiskStatus }) => void;
+  onStatusChange: (data: { status: RiskStatus; comment?: string }) => void;
 }
 
 const riskClosedStatusList = Object.values(RiskClosedStatus).map(
@@ -26,9 +29,16 @@ const riskClosedStatusList = Object.values(RiskClosedStatus).map(
 
 export const ClosedStateModal = (props: ClosedStateModal) => {
   const { isOpen, onClose, onStatusChange } = props;
+  const [closingComment, setClosingComment] = useState('');
 
   const [selectRiskClosedStatus, setSelectRiskClosedStatus] =
     useState<RiskClosedStatus>();
+
+  useEffect(() => {
+    return () => {
+      setClosingComment('');
+    };
+  }, [isOpen]);
 
   return (
     <Modal
@@ -42,6 +52,7 @@ export const ClosedStateModal = (props: ClosedStateModal) => {
           if (selectRiskClosedStatus) {
             onStatusChange({
               status: selectRiskClosedStatus as unknown as RiskStatus,
+              comment: closingComment,
             });
             onClose();
           }
@@ -80,6 +91,17 @@ export const ClosedStateModal = (props: ClosedStateModal) => {
             </div>
           </label>
         ))}
+        <InputText
+          type={Type.TEXT_AREA}
+          name="message"
+          value={closingComment}
+          onChange={e => setClosingComment(e.target.value)}
+          placeholder="Whats the reason for closing this risk?"
+        />
+        <p className="mt-4 rounded bg-blue-100 p-2 text-sm">
+          <InformationCircleIcon className="mr-2 inline size-5 text-default" />
+          This action will remove the existing comment of the risk.
+        </p>
       </div>
     </Modal>
   );

@@ -414,11 +414,12 @@ export function Risks() {
                 {
                   label: RiskStatusLabel[RiskStatus.Opened],
                   icon: getRiskStatusIcon(RiskStatus.Opened),
-                  onClick: () =>
+                  onClick: () => {
                     updateRisk({
                       selectedRows,
                       status: RiskStatus.Opened,
-                    }),
+                    });
+                  },
                 },
                 {
                   label: 'Closed',
@@ -504,13 +505,15 @@ export function Risks() {
       <ClosedStateModal
         isOpen={isClosedSubStateModalOpen}
         onClose={() => setIsClosedSubStateModalOpen(false)}
-        onStatusChange={({ status }) => {
+        onStatusChange={({ status, comment }) => {
           updateRisk({
             selectedRows: selectedRows
               .map(i => sortedRisks[Number(i)])
               .filter(Boolean),
             status,
+            comment,
           });
+          setSelectedRows([]);
         }}
       />
     </div>

@@ -40,7 +40,7 @@ export const Inputs: React.FC<Props> = (props: Props) => {
 
   useEffect(() => {
     props.onChange(values);
-  }, [values, props]);
+  }, [values]);
 
   function handleChange(input: InputType) {
     return function (event: InputEvent) {

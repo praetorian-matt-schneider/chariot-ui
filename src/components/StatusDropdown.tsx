@@ -28,6 +28,7 @@ const StatusDropdown: React.FC<StatusDropdownProps> = ({ onSelect }) => {
       C: 0,
       CR: 0,
       CF: 0,
+      M: 0,
     };
 
     Object.keys(statusData).forEach(key => {

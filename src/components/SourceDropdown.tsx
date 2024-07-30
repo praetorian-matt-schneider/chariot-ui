@@ -44,7 +44,7 @@ const SourceDropdown: React.FC<SourceDropdownProps> = ({ type, onSelect }) => {
         return item.toUpperCase();
       default:
         if (item.includes('@')) return item;
-        return <span className="capitalize">{item}</span>;
+        return <span>{item}</span>;
     }
   }
 

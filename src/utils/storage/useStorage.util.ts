@@ -6,6 +6,7 @@ import { appStorage, appStorageKey } from '@/utils/storage/appStorage.util';
 import { queryStorge } from '@/utils/storage/queryStorage.util';
 
 export enum StorageKey {
+  ALERT_COUNT = 'alertCount',
   AUTH = 'chariot.auth',
   SHOW_NEW_USER_SEED_MODAL = 'chariot.showNewUserSeedModal',
   DRAWER_COMPOSITE_KEY = 'drawerCompositeKey',

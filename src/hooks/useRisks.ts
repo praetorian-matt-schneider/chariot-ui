@@ -142,7 +142,6 @@ const useBulkUpdateRiskHook = () => {
 
       if (validResults.length !== risks.length) {
         const firstError = response.find(result => result instanceof Error);
-        // Note: Some seeds failed to add, so throwing the first error, and useMutation will handle the error toast
 
         throw firstError;
       }
@@ -159,10 +158,12 @@ export function useBulkUpdateRisk() {
     selectedRows,
     status,
     severity,
+    comment: newComment,
   }: {
     selectedRows: Risk[];
     status?: RiskStatus;
     severity?: string;
+    comment?: string;
   }) {
     return updateRisk(
       selectedRows.map(item => {
@@ -179,7 +180,7 @@ export function useBulkUpdateRisk() {
           key: item.key,
           name: finding,
           status: newStatus,
-          comment: item.comment,
+          comment: newComment || item.comment,
         };
       })
     );

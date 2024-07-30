@@ -5,10 +5,11 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { AppRoutes } from '@/app/AppRoute';
 import { useInitAxiosInterceptors } from '@/hooks/useAxios';
 import { queryClient } from '@/queryclient';
-import AuthProvider from '@/state/auth';
+import AuthProvider, { emptyAuth } from '@/state/auth';
 import { BreadCrumbsProvider } from '@/state/breadcrumbs';
 import { GlobalStateProvider } from '@/state/global.state';
 import { SearchProvider } from '@/state/search';
+import { initAmplify } from '@/utils/amplify.util';
 import { QueryClientProvider } from '@/utils/api';
 
 import 'react-toastify/dist/ReactToastify.css';
@@ -61,6 +62,14 @@ function AppProviders({ children }: { children: React.ReactNode }) {
 }
 
 export function App() {
+  initAmplify({
+    clientId: emptyAuth.clientId,
+    userPoolId: emptyAuth.userPoolId,
+    backend: emptyAuth.backend,
+    region: emptyAuth.region,
+    api: emptyAuth.api,
+  });
+
   return (
     <ThirdPartyProviders>
       <AppProviders>

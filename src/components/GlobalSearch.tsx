@@ -205,7 +205,6 @@ const SearchResultDropdown: React.FC<Search> = ({
   files,
   assets,
   accounts,
-  seeds,
   jobs,
   isLoading,
   setIsFocused,
@@ -216,13 +215,7 @@ const SearchResultDropdown: React.FC<Search> = ({
 
   const { search } = useSearchContext();
   const isEmpty =
-    !risks &&
-    !files &&
-    !assets &&
-    !accounts &&
-    !seeds &&
-    !jobs &&
-    search?.length > 0;
+    !risks && !files && !assets && !accounts && !jobs && search?.length > 0;
 
   const tags = [
     { title: ResourceLabels.asset, data: assets },

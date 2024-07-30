@@ -32,6 +32,7 @@ import { Modules, useGetModuleData } from '@/sections/overview/Module';
 import { useAuth } from '@/state/auth';
 import { useGlobalState } from '@/state/global.state';
 import {
+  Account,
   AccountMetadata,
   Integration,
   IntegrationMeta,
@@ -61,8 +62,8 @@ export function Overview() {
 
   const featuredModules = [
     Module.ASM,
-    Module.BAS,
     Module.CTI,
+    Module.BAS,
     Module.VM,
     Module.CPT,
   ];
@@ -280,7 +281,7 @@ export function ModulesModal() {
     if (integrationData) {
       const accounts = integrationData.accounts;
 
-      return accounts.map(account => {
+      return accounts.map((account: Account) => {
         if (account.config) {
           Object.keys(account.config).forEach((key: string) => {
             if (account.config[key as keyof AccountMetadata] === '') {
@@ -297,7 +298,7 @@ export function ModulesModal() {
 
   async function handleDisconnect() {
     if (selectedIntegration.length > 0) {
-      const promises = selectedIntegration.map(account =>
+      const promises = selectedIntegration.map((account: Account) =>
         unlink({
           username: account.member,
           member: account.member,
@@ -363,8 +364,8 @@ export function ModulesModal() {
   const featuredModules = [
     Module.PM,
     Module.ASM,
-    Module.BAS,
     Module.CTI,
+    Module.BAS,
     Module.VM,
   ];
 

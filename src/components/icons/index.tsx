@@ -2,17 +2,12 @@ import React from 'react';
 import {
   CommandLineIcon,
   ExclamationTriangleIcon,
-  GlobeAltIcon,
   ServerStackIcon,
 } from '@heroicons/react/24/outline';
 
 interface IconProps {
   className?: string;
 }
-
-export const SeedsIcon: React.FC<IconProps> = ({ className }) => (
-  <GlobeAltIcon className={className} />
-);
 
 export const AssetsIcon: React.FC<IconProps> = ({ className }) => (
   <ServerStackIcon className={className} />

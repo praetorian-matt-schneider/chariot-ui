@@ -12,7 +12,7 @@ export const useSearchParams = () => {
 
   function addSearchParams(key: string, value = '') {
     searchParams.set(key, value);
-    setSearchParams(searchParams);
+    setSearchParams(searchParams, { replace: true });
   }
 
   return { searchParams, addSearchParams, removeSearchParams };

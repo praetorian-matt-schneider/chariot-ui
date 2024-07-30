@@ -2,16 +2,14 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 import { LogoIcon } from '@/components/icons/Logo.icon';
+import MyInbox from '@/components/MyInbox';
 import { AccountDropdown } from '@/sections/topNavBar/AccountDropdown';
 import { Notifications } from '@/sections/topNavBar/Notifications';
 import { getRoute } from '@/utils/route.util';
 
-export function TopNavBar() {
-  const [showNotification, setShowNotification] = useState<boolean>(false);
+export const TopNavBar: React.FC = () => {
+  const [, setShowNotification] = useState<boolean>(false);
   const location = useLocation();
-
-  // TODO: Add back the notification on jobs
-  console.log('showNotification', showNotification);
 
   const currentPage = location.pathname.split('/').pop();
   const isCurrentPage = (page: string) => currentPage === page;
@@ -54,6 +52,7 @@ export function TopNavBar() {
                 }}
                 onClick={() => setShowNotification(false)}
               />
+              <MyInbox />
               <AccountDropdown />
             </div>
           </div>
@@ -61,4 +60,4 @@ export function TopNavBar() {
       </div>
     </div>
   );
-}
+};

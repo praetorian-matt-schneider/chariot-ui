@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { Dispatch, ReactNode, SetStateAction } from 'react';
 
 import { InputsT } from '@/components/form/Inputs';
 
@@ -11,6 +11,7 @@ export enum RiskScanMessage {
 
 export enum UniqueQueryKeys {
   Backends = 'backends',
+  ACCOUNT_ALERTS = 'ACCOUNT_ALERTS',
   MY = 'MY',
   GENERIC_MY_SEARCH = 'GENERIC_MY_SEARCH',
   GET_FILE = 'GET_FILE',
@@ -31,6 +32,7 @@ export enum RiskStatus {
   Resolved = 'C',
   FalsePositive = 'CF',
   Rejected = 'CR',
+  Machine = 'M',
 }
 
 export type RiskCombinedStatus = string;
@@ -42,10 +44,6 @@ export enum RiskSeverity {
   'High' = 'H',
   'Critical' = 'C',
 }
-export enum SeedStatus {
-  Active = 'A',
-  Frozen = 'F',
-}
 export enum AssetStatus {
   ActiveHigh = 'AH',
   ActiveLow = 'AL',
@@ -56,8 +54,8 @@ export enum AssetStatus {
 
 export const AssetStatusLabel: Record<AssetStatus, string> = {
   [AssetStatus.ActiveHigh]: 'Comprehensive Scan',
-  [AssetStatus.Active]: 'Standard Scan',
-  [AssetStatus.ActiveLow]: 'Asset Discovery',
+  [AssetStatus.Active]: 'Vulnerability Scan',
+  [AssetStatus.ActiveLow]: 'Enumeration Only',
   [AssetStatus.Frozen]: 'Excluded',
   [AssetStatus.Deleted]: 'Deleted',
 };
@@ -68,6 +66,7 @@ export const RiskStatusLabel: Record<RiskStatus, string> = {
   C: 'Resolved',
   CR: 'Rejected',
   CF: 'False Positive',
+  M: 'Machine',
 };
 
 export enum RiskClosedStatus {
@@ -112,14 +111,6 @@ export const DisplaySeverities: Record<string, string> = {
   H: 'High Risks (Open)',
   C: 'Critical Risks (Open)',
   cisa_kev: 'CISA KEV (Open)',
-};
-
-export const SeedLabels: Record<string, string> = {
-  cloud: 'Integrations',
-  ipv4: 'IPv4 Addresses',
-  cidr: 'CIDR Ranges',
-  repository: 'GitHub Organizations',
-  domain: 'Domains',
 };
 
 export const FileLabels: Record<string, string> = {
@@ -190,7 +181,6 @@ export interface Asset {
   config: unknown;
   created: string;
   dns: string;
-  seed: boolean;
   history: EntityHistory[];
   key: string;
   name: string;
@@ -239,23 +229,7 @@ export interface Risk extends RiskTemplate {
   updated: string;
   ttl: number;
   source: string;
-  seed: string;
   history: EntityHistory[];
-}
-
-export interface Seed {
-  class: string;
-  comment: string;
-  config: Record<string, string>;
-  created: string;
-  dns: string;
-  history: string | null;
-  key: string;
-  name: string;
-  status: SeedStatus;
-  ttl: number;
-  updated: string;
-  username: string;
 }
 
 export interface Attribute {
@@ -392,7 +366,6 @@ export interface MyResource {
   risk: Risk[];
   asset: Asset[];
   job: Job[];
-  seed: Seed[];
   attribute: Attribute[];
   file: MyFile[];
 }
@@ -402,7 +375,6 @@ export interface GenericResource {
   risks: Risk[];
   assets: Asset[];
   jobs: Job[];
-  seeds: Seed[];
   attributes: Attribute[];
   files: MyFile[];
   threats: Threat[];
@@ -416,7 +388,6 @@ export interface Search {
   assets: Asset[];
   attributes: Attribute[];
   jobs: Job[];
-  seeds: Seed[];
   attribute: Attribute[];
   files: MyFile[];
   threats: Threat[];
@@ -430,11 +401,12 @@ export interface BackendSections {
 }
 
 export interface BackendType {
-  api: string;
-  client_id: string;
   name: string;
+  client_id: string;
+  api: string;
   username?: string;
   password?: string;
+  userPoolId: string;
 }
 
 export interface AuthState {
@@ -448,12 +420,20 @@ export interface AuthState {
   expiry?: Date;
   friend: { email: string; displayName: string };
   isImpersonating: boolean;
+  userPoolId: string;
 }
 
 export interface AuthContextType extends AuthState {
-  setCognitoAuthStates: (props: CognitoAuthStates) => void;
-  login: (backend: BackendType) => Promise<void>;
+  confirmOTP: (username: string, password: string, opt: string) => void;
+  error: string;
+  fetchToken: () => void;
+  isLoading: boolean;
+  login: (username?: string, password?: string) => void;
   logout: () => void;
+  setAuth: Dispatch<SetStateAction<AuthState>>;
+  setBackendStack: (backend?: BackendType) => void;
+  setError: (error: string) => void;
+  signup: (username: string, password: string, gotoNext: () => void) => void;
   startImpersonation: (memberId: string, displayName: string) => void;
   stopImpersonation: () => void;
 }

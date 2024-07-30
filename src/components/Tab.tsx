@@ -5,7 +5,7 @@ import { Button } from '@/components/Button';
 import { cn } from '@/utils/classname';
 import { useStorage } from '@/utils/storage/useStorage.util';
 
-interface Tab<ID = string> {
+export interface Tab<ID = string> {
   id: ID;
   label: ReactNode;
   Content: React.ElementType;
