@@ -102,7 +102,7 @@ const Alerts: React.FC = () => {
 
     return (
       <div
-        className="flex w-full cursor-pointer items-center space-x-4 border-b border-gray-200 bg-white p-4 px-8 hover:bg-gray-100"
+        className="flex w-full cursor-pointer items-center space-x-4 border-b border-gray-200 bg-white p-4 hover:bg-gray-100"
         onClick={e => {
           e.preventDefault();
           e.stopPropagation();
@@ -202,36 +202,40 @@ const Alerts: React.FC = () => {
             </>
           )}
         </div>
-        <div className="flex flex-1 items-center space-x-3">
+        <div className="flex flex-1 items-center space-x-3 overflow-hidden">
           {!isAsset(item) && (
             <Tooltip title="Severity">
               {getRiskSeverityIcon(item.status[1] as RiskSeverity)}
             </Tooltip>
           )}
-          <div className="flex w-full flex-col overflow-hidden ">
-            <Tooltip title="DNS">
-              <span className=" text-nowrap text-lg font-semibold text-gray-800 hover:text-gray-900">
-                {item.name ?? (isAsset(item) ? item.dns : item.key)}
+          <div className="flex flex-1 items-center space-x-3 overflow-hidden">
+            <div className="flex w-full flex-col overflow-hidden">
+              <Tooltip
+                title={item.name ?? (isAsset(item) ? item.dns : item.key)}
+              >
+                <span className="truncate text-lg font-semibold text-gray-800 hover:text-gray-900">
+                  {item.name ?? (isAsset(item) ? item.dns : item.key)}
+                </span>
+              </Tooltip>
+              <span className="text-xs text-gray-500">
+                {item.created !== item.updated ? (
+                  <Tooltip title={`Created on ${formatDate(item.created)}`}>
+                    Updated on {formatDate(item.updated)}
+                  </Tooltip>
+                ) : (
+                  <Tooltip title="Source">
+                    <span>
+                      {isAsset(item)
+                        ? item.source === 'provided'
+                          ? 'Added'
+                          : 'Discovered'
+                        : 'Identified'}{' '}
+                      {formatDate(item.created)}
+                    </span>
+                  </Tooltip>
+                )}
               </span>
-            </Tooltip>
-            <span className="text-xs text-gray-500">
-              {item.created !== item.updated ? (
-                <Tooltip title={`Created on ${formatDate(item.created)}`}>
-                  Updated on {formatDate(item.updated)}
-                </Tooltip>
-              ) : (
-                <Tooltip title="Source">
-                  <span>
-                    {isAsset(item)
-                      ? item.source === 'provided'
-                        ? 'Added'
-                        : 'Discovered'
-                      : 'Identified'}{' '}
-                    {formatDate(item.created)}
-                  </span>
-                </Tooltip>
-              )}
-            </span>
+            </div>
           </div>
         </div>
         <div className="flex items-center space-x-2">
