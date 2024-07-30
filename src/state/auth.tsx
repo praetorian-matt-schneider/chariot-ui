@@ -7,7 +7,6 @@ import React, {
   useState,
 } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Amplify } from 'aws-amplify';
 import {
   confirmSignUp,
   fetchAuthSession,
@@ -19,6 +18,7 @@ import {
 import { Snackbar } from '@/components/Snackbar';
 import { queryClient } from '@/queryclient';
 import { AuthContextType, AuthState, BackendType } from '@/types';
+import { initAmplify } from '@/utils/amplify.util';
 import { getRoute } from '@/utils/route.util';
 import { StorageKey, useStorage } from '@/utils/storage/useStorage.util';
 
@@ -56,10 +56,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   );
 
   const [isTokenRefreshing, setIsTokenRefreshing] = useState(isExpired(expiry));
-
-  useEffect(() => {
-    setBackendStack();
-  }, []);
 
   const updateTabVisibility = useCallback(() => {
     const isVisible = document.visibilityState === 'visible';
@@ -99,37 +95,12 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const userPoolId = backendStack?.userPoolId || emptyAuth.userPoolId;
     const region = REGION_REGEX.exec(api)?.[1] ?? 'us-east-2';
 
-    Amplify.configure({
-      Auth: {
-        Cognito: {
-          userPoolClientId: clientId,
-          userPoolId,
-
-          loginWith: {
-            oauth: {
-              domain: `praetorian-${backend}.auth.${region}.amazoncognito.com`,
-              scopes: ['email', 'openid'],
-              redirectSignIn: [
-                'https://localhost:3000/hello',
-                'https://preview.chariot.praetorian.com/hello',
-              ],
-              redirectSignOut: [
-                'https://localhost:3000/goodbye',
-                'https://preview.chariot.praetorian.com/goodbye',
-              ],
-              responseType: 'code',
-            },
-          },
-        },
-      },
-      API: {
-        REST: {
-          [backend]: {
-            endpoint: api,
-            region,
-          },
-        },
-      },
+    initAmplify({
+      clientId,
+      userPoolId,
+      backend,
+      region,
+      api,
     });
 
     setAuth(prevAuth => ({
