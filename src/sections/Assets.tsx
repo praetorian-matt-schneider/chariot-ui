@@ -1,9 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import { PlusIcon, PuzzlePieceIcon } from '@heroicons/react/24/outline';
 import { useDebounce } from 'use-debounce';
 
-import { Dropdown } from '@/components/Dropdown';
+import AssetStatusDropdown from '@/components/AssetStatusDropdown';
 import { AssetsIcon, RisksIcon } from '@/components/icons';
 import { getAssetStatusIcon } from '@/components/icons/AssetStatus.icon';
 import { HorseIcon } from '@/components/icons/Horse.icon';
@@ -25,7 +24,6 @@ import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useIntegration } from '@/hooks/useIntegration';
 import { AssetStatusWarning } from '@/sections/AssetStatusWarning';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
-import { getFilterLabel } from '@/sections/RisksTable';
 import { parseKeys } from '@/sections/SearchByType';
 import { useGlobalState } from '@/state/global.state';
 import { Asset, AssetStatus, AssetStatusLabel, Risk } from '@/types';
@@ -284,18 +282,6 @@ const Assets: React.FC = () => {
     },
   ];
 
-  const priorityOptions = useMemo(
-    () =>
-      Object.entries(AssetStatusLabel).map(([value, label]) => ({
-        label,
-        labelSuffix: assetsWithRisk.filter(({ status }) =>
-          status.startsWith(value)
-        ).length,
-        value,
-      })),
-    [assetsWithRisk]
-  );
-
   function updateStatus(assets: string[], status: AssetStatus) {
     const showBulk = showBulkSnackbar(assets.length);
     setShowAssetStatusWarning(false);
@@ -354,33 +340,8 @@ const Assets: React.FC = () => {
             <AttributeFilter
               onAssetsChange={assets => setAssetsWithAttributesFilter(assets)}
             />
-            <Dropdown
-              styleType="header"
-              label={getFilterLabel(
-                'Statuses',
-                priorityFilter,
-                priorityOptions
-              )}
-              endIcon={
-                <ChevronDownIcon className="size-3 stroke-[4px] text-header-dark" />
-              }
-              menu={{
-                items: [
-                  {
-                    label: 'All Statuses',
-                    labelSuffix: assets.length.toLocaleString(),
-                    value: '',
-                  },
-                  {
-                    label: 'Divider',
-                    type: 'divider',
-                  },
-                  ...priorityOptions,
-                ],
-                onSelect: selectedRows => setPriorityFilter(selectedRows),
-                value: priorityFilter,
-                multiSelect: true,
-              }}
+            <AssetStatusDropdown
+              onSelect={(selected: string[]) => setPriorityFilter(selected)}
             />
             <SourceDropdown
               type="asset"
