@@ -74,7 +74,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         friend: { email: memberId, displayName: displayName },
       };
     });
-    window.location.assign('/app/risks');
+    window.location.assign('/app/overview');
   };
 
   const stopImpersonation = () => {
