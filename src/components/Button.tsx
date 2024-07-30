@@ -48,7 +48,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         case 'text':
           return 'text-default hover:bg-layer1';
         case 'textPrimary':
-          return 'text-brand';
+          return 'text-brand inline';
         case 'primary':
           return 'bg-brand text-layer0 shadow-sm hover:bg-brand-hover disabled:border disabled:border-default';
         case 'secondary':

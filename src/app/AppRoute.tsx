@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 
 import { RenderRoutes } from '@/components/route/RenderRoutes';
@@ -11,18 +11,26 @@ import Files from '@/sections/Files';
 import Hello from '@/sections/Hello';
 import Intelligence from '@/sections/Intelligence';
 import Jobs from '@/sections/Jobs';
-import Login from '@/sections/Login';
 import Logout from '@/sections/Logout';
 import { Overview } from '@/sections/overview';
 import { Report } from '@/sections/Report';
 import { Risks } from '@/sections/RisksTable';
+import { ForgotPassword, Login, Signup } from '@/sections/signup';
 import { useAuth } from '@/state/auth';
 import { validateRoutes } from '@/utils/route.util';
 import { getRoute } from '@/utils/route.util';
 
 function CheckAuth(props: { children: ReactNode }) {
-  const { token } = useAuth();
+  const { token, isLoading, fetchToken } = useAuth();
   const location = useLocation();
+
+  useEffect(() => {
+    fetchToken();
+  }, []);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   if (token) {
     return props.children;
@@ -36,7 +44,15 @@ function CheckAuth(props: { children: ReactNode }) {
 const appRoutes = {
   login: {
     element: <Login />,
-    title: 'login',
+    title: 'Login',
+  },
+  signup: {
+    element: <Signup />,
+    title: 'Sign Up',
+  },
+  'forgot-password': {
+    element: <ForgotPassword />,
+    title: 'Forgot Password',
   },
   hello: {
     element: <Hello />,

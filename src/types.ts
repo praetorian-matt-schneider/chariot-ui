@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { Dispatch, ReactNode, SetStateAction } from 'react';
 
 import { InputsT } from '@/components/form/Inputs';
 
@@ -399,11 +399,12 @@ export interface BackendSections {
 }
 
 export interface BackendType {
-  api: string;
-  client_id: string;
   name: string;
+  client_id: string;
+  api: string;
   username?: string;
   password?: string;
+  userPoolId?: string;
 }
 
 export interface AuthState {
@@ -417,12 +418,20 @@ export interface AuthState {
   expiry?: Date;
   friend: { email: string; displayName: string };
   isImpersonating: boolean;
+  userPoolId: string;
 }
 
 export interface AuthContextType extends AuthState {
-  setCognitoAuthStates: (props: CognitoAuthStates) => void;
-  login: (backend: BackendType) => Promise<void>;
+  confirmOTP: (username: string, password: string, opt: string) => void;
+  error: string;
+  fetchToken: () => void;
+  isLoading: boolean;
+  login: (username?: string, password?: string, backend?: BackendType) => void;
   logout: () => void;
+  setAuth: Dispatch<SetStateAction<AuthState>>;
+  setBackendStack: (backend?: BackendType) => void;
+  setError: (error: string) => void;
+  signup: (username: string, password: string, gotoNext: () => void) => void;
   startImpersonation: (memberId: string, displayName: string) => void;
   stopImpersonation: () => void;
 }

@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { useAuth } from '@/state/auth';
 
 function Logout() {
   const { logout } = useAuth();
 
-  React.useEffect(() => {
+  useEffect(() => {
     logout();
   }, []);
 
