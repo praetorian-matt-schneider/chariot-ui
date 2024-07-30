@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { InformationCircleIcon } from '@heroicons/react/24/solid';
 
 import { Modal } from '@/components/Modal';
 import {
@@ -96,6 +97,10 @@ export const ClosedStateModal = (props: ClosedStateModal) => {
           className="block w-full rounded-sm border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 "
           placeholder="Whats the reason for closing this risk?"
         />
+        <p className="mt-4 rounded bg-blue-100 p-2 text-sm">
+          <InformationCircleIcon className="mr-2 inline size-5 text-default" />
+          This action will remove the existing comment of the risk.
+        </p>
       </div>
     </Modal>
   );
