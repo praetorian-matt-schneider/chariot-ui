@@ -24,6 +24,13 @@ const MyInbox: React.FC = () => {
     }
   }, [isPending, totalAlerts, prevAlertCount]);
 
+  const formatAlertCount = (count: number) => {
+    if (count > 999) {
+      return (count / 1000).toFixed(1) + 'k';
+    }
+    return count;
+  };
+
   const getMenuItems = () => {
     if (alerts === null || alerts.length === 0) {
       return [
@@ -65,10 +72,11 @@ const MyInbox: React.FC = () => {
             <span
               role="label"
               className={cn(
-                'text-white bg-red-500 rounded-full size-5 absolute -top-2 -right-1 flex justify-center items-center text-xs text-center font-semibold transition duration-150 ease-in-out'
+                'text-white bg-red-500 rounded-full absolute -top-2 -right-1 flex justify-center items-center text-xs text-center font-semibold transition duration-150 ease-in-out',
+                totalAlerts > 99 ? 'text-[10px]' : 'size-5'
               )}
             >
-              {totalAlerts}
+              {formatAlertCount(totalAlerts)}
             </span>
           )}
         </span>
