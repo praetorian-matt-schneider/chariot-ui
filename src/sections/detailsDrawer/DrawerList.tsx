@@ -51,7 +51,7 @@ export const DrawerList = (props: Props) => {
   const virtualItems = virtualizer.getVirtualItems();
 
   const createLabel = (label: string, value: ReactNode) => {
-    if (label?.toLowerCase() === 'url') {
+    if (label?.toLowerCase() === 'asset') {
       return (
         <a href={value as string} target="_blank" rel="noreferrer">
           {value}
