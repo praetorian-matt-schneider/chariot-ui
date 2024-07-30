@@ -11,6 +11,7 @@ export enum RiskScanMessage {
 
 export enum UniqueQueryKeys {
   Backends = 'backends',
+  ACCOUNT_ALERTS = 'ACCOUNT_ALERTS',
   MY = 'MY',
   GENERIC_MY_SEARCH = 'GENERIC_MY_SEARCH',
   GET_FILE = 'GET_FILE',
@@ -41,10 +42,6 @@ export enum RiskSeverity {
   'Medium' = 'M',
   'High' = 'H',
   'Critical' = 'C',
-}
-export enum SeedStatus {
-  Active = 'A',
-  Frozen = 'F',
 }
 export enum AssetStatus {
   ActiveHigh = 'AH',
@@ -112,14 +109,6 @@ export const DisplaySeverities: Record<string, string> = {
   H: 'High Risks (Open)',
   C: 'Critical Risks (Open)',
   cisa_kev: 'CISA KEV (Open)',
-};
-
-export const SeedLabels: Record<string, string> = {
-  cloud: 'Integrations',
-  ipv4: 'IPv4 Addresses',
-  cidr: 'CIDR Ranges',
-  repository: 'GitHub Organizations',
-  domain: 'Domains',
 };
 
 export const FileLabels: Record<string, string> = {
@@ -190,7 +179,6 @@ export interface Asset {
   config: unknown;
   created: string;
   dns: string;
-  seed: boolean;
   history: EntityHistory[];
   key: string;
   name: string;
@@ -239,23 +227,7 @@ export interface Risk extends RiskTemplate {
   updated: string;
   ttl: number;
   source: string;
-  seed: string;
   history: EntityHistory[];
-}
-
-export interface Seed {
-  class: string;
-  comment: string;
-  config: Record<string, string>;
-  created: string;
-  dns: string;
-  history: string | null;
-  key: string;
-  name: string;
-  status: SeedStatus;
-  ttl: number;
-  updated: string;
-  username: string;
 }
 
 export interface Attribute {
@@ -392,7 +364,6 @@ export interface MyResource {
   risk: Risk[];
   asset: Asset[];
   job: Job[];
-  seed: Seed[];
   attribute: Attribute[];
   file: MyFile[];
 }
@@ -402,7 +373,6 @@ export interface GenericResource {
   risks: Risk[];
   assets: Asset[];
   jobs: Job[];
-  seeds: Seed[];
   attributes: Attribute[];
   files: MyFile[];
   threats: Threat[];
@@ -416,7 +386,6 @@ export interface Search {
   assets: Asset[];
   attributes: Attribute[];
   jobs: Job[];
-  seeds: Seed[];
   attribute: Attribute[];
   files: MyFile[];
   threats: Threat[];

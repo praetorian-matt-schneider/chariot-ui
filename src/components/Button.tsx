@@ -50,7 +50,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         case 'textPrimary':
           return 'text-brand';
         case 'primary':
-          return 'bg-brand text-layer0 shadow-sm hover:bg-brand-hover disabled:text-default';
+          return 'bg-brand text-layer0 shadow-sm hover:bg-brand-hover disabled:border disabled:border-default';
         case 'secondary':
           return `bg-layer0 text-default hover:bg-layer1 shadow-sm border border-default ${isSelected ? 'bg-layer1' : ''}`;
         case 'header':
@@ -60,7 +60,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         case 'none':
           return '';
         case 'error': {
-          return 'bg-red-100 hover:bg-red-200 border border-red-500 text-red-800';
+          return 'bg-red-100 hover:bg-red-200 border border-red-500 text-red-800 disabled:border-default';
         }
         default:
           return 'bg-default-light text-default';

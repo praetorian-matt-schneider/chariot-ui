@@ -5,6 +5,10 @@ export const getQueryKey = {
   getMy: (key: MyResourceKey, compositeKey?: string) => {
     return [UniqueQueryKeys.MY, key, ...(compositeKey ? [compositeKey] : [])];
   },
+  getAccountAlerts: (account: string) => [
+    UniqueQueryKeys.ACCOUNT_ALERTS,
+    account,
+  ],
   getBackend: () => [UniqueQueryKeys.Backends],
   getFile: (props: GetFilesProps) => [UniqueQueryKeys.GET_FILE, props.name],
   genericSearch: (search: string) => [

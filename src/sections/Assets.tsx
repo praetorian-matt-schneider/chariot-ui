@@ -28,6 +28,7 @@ import { parseKeys } from '@/sections/SearchByType';
 import { useGlobalState } from '@/state/global.state';
 import { Asset, AssetStatus, AssetStatusLabel, Risk } from '@/types';
 import { useMergeStatus } from '@/utils/api';
+import { useSearchParams } from '@/utils/url.util';
 
 type Severity = 'I' | 'L' | 'M' | 'H' | 'C';
 type SeverityOpenCounts = Partial<Record<Severity, Risk[]>>;
@@ -115,6 +116,7 @@ const Assets: React.FC = () => {
   const { data: risks = [], status: riskStatus } = useMy({ resource: 'risk' });
   const { isIntegration } = useIntegration();
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
+  const { searchParams, removeSearchParams } = useSearchParams();
   const [priorityFilter, setPriorityFilter] = useFilter(
     [''],
     'asset-priority',
@@ -129,6 +131,18 @@ const Assets: React.FC = () => {
     string[]
   >([]);
 
+  useEffect(() => {
+    if (searchParams.has('asset-priority')) {
+      console.log(
+        'searchParams.get(asset-priority)',
+        searchParams.get('asset-priority')
+      );
+      setPriorityFilter(
+        JSON.parse(searchParams.get('asset-priority') || '[]') as AssetStatus[]
+      );
+    }
+  }, [searchParams]);
+
   const status = useMergeStatus(
     ...(debouncedSearch
       ? [statusDebouncedSearchDns, statusDebouncedSearchName, riskStatus]
@@ -142,6 +156,7 @@ const Assets: React.FC = () => {
   const [showAssetStatusWarning, setShowAssetStatusWarning] =
     useState<boolean>(false);
   const [assetStatus, setAssetStatus] = useState<AssetStatus | ''>('');
+  const reviewStep = searchParams.get('review');
 
   const { mutateAsync: updateAsset } = useUpdateAsset();
 
@@ -393,15 +408,26 @@ const Assets: React.FC = () => {
                 },
                 {
                   label: AssetStatusLabel[AssetStatus.Active],
-                  icon: getAssetStatusIcon(AssetStatus.Active),
+                  className:
+                    reviewStep === '2' ? 'border border-brand text-brand' : '',
+                  icon:
+                    reviewStep === '2' ? (
+                      <div className="size-3 animate-pulse rounded-full bg-brand ring-brand-light" />
+                    ) : (
+                      getAssetStatusIcon(AssetStatus.Active)
+                    ),
                   disabled: assets.every(
                     asset => asset.status === AssetStatus.Active
                   ),
-                  onClick: () =>
+                  onClick: () => {
+                    if (reviewStep === '2') {
+                      removeSearchParams('review');
+                    }
                     updateStatus(
                       assets.map(asset => asset.key),
                       AssetStatus.Active
-                    ),
+                    );
+                  },
                 },
                 {
                   label: AssetStatusLabel[AssetStatus.ActiveLow],

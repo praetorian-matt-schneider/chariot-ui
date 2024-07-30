@@ -44,6 +44,7 @@ import {
 import { useMergeStatus } from '@/utils/api';
 import { isKEVRisk } from '@/utils/risk.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
+import { useSearchParams } from '@/utils/url.util';
 import { generatePathWithSearch } from '@/utils/url.util';
 
 const DownIcon = (
@@ -139,6 +140,7 @@ const getFilteredRisks = (
 
 export function Risks() {
   const { getRiskDrawerLink } = getDrawerLink();
+  const { searchParams, removeSearchParams } = useSearchParams();
   const { handleUpdate: updateRisk, status: updateRiskStatus } =
     useBulkUpdateRisk();
 
@@ -187,6 +189,8 @@ export function Risks() {
 
   const { data: knownExploitedThreats = [], status: threatsStatus } =
     useGetKev();
+
+  const reviewStep = searchParams.get('review');
 
   const {
     data: risksUseMy = [],
@@ -413,17 +417,38 @@ export function Risks() {
                 },
                 {
                   label: RiskStatusLabel[RiskStatus.Opened],
-                  icon: getRiskStatusIcon(RiskStatus.Opened),
-                  onClick: () =>
+                  className:
+                    reviewStep === '2' ? 'border border-brand text-brand' : '',
+                  icon:
+                    reviewStep === '2' ? (
+                      <div className="size-3 animate-pulse rounded-full bg-brand ring-brand-light" />
+                    ) : (
+                      getRiskStatusIcon(RiskStatus.Opened)
+                    ),
+                  onClick: () => {
+                    if (reviewStep === '2') {
+                      removeSearchParams('review');
+                    }
                     updateRisk({
                       selectedRows,
                       status: RiskStatus.Opened,
-                    }),
+                    });
+                  },
                 },
                 {
                   label: 'Closed',
-                  icon: getRiskStatusIcon(RiskStatus.Resolved),
+                  className:
+                    reviewStep === '2' ? 'border border-brand text-brand' : '',
+                  icon:
+                    reviewStep === '2' ? (
+                      <div className="size-3 animate-pulse rounded-full bg-brand ring-brand-light" />
+                    ) : (
+                      getRiskStatusIcon(RiskStatus.Resolved)
+                    ),
                   onClick: () => {
+                    if (reviewStep === '2') {
+                      removeSearchParams('review');
+                    }
                     setIsClosedSubStateModalOpen(true);
                   },
                 },
