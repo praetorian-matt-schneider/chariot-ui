@@ -208,9 +208,9 @@ const Alerts: React.FC = () => {
               {getRiskSeverityIcon(item.status[1] as RiskSeverity)}
             </Tooltip>
           )}
-          <div className="flex flex-col">
+          <div className="flex w-full flex-col overflow-hidden ">
             <Tooltip title="DNS">
-              <span className="text-lg font-semibold text-gray-800 hover:text-gray-900">
+              <span className=" text-nowrap text-lg font-semibold text-gray-800 hover:text-gray-900">
                 {item.name ?? (isAsset(item) ? item.dns : item.key)}
               </span>
             </Tooltip>
@@ -235,23 +235,6 @@ const Alerts: React.FC = () => {
           </div>
         </div>
         <div className="flex items-center space-x-2">
-          {!isAsset(item) && (
-            <Tooltip title="DNS">
-              <span className="rounded-md border border-gray-300 p-1 text-xs">
-                {item.dns}
-              </span>
-            </Tooltip>
-          )}
-          <Tooltip title="Source">
-            <span
-              className={cn(
-                'rounded-md border border-gray-300 p-1 text-xs',
-                isAsset(item) && 'capitalize'
-              )}
-            >
-              {item.source}
-            </span>
-          </Tooltip>
           <Tooltip title="Status">
             <span className="rounded border border-red-400 px-2 py-1 text-xs font-medium text-red-500">
               {isAsset(item)
