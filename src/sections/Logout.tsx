@@ -3,10 +3,10 @@ import React, { useEffect } from 'react';
 import { useAuth } from '@/state/auth';
 
 function Logout() {
-  const { logoutNew } = useAuth();
+  const { logout } = useAuth();
 
   useEffect(() => {
-    logoutNew();
+    logout();
   }, []);
 
   return <div></div>;
