@@ -45,7 +45,7 @@ export const PageWrapper = ({
           name: config.get(backend, 'name').trim() as string,
           client_id: config.get(backend, 'client_id').trim() as string,
           api: config.get(backend, 'api').trim() as string,
-          userPoolId: config.get(backend, 'userPoolId').trim() as string,
+          userPoolId: config.get(backend, 'user_pool_id').trim() as string,
         };
 
         if (
