@@ -435,7 +435,7 @@ export interface BackendType {
   api: string;
   username?: string;
   password?: string;
-  userPoolId?: string;
+  userPoolId: string;
 }
 
 export interface AuthState {

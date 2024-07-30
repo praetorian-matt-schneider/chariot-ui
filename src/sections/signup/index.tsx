@@ -15,6 +15,7 @@ export const Login = () => {
   return (
     <PageWrapper title="Sign in with your email and password">
       <EmailPasswordForm
+        isLogin={true}
         credentials={credentials}
         setCredentials={setCredentials}
       />
