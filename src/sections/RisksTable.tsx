@@ -19,12 +19,13 @@ import { HorseIcon } from '@/components/icons/Horse.icon';
 import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
 import { getRiskStatusIcon } from '@/components/icons/RiskStatus.icon';
 import { MenuItemProps } from '@/components/Menu';
+import SeverityDropdown from '@/components/SeverityDropdown';
 import SourceDropdown from '@/components/SourceDropdown';
+import StatusDropdown from '@/components/StatusDropdown';
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
 import { ClosedStateModal } from '@/components/ui/ClosedStateModal';
-import { riskStatusFilterOptions } from '@/components/ui/RiskDropdown';
 import { useGetKev } from '@/hooks/kev';
 import { useFilter } from '@/hooks/useFilter';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
@@ -34,6 +35,7 @@ import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { useGlobalState } from '@/state/global.state';
 import {
   Risk,
+  RiskCombinedStatus,
   RiskSeverity,
   RiskStatus,
   RiskStatusLabel,
@@ -61,8 +63,16 @@ export const getFilterLabel = (
     : labels.join(', ');
 };
 
-export const getStatus = (status: string) =>
-  (status[0] || '') + (status[2] || '');
+export function getStatus(status: RiskCombinedStatus): RiskStatus {
+  const baseStatus = status[0];
+  const subStatus = status.length > 1 ? status.slice(2) : '';
+
+  if (baseStatus === 'C' && subStatus) {
+    return `C${subStatus}` as RiskStatus;
+  }
+
+  return baseStatus as RiskStatus;
+}
 
 const getFilteredRisksByCISA = (
   risks: Risk[],
@@ -94,8 +104,8 @@ const getFilteredRisks = (
 ) => {
   let filteredRisks = risks;
   if (statusFilter?.filter(Boolean).length > 0) {
-    filteredRisks = filteredRisks.filter(({ status }) =>
-      statusFilter.includes(`${getStatus(status)}`)
+    filteredRisks = filteredRisks.filter(risk =>
+      statusFilter.includes(getStatus(risk.status))
     );
   }
   if (severityFilter?.filter(Boolean).length > 0) {
@@ -310,72 +320,11 @@ export function Risks() {
     []
   );
 
-  const risksExceptSeverity = useMemo(
-    () =>
-      getFilteredRisks(risks, {
-        statusFilter,
-        intelFilter,
-        sourcesFilter,
-        knownExploitedThreats,
-      }),
-    [
-      risks,
-      statusFilter,
-      sourcesFilter,
-      intelFilter,
-      JSON.stringify(knownExploitedThreats),
-    ]
-  );
-
-  const severityOptions = useMemo(
-    () =>
-      Object.entries(SeverityDef)
-        .map(([value, label]) => ({
-          label,
-          labelSuffix: risksExceptSeverity.filter(
-            ({ status }) => status[1] === value
-          ).length,
-          value,
-        }))
-        .reverse(),
-    [risksExceptSeverity]
-  );
-
-  const risksExceptStatus = useMemo(
-    () =>
-      getFilteredRisks(risks, {
-        severityFilter,
-        intelFilter,
-        sourcesFilter,
-        knownExploitedThreats,
-      }),
-    [
-      risks,
-      severityFilter,
-      sourcesFilter,
-      intelFilter,
-      JSON.stringify(knownExploitedThreats),
-    ]
-  );
   const risksExceptSource = useMemo(
     () =>
       getFilteredRisks(risks, { severityFilter, statusFilter, sourcesFilter }),
     [risks, severityFilter, statusFilter, sourcesFilter]
   );
-
-  function getRiskStausOptionWithCount(riskStatus: RiskStatus[]) {
-    return riskStatus.map(riskStatus => {
-      return {
-        label: RiskStatusLabel[riskStatus],
-        labelSuffix: risksExceptStatus
-          .filter(
-            ({ status }: { status: string }) => getStatus(status) === riskStatus
-          )
-          .length?.toLocaleString(),
-        value: riskStatus,
-      };
-    });
-  }
 
   return (
     <div className="flex w-full flex-col">
@@ -388,69 +337,14 @@ export function Risks() {
         resize={true}
         filters={
           <div className="flex gap-4">
-            <Dropdown
-              styleType="header"
-              label={getFilterLabel(
-                'Severities',
-                severityFilter,
-                severityOptions
-              )}
-              endIcon={DownIcon}
-              menu={{
-                items: [
-                  {
-                    label: 'All Severities',
-                    labelSuffix: risksExceptSeverity.length,
-                    value: '',
-                  },
-                  {
-                    label: 'Divider',
-                    type: 'divider',
-                  },
-                  ...severityOptions,
-                ],
-                onSelect: selectedRows => setSeverityFilter(selectedRows),
-                value: severityFilter,
-                multiSelect: true,
+            <SeverityDropdown
+              onSelect={selectedRows => {
+                setSeverityFilter(selectedRows);
               }}
             />
-            <Dropdown
-              styleType="header"
-              label={getFilterLabel(
-                'Statuses',
-                statusFilter,
-                riskStatusFilterOptions
-              )}
-              endIcon={DownIcon}
-              menu={{
-                items: [
-                  {
-                    label: 'All Statuses',
-                    labelSuffix: risksExceptStatus.length?.toLocaleString(),
-                    value: '',
-                  },
-                  {
-                    label: 'Divider',
-                    type: 'divider',
-                  },
-                  ...getRiskStausOptionWithCount([
-                    RiskStatus.Triaged,
-                    RiskStatus.Opened,
-                  ]),
-                  {
-                    label: 'Divider',
-                    type: 'divider',
-                  },
-                  ...getRiskStausOptionWithCount([
-                    RiskStatus.Resolved,
-                    RiskStatus.Rejected,
-                    RiskStatus.FalsePositive,
-                  ]),
-                ],
-                onSelect: selectedRows =>
-                  setStatusesFilter(selectedRows as RiskStatus[]),
-                value: statusFilter,
-                multiSelect: true,
+            <StatusDropdown
+              onSelect={selectedRows => {
+                setStatusesFilter(selectedRows);
               }}
             />
             <Dropdown
