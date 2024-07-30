@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Modal } from '@/components/Modal';
 import {
@@ -11,7 +11,7 @@ import {
 interface ClosedStateModal {
   isOpen: boolean;
   onClose: () => void;
-  onStatusChange: (data: { status: RiskStatus }) => void;
+  onStatusChange: (data: { status: RiskStatus; comment?: string }) => void;
 }
 
 const riskClosedStatusList = Object.values(RiskClosedStatus).map(
@@ -26,9 +26,16 @@ const riskClosedStatusList = Object.values(RiskClosedStatus).map(
 
 export const ClosedStateModal = (props: ClosedStateModal) => {
   const { isOpen, onClose, onStatusChange } = props;
+  const [closingComment, setClosingComment] = useState('');
 
   const [selectRiskClosedStatus, setSelectRiskClosedStatus] =
     useState<RiskClosedStatus>();
+
+  useEffect(() => {
+    return () => {
+      setClosingComment('');
+    };
+  }, [isOpen]);
 
   return (
     <Modal
@@ -42,6 +49,7 @@ export const ClosedStateModal = (props: ClosedStateModal) => {
           if (selectRiskClosedStatus) {
             onStatusChange({
               status: selectRiskClosedStatus as unknown as RiskStatus,
+              comment: closingComment,
             });
             onClose();
           }
@@ -80,6 +88,14 @@ export const ClosedStateModal = (props: ClosedStateModal) => {
             </div>
           </label>
         ))}
+        <textarea
+          id="message"
+          rows={6}
+          value={closingComment}
+          onChange={e => setClosingComment(e.target.value)}
+          className="block w-full rounded-sm border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 "
+          placeholder="Whats the reason for closing this risk?"
+        />
       </div>
     </Modal>
   );

@@ -105,14 +105,17 @@ export const RiskDropdown: React.FC<Props> = ({
   function handleStatusChange({
     status,
     severity,
+    comment,
   }: {
     status?: RiskStatus;
     severity?: string;
+    comment?: string;
   }) {
     updateRisk({
       selectedRows: data as Risk[],
       status,
       severity,
+      comment,
     });
   }
 
