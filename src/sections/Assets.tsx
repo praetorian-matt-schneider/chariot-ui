@@ -218,7 +218,7 @@ const Assets: React.FC = () => {
       );
     });
     return filteredAssets;
-  }, [assetsWithRisk, priorityFilter]);
+  }, [assetsWithRisk, priorityFilter, sourceFilter]);
 
   const columns: Columns<AssetsWithRisk> = [
     {
