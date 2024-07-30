@@ -19,12 +19,13 @@ import { HorseIcon } from '@/components/icons/Horse.icon';
 import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
 import { getRiskStatusIcon } from '@/components/icons/RiskStatus.icon';
 import { MenuItemProps } from '@/components/Menu';
+import SeverityDropdown from '@/components/SeverityDropdown';
 import SourceDropdown from '@/components/SourceDropdown';
+import StatusDropdown from '@/components/StatusDropdown';
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
 import { ClosedStateModal } from '@/components/ui/ClosedStateModal';
-import { riskStatusFilterOptions } from '@/components/ui/RiskDropdown';
 import { useGetKev } from '@/hooks/kev';
 import { useFilter } from '@/hooks/useFilter';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
@@ -34,6 +35,7 @@ import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { useGlobalState } from '@/state/global.state';
 import {
   Risk,
+  RiskCombinedStatus,
   RiskSeverity,
   RiskStatus,
   RiskStatusLabel,
@@ -62,8 +64,16 @@ export const getFilterLabel = (
     : labels.join(', ');
 };
 
-export const getStatus = (status: string) =>
-  (status[0] || '') + (status[2] || '');
+export function getStatus(status: RiskCombinedStatus): RiskStatus {
+  const baseStatus = status[0];
+  const subStatus = status.length > 1 ? status.slice(2) : '';
+
+  if (baseStatus === 'C' && subStatus) {
+    return `C${subStatus}` as RiskStatus;
+  }
+
+  return baseStatus as RiskStatus;
+}
 
 const getFilteredRisksByCISA = (
   risks: Risk[],
@@ -94,33 +104,34 @@ const getFilteredRisks = (
   }
 ) => {
   let filteredRisks = risks;
-  console.log('statusFilter', statusFilter);
-  if (statusFilter && statusFilter?.filter(Boolean).length > 0) {
-    filteredRisks = filteredRisks.filter(({ status }) =>
-      statusFilter.includes(`${getStatus(status)}`)
+  const trimmedStatusFilter = statusFilter.filter(Boolean);
+  const trimmedSeverityFilter = severityFilter.filter(Boolean);
+  const trimmedIntelFilter = intelFilter.filter(Boolean);
+  const trimmedSourcesFilter = sourcesFilter.filter(Boolean);
+
+  if (trimmedStatusFilter.length > 0) {
+    filteredRisks = filteredRisks.filter(risk =>
+      trimmedStatusFilter.filter(Boolean).includes(getStatus(risk.status))
     );
   }
-  if (severityFilter?.filter(Boolean).length > 0) {
+  console.log('filtered', filteredRisks);
+
+  if (trimmedSeverityFilter.length > 0) {
     filteredRisks = filteredRisks.filter(risk =>
-      severityFilter?.includes(risk.status[1])
+      trimmedSeverityFilter.filter(Boolean).includes(risk.status[1])
     );
   }
 
-  if (
-    intelFilter.length > 0 &&
-    intelFilter[0] === 'cisa_kev' &&
-    knownExploitedThreats &&
-    knownExploitedThreats.length > 0
-  ) {
+  if (trimmedIntelFilter.length > 0) {
     filteredRisks = getFilteredRisksByCISA(
       filteredRisks,
       knownExploitedThreats
     );
   }
 
-  if (sourcesFilter?.filter(Boolean).length > 0) {
+  if (trimmedSourcesFilter.length > 0) {
     filteredRisks = filteredRisks.filter(risk =>
-      sourcesFilter.includes(risk.source)
+      trimmedSourcesFilter.filter(Boolean).includes(risk.source)
     );
   }
 
@@ -139,7 +150,7 @@ export function Risks() {
 
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [statusFilter, setStatusesFilter] = useFilter<RiskStatus[]>(
-    [RiskStatus.Opened],
+    [],
     'risk-status',
     setSelectedRows
   );
@@ -191,6 +202,7 @@ export function Risks() {
     resource: 'risk',
     filterByGlobalSearch: true,
   });
+
   const risks: Risk[] = debouncedSearch
     ? dataDebouncedSearch?.risks || []
     : risksUseMy;
@@ -201,31 +213,31 @@ export function Risks() {
   );
 
   const filteredRisks = useMemo(() => {
-    let filteredRisks = risks;
-    filteredRisks = getFilteredRisks(risks, {
+    return getFilteredRisks(risks, {
       statusFilter,
       severityFilter,
       intelFilter,
       sourcesFilter,
       knownExploitedThreats,
     });
-
-    const sortOrder = ['C', 'H', 'M', 'L', 'I'];
-    filteredRisks = filteredRisks.sort((a, b) => {
-      return (
-        sortOrder.indexOf(a.status[1]) - sortOrder.indexOf(b.status[1]) ||
-        new Date(b.updated).getTime() - new Date(a.updated).getTime()
-      );
-    });
-    return filteredRisks;
   }, [
     severityFilter,
     statusFilter,
     intelFilter,
     sourcesFilter,
-    JSON.stringify(risks),
-    JSON.stringify(knownExploitedThreats),
+    risks,
+    knownExploitedThreats,
   ]);
+
+  const sortedRisks = useMemo(() => {
+    const sortOrder = ['C', 'H', 'M', 'L', 'I'];
+    return filteredRisks.sort((a, b) => {
+      return (
+        sortOrder.indexOf(a.status[1]) - sortOrder.indexOf(b.status[1]) ||
+        new Date(b.updated).getTime() - new Date(a.updated).getTime()
+      );
+    });
+  }, [filteredRisks]);
 
   const columns: Columns<Risk> = useMemo(
     () => [
@@ -315,73 +327,6 @@ export function Risks() {
     []
   );
 
-  const risksExceptSeverity = useMemo(
-    () =>
-      getFilteredRisks(risks, {
-        statusFilter,
-        intelFilter,
-        sourcesFilter,
-        knownExploitedThreats,
-      }),
-    [
-      risks,
-      statusFilter,
-      sourcesFilter,
-      intelFilter,
-      JSON.stringify(knownExploitedThreats),
-    ]
-  );
-
-  const severityOptions = useMemo(
-    () =>
-      Object.entries(SeverityDef)
-        .map(([value, label]) => ({
-          label,
-          labelSuffix: risksExceptSeverity.filter(
-            ({ status }) => status[1] === value
-          ).length,
-          value,
-        }))
-        .reverse(),
-    [risksExceptSeverity]
-  );
-
-  const risksExceptStatus = useMemo(
-    () =>
-      getFilteredRisks(risks, {
-        severityFilter,
-        intelFilter,
-        sourcesFilter,
-        knownExploitedThreats,
-      }),
-    [
-      risks,
-      severityFilter,
-      sourcesFilter,
-      intelFilter,
-      JSON.stringify(knownExploitedThreats),
-    ]
-  );
-  const risksExceptSource = useMemo(
-    () =>
-      getFilteredRisks(risks, { severityFilter, statusFilter, sourcesFilter }),
-    [risks, severityFilter, statusFilter, sourcesFilter]
-  );
-
-  function getRiskStausOptionWithCount(riskStatus: RiskStatus[]) {
-    return riskStatus.map(riskStatus => {
-      return {
-        label: RiskStatusLabel[riskStatus],
-        labelSuffix: risksExceptStatus
-          .filter(
-            ({ status }: { status: string }) => getStatus(status) === riskStatus
-          )
-          .length?.toLocaleString(),
-        value: riskStatus,
-      };
-    });
-  }
-
   return (
     <div className="flex w-full flex-col">
       <Table
@@ -393,69 +338,14 @@ export function Risks() {
         resize={true}
         filters={
           <div className="flex gap-4">
-            <Dropdown
-              styleType="header"
-              label={getFilterLabel(
-                'Severities',
-                severityFilter,
-                severityOptions
-              )}
-              endIcon={DownIcon}
-              menu={{
-                items: [
-                  {
-                    label: 'All Severities',
-                    labelSuffix: risksExceptSeverity.length,
-                    value: '',
-                  },
-                  {
-                    label: 'Divider',
-                    type: 'divider',
-                  },
-                  ...severityOptions,
-                ],
-                onSelect: selectedRows => setSeverityFilter(selectedRows),
-                value: severityFilter,
-                multiSelect: true,
+            <SeverityDropdown
+              onSelect={selectedRows => {
+                setSeverityFilter(selectedRows);
               }}
             />
-            <Dropdown
-              styleType="header"
-              label={getFilterLabel(
-                'Statuses',
-                statusFilter,
-                riskStatusFilterOptions
-              )}
-              endIcon={DownIcon}
-              menu={{
-                items: [
-                  {
-                    label: 'All Statuses',
-                    labelSuffix: risksExceptStatus.length?.toLocaleString(),
-                    value: '',
-                  },
-                  {
-                    label: 'Divider',
-                    type: 'divider',
-                  },
-                  ...getRiskStausOptionWithCount([
-                    RiskStatus.Triaged,
-                    RiskStatus.Opened,
-                  ]),
-                  {
-                    label: 'Divider',
-                    type: 'divider',
-                  },
-                  ...getRiskStausOptionWithCount([
-                    RiskStatus.Resolved,
-                    RiskStatus.Rejected,
-                    RiskStatus.FalsePositive,
-                  ]),
-                ],
-                onSelect: selectedRows =>
-                  setStatusesFilter(selectedRows as RiskStatus[]),
-                value: statusFilter,
-                multiSelect: true,
+            <StatusDropdown
+              onSelect={selectedRows => {
+                setStatusesFilter(selectedRows);
               }}
             />
             <Dropdown
@@ -468,7 +358,7 @@ export function Risks() {
                 items: [
                   {
                     label: 'All Threat Intel',
-                    labelSuffix: risksExceptSource.length,
+                    labelSuffix: risks.length,
                     value: '',
                   },
                   {
@@ -478,7 +368,7 @@ export function Risks() {
                   {
                     label: 'CISA KEV',
                     labelSuffix: getFilteredRisksByCISA(
-                      risksExceptSource,
+                      risks,
                       knownExploitedThreats
                     ).length,
                     value: 'cisa_kev',
@@ -621,7 +511,7 @@ export function Risks() {
           };
         }}
         columns={columns}
-        data={filteredRisks}
+        data={sortedRisks}
         status={status}
         error={error}
         selection={{ value: selectedRows, onChange: setSelectedRows }}
@@ -642,7 +532,7 @@ export function Risks() {
         onStatusChange={({ status }) => {
           updateRisk({
             selectedRows: selectedRows
-              .map(i => filteredRisks[Number(i)])
+              .map(i => sortedRisks[Number(i)])
               .filter(Boolean),
             status,
           });
