@@ -103,32 +103,34 @@ const getFilteredRisks = (
   }
 ) => {
   let filteredRisks = risks;
-  if (statusFilter?.filter(Boolean).length > 0) {
+  const trimmedStatusFilter = statusFilter.filter(Boolean);
+  const trimmedSeverityFilter = severityFilter.filter(Boolean);
+  const trimmedIntelFilter = intelFilter.filter(Boolean);
+  const trimmedSourcesFilter = sourcesFilter.filter(Boolean);
+
+  if (trimmedStatusFilter.length > 0) {
     filteredRisks = filteredRisks.filter(risk =>
-      statusFilter.includes(getStatus(risk.status))
+      trimmedStatusFilter.filter(Boolean).includes(getStatus(risk.status))
     );
   }
-  if (severityFilter?.filter(Boolean).length > 0) {
+  console.log('filtered', filteredRisks);
+
+  if (trimmedSeverityFilter.length > 0) {
     filteredRisks = filteredRisks.filter(risk =>
-      severityFilter?.includes(risk.status[1])
+      trimmedSeverityFilter.filter(Boolean).includes(risk.status[1])
     );
   }
 
-  if (
-    intelFilter.length > 0 &&
-    intelFilter[0] === 'cisa_kev' &&
-    knownExploitedThreats &&
-    knownExploitedThreats.length > 0
-  ) {
+  if (trimmedIntelFilter.length > 0) {
     filteredRisks = getFilteredRisksByCISA(
       filteredRisks,
       knownExploitedThreats
     );
   }
 
-  if (sourcesFilter?.filter(Boolean).length > 0) {
+  if (trimmedSourcesFilter.length > 0) {
     filteredRisks = filteredRisks.filter(risk =>
-      sourcesFilter.includes(risk.source)
+      trimmedSourcesFilter.filter(Boolean).includes(risk.source)
     );
   }
 
@@ -146,7 +148,7 @@ export function Risks() {
 
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [statusFilter, setStatusesFilter] = useFilter<RiskStatus[]>(
-    [RiskStatus.Opened],
+    [],
     'risk-status',
     setSelectedRows
   );
@@ -196,6 +198,7 @@ export function Risks() {
     resource: 'risk',
     filterByGlobalSearch: true,
   });
+
   const risks: Risk[] = debouncedSearch
     ? dataDebouncedSearch?.risks || []
     : risksUseMy;
@@ -206,31 +209,31 @@ export function Risks() {
   );
 
   const filteredRisks = useMemo(() => {
-    let filteredRisks = risks;
-    filteredRisks = getFilteredRisks(risks, {
+    return getFilteredRisks(risks, {
       statusFilter,
       severityFilter,
       intelFilter,
       sourcesFilter,
       knownExploitedThreats,
     });
-
-    const sortOrder = ['C', 'H', 'M', 'L', 'I'];
-    filteredRisks = filteredRisks.sort((a, b) => {
-      return (
-        sortOrder.indexOf(a.status[1]) - sortOrder.indexOf(b.status[1]) ||
-        new Date(b.updated).getTime() - new Date(a.updated).getTime()
-      );
-    });
-    return filteredRisks;
   }, [
     severityFilter,
     statusFilter,
     intelFilter,
     sourcesFilter,
-    JSON.stringify(risks),
-    JSON.stringify(knownExploitedThreats),
+    risks,
+    knownExploitedThreats,
   ]);
+
+  const sortedRisks = useMemo(() => {
+    const sortOrder = ['C', 'H', 'M', 'L', 'I'];
+    return filteredRisks.sort((a, b) => {
+      return (
+        sortOrder.indexOf(a.status[1]) - sortOrder.indexOf(b.status[1]) ||
+        new Date(b.updated).getTime() - new Date(a.updated).getTime()
+      );
+    });
+  }, [filteredRisks]);
 
   const columns: Columns<Risk> = useMemo(
     () => [
@@ -320,12 +323,6 @@ export function Risks() {
     []
   );
 
-  const risksExceptSource = useMemo(
-    () =>
-      getFilteredRisks(risks, { severityFilter, statusFilter, sourcesFilter }),
-    [risks, severityFilter, statusFilter, sourcesFilter]
-  );
-
   return (
     <div className="flex w-full flex-col">
       <Table
@@ -357,7 +354,7 @@ export function Risks() {
                 items: [
                   {
                     label: 'All Threat Intel',
-                    labelSuffix: risksExceptSource.length,
+                    labelSuffix: risks.length,
                     value: '',
                   },
                   {
@@ -367,7 +364,7 @@ export function Risks() {
                   {
                     label: 'CISA KEV',
                     labelSuffix: getFilteredRisksByCISA(
-                      risksExceptSource,
+                      risks,
                       knownExploitedThreats
                     ).length,
                     value: 'cisa_kev',
@@ -489,7 +486,7 @@ export function Risks() {
           };
         }}
         columns={columns}
-        data={filteredRisks}
+        data={sortedRisks}
         status={status}
         error={error}
         selection={{ value: selectedRows, onChange: setSelectedRows }}
@@ -510,7 +507,7 @@ export function Risks() {
         onStatusChange={({ status }) => {
           updateRisk({
             selectedRows: selectedRows
-              .map(i => filteredRisks[Number(i)])
+              .map(i => sortedRisks[Number(i)])
               .filter(Boolean),
             status,
           });
