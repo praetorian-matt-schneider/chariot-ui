@@ -32,6 +32,7 @@ export enum RiskStatus {
   Resolved = 'C',
   FalsePositive = 'CF',
   Rejected = 'CR',
+  Machine = 'M',
 }
 
 export type RiskCombinedStatus = string;
@@ -65,6 +66,7 @@ export const RiskStatusLabel: Record<RiskStatus, string> = {
   C: 'Resolved',
   CR: 'Rejected',
   CF: 'False Positive',
+  M: 'Machine',
 };
 
 export enum RiskClosedStatus {
