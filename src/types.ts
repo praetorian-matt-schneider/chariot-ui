@@ -457,7 +457,7 @@ export interface AuthContextType extends AuthState {
   error: string;
   fetchToken: () => void;
   isLoading: boolean;
-  login: (username?: string, password?: string, backend?: BackendType) => void;
+  login: (username?: string, password?: string) => void;
   logout: () => void;
   setAuth: Dispatch<SetStateAction<AuthState>>;
   setBackendStack: (backend?: BackendType) => void;

@@ -150,13 +150,8 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }));
   };
 
-  const login = async (
-    username = '',
-    password = '',
-    backendStack?: BackendType
-  ) => {
+  const login = async (username = '', password = '') => {
     try {
-      backendStack && setBackendStack(backendStack);
       if (username && password) {
         setNewUserSeedModal(true);
         setIsLoading(true);
@@ -241,6 +236,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     await signOut();
     navigate(getRoute(['login']));
+    setBackendStack();
   }
 
   const value: AuthContextType = useMemo(

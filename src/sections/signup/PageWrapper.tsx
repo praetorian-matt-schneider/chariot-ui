@@ -62,7 +62,8 @@ export const PageWrapper = ({
             password = config.get(backend, 'password').trim() as string;
           }
 
-          login(username, password, creds);
+          setBackendStack(creds);
+          login(username, password);
         }
       } catch (error) {
         if (error instanceof Error && error.message) {
