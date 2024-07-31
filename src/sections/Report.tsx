@@ -69,7 +69,7 @@ export const Report = () => {
   };
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex flex-col">
       <div
         className={cn(
           'flex flex-col space-y-6 rounded-[2px] bg-white p-2 shadow-sm'
