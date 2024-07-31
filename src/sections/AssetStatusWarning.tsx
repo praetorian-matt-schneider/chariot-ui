@@ -30,7 +30,7 @@ export function AssetStatusWarning({
         icon={<BoltIcon className="size-5" />}
         footer={{
           text: 'Change Status',
-          className: 'w-fit',
+          className: 'w-full text-nowrap',
           onClick: onConfirm,
         }}
       >
@@ -59,7 +59,7 @@ export function AssetStatusWarning({
         icon={<PauseCircleIcon className="size-5" />}
         footer={{
           text: 'Change Status',
-          className: 'w-fit',
+          className: 'w-full text-nowrap',
           startIcon: <PauseCircleIcon className="size-4" />,
           onClick: onConfirm,
         }}
@@ -82,7 +82,7 @@ export function AssetStatusWarning({
         icon={<ArchiveBoxIcon className="size-5" />}
         footer={{
           text: 'Change Status',
-          className: 'w-fit',
+          className: 'w-full text-nowrap',
           startIcon: <ArchiveBoxIcon className="size-4" />,
           onClick: onConfirm,
         }}
