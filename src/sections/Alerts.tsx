@@ -327,7 +327,10 @@ const Alerts: React.FC = () => {
         <h2 className="mb-4 flex items-center py-2 text-lg font-medium text-gray-800">
           <Inbox className="ml-3 mr-2 size-8 stroke-[2px] " />
           <span className="mr-2 text-xl font-bold">
-            All Alerts {alerts && alerts.length && <span>({totalAlerts})</span>}
+            All Alerts{' '}
+            {alerts && alerts.length && (
+              <span>({totalAlerts?.toLocaleString()})</span>
+            )}
           </span>
         </h2>
         {alerts === null && (
