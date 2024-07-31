@@ -4,7 +4,7 @@ const Footer = () => {
   return (
     <div className="w-full">
       <div className="m-auto w-full max-w-screen-xl">
-        <footer className="mt-12 flex w-full items-center justify-between gap-2 p-4 text-xs text-gray-400">
+        <footer className="flex w-full items-center justify-between gap-2 p-4 text-xs text-gray-400">
           <div className="w-1/3">
             Copyright &copy; {new Date().getFullYear()}. All Rights Reserved.
           </div>

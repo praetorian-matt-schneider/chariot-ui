@@ -270,9 +270,12 @@ const Alerts: React.FC = () => {
   });
 
   return (
-    <div className="flex h-full">
+    <div
+      className="flex rounded-sm border border-gray-200 bg-white"
+      style={{ height: 'calc(100vh - 150px)' }}
+    >
       {/* Sidebar */}
-      <div className="w-1/4 overflow-auto rounded-l-sm rounded-r-none border border-r-0 border-gray-200 bg-zinc-50 bg-gradient-to-l px-2 py-4">
+      <div className="w-1/4 overflow-auto border-r border-gray-200 bg-zinc-50 bg-gradient-to-l px-2 py-4">
         <h2 className="mb-4 flex items-center py-2 text-lg font-medium text-gray-800">
           <Inbox className="ml-3 mr-2 size-8 stroke-[2px] " />
           <span className="mr-2 text-xl font-bold">
@@ -325,7 +328,7 @@ const Alerts: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-auto rounded-sm border border-gray-200 bg-white">
+      <div className="flex-1 overflow-hidden">
         {alerts === null && (
           <div className="mt-16 flex flex-1 items-center justify-center">
             <div className="text-center">
@@ -341,11 +344,10 @@ const Alerts: React.FC = () => {
         )}
         {query && (
           <div className="flex h-full flex-col">
-            <div ref={parentRef} className="grow overflow-auto">
+            <div ref={parentRef} className="flex-1 overflow-auto">
               <div
                 className="relative"
                 style={{
-                  minHeight: '100%',
                   height: `${virtualizer.getTotalSize()}px`,
                 }}
               >
