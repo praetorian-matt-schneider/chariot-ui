@@ -72,8 +72,10 @@ const MyInbox: React.FC = () => {
             <span
               role="label"
               className={cn(
-                'text-white bg-red-500 rounded-full absolute -top-2 -right-1 flex justify-center items-center text-xs text-center font-semibold transition duration-150 ease-in-out',
-                totalAlerts > 99 ? 'text-[10px]' : 'size-5'
+                'text-white bg-red-500 rounded-full absolute flex justify-center items-center text-xs text-center font-semibold transition duration-150 ease-in-out',
+                totalAlerts > 99
+                  ? 'text-[10px] w-7 h-7 -top-3 -right-2'
+                  : 'w-5 h-5 -top-2 -right-1'
               )}
             >
               {formatAlertCount(totalAlerts)}
