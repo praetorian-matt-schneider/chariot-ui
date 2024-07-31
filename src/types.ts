@@ -417,7 +417,7 @@ export interface AuthState {
   clientId: string;
   me: string;
   rToken?: string;
-  expiry?: Date;
+  expiry?: number;
   friend: { email: string; displayName: string };
   isImpersonating: boolean;
   userPoolId: string;

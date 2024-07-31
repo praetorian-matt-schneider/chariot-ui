@@ -19,6 +19,7 @@ import { Snackbar } from '@/components/Snackbar';
 import { queryClient } from '@/queryclient';
 import { AuthContextType, AuthState, BackendType } from '@/types';
 import { initAmplify } from '@/utils/amplify.util';
+import { msToM } from '@/utils/date.util';
 import { getRoute } from '@/utils/route.util';
 import { StorageKey, useStorage } from '@/utils/storage/useStorage.util';
 
@@ -49,7 +50,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { expiry } = auth;
 
-  const [, setIsTabVisible] = useState(true);
   const [, setNewUserSeedModal] = useStorage(
     { key: StorageKey.SHOW_NEW_USER_SEED_MODAL },
     false
@@ -60,12 +60,36 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const updateTabVisibility = useCallback(() => {
     const isVisible = document.visibilityState === 'visible';
 
-    if (isVisible) {
-      fetchToken();
-    }
+    if (isVisible && expiry) {
+      const buffer = 5 * 60 * 1000; // 5 min as buffer
+      const expiresInMs =
+        new Date(expiry * 1000).getTime() - getCurrentData().getTime() - buffer;
+      if (msToM(expiresInMs) < 0) {
+        console.log('The Token has expired', msToM(expiresInMs), 'minutes ago');
+      } else {
+        console.log('The Token will expire in', msToM(expiresInMs), 'minutes');
+      }
 
-    setIsTabVisible(isVisible);
+      const refreshTimeout = setTimeout(() => {
+        console.log('Force refreshing new token.', {
+          expiry: new Date(expiry * 1000),
+          currentDate: new Date(),
+        });
+        fetchToken(true);
+      }, expiresInMs);
+
+      return () => {
+        clearTimeout(refreshTimeout);
+      };
+    }
   }, [expiry]);
+
+  useEffect(() => {
+    document.addEventListener('visibilitychange', updateTabVisibility);
+    return () => {
+      document.removeEventListener('visibilitychange', updateTabVisibility);
+    };
+  }, [updateTabVisibility]);
 
   const startImpersonation = (memberId: string, displayName: string) => {
     setAuth(prevAuth => {
@@ -181,13 +205,26 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }
 
-  async function fetchToken() {
+  async function fetchToken(forceRefresh = false) {
     setIsTokenRefreshing(true);
-    const session = await fetchAuthSession();
+    const session = await fetchAuthSession({ forceRefresh });
+
+    const token = session.tokens?.idToken?.toString() ?? '';
+    const expiry = session.tokens?.idToken?.payload?.exp ?? 0;
+    const me = session.tokens?.idToken?.payload?.email?.toString() ?? '';
+
+    if (forceRefresh) {
+      console.log('Token has been refreshed : ', {
+        expiry: new Date(expiry * 1000),
+        currentDate: new Date(),
+      });
+    }
+
     setAuth(auth => ({
       ...auth,
-      token: session.tokens?.idToken?.toString() ?? '',
-      me: session.tokens?.idToken?.payload?.email?.toString() ?? '',
+      token,
+      expiry,
+      me,
     }));
     setIsTokenRefreshing(false);
   }
@@ -222,14 +259,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     [login, logout, JSON.stringify(auth)]
   );
 
-  useEffect(() => {
-    document.addEventListener('visibilitychange', updateTabVisibility);
-
-    return () => {
-      document.removeEventListener('visibilitychange', updateTabVisibility);
-    };
-  }, [updateTabVisibility]);
-
   if (isTokenRefreshing) {
     return null;
   }
@@ -254,10 +283,10 @@ function getCurrentData() {
   return new Date();
 }
 
-function isExpired(expiry?: Date) {
+function isExpired(expiry?: number) {
   if (!expiry) return false;
 
-  const expiryDate = new Date(expiry);
+  const expiryDate = new Date(expiry * 1000);
   const currentDate = getCurrentData();
 
   return currentDate > expiryDate;
