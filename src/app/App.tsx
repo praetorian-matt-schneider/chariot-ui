@@ -16,6 +16,19 @@ import 'react-toastify/dist/ReactToastify.css';
 
 function AppComponent() {
   useInitAxiosInterceptors();
+  (function () {
+    const currentVersion = '1.0.0';
+    const versionKey = 'chariot';
+    const storedVersion = localStorage.getItem(versionKey);
+
+    if (storedVersion === null || storedVersion !== currentVersion) {
+      // Clear localStorage
+      localStorage.clear();
+
+      // Set the new version
+      localStorage.setItem(versionKey, currentVersion);
+    }
+  })();
 
   return <AppRoutes />;
 }
