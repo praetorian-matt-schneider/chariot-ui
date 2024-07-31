@@ -22,6 +22,7 @@ const riskStatus = (status: string): string => {
     case 'C':
       if (status[2] === 'R') return RiskStatusLabel[RiskStatus.Rejected];
       if (status[2] === 'F') return RiskStatusLabel[RiskStatus.FalsePositive];
+      if (status[2] === 'S') return RiskStatusLabel[RiskStatus.Scope];
       return RiskStatusLabel[RiskStatus.Resolved];
     case 'T':
     default:

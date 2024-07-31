@@ -19,6 +19,7 @@ export const getRiskStatusIcon = (status: RiskStatus, className = 'size-5') => {
     case RiskStatus.Resolved:
     case RiskStatus.Rejected:
     case RiskStatus.FalsePositive:
+    case RiskStatus.Scope:
     default:
       return <LockClosedIcon className={cn('text-default-light', className)} />;
   }

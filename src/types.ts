@@ -32,6 +32,7 @@ export enum RiskStatus {
   Resolved = 'C',
   FalsePositive = 'CF',
   Rejected = 'CR',
+  Scope = 'CS',
   Machine = 'M',
 }
 
@@ -66,6 +67,7 @@ export const RiskStatusLabel: Record<RiskStatus, string> = {
   C: 'Resolved',
   CR: 'Rejected',
   CF: 'False Positive',
+  CS: 'Out of Scope',
   M: 'Automatically Closed',
 };
 
@@ -73,12 +75,14 @@ export enum RiskClosedStatus {
   Resolved = RiskStatus.Resolved,
   Rejected = RiskStatus.Rejected,
   FalsePositive = RiskStatus.FalsePositive,
+  Scope = RiskStatus.Scope,
 }
 
 export const RiskClosedStatusLongLabel: Record<RiskClosedStatus, string> = {
   [RiskStatus.Resolved]: 'Mark as Resolved',
   [RiskStatus.Rejected]: 'Reject the Risk',
   [RiskStatus.FalsePositive]: 'False Positive',
+  [RiskStatus.Scope]: 'Out of Scope',
 };
 
 export const RiskClosedStatusLongDesc: Record<RiskClosedStatus, string> = {
@@ -88,6 +92,8 @@ export const RiskClosedStatusLongDesc: Record<RiskClosedStatus, string> = {
     'We acknowledge the presence of this risk and accept it, understanding the potential impact.',
   [RiskStatus.FalsePositive]:
     'This risk is deemed to be a false positive or not valid, and no further action will be taken.',
+  [RiskStatus.Scope]:
+    'This risk is out of scope and will not be addressed or mitigated.',
 };
 
 export const SeverityDef: Record<RiskSeverity, string> = {
