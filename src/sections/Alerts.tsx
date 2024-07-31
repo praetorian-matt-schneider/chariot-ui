@@ -272,7 +272,7 @@ const Alerts: React.FC = () => {
   return (
     <div
       className="flex rounded-sm border border-gray-200 bg-white"
-      style={{ height: 'calc(100vh - 13 0px)' }}
+      style={{ height: 'calc(100vh - 135px)' }}
     >
       {/* Sidebar */}
       <div className="w-1/4 overflow-auto border-r border-gray-200 bg-zinc-50 bg-gradient-to-l px-2 py-4">
