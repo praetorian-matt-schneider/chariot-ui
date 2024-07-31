@@ -270,7 +270,7 @@ const Alerts: React.FC = () => {
   });
 
   return (
-    <div className="flex h-[60vh] shadow-sm">
+    <div className="flex h-full">
       {/* Sidebar */}
       <div className="w-1/4 overflow-auto rounded-l-sm rounded-r-none border border-r-0 border-gray-200 bg-zinc-50 bg-gradient-to-l px-2 py-4">
         <h2 className="mb-4 flex items-center py-2 text-lg font-medium text-gray-800">
@@ -325,7 +325,7 @@ const Alerts: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="border-l-none flex-1 rounded-sm rounded-l-none border border-gray-200 bg-white">
+      <div className="flex-1 overflow-auto rounded-sm border border-gray-200 bg-white">
         {alerts === null && (
           <div className="mt-16 flex flex-1 items-center justify-center">
             <div className="text-center">
@@ -345,6 +345,7 @@ const Alerts: React.FC = () => {
               <div
                 className="relative"
                 style={{
+                  minHeight: '100%',
                   height: `${virtualizer.getTotalSize()}px`,
                 }}
               >
