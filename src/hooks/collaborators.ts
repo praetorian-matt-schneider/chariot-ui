@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 
-import { Snackbar } from '@/components/Snackbar';
 import { getDisplayName, useGetCollaboratorEmails } from '@/hooks/useAccounts';
 import { useAxios } from '@/hooks/useAxios';
 import { useMy } from '@/hooks/useMy';
@@ -82,14 +81,6 @@ export function useGetCollaborators(props?: CollaboratorProps) {
       setCollaborators(
         hasSomeError ? results.filter(s => s && !(s instanceof Error)) : results
       );
-
-      if (hasSomeError) {
-        Snackbar({
-          variant: 'error',
-          title: 'Failed to fetch some collaborators details',
-          description: '',
-        });
-      }
 
       setCollaboratorsStatus('success');
     };
