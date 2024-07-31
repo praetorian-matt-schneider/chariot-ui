@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-imports */
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import {
   DefaultError,
   InfiniteData,
@@ -17,9 +17,8 @@ import {
 export type { QueryStatus } from '@tanstack/react-query';
 export { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import { Snackbar } from '@/components/Snackbar';
 import { queryClient } from '@/queryclient';
-import { createError, getError } from '@/utils/error.util';
+import { createError } from '@/utils/error.util';
 import { capitalize } from '@/utils/lodash.util';
 import { appendPeriodIfMissing } from '@/utils/text.util';
 
@@ -47,17 +46,6 @@ export function useMutation<
         throw getQueryError(options, error);
       }
     },
-    onError: (err, ...restArgs) => {
-      const error = getError(err);
-
-      Snackbar({
-        description: error.message,
-        title: error.name,
-        variant: 'error',
-      });
-
-      return options.onError?.(err, ...restArgs);
-    },
   });
 }
 
@@ -80,18 +68,6 @@ export function useQuery<
       }
     },
   });
-
-  useEffect(() => {
-    if (query.status === 'error' && query.error) {
-      const error = getError(query.error);
-
-      Snackbar({
-        description: error.message,
-        title: error.name,
-        variant: 'error',
-      });
-    }
-  }, [query.status, query.error]);
 
   return {
     ...query,
@@ -132,18 +108,6 @@ export function useInfiniteQuery<
       }
     },
   });
-
-  useEffect(() => {
-    if (query.status === 'error' && query.error) {
-      const error = getError(query.error);
-
-      Snackbar({
-        description: error.message,
-        title: error.name,
-        variant: 'error',
-      });
-    }
-  }, [query.status, query.error]);
 
   return {
     ...query,
