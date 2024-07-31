@@ -112,93 +112,141 @@ const Alerts: React.FC = () => {
         <div className="flex space-x-2">
           {isAsset(item) && item.status === AssetStatus.ActiveLow && (
             <>
-              <Button
-                styleType="primary"
-                className="h-8"
-                onClick={e => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleAssetChange(item, AssetStatus.Active);
-                }}
-                disabled={updateAssetStatus === 'pending'}
-              >
-                Enable
-              </Button>
-              <Button
-                styleType="secondary"
-                className="h-8"
-                onClick={e => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleAssetChange(item, AssetStatus.Deleted);
-                }}
-                disabled={updateAssetStatus === 'pending'}
-              >
-                Delete
-              </Button>
+              <Tooltip title="Enable Risk Scanning">
+                <Button
+                  styleType="primary"
+                  className="h-8"
+                  onClick={e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleAssetChange(item, AssetStatus.Active);
+                  }}
+                  disabled={updateAssetStatus === 'pending'}
+                >
+                  Enable
+                </Button>
+              </Tooltip>
+              <Tooltip title="Mark as Deleted">
+                <Button
+                  styleType="secondary"
+                  className="h-8"
+                  onClick={e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleAssetChange(item, AssetStatus.Deleted);
+                  }}
+                  disabled={updateAssetStatus === 'pending'}
+                >
+                  Delete
+                </Button>
+              </Tooltip>
             </>
           )}
           {!isAsset(item) && item.status[0] === RiskStatus.Triaged && (
             <>
-              <Button
-                styleType="primary"
-                className="h-8"
-                onClick={e => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleRiskChange(
-                    item,
-                    RiskStatus.Opened,
-                    item.status[1] as RiskSeverity
-                  );
-                }}
-                disabled={updateRiskStatus === 'pending'}
-              >
-                Accept
-              </Button>
-              <Button
-                styleType="secondary"
-                className="h-8"
-                onClick={e => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setIsClosedSubStateModalOpen(true);
-                }}
-                disabled={updateRiskStatus === 'pending'}
-              >
-                Reject
-              </Button>
+              <Tooltip title="Mark as Open">
+                <Button
+                  styleType="primary"
+                  className="h-8"
+                  onClick={e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleRiskChange(
+                      item,
+                      RiskStatus.Opened,
+                      item.status[1] as RiskSeverity
+                    );
+                  }}
+                  disabled={updateRiskStatus === 'pending'}
+                >
+                  Accept
+                </Button>
+              </Tooltip>
+              <Tooltip title="Mark as Closed">
+                <Button
+                  styleType="secondary"
+                  className="h-8"
+                  onClick={e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsClosedSubStateModalOpen(true);
+                  }}
+                  disabled={updateRiskStatus === 'pending'}
+                >
+                  Reject
+                </Button>
+              </Tooltip>
+            </>
+          )}
+          {!isAsset(item) && item.status[0] === RiskStatus.Machine && (
+            <>
+              <Tooltip title="Mark as Closed">
+                <Button
+                  styleType="primary"
+                  className="h-8"
+                  onClick={e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsClosedSubStateModalOpen(true);
+                  }}
+                  disabled={updateRiskStatus === 'pending'}
+                >
+                  Yes
+                </Button>
+              </Tooltip>
+              <Tooltip title="Mark as Open">
+                <Button
+                  styleType="secondary"
+                  className="h-8"
+                  onClick={e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleRiskChange(
+                      item,
+                      RiskStatus.Opened,
+                      item.status[1] as RiskSeverity
+                    );
+                  }}
+                  disabled={updateRiskStatus === 'pending'}
+                >
+                  No
+                </Button>
+              </Tooltip>
             </>
           )}
           {!isAsset(item) && item.status[0] === RiskStatus.Opened && (
             <>
-              <Button
-                styleType="primary"
-                className="h-8"
-                onClick={e => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  reRunJob({
-                    capability: item.source,
-                    dns: item.dns,
-                  });
-                }}
-                disabled={reRunJobStatus === 'pending'}
-              >
-                Rescan
-              </Button>
-              <Button
-                styleType="secondary"
-                className="h-8"
-                onClick={e => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setIsClosedSubStateModalOpen(true);
-                }}
-                disabled={updateRiskStatus === 'pending'}
-              >
-                Close
-              </Button>
+              <Tooltip title="Rerun capability against this asset">
+                <Button
+                  styleType="primary"
+                  className="h-8"
+                  onClick={e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    reRunJob({
+                      capability: item.source,
+                      dns: item.dns,
+                    });
+                  }}
+                  disabled={reRunJobStatus === 'pending'}
+                >
+                  Rescan
+                </Button>
+              </Tooltip>
+              <Tooltip title="Mark as Closed">
+                <Button
+                  styleType="secondary"
+                  className="h-8"
+                  onClick={e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsClosedSubStateModalOpen(true);
+                  }}
+                  disabled={updateRiskStatus === 'pending'}
+                >
+                  Close
+                </Button>
+              </Tooltip>
             </>
           )}
         </div>

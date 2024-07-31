@@ -66,7 +66,7 @@ export const RiskStatusLabel: Record<RiskStatus, string> = {
   C: 'Resolved',
   CR: 'Rejected',
   CF: 'False Positive',
-  M: 'Machine',
+  M: 'Automatically Closed',
 };
 
 export enum RiskClosedStatus {
