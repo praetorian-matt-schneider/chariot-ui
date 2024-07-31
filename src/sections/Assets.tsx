@@ -116,7 +116,7 @@ const Assets: React.FC = () => {
   const { data: risks = [], status: riskStatus } = useMy({ resource: 'risk' });
   const { isIntegration } = useIntegration();
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
-  const { searchParams, removeSearchParams } = useSearchParams();
+  const { searchParams } = useSearchParams();
   const [priorityFilter, setPriorityFilter] = useFilter(
     [''],
     'asset-priority',

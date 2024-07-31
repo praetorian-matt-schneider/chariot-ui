@@ -38,11 +38,6 @@ export function Drawer({
   minWidth = 600,
 }: Props) {
   const ref = useRef<HTMLDivElement>(null);
-  // const { size, onMouseDown } = useResize({
-  //   el: ref.current || document.createElement('div'),
-  //   minWidth,
-  //   position: 'right',
-  // });
   const [domHasModal, setDomHasModal] = useState(false);
 
   /**

@@ -15,6 +15,7 @@ export enum StorageKey {
   POE = 'POE',
   RUNNING_JOBS = 'RUNNING_JOBS',
   ASESET_PRIORITY_FILTER = 'asset-priority',
+  RESIZE = 'resizeColumn',
 }
 
 interface UseStorageOptions<S> {

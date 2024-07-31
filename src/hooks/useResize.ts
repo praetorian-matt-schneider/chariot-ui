@@ -1,17 +1,27 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+
+import { StorageKey, useStorage } from '@/utils/storage/useStorage.util';
 
 interface Props {
   el: HTMLElement;
   minWidth?: number;
   position?: 'left' | 'right';
+  storageKey?: string; // Optional storage key to make it element-specific
 }
 
 export const useResize = (props: Props) => {
-  const { minWidth = 100, el, position = 'left' } = props;
-  const [size, setSize] = useState({
-    x: 0,
-    y: 0,
-  });
+  const { minWidth = 100, el, position = 'left', storageKey } = props;
+
+  // Use storage for persisting the size
+  const [size, setSize] = useStorage(
+    {
+      key: storageKey ? `${StorageKey.RESIZE}_${storageKey}` : undefined,
+    },
+    {
+      x: 0,
+      y: 0,
+    }
+  );
 
   useEffect(() => {
     const { width, height } = el.getBoundingClientRect();
@@ -31,13 +41,13 @@ export const useResize = (props: Props) => {
     document.body.classList.add('col-resize');
 
     function onMouseMove(mouseMoveEvent: MouseEvent) {
-      setSize(() => ({
+      setSize({
         x:
           position === 'left'
             ? getWidth(startSize.x - startPosition.x + mouseMoveEvent.pageX)
             : getWidth(screen.width - mouseMoveEvent.pageX),
         y: startSize.y - startPosition.y + mouseMoveEvent.pageY,
-      }));
+      });
     }
 
     function onMouseUp() {
@@ -45,7 +55,6 @@ export const useResize = (props: Props) => {
       document.body.removeEventListener('mousemove', onMouseMove);
     }
 
-    // Attach mousemove and mouseup event listeners to the body only after mousedown event
     document.body.addEventListener('mousemove', onMouseMove);
     document.body.addEventListener('mouseup', onMouseUp, { once: true });
   };

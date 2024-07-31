@@ -2,7 +2,6 @@
 /* TODO: Fix the types for the Table component */
 
 import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import {
   ChevronDownIcon,
   ExclamationCircleIcon,
@@ -62,7 +61,6 @@ export function Table<TData>(props: TableProps<TData>) {
     resize = false,
     search: controlledSearch,
   } = props;
-  const [searchParams, addSearchParams] = useSearchParams();
   const controlledSearchValue = controlledSearch?.value;
   const onControlledSearchChange = controlledSearch?.onChange;
   const [search, setSearch] = useStorage(
@@ -453,7 +451,11 @@ export function Table<TData>(props: TableProps<TData>) {
           >
             <tr className="relative">
               {enableCheckbox && (
-                <Th fixedWidth={CELL_WIDTHS.checkbox} align="center">
+                <Th
+                  fixedWidth={CELL_WIDTHS.checkbox}
+                  align="center"
+                  storageKey={`${tableName}-checkbox`}
+                >
                   <label className={'cursor-pointer'}>
                     <input
                       type="checkbox"
@@ -477,12 +479,20 @@ export function Table<TData>(props: TableProps<TData>) {
                     }
                     align={column.align}
                     resize={resize}
+                    storageKey={`${tableName}-${column.label}`}
                   >
                     {column.label}
                   </Th>
                 );
               })}
-              {rowActions && <Th fixedWidth={CELL_WIDTHS.actions}>Actions</Th>}
+              {rowActions && (
+                <Th
+                  fixedWidth={CELL_WIDTHS.actions}
+                  storageKey={`${tableName}-actions`}
+                >
+                  Actions
+                </Th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -539,6 +549,7 @@ export function Th(props: {
   className?: string;
   fixedWidth?: number;
   children: ReactNode;
+  storageKey: string;
   align?: CellAlignment;
   resize?: boolean;
 }) {
@@ -547,6 +558,7 @@ export function Th(props: {
   const { size, onMouseDown } = useResize({
     el: ref.current || document.createElement('div'),
     minWidth: fixedWidth || 100,
+    storageKey: props.storageKey,
   });
 
   return (
