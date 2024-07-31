@@ -156,7 +156,6 @@ const Assets: React.FC = () => {
   const [showAssetStatusWarning, setShowAssetStatusWarning] =
     useState<boolean>(false);
   const [assetStatus, setAssetStatus] = useState<AssetStatus | ''>('');
-  const reviewStep = searchParams.get('review');
 
   const { mutateAsync: updateAsset } = useUpdateAsset();
 
@@ -408,21 +407,11 @@ const Assets: React.FC = () => {
                 },
                 {
                   label: AssetStatusLabel[AssetStatus.Active],
-                  className:
-                    reviewStep === '2' ? 'border border-brand text-brand' : '',
-                  icon:
-                    reviewStep === '2' ? (
-                      <div className="size-3 animate-pulse rounded-full bg-brand ring-brand-light" />
-                    ) : (
-                      getAssetStatusIcon(AssetStatus.Active)
-                    ),
+                  icon: getAssetStatusIcon(AssetStatus.Active),
                   disabled: assets.every(
                     asset => asset.status === AssetStatus.Active
                   ),
                   onClick: () => {
-                    if (reviewStep === '2') {
-                      removeSearchParams('review');
-                    }
                     updateStatus(
                       assets.map(asset => asset.key),
                       AssetStatus.Active

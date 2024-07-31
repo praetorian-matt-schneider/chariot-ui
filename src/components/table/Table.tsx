@@ -8,10 +8,9 @@ import {
   ExclamationCircleIcon,
   InformationCircleIcon,
   MagnifyingGlassIcon,
-  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { notUndefined, useVirtualizer } from '@tanstack/react-virtual';
-import { ArrowDown, CircleCheck, Slash } from 'lucide-react';
+import { Slash } from 'lucide-react';
 
 import { Button } from '@/components/Button';
 import { Dropdown } from '@/components/Dropdown';
@@ -140,7 +139,6 @@ export function Table<TData>(props: TableProps<TData>) {
     []
   );
   const [lastSelectedRow, setLastSelectedRow] = useState<number>();
-  const reviewStep = searchParams.get('review');
 
   const enableCheckbox = Boolean(selection);
   const isLoading = status === 'pending';
@@ -298,9 +296,6 @@ export function Table<TData>(props: TableProps<TData>) {
       ? []
       : indexedData.map(({ _idx }) => _idx);
     setSelectedRows(newSelectedRows);
-    if (reviewStep === '1') {
-      addSearchParams({ review: '2' });
-    }
   }
 
   const isError = status === 'error';
@@ -400,8 +395,7 @@ export function Table<TData>(props: TableProps<TData>) {
                         disabled={selectedRows.length === 0}
                         className={cn(
                           parsedPrimaryAction &&
-                            'h-full relative rounded-none rounded-r-[2px] bg-header-dark disabled:bg-header-dark disabled:cursor-not-allowed',
-                          reviewStep === '2' && 'border border-brand'
+                            'h-full relative rounded-none rounded-r-[2px] bg-header-dark disabled:bg-header-dark disabled:cursor-not-allowed'
                         )}
                         styleType="header"
                         endIcon={
@@ -410,13 +404,6 @@ export function Table<TData>(props: TableProps<TData>) {
                         {...parsedActions}
                       ></Dropdown>
                     </Tooltip>
-                    {reviewStep === '2' && (
-                      <ArrowDown
-                        className={
-                          'absolute -top-2 left-3 z-20 -translate-x-1/2 -translate-y-full animate-bounce rounded-full bg-brand text-white shadow-lg'
-                        }
-                      />
-                    )}
                   </div>
                 )}
               </div>
@@ -449,37 +436,6 @@ export function Table<TData>(props: TableProps<TData>) {
           icon={noData?.icon}
         />
       )}
-
-      {reviewStep && (
-        <div className="border-b-1 sticky top-[4.5rem] z-10 m-auto w-full rounded-t-sm border-default border-b-gray-400 bg-layer0 font-medium shadow-md">
-          <div className="flex flex-row items-center p-2">
-            {reviewStep === '1' && (
-              <div className="mr-2 pl-1">
-                <ArrowDown className="size-6 animate-bounce text-brand" />
-              </div>
-            )}
-            {reviewStep === '2' && (
-              <div className="mr-2 pl-1">
-                <CircleCheck className="size-6 text-default-light" />
-              </div>
-            )}
-            <p className="w-full text-sm">
-              <span className="text-gray-700">
-                Discovered assets are not being scanned for risks
-              </span>
-            </p>
-            <div>
-              <XMarkIcon
-                className="size-6 cursor-pointer"
-                onClick={() => {
-                  searchParams.delete('review');
-                  addSearchParams(searchParams);
-                }}
-              />
-            </div>
-          </div>
-        </div>
-      )}
       {isLoadingOrHaveData && (
         <table
           className={cn(
@@ -491,27 +447,14 @@ export function Table<TData>(props: TableProps<TData>) {
           <thead
             className={cn(
               'sticky bg-layer0',
-              isTableView && !skipHeader
-                ? reviewStep
-                  ? 'top-[7rem]'
-                  : 'top-[4.5rem]'
-                : 'top-0'
+              isTableView && !skipHeader ? 'top-[4.5rem]' : 'top-0'
             )}
             style={{ zIndex: 1 }}
           >
             <tr className="relative">
               {enableCheckbox && (
-                <Th
-                  fixedWidth={CELL_WIDTHS.checkbox}
-                  align="center"
-                  className={reviewStep === '1' ? 'relative' : ''}
-                >
-                  <label
-                    className={cn(
-                      'cursor-pointer',
-                      reviewStep === '1' && 'border border-brand'
-                    )}
-                  >
+                <Th fixedWidth={CELL_WIDTHS.checkbox} align="center">
+                  <label className={'cursor-pointer'}>
                     <input
                       type="checkbox"
                       onChange={handleSelectAll}
