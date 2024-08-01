@@ -44,7 +44,7 @@ import {
 import { useMergeStatus } from '@/utils/api';
 import { isKEVRisk } from '@/utils/risk.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
-import { generatePathWithSearch } from '@/utils/url.util';
+import { generatePathWithSearch, useSearchParams } from '@/utils/url.util';
 
 const DownIcon = (
   <ChevronDownIcon className="size-3 stroke-[4px] text-header-dark" />
@@ -182,6 +182,8 @@ export function Risks() {
       { enabled: Boolean(debouncedSearch) }
     );
 
+  const { searchParams, addSearchParams } = useSearchParams();
+
   const [isClosedSubStateModalOpen, setIsClosedSubStateModalOpen] =
     useState(false);
 
@@ -198,6 +200,12 @@ export function Risks() {
     resource: 'risk',
     filterByGlobalSearch: true,
   });
+
+  useEffect(() => {
+    if (searchParams.has('q')) {
+      setSearch(searchParams.get('q') || '');
+    }
+  }, [searchParams]);
 
   const risks: Risk[] = debouncedSearch
     ? dataDebouncedSearch?.risks || []
@@ -234,6 +242,11 @@ export function Risks() {
       );
     });
   }, [filteredRisks]);
+
+  function handleSearchUpdate(value: string) {
+    setSearch(value);
+    addSearchParams('q', value);
+  }
 
   const columns: Columns<Risk> = useMemo(
     () => [
@@ -329,7 +342,7 @@ export function Risks() {
         name={'risks'}
         search={{
           value: search,
-          onChange: setSearch,
+          onChange: handleSearchUpdate,
         }}
         resize={true}
         filters={

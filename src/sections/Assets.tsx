@@ -111,7 +111,7 @@ const Assets: React.FC = () => {
   const { data: risks = [], status: riskStatus } = useMy({ resource: 'risk' });
   const { isIntegration } = useIntegration();
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
-  const { searchParams } = useSearchParams();
+  const { searchParams, addSearchParams } = useSearchParams();
   const [priorityFilter, setPriorityFilter] = useFilter(
     [''],
     'asset-priority',
@@ -128,13 +128,12 @@ const Assets: React.FC = () => {
 
   useEffect(() => {
     if (searchParams.has('asset-priority')) {
-      console.log(
-        'searchParams.get(asset-priority)',
-        searchParams.get('asset-priority')
-      );
       setPriorityFilter(
         JSON.parse(searchParams.get('asset-priority') || '[]') as AssetStatus[]
       );
+    }
+    if (searchParams.has('q')) {
+      setSearch(searchParams.get('q') || '');
     }
   }, [searchParams]);
 
@@ -311,6 +310,11 @@ const Assets: React.FC = () => {
     });
   }
 
+  function handleSearchUpdate(value: string) {
+    setSearch(value);
+    addSearchParams('q', value);
+  }
+
   useEffect(() => {
     if (
       !isError &&
@@ -333,7 +337,7 @@ const Assets: React.FC = () => {
         name="assets"
         search={{
           value: search,
-          onChange: setSearch,
+          onChange: handleSearchUpdate,
         }}
         filters={
           <div className="flex gap-4">
