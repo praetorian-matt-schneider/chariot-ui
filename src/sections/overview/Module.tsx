@@ -409,7 +409,7 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
             href="/templates/aws-permissions-template.yaml"
             download
           >
-            aws-permission-template.yaml
+            Pull-Based (IAM Role)
           </a>
         </div>
         <div className="mt-1">
@@ -418,7 +418,7 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
             href="/templates/aws-events-template.yaml"
             download
           >
-            aws-events-template.yaml
+            Event-Based (AWS EventBridge)
           </a>
         </div>
       </div>
