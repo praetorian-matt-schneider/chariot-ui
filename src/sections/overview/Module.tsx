@@ -401,7 +401,7 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     message: (
       <div>
         <label className="block text-sm font-medium leading-6 text-gray-900">
-          CloudFormation Template Download
+          CloudFormation Templates
         </label>
         <div className="mt-1">
           <a
@@ -410,6 +410,15 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
             download
           >
             aws-permission-template.yaml
+          </a>
+        </div>
+        <div className="mt-1">
+          <a
+            className="text-brand"
+            href="/templates/aws-events-template.yaml"
+            download
+          >
+            aws-events-template.yaml
           </a>
         </div>
       </div>
