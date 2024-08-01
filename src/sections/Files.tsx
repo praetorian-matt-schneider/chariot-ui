@@ -28,7 +28,6 @@ import FileViewer from '@/components/FileViewer';
 import { RisksIcon } from '@/components/icons';
 import { Loader } from '@/components/Loader';
 import { Modal } from '@/components/Modal';
-import { Snackbar } from '@/components/Snackbar';
 import { Tooltip } from '@/components/Tooltip';
 import { Body } from '@/components/ui/Body';
 import { NoData } from '@/components/ui/NoData';
@@ -249,20 +248,10 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
         },
       })
         .then(() => {
-          Snackbar({
-            title: file.name,
-            description: 'The file has been uploaded successfully.',
-            variant: 'success',
-          });
           setUploadProgress(null); // Reset progress on success
           setShowFileUpload(false); // Hide Dropzone
         })
         .catch(() => {
-          Snackbar({
-            title: file.name,
-            description: 'Failed to upload the file.',
-            variant: 'error',
-          });
           setUploadProgress(null); // Reset progress on error
         });
     });
@@ -443,22 +432,9 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
               ignoreSnackbar: true,
               name: filename,
               content: content ?? '',
-            })
-              .then(() => {
-                Snackbar({
-                  title: filename,
-                  description: 'The file has been saved successfully.',
-                  variant: 'success',
-                });
-                setFilename('');
-              })
-              .catch(() => {
-                Snackbar({
-                  title: filename,
-                  description: 'Failed to save the file.',
-                  variant: 'error',
-                });
-              });
+            }).then(() => {
+              setFilename('');
+            });
           },
         }}
       >
