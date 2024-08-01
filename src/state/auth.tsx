@@ -162,23 +162,15 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   async function logout() {
+    try {
+      await signOut();
+    } catch {
+      // Do nothing
+    }
+
     queryClient.clear();
-    setAuth(auth => {
-      const backendStack = {
-        api: auth.api,
-        backend: auth.backend,
-        clientId: auth.clientId,
-        userPoolId: auth.userPoolId,
-      };
-
-      return {
-        ...emptyAuth,
-        ...backendStack,
-      };
-    });
+    setAuth(emptyAuth);
     navigate(getRoute(['login']));
-
-    await signOut();
   }
 
   function setBackendStack(backendStack: BackendStack = defaultStack) {
@@ -195,9 +187,11 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const token = session.tokens?.idToken?.toString() ?? '';
 
     if (!token) {
-      console.error('Error occured while fetching token');
+      toast.error('Init token missing');
 
-      logout();
+      queryClient.clear();
+      setAuth(emptyAuth);
+      navigate(getRoute(['login']));
     }
 
     return token;
@@ -217,21 +211,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         case 'signedOut':
           console.log('user have been signedOut successfully.', payload);
-          queryClient.clear();
-          setAuth(auth => {
-            const backendStack = {
-              api: auth.api,
-              backend: auth.backend,
-              clientId: auth.clientId,
-              userPoolId: auth.userPoolId,
-            };
-
-            return {
-              ...emptyAuth,
-              ...backendStack,
-            };
-          });
-          navigate(getRoute(['login']));
 
           break;
         case 'tokenRefresh':
