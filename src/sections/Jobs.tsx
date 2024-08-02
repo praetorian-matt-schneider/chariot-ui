@@ -155,7 +155,7 @@ const Jobs: React.FC = () => {
       },
     },
     {
-      label: 'Retry',
+      label: 'Rerun',
       id: '',
       fixedWidth: 75,
       align: 'center',
