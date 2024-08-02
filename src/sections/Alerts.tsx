@@ -225,7 +225,7 @@ const Alerts: React.FC = () => {
                     e.stopPropagation();
                     reRunJob({
                       capability: item.source,
-                      dns: item.dns,
+                      key: `#asset#${item.dns}`,
                     });
                   }}
                   disabled={reRunJobStatus === 'pending'}

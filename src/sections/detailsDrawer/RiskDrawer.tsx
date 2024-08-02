@@ -11,6 +11,7 @@ import { TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 
 import { Button } from '@/components/Button';
 import { Drawer } from '@/components/Drawer';
+import { Dropdown } from '@/components/Dropdown';
 import { HorizontalTimeline } from '@/components/HorizontalTimeline';
 import { RisksIcon } from '@/components/icons';
 import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
@@ -142,6 +143,10 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
       enabled: open,
     }
   );
+  const scannableAttributes = attributesGenericSearch?.attributes.filter(
+    attribute => attribute.name === 'source'
+  );
+
   const {
     data: allAssetJobs = [],
     status: allAssetJobsStatus,
@@ -313,9 +318,9 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                     : 'On-demand scanning is only available for automated risk discovery.'
                 }
               >
-                <Button
+                <Dropdown
                   className="border-1 h-8 border border-default"
-                  startIcon={<ArrowPathIcon className="size-5" />}
+                  label={'Scan Now'}
                   disabled={
                     !risk.source ||
                     isManualORPRrovidedRisk(risk) ||
@@ -325,13 +330,21 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                     reRunJobStatus === 'pending' ||
                     allAssetJobsStatus === 'pending'
                   }
-                  onClick={async () => {
-                    await reRunJob({ capability: risk.source, dns: risk.dns });
-                    refetchAllAssetJobs();
+                  startIcon={<ArrowPathIcon className="size-5" />}
+                  menu={{
+                    items:
+                      scannableAttributes?.map(attribute => ({
+                        label: attribute.value || '',
+                        onClick: async () => {
+                          await reRunJob({
+                            capability: risk.source,
+                            key: `#asset#${attribute.value}`,
+                          });
+                          refetchAllAssetJobs();
+                        },
+                      })) || [],
                   }}
-                >
-                  Scan Now
-                </Button>
+                />
               </Tooltip>
             </div>
           </div>

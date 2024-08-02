@@ -14,10 +14,10 @@ export function useReRunJob() {
 
   return useMutation({
     defaultErrorMessage: 'Failed to re run job',
-    mutationFn: ({ capability, dns }: { capability: string; dns: string }) => {
+    mutationFn: ({ capability, key }: { capability: string; key: string }) => {
       return axios.post(`/job/`, {
         name: capability,
-        key: `#asset#${dns}`,
+        key,
       });
     },
     onSuccess: () => {
