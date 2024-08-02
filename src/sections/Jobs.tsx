@@ -160,7 +160,8 @@ const Jobs: React.FC = () => {
       fixedWidth: 75,
       align: 'center',
       cell: (job: Job) => {
-        const isRunning = job.status === JobStatus.Running;
+        const isRunning =
+          job.status === JobStatus.Running || job.status === JobStatus.Queued;
 
         return (
           <ArrowPathIcon
