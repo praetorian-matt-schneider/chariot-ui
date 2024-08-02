@@ -338,7 +338,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                         onClick: async () => {
                           await reRunJob({
                             capability: risk.source,
-                            key: `#asset#${attribute.value}`,
+                            key: attribute.value,
                           });
                           refetchAllAssetJobs();
                         },
