@@ -1,5 +1,10 @@
 import { ReactNode, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import {
+  CheckCircleIcon,
+  History as HistoryIcon,
+  NotepadText,
+} from 'lucide-react';
 
 import { Drawer } from '@/components/Drawer';
 import { AssetsIcon, RisksIcon } from '@/components/icons';
@@ -15,6 +20,7 @@ import { useMy } from '@/hooks';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { buildOpenRiskDataset } from '@/sections/Assets';
 import { AddAttribute } from '@/sections/detailsDrawer/AddAttribute';
+import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import {
   Asset,
   AssetStatusLabel,
@@ -33,6 +39,8 @@ interface Props {
   compositeKey: string;
   open: boolean;
 }
+
+const { getAssetDrawerLink, getRiskDrawerLink } = getDrawerLink();
 
 function getHistoryDiff(history: EntityHistory): {
   title: ReactNode;
@@ -156,45 +164,69 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
       open={open}
       onClose={() => removeSearchParams(StorageKey.DRAWER_COMPOSITE_KEY)}
       onBack={() => navigate(-1)}
-      className="w-full rounded-t-md"
+      className="w-full rounded-t-lg bg-white p-6 shadow-lg"
       header={
         isInitialLoading ? null : (
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-semibold">{asset.name}</h2>
+          <div className="flex w-full items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <h2 className="text-2xl font-medium text-gray-900">
+                {asset.name}
+              </h2>
               <p className="text-sm text-gray-500">{asset.dns}</p>
             </div>
-            <div className="flex items-center space-x-4">
-              <Tooltip placement="top" title="Change scan status">
-                <AssetStatusDropdown asset={asset} />
-              </Tooltip>
+
+            <div className="mr-2 flex flex-row space-x-4 text-right">
+              <AddAttribute resourceKey={asset.key} />
+              <AssetStatusDropdown asset={asset} />
             </div>
           </div>
         )
       }
     >
       <Loader isLoading={isInitialLoading} type="spinner">
-        <div className="flex h-full flex-col space-y-8 px-6 py-4">
+        <div className="flex h-full flex-col space-y-8">
           <div className="grid grid-cols-2 gap-8">
             {/* Risks Table */}
-            <div className="rounded-md border border-gray-200 bg-white p-4 shadow-sm">
-              <h3 className="mb-4 text-lg font-semibold">Risks</h3>
+            <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all hover:shadow-md">
+              <h3 className="mb-4 text-lg font-medium text-gray-900">
+                <RisksIcon className="mr-1 inline size-5" />
+                Risks
+              </h3>
               {risks.length === 0 ? (
-                <div className="text-center text-gray-500">
-                  <p>No risks found for this asset.</p>
-                  <p>Your asset appears safe and secure.</p>
+                <div className="flex w-full flex-col items-center rounded-lg border border-green-200 bg-green-50 p-4 shadow-sm">
+                  <div className="mb-2 flex items-center space-x-2">
+                    <CheckCircleIcon className="size-8 text-green-500" />
+                    <h4 className="text-lg font-medium text-green-700">
+                      This asset appears safe!
+                    </h4>
+                  </div>
+                  <p className="text-center text-sm text-green-600">
+                    No risks have been detected for this asset. However,
+                    it&apos;s always a good practice to regularly monitor and
+                    scan for any new potential threats.
+                  </p>
+                  <div className="mt-4">
+                    <button
+                      className="text-sm font-medium text-blue-600 hover:underline"
+                      onClick={() => {
+                        // Trigger a new scan or redirect to a monitoring page
+                      }}
+                    >
+                      Schedule a scan now
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <table className="min-w-full table-auto">
                   <thead>
                     <tr>
-                      <th className="p-2 text-left text-sm font-medium text-gray-500">
+                      <th className="w-[80px] p-2 text-left text-sm font-medium text-gray-600">
                         Priority
                       </th>
-                      <th className="p-2 text-left text-sm font-medium text-gray-500">
+                      <th className="p-2 text-left text-sm font-medium text-gray-600">
                         Name
                       </th>
-                      <th className="p-2 text-left text-sm font-medium text-gray-500">
+                      <th className="p-2 text-left text-sm font-medium text-gray-600">
                         Last Updated
                       </th>
                     </tr>
@@ -208,7 +240,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
                       return (
                         <tr
                           key={dns}
-                          className="border-b border-gray-100 bg-white"
+                          className="border-b border-gray-200 bg-white hover:bg-gray-100"
                         >
                           <td className="p-2">
                             <div className="flex items-center space-x-2">
@@ -217,19 +249,30 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
                                   SeverityDef[riskSeverityKey] + ' Severity'
                                 }
                               >
-                                {getRiskSeverityIcon(riskSeverityKey, 'size-5')}
+                                {getRiskSeverityIcon(
+                                  riskSeverityKey,
+                                  'h-4 w-4 text-red-500'
+                                )}
                               </Tooltip>
                               <Tooltip
                                 title={
                                   RiskStatusLabel[riskStatusKey] + ' Status'
                                 }
                               >
-                                {getRiskStatusIcon(riskStatusKey, 'size-5')}
+                                {getRiskStatusIcon(
+                                  riskStatusKey,
+                                  'h-4 w-4 text-gray-700'
+                                )}
                               </Tooltip>
                             </div>
                           </td>
-                          <td className="p-2 text-sm font-medium text-gray-900">
-                            {name}
+                          <td className="p-2 text-sm font-medium text-gray-800">
+                            <Link
+                              to={getRiskDrawerLink({ dns, name })}
+                              className="text-blue-600 hover:underline"
+                            >
+                              {name}
+                            </Link>
                           </td>
                           <td className="p-2 text-sm text-gray-500">
                             {formatDate(updated)}
@@ -243,10 +286,13 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
             </div>
 
             {/* Attributes Table */}
-            <div className="rounded-md border border-gray-200 bg-white p-4 shadow-sm">
-              <h3 className="mb-4 text-lg font-semibold">Attributes</h3>
+            <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all hover:shadow-md">
+              <div className="flex flex-row justify-between">
+                <h3 className="mb-4 text-lg font-medium text-gray-900">
+                  <NotepadText className="mr-1 inline size-5" /> Attributes
+                </h3>
+              </div>
               <div className="space-y-4">
-                <AddAttribute resourceKey={asset.key} />
                 {attributesGenericSearch?.attributes?.length === 0 ? (
                   <div className="text-center text-gray-500">
                     <p>No attributes added to this asset yet.</p>
@@ -255,13 +301,13 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
                   <table className="min-w-full table-auto">
                     <thead>
                       <tr>
-                        <th className="p-2 text-left text-sm font-medium text-gray-500">
+                        <th className="p-2 text-left text-sm font-medium text-gray-600">
                           Name
                         </th>
-                        <th className="p-2 text-left text-sm font-medium text-gray-500">
+                        <th className="p-2 text-left text-sm font-medium text-gray-600">
                           Value
                         </th>
-                        <th className="p-2 text-left text-sm font-medium text-gray-500">
+                        <th className="p-2 text-left text-sm font-medium text-gray-600">
                           Last Updated
                         </th>
                       </tr>
@@ -270,9 +316,9 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
                       {attributesGenericSearch?.attributes?.map(data => (
                         <tr
                           key={data.name}
-                          className="border-b border-gray-100 bg-white"
+                          className="border-b border-gray-200 bg-white hover:bg-gray-100"
                         >
-                          <td className="p-2 text-sm font-medium text-gray-900">
+                          <td className="p-2 text-sm font-medium text-gray-800">
                             {data.name}
                           </td>
                           <td className="p-2 text-sm text-gray-500">
@@ -291,8 +337,10 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
           </div>
 
           {/* Related Assets Table */}
-          <div className="rounded-md border border-gray-200 bg-white p-4 shadow-sm">
-            <h3 className="mb-4 text-lg font-semibold">Related Assets</h3>
+          <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all hover:shadow-md">
+            <h3 className="mb-4 text-lg font-medium text-gray-900">
+              <AssetsIcon className="mr-1 inline size-5" /> Related Assets
+            </h3>
             {linkedHostnames.length === 0 && linkedIps.length === 0 ? (
               <div className="text-center text-gray-500">
                 <p>No related assets found.</p>
@@ -302,19 +350,19 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
               <table className="min-w-full table-auto">
                 <thead>
                   <tr>
-                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">
+                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">
                       Type
                     </th>
-                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">
+                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">
                       Name
                     </th>
-                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">
+                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">
                       DNS
                     </th>
-                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">
+                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">
                       Last Updated
                     </th>
-                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">
+                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">
                       Status
                     </th>
                   </tr>
@@ -327,13 +375,21 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
                     return (
                       <tr
                         key={data.dns}
-                        className="border-b border-gray-100 bg-white"
+                        className="border-b border-gray-200 bg-white hover:bg-gray-100"
                       >
-                        <td className="px-4 py-2 text-sm font-medium text-gray-900">
+                        <td className="px-4 py-2 text-sm font-medium text-gray-800">
                           Hostname
                         </td>
-                        <td className="px-4 py-2 text-sm font-medium text-gray-900">
-                          {data.name}
+                        <td className="px-4 py-2 text-sm font-medium text-gray-800">
+                          <Link
+                            to={getAssetDrawerLink({
+                              dns: data.dns,
+                              name: data.name,
+                            })}
+                            className="text-blue-600 hover:underline"
+                          >
+                            {data.name}
+                          </Link>
                         </td>
                         <td className="px-4 py-2 text-sm text-gray-500">
                           {data.dns}
@@ -343,11 +399,14 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
                         </td>
                         <td className="px-4 py-2">
                           <Tooltip title={detail}>
-                            {getAssetStatusIcon(data.status, 'size-5')}
+                            {getAssetStatusIcon(
+                              data.status,
+                              'h-4 w-4 text-green-500'
+                            )}
                           </Tooltip>
                           {containsRisks && (
                             <Tooltip title="Contains open risks">
-                              <RisksIcon className="size-5" />
+                              <RisksIcon className="size-4 text-red-500" />
                             </Tooltip>
                           )}
                         </td>
@@ -361,13 +420,21 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
                     return (
                       <tr
                         key={data.dns}
-                        className="border-b border-gray-100 bg-white"
+                        className="border-b border-gray-200 bg-white hover:bg-gray-100"
                       >
-                        <td className="px-4 py-2 text-sm font-medium text-gray-900">
+                        <td className="px-4 py-2 text-sm font-medium text-gray-800">
                           IP Address
                         </td>
-                        <td className="px-4 py-2 text-sm font-medium text-gray-900">
-                          {data.name}
+                        <td className="px-4 py-2 text-sm font-medium text-gray-800">
+                          <Link
+                            to={getAssetDrawerLink({
+                              dns: data.dns,
+                              name: data.name,
+                            })}
+                            className="text-blue-600 hover:underline"
+                          >
+                            {data.name}
+                          </Link>
                         </td>
                         <td className="px-4 py-2 text-sm text-gray-500">
                           {data.dns}
@@ -377,11 +444,14 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
                         </td>
                         <td className="px-4 py-2">
                           <Tooltip title={detail}>
-                            {getAssetStatusIcon(data.status, 'size-5')}
+                            {getAssetStatusIcon(
+                              data.status,
+                              'h-4 w-4 text-green-500'
+                            )}
                           </Tooltip>
                           {containsRisks && (
                             <Tooltip title="Contains open risks">
-                              <RisksIcon className="size-5" />
+                              <RisksIcon className="size-4 text-red-500" />
                             </Tooltip>
                           )}
                         </td>
@@ -394,8 +464,11 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
           </div>
 
           {/* History Timeline */}
-          <div className="rounded-md border border-gray-200 bg-white p-4 shadow-sm">
-            <h3 className="mb-4 text-lg font-semibold">History</h3>
+          <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all hover:shadow-md">
+            <h3 className="mb-4 text-lg font-medium text-gray-900">
+              <HistoryIcon className="mr-1 inline size-5" />
+              History
+            </h3>
             <Timeline
               items={history.map((item, index) => {
                 const { title, updated } = getHistoryDiff(item);
@@ -404,7 +477,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
                   description: updated,
                   icon:
                     index === 0 ? (
-                      <AssetsIcon className="stroke-1" />
+                      <AssetsIcon className="size-4 text-gray-700" />
                     ) : undefined,
                 };
               })}

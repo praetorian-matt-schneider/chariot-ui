@@ -39,7 +39,7 @@ export const AssetStatusDropdown = (props: Props) => {
 
   return (
     <Dropdown
-      className={`min-w-52 justify-between rounded-[2px] border-2 border-default py-1 pr-2`}
+      className={`min-w-52 justify-between rounded-[2px] border-2 border-default pr-2`}
       menu={{
         items: options,
         onClick: value => {
