@@ -223,88 +223,103 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
       onClose={() => removeSearchParams(StorageKey.DRAWER_COMPOSITE_KEY)}
       onBack={() => navigate(-1)}
       minWidth={DRAWER_WIDTH}
-      className="w-full rounded-t-lg bg-white p-6 shadow-lg"
+      className="w-full rounded-t-lg bg-white  p-6 shadow-lg"
       header={
         isInitialLoading ? null : (
-          <div className="flex w-full items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <p className="text-lg font-medium text-gray-900">
-                {risk.name}{' '}
-                <span className="font-normal text-gray-500">
-                  via {risk.source} on {risk.dns}
-                </span>
-                {knownExploitedThreats.includes(risk.name) && (
-                  <span className="text-red-500">[Known Exploited Threat]</span>
+          <div className="flex w-full flex-col">
+            {/* Job Timeline and Actions */}
+            <div>
+              <HorizontalTimeline
+                steps={jobTimeline}
+                current={jobTimeline.findIndex(
+                  ({ status }) => status === jobForThisRisk?.status
                 )}
-              </p>
+              />
             </div>
-            <div className="mr-2 flex space-x-3">
-              <Tooltip placement="top" title="Change risk status">
-                <RiskDropdown
-                  type="status"
-                  risk={risk}
-                  className="h-8 text-nowrap"
-                />
-              </Tooltip>
-              <Tooltip placement="top" title="Change risk severity">
-                <RiskDropdown
-                  type="severity"
-                  risk={risk}
-                  className={cn(severityClass, 'h-8')}
-                />
-              </Tooltip>
-              <Tooltip placement="top" title="View proof of exploit">
-                <Button
-                  className="h-8 text-nowrap border border-default"
-                  startIcon={<DocumentTextIcon className="size-5" />}
-                  onClick={() => {
-                    navigate(
-                      generatePathWithSearch({
-                        appendSearch: [[StorageKey.POE, `${dns}/${name}`]],
-                      })
-                    );
-                  }}
-                >
-                  Proof of Exploit
-                </Button>
-              </Tooltip>
-              <Tooltip
-                placement="top"
-                title={
-                  risk.source && !isManualORPRrovidedRisk(risk)
-                    ? isJobRunningForThisRisk
-                      ? 'Scanning in progress'
-                      : 'Revalidate the risk'
-                    : 'On-demand scanning is only available for automated risk discovery.'
-                }
-              >
-                <Button
-                  className="h-8 text-nowrap border border-default"
-                  startIcon={<ArrowPathIcon className="size-5" />}
-                  disabled={
-                    !risk.source ||
-                    isManualORPRrovidedRisk(risk) ||
-                    Boolean(isJobRunningForThisRisk)
+            <div className="mt-2 flex w-full items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <p className="text-lg font-medium text-gray-900">
+                  {risk.name}{' '}
+                  <span className="font-normal text-gray-500">
+                    via {risk.source} on {risk.dns}
+                  </span>
+                  {knownExploitedThreats.includes(risk.name) && (
+                    <span className="text-red-500">
+                      [Known Exploited Threat]
+                    </span>
+                  )}
+                </p>
+              </div>
+              <div className="mr-2 flex space-x-3">
+                <Tooltip placement="top" title="Change risk status">
+                  <RiskDropdown
+                    type="status"
+                    risk={risk}
+                    className="h-8 text-nowrap"
+                  />
+                </Tooltip>
+                <Tooltip placement="top" title="Change risk severity">
+                  <RiskDropdown
+                    type="severity"
+                    risk={risk}
+                    className={cn(severityClass, 'h-8')}
+                  />
+                </Tooltip>
+                <Tooltip placement="top" title="View proof of exploit">
+                  <Button
+                    className="h-8 text-nowrap border border-default"
+                    startIcon={<DocumentTextIcon className="size-5" />}
+                    onClick={() => {
+                      navigate(
+                        generatePathWithSearch({
+                          appendSearch: [[StorageKey.POE, `${dns}/${name}`]],
+                        })
+                      );
+                    }}
+                  >
+                    Proof of Exploit
+                  </Button>
+                </Tooltip>
+                <Tooltip
+                  placement="top"
+                  title={
+                    risk.source && !isManualORPRrovidedRisk(risk)
+                      ? isJobRunningForThisRisk
+                        ? 'Scanning in progress'
+                        : 'Revalidate the risk'
+                      : 'On-demand scanning is only available for automated risk discovery.'
                   }
-                  isLoading={
-                    reRunJobStatus === 'pending' ||
-                    allAssetJobsStatus === 'pending'
-                  }
-                  onClick={async () => {
-                    attributesGenericSearch?.attributes?.forEach(async risk => {
-                      if (risk.value.startsWith('#asset')) {
-                        await reRunJob({
-                          capability: risk.source,
-                          jobKey: risk.value,
-                        });
-                        refetchAllAssetJobs();
-                      }
-                    });
-                  }}
                 >
-                  Scan Now
-                </Button>
-              </Tooltip>
+                  <Button
+                    className="h-8 text-nowrap border border-default"
+                    startIcon={<ArrowPathIcon className="size-5" />}
+                    disabled={
+                      !risk.source ||
+                      isManualORPRrovidedRisk(risk) ||
+                      Boolean(isJobRunningForThisRisk)
+                    }
+                    isLoading={
+                      reRunJobStatus === 'pending' ||
+                      allAssetJobsStatus === 'pending'
+                    }
+                    onClick={async () => {
+                      attributesGenericSearch?.attributes?.forEach(
+                        async risk => {
+                          if (risk.value.startsWith('#asset')) {
+                            await reRunJob({
+                              capability: risk.source,
+                              jobKey: risk.value,
+                            });
+                            refetchAllAssetJobs();
+                          }
+                        }
+                      );
+                    }}
+                  >
+                    Scan Now
+                  </Button>
+                </Tooltip>
+              </div>
             </div>
           </div>
         )
@@ -312,28 +327,18 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     >
       <Loader isLoading={isInitialLoading} type="spinner">
         <div className="flex h-full flex-col gap-4 px-6">
-          {/* Job Timeline and Actions */}
-          <div>
-            <HorizontalTimeline
-              steps={jobTimeline}
-              current={jobTimeline.findIndex(
-                ({ status }) => status === jobForThisRisk?.status
-              )}
-            />
-          </div>
-
           <div className="grid grid-cols-2 gap-8">
             {/* Description & Remediation */}
             <div
               className={cn(
-                'flex flex-col border border-gray-200 p-4 shadow-sm transition-all hover:rounded-lg hover:shadow-md'
+                'bg-white flex flex-col border border-gray-200 p-4 transition-all hover:rounded-lg hover:shadow-md'
               )}
             >
               <div className="mb-4 flex flex-row items-center space-x-1">
-                <ClipboardCheck className="size-5 text-gray-800" />
+                <ClipboardCheck className="size-6 text-gray-800" />
                 <h3
                   className={cn(
-                    'text-lg font-medium tracking-wide text-gray-900'
+                    'text-2xl font-semibold tracking-wide text-gray-900'
                   )}
                 >
                   Description & Remediation
@@ -422,12 +427,12 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
               {/* Attributes Section */}
               <div
                 className={cn(
-                  ' border border-gray-200 p-4 shadow-sm transition-all hover:rounded-lg hover:shadow-md'
+                  ' bg-white border border-gray-200 p-4 transition-all hover:rounded-lg hover:shadow-md'
                 )}
               >
                 <div className="mb-4 flex flex-row items-center space-x-1">
-                  <NotepadText className="size-5 text-gray-800" />
-                  <h3 className="text-lg font-medium tracking-wide text-gray-900">
+                  <NotepadText className="size-6 text-gray-800" />
+                  <h3 className="text-2xl font-semibold tracking-wide text-gray-900">
                     Attributes
                   </h3>
                 </div>
@@ -500,12 +505,12 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
               {/* Comment Section */}
               <div
                 className={cn(
-                  'border border-gray-200 p-4 shadow-sm transition-all hover:rounded-lg hover:shadow-md'
+                  'bg-white border border-gray-200 p-4 transition-all hover:rounded-lg hover:shadow-md'
                 )}
               >
                 <div className="mb-4 flex flex-row items-center space-x-1">
-                  <MessageSquare className="size-5 text-gray-800" />
-                  <h3 className="text-lg font-medium tracking-wide text-gray-900">
+                  <MessageSquare className="size-6 text-gray-800" />
+                  <h3 className="text-2xl font-semibold tracking-wide text-gray-900">
                     Comments
                   </h3>
                 </div>
@@ -522,12 +527,12 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
             {/* Occurrences Section */}
             <div
               className={cn(
-                'border border-gray-200 p-4 shadow-sm transition-all hover:rounded-lg hover:shadow-md'
+                'bg-white border border-gray-200 p-4 transition-all hover:rounded-lg hover:shadow-md'
               )}
             >
               <div className="mb-4 flex flex-row items-center space-x-1">
-                <RisksIcon className="size-5 text-gray-800" />
-                <h3 className="text-lg font-medium text-gray-900">
+                <RisksIcon className="size-6 text-gray-800" />
+                <h3 className="text-2xl font-semibold text-gray-900">
                   Occurrences
                 </h3>
               </div>
@@ -608,12 +613,12 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
           {/* History Section */}
           <div
             className={cn(
-              'border border-gray-200 p-4 shadow-sm transition-all hover:rounded-lg hover:shadow-md'
+              'bg-white border border-gray-200 p-4 transition-all hover:rounded-lg hover:shadow-md'
             )}
           >
             <div className="mb-4 flex flex-row items-center space-x-1">
-              <HistoryIcon className="size-5 text-gray-800" />
-              <h3 className="text-lg font-medium text-gray-900">History</h3>
+              <HistoryIcon className="size-6 text-gray-800" />
+              <h3 className="text-2xl font-semibold text-gray-900">History</h3>
             </div>
             <Timeline
               items={[

@@ -12,7 +12,7 @@ export const HorizontalTimeline = ({ steps = [], current = 0 }: Props) => {
   const filled = current > -1 ? current : 0;
 
   return (
-    <div className="relative mb-8 w-full">
+    <div className="relative mb-8 mt-2 w-full">
       <div className="absolute top-[5px] z-0 h-[2px] w-full bg-default">
         <div
           className={'h-full bg-brand transition-all duration-1000'}
@@ -26,7 +26,7 @@ export const HorizontalTimeline = ({ steps = [], current = 0 }: Props) => {
         {steps.map((step, index) => (
           <div
             key={index}
-            className="relative z-10 flex items-center justify-center bg-layer0 px-1"
+            className="relative z-10 flex items-center justify-center bg-transparent px-1"
           >
             <Tooltip
               title={
@@ -48,7 +48,7 @@ export const HorizontalTimeline = ({ steps = [], current = 0 }: Props) => {
               />
               <span
                 className={cn(
-                  'absolute text-sm text-default font-medium',
+                  'absolute text-sm text-default font-medium -bottom-6',
                   index === 0 && 'left-0',
                   index > 0 && index < steps.length - 1 && 'left-[-25px]',
                   index === steps.length - 1 && 'right-0'

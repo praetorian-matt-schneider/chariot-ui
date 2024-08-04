@@ -41,7 +41,7 @@ export const AddAttribute = (props: Props) => {
         open={open}
         setOpen={setOpen}
         styleType="none"
-        className="relative flex min-w-52 items-center  rounded-[2px] border-2 border-default bg-default-light px-4 py-3 pr-2 text-sm font-medium text-default ring-inset focus:z-10 focus:outline-0 disabled:cursor-not-allowed disabled:bg-default-light disabled:text-default-light"
+        className="relative flex items-center border-2 border-default bg-default-light"
         endIcon={
           open ? (
             <ChevronUpIcon className="ml-auto size-4 text-gray-500" />
@@ -53,9 +53,9 @@ export const AddAttribute = (props: Props) => {
         label="Add Attribute"
         style={{ zIndex: 1 }}
       >
-        <div className="w-[260px]">
+        <div className="w-[360px]">
           <form
-            className="space-y-4"
+            className="space-y-4 p-4"
             onSubmit={event => {
               event.preventDefault();
               createAttribute(
@@ -78,7 +78,6 @@ export const AddAttribute = (props: Props) => {
                   placeholder: 'technology',
                   name: 'name',
                   required: true,
-                  className: 'text-sm p-2 border border-gray-300 rounded-md',
                 },
                 {
                   label: 'Value',
@@ -86,26 +85,22 @@ export const AddAttribute = (props: Props) => {
                   placeholder: 'Apache Web Server',
                   name: 'value',
                   required: true,
-                  className: 'text-sm p-2 border border-gray-300 rounded-md',
                 },
               ]}
               onChange={values =>
                 setFormData(formData => ({ ...formData, ...values }))
               }
             />
-            <div className="flex justify-end gap-2">
+            <div className="flex justify-start gap-2">
               <Button
                 styleType="primary"
                 type="submit"
-                className="text-xs"
-                startIcon={<PlusIcon className="size-4" />}
                 disabled={creatingAttribute === 'pending'}
               >
-                Add
+                Add Attribute
               </Button>
               <Button
-                styleType="textPrimary"
-                className="text-xs"
+                styleType="secondary"
                 disabled={creatingAttribute === 'pending'}
                 onClick={reset}
               >

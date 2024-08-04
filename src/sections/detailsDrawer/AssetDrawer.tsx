@@ -165,13 +165,18 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
       open={open}
       onClose={() => removeSearchParams(StorageKey.DRAWER_COMPOSITE_KEY)}
       onBack={() => navigate(-1)}
-      className="w-full rounded-t-lg p-6 shadow-lg"
+      className="w-full rounded-t-lg bg-white p-6 shadow-lg"
       header={
         isInitialLoading ? null : (
           <div className="flex w-full items-center justify-between">
             <div className="flex items-center space-x-3">
-              <h2 className="text-2xl font-medium tracking-wide text-gray-900">
-                {asset.name}
+              <h2 className="text-lg font-medium tracking-wide text-gray-900">
+                {asset.name}{' '}
+                {asset.dns && (
+                  <span className="font-normal text-gray-500">
+                    ({asset.dns})
+                  </span>
+                )}
               </h2>
             </div>
 
@@ -188,9 +193,9 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
           <div className="grid grid-cols-2 gap-8">
             {/* Risks Section */}
             {openRisks.length === 0 ? (
-              <div className="rounded-sm border border-green-500 p-4 shadow-sm transition-all hover:rounded-lg hover:shadow-md">
-                <h3 className="mb-4 text-lg font-semibold tracking-wide text-green-600">
-                  <CheckCircleIcon className="mr-1 inline size-5 text-green-600" />
+              <div className="rounded-sm border border-green-500 bg-white p-4  transition-all hover:rounded-lg hover:shadow-md">
+                <h3 className="mb-4 text-2xl font-semibold tracking-wide text-green-600">
+                  <CheckCircleIcon className="mr-1 inline size-6 text-green-600" />
                   This Asset is Safe!
                 </h3>
                 <p className="text-sm text-gray-700">
@@ -210,8 +215,8 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
                 </div>
               </div>
             ) : (
-              <div className="rounded-sm border border-red-500 p-4 shadow-sm transition-all hover:rounded-lg hover:shadow-md">
-                <h3 className="mb-4 text-lg font-semibold tracking-wide text-red-600">
+              <div className="rounded-sm border border-red-500 bg-white p-4  transition-all hover:rounded-lg hover:shadow-md">
+                <h3 className="mb-4 text-2xl font-semibold tracking-wide text-red-600">
                   <AlertTriangle className="mr-1 inline size-5 text-red-600" />
                   This Asset is at Risk!
                 </h3>
@@ -273,10 +278,10 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
             )}
 
             {/* Attributes Section */}
-            <div className="rounded-sm border border-gray-200 p-4 shadow-sm transition-all hover:rounded-lg hover:shadow-md">
+            <div className="rounded-sm border border-gray-200 bg-white p-4  transition-all hover:rounded-lg hover:shadow-md">
               <div className="flex flex-row justify-between">
-                <h3 className="mb-4 text-lg font-medium tracking-wide text-gray-900">
-                  <NotepadText className="mr-1 inline size-5 text-gray-800" />
+                <h3 className="mb-4 text-2xl font-semibold tracking-wide text-gray-900">
+                  <NotepadText className="mr-1 inline size-6 text-gray-800" />
                   Attributes
                 </h3>
               </div>
@@ -337,14 +342,9 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
           </div>
 
           {/* Related Assets Section */}
-          <div
-            className="rounded-sm border border-gray-200 p-4 shadow-sm transition-all hover:rounded-lg hover:shadow-md"
-            style={{
-              background: 'rgba(255, 255, 255, 0.1)',
-            }}
-          >
-            <h3 className="mb-4 text-lg font-medium tracking-wide text-gray-900">
-              <AssetsIcon className="mr-1 inline size-5 text-gray-800" />
+          <div className="rounded-sm border border-gray-200 bg-white p-4  transition-all hover:rounded-lg hover:shadow-md">
+            <h3 className="mb-4 text-2xl font-semibold tracking-wide text-gray-900">
+              <AssetsIcon className="mr-1 inline size-6 text-gray-800" />
               Related Assets
             </h3>
             {linkedHostnames.length === 0 && linkedIps.length === 0 ? (
@@ -453,9 +453,9 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
           </div>
 
           {/* History Section */}
-          <div className="rounded-sm border border-gray-200 p-4 shadow-sm transition-all hover:rounded-lg hover:shadow-md">
-            <h3 className="mb-4 text-lg font-medium tracking-wide text-gray-900">
-              <HistoryIcon className="mr-1 inline size-5 text-gray-800" />
+          <div className="rounded-sm border border-gray-200 bg-white p-4  transition-all hover:rounded-lg hover:shadow-md">
+            <h3 className="mb-4 text-2xl font-semibold tracking-wide text-gray-900">
+              <HistoryIcon className="mr-1 inline size-6 text-gray-800" />
               History
             </h3>
             <Timeline
