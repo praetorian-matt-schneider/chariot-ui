@@ -11,7 +11,6 @@ import { Drawer } from '@/components/Drawer';
 import { HorizontalTimeline } from '@/components/HorizontalTimeline';
 import { RisksIcon } from '@/components/icons';
 import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
-import { getRiskStatusIcon } from '@/components/icons/RiskStatus.icon';
 import { UnionIcon } from '@/components/icons/Union.icon';
 import { Loader } from '@/components/Loader';
 import { MarkdownEditor } from '@/components/markdown/MarkdownEditor';
@@ -36,11 +35,12 @@ import {
   RiskCombinedStatus,
   RiskSeverity,
   RiskStatus,
-  RiskStatusLabel,
   SeverityDef,
 } from '@/types';
+import { cn } from '@/utils/classname';
 import { formatDate } from '@/utils/date.util';
 import { sToMs } from '@/utils/date.util';
+import { getSeverityClass } from '@/utils/getSeverityClass.util';
 import { isManualORPRrovidedRisk } from '@/utils/risk.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
 import { generatePathWithSearch, useSearchParams } from '@/utils/url.util';
@@ -162,6 +162,8 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     riskStatus === 'pending' || definitionsFileStatus === 'pending';
   const risk: Risk = risks[0] || {};
 
+  const severityClass = getSeverityClass(risk.status?.[1]);
+
   const jobForThisRisk = allAssetJobs.find(job => {
     return job.source === risk.source;
   });
@@ -219,40 +221,40 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
       className="rounded-t-lg"
       header={
         isInitialLoading ? null : (
-          <div className="flex w-full flex-row">
-            <p className="w-full text-lg font-medium text-gray-900">
-              {risk.name}{' '}
-              {knownExploitedThreats.includes(risk.name) && (
-                <span className="text-red-500">[Known Exploited Threat]</span>
-              )}
-            </p>
-            <div className="flex space-x-1 text-nowrap">
+          <div className="flex w-full items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <p className="text-lg font-medium text-gray-900">
+                {risk.name}{' '}
+                {knownExploitedThreats.includes(risk.name) && (
+                  <span className="text-red-500">[Known Exploited Threat]</span>
+                )}
+              </p>
+            </div>
+            <div className="flex space-x-3">
               <Tooltip placement="top" title="Change risk status">
-                <div>
-                  <RiskDropdown type="status" risk={risk} />
-                </div>
+                <RiskDropdown type="status" risk={risk} />
               </Tooltip>
               <Tooltip placement="top" title="Change risk severity">
-                <div>
-                  <RiskDropdown type="severity" risk={risk} />
-                </div>
+                <RiskDropdown
+                  type="severity"
+                  risk={risk}
+                  className={severityClass}
+                />
               </Tooltip>
               <Tooltip placement="top" title="View proof of exploit">
-                <div>
-                  <Button
-                    className="border-1 h-8 border border-default"
-                    startIcon={<DocumentTextIcon className="size-5" />}
-                    onClick={() => {
-                      navigate(
-                        generatePathWithSearch({
-                          appendSearch: [[StorageKey.POE, `${dns}/${name}`]],
-                        })
-                      );
-                    }}
-                  >
-                    Proof of Exploit
-                  </Button>
-                </div>
+                <Button
+                  className="h-8 border border-default"
+                  startIcon={<DocumentTextIcon className="size-5" />}
+                  onClick={() => {
+                    navigate(
+                      generatePathWithSearch({
+                        appendSearch: [[StorageKey.POE, `${dns}/${name}`]],
+                      })
+                    );
+                  }}
+                >
+                  Proof of Exploit
+                </Button>
               </Tooltip>
               <Tooltip
                 placement="top"
@@ -265,7 +267,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                 }
               >
                 <Button
-                  className="border-1 h-8 border border-default"
+                  className="h-8 border border-default"
                   startIcon={<ArrowPathIcon className="size-5" />}
                   disabled={
                     !risk.source ||
@@ -303,8 +305,16 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
 
           <div className="grid grid-cols-2 gap-8">
             {/* Description & Remediation */}
-            <div className="border border-gray-200 p-4  shadow-sm transition-all hover:rounded-lg hover:shadow-md">
-              <h3 className="mb-4 text-lg font-medium tracking-wide text-gray-900">
+            <div
+              className={cn(
+                'border border-gray-200 p-4 shadow-sm transition-all hover:rounded-lg hover:shadow-md'
+              )}
+            >
+              <h3
+                className={cn(
+                  'mb-4 text-lg font-medium tracking-wide text-gray-900'
+                )}
+              >
                 Description & Remediation
               </h3>
               <Loader
@@ -343,6 +353,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                   <MarkdownPreview
                     source={definitionsFileValue}
                     style={{
+                      padding: '0.75rem',
                       wordBreak: 'break-word',
                       minHeight: '20px',
                     }}
@@ -387,7 +398,11 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
 
             <div className="flex flex-col gap-4">
               {/* Attributes Section */}
-              <div className="border border-gray-200 p-4 shadow-sm transition-all hover:rounded-lg hover:shadow-md">
+              <div
+                className={cn(
+                  ' border border-gray-200 p-4 shadow-sm transition-all hover:rounded-lg hover:shadow-md'
+                )}
+              >
                 <h3 className="mb-4 text-lg font-medium tracking-wide text-gray-900">
                   Attributes
                 </h3>
@@ -435,7 +450,11 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                 </div>
               </div>
               {/* Comment Section */}
-              <div className="border border-gray-200 p-4 shadow-sm transition-all hover:rounded-lg hover:shadow-md">
+              <div
+                className={cn(
+                  'border border-gray-200 p-4 shadow-sm transition-all hover:rounded-lg hover:shadow-md'
+                )}
+              >
                 <h3 className="mb-4 text-lg font-medium tracking-wide text-gray-900">
                   Comments
                 </h3>
@@ -450,7 +469,11 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
 
           <div className="w-full">
             {/* Occurrences Section */}
-            <div className="border border-gray-200 p-4  shadow-sm transition-all  hover:rounded-lg hover:shadow-md">
+            <div
+              className={cn(
+                'border border-gray-200 p-4 shadow-sm transition-all hover:rounded-lg hover:shadow-md'
+              )}
+            >
               <h3 className="mb-4 text-lg font-medium text-gray-900">
                 Occurrences
               </h3>
@@ -502,22 +525,21 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                             {data.dns}
                           </td>
                           <td className="p-2 text-sm">
-                            <Tooltip
-                              title={RiskStatusLabel[riskStatusKey] + ' Status'}
-                            >
-                              {getRiskStatusIcon(
-                                riskStatusKey,
-                                'h-4 w-4 text-gray-700'
-                              )}
-                            </Tooltip>
-                            <Tooltip
-                              title={SeverityDef[riskSeverityKey] + ' Severity'}
-                            >
-                              {getRiskSeverityIcon(
-                                riskSeverityKey,
-                                'h-4 w-4 text-red-500'
-                              )}
-                            </Tooltip>
+                            <div className="flex flex-row items-center space-x-1">
+                              <Tooltip
+                                title={
+                                  SeverityDef[riskSeverityKey] + ' Severity'
+                                }
+                              >
+                                {getRiskSeverityIcon(
+                                  riskSeverityKey,
+                                  'h-4 w-4 text-red-500'
+                                )}
+                              </Tooltip>
+                              <p className="text-xs">
+                                {SeverityDef[riskSeverityKey]}
+                              </p>
+                            </div>
                           </td>
                           <td className="p-2 text-sm text-gray-500">
                             {formatDate(data.updated)}
@@ -532,7 +554,11 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
           </div>
 
           {/* History Section */}
-          <div className="border border-gray-200 p-4  shadow-sm transition-all  hover:rounded-lg hover:shadow-md">
+          <div
+            className={cn(
+              'border border-gray-200 p-4 shadow-sm transition-all hover:rounded-lg hover:shadow-md'
+            )}
+          >
             <h3 className="mb-4 text-lg font-medium text-gray-900">History</h3>
             <Timeline
               items={[
