@@ -326,7 +326,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
             {/* Description & Remediation */}
             <div
               className={cn(
-                'border border-gray-200 p-4 shadow-sm transition-all hover:rounded-lg hover:shadow-md'
+                'flex flex-col border border-gray-200 p-4 shadow-sm transition-all hover:rounded-lg hover:shadow-md'
               )}
             >
               <div className="mb-4 flex flex-row items-center space-x-1">
@@ -381,7 +381,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                     }}
                   />
                 ) : (
-                  <div className="flex w-full flex-col items-center justify-center text-center">
+                  <div className="flex w-full flex-1 flex-col items-center justify-center text-center">
                     <UnionIcon className="mt-8 size-16 text-default-light" />
                     <p className="mt-7 text-lg font-bold">
                       Generate Description & Remediation
@@ -405,7 +405,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                 )}
                 <Button
                   styleType="none"
-                  className="mt-4 pl-0 font-bold"
+                  className="mr-auto mt-4 pl-0 font-bold"
                   endIcon={<PencilSquareIcon className="size-5" />}
                   onClick={event => {
                     event.preventDefault();
