@@ -457,20 +457,22 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                             <td className="p-2 text-sm font-medium text-gray-800">
                               {data.name}
                             </td>
-                            <td className="p-2 text-sm text-gray-500">
-                              {data.value.startsWith('#asset') ? (
-                                <Link
-                                  to={getAssetDrawerLink({
-                                    dns: data.value.split('#')[3],
-                                    name: data.value.split('#')[2],
-                                  })}
-                                  className="text-blue-500 hover:underline"
-                                >
-                                  {data.value}
-                                </Link>
-                              ) : (
-                                data.value
-                              )}
+                            <td className=" break-all p-2 text-sm text-gray-500">
+                              <span className="">
+                                {data.value.startsWith('#asset') ? (
+                                  <Link
+                                    to={getAssetDrawerLink({
+                                      dns: data.value.split('#')[3],
+                                      name: data.value.split('#')[2],
+                                    })}
+                                    className="text-blue-500 hover:underline"
+                                  >
+                                    {data.value}
+                                  </Link>
+                                ) : (
+                                  data.value
+                                )}
+                              </span>
                             </td>
                             <td className="p-2 text-sm text-gray-500">
                               {formatDate(data.updated)}
