@@ -34,7 +34,6 @@ import {
   Risk,
   RiskCombinedStatus,
   RiskSeverity,
-  RiskStatus,
   SeverityDef,
 } from '@/types';
 import { cn } from '@/utils/classname';
@@ -218,13 +217,16 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
       onClose={() => removeSearchParams(StorageKey.DRAWER_COMPOSITE_KEY)}
       onBack={() => navigate(-1)}
       minWidth={DRAWER_WIDTH}
-      className="rounded-t-lg"
+      className="w-full rounded-t-lg bg-white p-6 shadow-lg"
       header={
         isInitialLoading ? null : (
           <div className="flex w-full items-center justify-between">
             <div className="flex items-center space-x-3">
               <p className="text-lg font-medium text-gray-900">
                 {risk.name}{' '}
+                <span className="font-normal text-gray-500">
+                  via {risk.source} on {risk.dns}
+                </span>
                 {knownExploitedThreats.includes(risk.name) && (
                   <span className="text-red-500">[Known Exploited Threat]</span>
                 )}
@@ -441,22 +443,22 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                             className="hover: border-b border-gray-200 bg-white"
                           >
                             <td className="p-2 text-sm font-medium text-gray-800">
+                              {data.name}
+                            </td>
+                            <td className="p-2 text-sm text-gray-500">
                               {data.value.startsWith('#asset') ? (
                                 <Link
                                   to={getAssetDrawerLink({
-                                    dns: data.value,
-                                    name: data.name,
+                                    dns: data.value.split('#')[3],
+                                    name: data.value.split('#')[2],
                                   })}
-                                  className="hover:underline"
+                                  className="text-blue-500 hover:underline"
                                 >
-                                  {data.name}
+                                  {data.value}
                                 </Link>
                               ) : (
-                                data.name
+                                data.value
                               )}
-                            </td>
-                            <td className="p-2 text-sm text-gray-500">
-                              {data.value}
                             </td>
                             <td className="p-2 text-sm text-gray-500">
                               {formatDate(data.updated)}
@@ -520,8 +522,6 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                   </thead>
                   <tbody>
                     {riskOccurrence.map(data => {
-                      const riskStatusKey =
-                        `${data.status?.[0]}${data.status?.[2] || ''}` as RiskStatus;
                       const riskSeverityKey = data.status?.[1] as RiskSeverity;
 
                       return (

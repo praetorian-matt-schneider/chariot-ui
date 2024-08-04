@@ -179,7 +179,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
       }
     >
       <Loader isLoading={isInitialLoading} type="spinner">
-        <div className="flex h-full flex-col space-y-8">
+        <div className="flex h-full flex-col gap-4 px-6">
           <div className="grid grid-cols-2 gap-8">
             {/* Risks Section */}
             {risks.length === 0 ? (
@@ -366,8 +366,8 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
                             )}
                             <Link
                               to={getAssetDrawerLink({
-                                dns: data.dns,
-                                name: data.name,
+                                dns: data.name.split('#')[3],
+                                name: data.name.split('#')[2],
                               })}
                               className="hover:underline"
                             >
