@@ -94,7 +94,7 @@ interface RiskDrawerProps {
 export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
   const navigate = useNavigate();
   const { removeSearchParams } = useSearchParams();
-  const { getRiskDrawerLink } = getDrawerLink();
+  const { getRiskDrawerLink, getAssetDrawerLink } = getDrawerLink();
 
   const [, dns, name] = compositeKey.split('#');
 
@@ -279,8 +279,15 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                     allAssetJobsStatus === 'pending'
                   }
                   onClick={async () => {
-                    await reRunJob({ capability: risk.source, dns: risk.dns });
-                    refetchAllAssetJobs();
+                    attributesGenericSearch?.attributes?.forEach(async risk => {
+                      if (risk.value.startsWith('#asset')) {
+                        await reRunJob({
+                          capability: risk.source,
+                          jobKey: risk.value,
+                        });
+                        refetchAllAssetJobs();
+                      }
+                    });
                   }}
                 >
                   Scan Now
@@ -434,7 +441,19 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                             className="hover: border-b border-gray-200 bg-white"
                           >
                             <td className="p-2 text-sm font-medium text-gray-800">
-                              {data.name}
+                              {data.value.startsWith('#asset') ? (
+                                <Link
+                                  to={getAssetDrawerLink({
+                                    dns: data.value,
+                                    name: data.name,
+                                  })}
+                                  className="hover:underline"
+                                >
+                                  {data.name}
+                                </Link>
+                              ) : (
+                                data.name
+                              )}
                             </td>
                             <td className="p-2 text-sm text-gray-500">
                               {data.value}
