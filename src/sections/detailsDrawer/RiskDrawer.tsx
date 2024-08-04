@@ -377,8 +377,8 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                     }}
                   />
                 ) : (
-                  <div className="flex h-96 w-full flex-col items-center justify-center bg-layer1 text-center">
-                    <UnionIcon className="size-16 text-default-light" />
+                  <div className="flex w-full flex-col items-center justify-center text-center">
+                    <UnionIcon className="mt-8 size-16 text-default-light" />
                     <p className="mt-7 text-lg font-bold">
                       Generate Description & Remediation
                     </p>
