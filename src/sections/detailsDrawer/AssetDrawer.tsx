@@ -304,7 +304,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
                           <td className="p-2 text-sm font-medium text-gray-800">
                             {data.name}
                           </td>
-                          <td className="p-2 text-sm text-gray-500">
+                          <td className="break-all p-2 text-sm text-gray-500">
                             {data.value?.startsWith('#asset') ? (
                               <Link
                                 to={getAssetDrawerLink({
