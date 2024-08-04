@@ -251,7 +251,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
               </Tooltip>
               <Tooltip placement="top" title="View proof of exploit">
                 <Button
-                  className="h-8 border border-default"
+                  className="h-8 text-nowrap border border-default"
                   startIcon={<DocumentTextIcon className="size-5" />}
                   onClick={() => {
                     navigate(
@@ -275,7 +275,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                 }
               >
                 <Button
-                  className="h-8 border border-default"
+                  className="h-8 text-nowrap border border-default"
                   startIcon={<ArrowPathIcon className="size-5" />}
                   disabled={
                     !risk.source ||
@@ -469,6 +469,15 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                                   >
                                     {data.value}
                                   </Link>
+                                ) : data.value.startsWith('http') ? (
+                                  <a
+                                    href={data.value}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-blue-500 hover:underline"
+                                  >
+                                    {data.value}
+                                  </a>
                                 ) : (
                                   data.value
                                 )}
