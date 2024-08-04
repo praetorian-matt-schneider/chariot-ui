@@ -25,6 +25,7 @@ import {
   EntityHistory,
   Risk,
   RiskSeverity,
+  RiskStatus,
   SeverityDef,
 } from '@/types';
 import { formatDate } from '@/utils/date.util';
@@ -155,6 +156,10 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
     ({ name }) => name !== asset.dns
   );
 
+  const openRisks = risks.filter(
+    ({ status }) => status?.[0] === RiskStatus.Opened
+  );
+
   return (
     <Drawer
       open={open}
@@ -182,7 +187,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
         <div className="flex h-full flex-col gap-4 px-6">
           <div className="grid grid-cols-2 gap-8">
             {/* Risks Section */}
-            {risks.length === 0 ? (
+            {openRisks.length === 0 ? (
               <div className="rounded-sm border border-green-500 p-4 shadow-sm transition-all hover:rounded-lg hover:shadow-md">
                 <h3 className="mb-4 text-lg font-semibold tracking-wide text-green-600">
                   <CheckCircleIcon className="mr-1 inline size-5 text-green-600" />
@@ -225,7 +230,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {risks.map(({ dns, name, status, updated }) => {
+                    {openRisks.map(({ dns, name, status, updated }) => {
                       const riskSeverityKey = status?.[1] as RiskSeverity;
 
                       return (
