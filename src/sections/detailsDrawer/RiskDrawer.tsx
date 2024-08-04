@@ -240,13 +240,17 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
             </div>
             <div className="mr-2 flex space-x-3">
               <Tooltip placement="top" title="Change risk status">
-                <RiskDropdown type="status" risk={risk} />
+                <RiskDropdown
+                  type="status"
+                  risk={risk}
+                  className="h-8 text-nowrap"
+                />
               </Tooltip>
               <Tooltip placement="top" title="Change risk severity">
                 <RiskDropdown
                   type="severity"
                   risk={risk}
-                  className={severityClass}
+                  className={cn(severityClass, 'h-8')}
                 />
               </Tooltip>
               <Tooltip placement="top" title="View proof of exploit">
