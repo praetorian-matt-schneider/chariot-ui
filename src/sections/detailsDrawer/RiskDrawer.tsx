@@ -238,7 +238,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                 )}
               </p>
             </div>
-            <div className="flex space-x-3">
+            <div className="mr-2 flex space-x-3">
               <Tooltip placement="top" title="Change risk status">
                 <RiskDropdown type="status" risk={risk} />
               </Tooltip>

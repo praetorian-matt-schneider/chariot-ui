@@ -119,11 +119,11 @@ export function Drawer({
                 ref={ref}
               >
                 <div className="h-full overflow-auto">
-                  <div className="mx-2 my-4 flex justify-between">
-                    <div className="flex w-full">
+                  <div className="mb-2 flex items-center justify-between pb-4">
+                    <div className="flex w-full items-center">
                       <Tooltip title="Go Back">
                         <ChevronLeftIcon
-                          className="mr-2 mt-2 size-5 cursor-pointer"
+                          className="mr-2 size-5 cursor-pointer"
                           onClick={onBack}
                         />{' '}
                       </Tooltip>
