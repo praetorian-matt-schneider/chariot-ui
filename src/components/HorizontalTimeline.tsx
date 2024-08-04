@@ -7,15 +7,27 @@ interface Props {
   className?: string;
 }
 
-export const HorizontalTimeline = ({ steps = [], current = 0 }: Props) => {
+export const HorizontalTimeline = ({
+  steps = [],
+  current = 0,
+  className = '',
+}: Props) => {
   const stepCount = steps.length;
   const filled = current > -1 ? current : 0;
 
   return (
     <div className="relative mb-8 mt-2 w-full">
-      <div className="absolute top-[5px] z-0 h-[2px] w-full bg-default">
+      <div
+        className={cn(
+          'absolute top-[5px] z-0 h-[2px] w-full bg-default',
+          className
+        )}
+      >
         <div
-          className={'h-full bg-brand transition-all duration-1000'}
+          className={cn(
+            'h-full bg-brand transition-all duration-1000',
+            className
+          )}
           style={{
             width: `${(filled * 100) / (stepCount - 1)}%`,
           }}
@@ -26,7 +38,9 @@ export const HorizontalTimeline = ({ steps = [], current = 0 }: Props) => {
         {steps.map((step, index) => (
           <div
             key={index}
-            className="relative z-10 flex items-center justify-center bg-transparent px-1"
+            className={
+              'relative z-10 flex items-center justify-center bg-transparent px-1'
+            }
           >
             <Tooltip
               title={
@@ -42,6 +56,7 @@ export const HorizontalTimeline = ({ steps = [], current = 0 }: Props) => {
               <div
                 className={cn(
                   'size-3 rounded-full bg-default cursor-pointer mb-1',
+                  className,
                   filled >= index && 'bg-brand',
                   step.className
                 )}

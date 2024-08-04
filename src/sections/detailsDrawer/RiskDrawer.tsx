@@ -237,6 +237,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                 current={jobTimeline.findIndex(
                   ({ status }) => status === jobForThisRisk?.status
                 )}
+                className={severityClass + ' brightness-90'}
               />
             </div>
             <div className="mt-2 flex w-full items-center justify-between">

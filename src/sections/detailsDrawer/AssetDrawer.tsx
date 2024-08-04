@@ -173,15 +173,13 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
       header={
         isInitialLoading ? null : (
           <div className="flex w-full items-center justify-between">
-            <div className="flex items-center space-x-3">
+            <div className="flex flex-col items-start">
               <h2 className="text-2xl font-medium tracking-wide text-gray-900">
                 {asset.name}{' '}
-                {asset.dns && (
-                  <span className="font-normal text-gray-500">
-                    ({asset.dns})
-                  </span>
-                )}
               </h2>
+              {asset.dns && (
+                <p className="text-md font-normal text-gray-500">{asset.dns}</p>
+              )}
             </div>
 
             <div className="mr-2 flex flex-row space-x-4 text-right">
