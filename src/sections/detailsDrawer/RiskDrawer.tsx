@@ -5,6 +5,12 @@ import {
   DocumentTextIcon,
   PencilSquareIcon,
 } from '@heroicons/react/24/outline';
+import {
+  ClipboardCheck,
+  HistoryIcon,
+  MessageSquare,
+  NotepadText,
+} from 'lucide-react';
 
 import { Button } from '@/components/Button';
 import { Drawer } from '@/components/Drawer';
@@ -319,13 +325,16 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                 'border border-gray-200 p-4 shadow-sm transition-all hover:rounded-lg hover:shadow-md'
               )}
             >
-              <h3
-                className={cn(
-                  'mb-4 text-lg font-medium tracking-wide text-gray-900'
-                )}
-              >
-                Description & Remediation
-              </h3>
+              <div className="mb-4 flex flex-row items-center space-x-1">
+                <ClipboardCheck className="size-5 text-gray-800" />
+                <h3
+                  className={cn(
+                    'text-lg font-medium tracking-wide text-gray-900'
+                  )}
+                >
+                  Description & Remediation
+                </h3>
+              </div>
               <Loader
                 isLoading={
                   isDefinitionsFileFetching || reportRiskStatus === 'pending'
@@ -412,9 +421,12 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                   ' border border-gray-200 p-4 shadow-sm transition-all hover:rounded-lg hover:shadow-md'
                 )}
               >
-                <h3 className="mb-4 text-lg font-medium tracking-wide text-gray-900">
-                  Attributes
-                </h3>
+                <div className="mb-4 flex flex-row items-center space-x-1">
+                  <NotepadText className="size-5 text-gray-800" />
+                  <h3 className="text-lg font-medium tracking-wide text-gray-900">
+                    Attributes
+                  </h3>
+                </div>
 
                 <div className="space-y-4">
                   {attributesGenericSearch?.attributes?.length === 0 ? (
@@ -476,9 +488,12 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                   'border border-gray-200 p-4 shadow-sm transition-all hover:rounded-lg hover:shadow-md'
                 )}
               >
-                <h3 className="mb-4 text-lg font-medium tracking-wide text-gray-900">
-                  Comments
-                </h3>
+                <div className="mb-4 flex flex-row items-center space-x-1">
+                  <MessageSquare className="size-5 text-gray-800" />
+                  <h3 className="text-lg font-medium tracking-wide text-gray-900">
+                    Comments
+                  </h3>
+                </div>
                 <Comment
                   comment={risk.comment}
                   isLoading={isRiskFetching}
@@ -495,9 +510,12 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                 'border border-gray-200 p-4 shadow-sm transition-all hover:rounded-lg hover:shadow-md'
               )}
             >
-              <h3 className="mb-4 text-lg font-medium text-gray-900">
-                Occurrences
-              </h3>
+              <div className="mb-4 flex flex-row items-center space-x-1">
+                <RisksIcon className="size-5 text-gray-800" />
+                <h3 className="text-lg font-medium text-gray-900">
+                  Occurrences
+                </h3>
+              </div>
               {riskOccurrence.length === 0 ? (
                 <div className="text-center text-gray-500">
                   <p>No occurrences found.</p>
@@ -578,7 +596,10 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
               'border border-gray-200 p-4 shadow-sm transition-all hover:rounded-lg hover:shadow-md'
             )}
           >
-            <h3 className="mb-4 text-lg font-medium text-gray-900">History</h3>
+            <div className="mb-4 flex flex-row items-center space-x-1">
+              <HistoryIcon className="size-5 text-gray-800" />
+              <h3 className="text-lg font-medium text-gray-900">History</h3>
+            </div>
             <Timeline
               items={[
                 ...(history
