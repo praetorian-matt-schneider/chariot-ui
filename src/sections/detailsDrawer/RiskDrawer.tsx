@@ -526,14 +526,14 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                 <table className="min-w-full table-auto">
                   <thead>
                     <tr>
+                      <th className="w-28 p-2 text-left text-sm font-medium text-gray-600">
+                        Status
+                      </th>
                       <th className="p-2 text-left text-sm font-medium text-gray-600">
                         Name
                       </th>
                       <th className="p-2 text-left text-sm font-medium text-gray-600">
                         DNS
-                      </th>
-                      <th className="p-2 text-left text-sm font-medium text-gray-600">
-                        Status
                       </th>
                       <th className="p-2 text-left text-sm font-medium text-gray-600">
                         Last Updated
@@ -549,20 +549,6 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                           key={data.dns}
                           className="hover: border-b border-gray-200 bg-white"
                         >
-                          <td className="p-2 text-sm font-medium text-blue-500">
-                            <Link
-                              to={getRiskDrawerLink({
-                                dns: data.dns,
-                                name: data.name,
-                              })}
-                              className="hover:underline"
-                            >
-                              {data.name}
-                            </Link>
-                          </td>
-                          <td className="p-2 text-sm text-gray-500">
-                            {data.dns}
-                          </td>
                           <td className="p-2 text-sm">
                             <div className="flex flex-row items-center space-x-1">
                               <Tooltip
@@ -579,6 +565,20 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                                 {SeverityDef[riskSeverityKey]}
                               </p>
                             </div>
+                          </td>
+                          <td className="p-2 text-sm font-medium text-blue-500">
+                            <Link
+                              to={getRiskDrawerLink({
+                                dns: data.dns,
+                                name: data.name,
+                              })}
+                              className="hover:underline"
+                            >
+                              {data.name}
+                            </Link>
+                          </td>
+                          <td className="p-2 text-sm text-gray-500">
+                            {data.dns}
                           </td>
                           <td className="p-2 text-sm text-gray-500">
                             {formatDate(data.updated)}
