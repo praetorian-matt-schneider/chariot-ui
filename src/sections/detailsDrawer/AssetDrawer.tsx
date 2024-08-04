@@ -1,6 +1,7 @@
 import { ReactNode, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
+  AlertTriangle,
   CheckCircleIcon,
   History as HistoryIcon,
   NotepadText,
@@ -8,14 +9,11 @@ import {
 
 import { Drawer } from '@/components/Drawer';
 import { AssetsIcon, RisksIcon } from '@/components/icons';
-import { getAssetStatusIcon } from '@/components/icons/AssetStatus.icon';
 import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
-import { getRiskStatusIcon } from '@/components/icons/RiskStatus.icon';
 import { Loader } from '@/components/Loader';
 import { Timeline } from '@/components/Timeline';
 import { Tooltip } from '@/components/Tooltip';
 import { AssetStatusDropdown } from '@/components/ui/AssetPriorityDropdown';
-import { getAssetStatusProperties } from '@/components/ui/AssetStatusChip';
 import { useMy } from '@/hooks';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { buildOpenRiskDataset } from '@/sections/Assets';
@@ -27,8 +25,6 @@ import {
   EntityHistory,
   Risk,
   RiskSeverity,
-  RiskStatus,
-  RiskStatusLabel,
   SeverityDef,
 } from '@/types';
 import { formatDate } from '@/utils/date.util';
@@ -169,10 +165,9 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
         isInitialLoading ? null : (
           <div className="flex w-full items-center justify-between">
             <div className="flex items-center space-x-3">
-              <h2 className="text-2xl font-medium text-gray-900">
+              <h2 className="text-2xl font-medium tracking-wide text-gray-900">
                 {asset.name}
               </h2>
-              <p className="text-sm text-gray-500">{asset.dns}</p>
             </div>
 
             <div className="mr-2 flex flex-row space-x-4 text-right">
@@ -186,64 +181,60 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
       <Loader isLoading={isInitialLoading} type="spinner">
         <div className="flex h-full flex-col space-y-8">
           <div className="grid grid-cols-2 gap-8">
-            {/* Risks Table */}
-            <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all hover:shadow-md">
-              <h3 className="mb-4 text-lg font-medium text-gray-900">
-                <RisksIcon className="mr-1 inline size-5" />
-                Risks
-              </h3>
-              {risks.length === 0 ? (
-                <div className="flex w-full flex-col items-center rounded-lg border border-green-200 bg-green-50 p-4 shadow-sm">
-                  <div className="mb-2 flex items-center space-x-2">
-                    <CheckCircleIcon className="size-8 text-green-500" />
-                    <h4 className="text-lg font-medium text-green-700">
-                      This asset appears safe!
-                    </h4>
-                  </div>
-                  <p className="text-center text-sm text-green-600">
-                    No risks have been detected for this asset. However,
-                    it&apos;s always a good practice to regularly monitor and
-                    scan for any new potential threats.
-                  </p>
-                  <div className="mt-4">
-                    <button
-                      className="text-sm font-medium text-blue-600 hover:underline"
-                      onClick={() => {
-                        // Trigger a new scan or redirect to a monitoring page
-                      }}
-                    >
-                      Schedule a scan now
-                    </button>
-                  </div>
+            {/* Risks Section */}
+            {risks.length === 0 ? (
+              <div className="rounded-sm border border-green-500 bg-white p-4 shadow-sm transition-all hover:rounded-lg hover:shadow-md">
+                <h3 className="mb-4 text-lg font-semibold tracking-wide text-green-600">
+                  <CheckCircleIcon className="mr-1 inline size-5 text-green-600" />
+                  This Asset is Safe!
+                </h3>
+                <p className="text-sm text-gray-700">
+                  No risks have been detected for this asset. However, it&apos;s
+                  always a good practice to regularly monitor and scan for any
+                  new potential threats.
+                </p>
+                <div className="mt-4">
+                  <button
+                    className="text-sm font-medium text-blue-500 hover:underline"
+                    onClick={() => {
+                      // Trigger a new scan or redirect to a monitoring page
+                    }}
+                  >
+                    Schedule a scan now
+                  </button>
                 </div>
-              ) : (
+              </div>
+            ) : (
+              <div className="rounded-sm border border-red-500 bg-white p-4 shadow-sm transition-all hover:rounded-lg hover:shadow-md">
+                <h3 className="mb-4 text-lg font-semibold tracking-wide text-red-600">
+                  <AlertTriangle className="mr-1 inline size-5 text-red-600" />
+                  This Asset is at Risk!
+                </h3>
                 <table className="min-w-full table-auto">
                   <thead>
                     <tr>
-                      <th className="w-[80px] p-2 text-left text-sm font-medium text-gray-600">
+                      <th className="w-[80px] p-2 text-left text-sm font-medium text-red-600">
                         Priority
                       </th>
-                      <th className="p-2 text-left text-sm font-medium text-gray-600">
+                      <th className="p-2 text-left text-sm font-medium text-red-600">
                         Name
                       </th>
-                      <th className="p-2 text-left text-sm font-medium text-gray-600">
+                      <th className="p-2 text-left text-sm font-medium text-red-600">
                         Last Updated
                       </th>
                     </tr>
                   </thead>
                   <tbody>
                     {risks.map(({ dns, name, status, updated }) => {
-                      const riskStatusKey =
-                        `${status?.[0]}${status?.[2] || ''}` as RiskStatus;
                       const riskSeverityKey = status?.[1] as RiskSeverity;
 
                       return (
                         <tr
                           key={dns}
-                          className="border-b border-gray-200 bg-white hover:bg-gray-100"
+                          className="border-b border-red-100 hover:bg-red-50"
                         >
                           <td className="p-2">
-                            <div className="flex items-center space-x-2">
+                            <div className="flex flex-row items-center space-x-2">
                               <Tooltip
                                 title={
                                   SeverityDef[riskSeverityKey] + ' Severity'
@@ -251,45 +242,37 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
                               >
                                 {getRiskSeverityIcon(
                                   riskSeverityKey,
-                                  'h-4 w-4 text-red-500'
+                                  'h-4 w-4 text-red-600'
                                 )}
                               </Tooltip>
-                              <Tooltip
-                                title={
-                                  RiskStatusLabel[riskStatusKey] + ' Status'
-                                }
-                              >
-                                {getRiskStatusIcon(
-                                  riskStatusKey,
-                                  'h-4 w-4 text-gray-700'
-                                )}
-                              </Tooltip>
+                              <span className="text-xs">
+                                {SeverityDef[riskSeverityKey]}
+                              </span>
                             </div>
                           </td>
-                          <td className="p-2 text-sm font-medium text-gray-800">
+                          <td className="p-2 text-sm font-medium text-blue-500">
                             <Link
                               to={getRiskDrawerLink({ dns, name })}
-                              className="text-blue-600 hover:underline"
+                              className="hover:underline"
                             >
                               {name}
                             </Link>
                           </td>
-                          <td className="p-2 text-sm text-gray-500">
-                            {formatDate(updated)}
-                          </td>
+                          <td className="p-2 text-sm">{formatDate(updated)}</td>
                         </tr>
                       );
                     })}
                   </tbody>
                 </table>
-              )}
-            </div>
+              </div>
+            )}
 
-            {/* Attributes Table */}
-            <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all hover:shadow-md">
+            {/* Attributes Section */}
+            <div className="rounded-sm border border-gray-200 bg-white p-4 shadow-sm transition-all hover:rounded-lg hover:shadow-md">
               <div className="flex flex-row justify-between">
-                <h3 className="mb-4 text-lg font-medium text-gray-900">
-                  <NotepadText className="mr-1 inline size-5" /> Attributes
+                <h3 className="mb-4 text-lg font-medium tracking-wide text-gray-900">
+                  <NotepadText className="mr-1 inline size-5 text-gray-800" />
+                  Attributes
                 </h3>
               </div>
               <div className="space-y-4">
@@ -316,7 +299,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
                       {attributesGenericSearch?.attributes?.map(data => (
                         <tr
                           key={data.name}
-                          className="border-b border-gray-200 bg-white hover:bg-gray-100"
+                          className="border-b border-gray-200 bg-white hover:bg-gray-50"
                         >
                           <td className="p-2 text-sm font-medium text-gray-800">
                             {data.name}
@@ -336,10 +319,11 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
             </div>
           </div>
 
-          {/* Related Assets Table */}
-          <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all hover:shadow-md">
-            <h3 className="mb-4 text-lg font-medium text-gray-900">
-              <AssetsIcon className="mr-1 inline size-5" /> Related Assets
+          {/* Related Assets Section */}
+          <div className="rounded-sm border border-gray-200 bg-white p-4 shadow-sm transition-all hover:rounded-lg hover:shadow-md">
+            <h3 className="mb-4 text-lg font-medium tracking-wide text-gray-900">
+              <AssetsIcon className="mr-1 inline size-5 text-gray-800" />
+              Related Assets
             </h3>
             {linkedHostnames.length === 0 && linkedIps.length === 0 ? (
               <div className="text-center text-gray-500">
@@ -351,109 +335,92 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
                 <thead>
                   <tr>
                     <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">
-                      Type
-                    </th>
-                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">
                       Name
                     </th>
                     <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">
                       DNS
                     </th>
                     <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">
-                      Last Updated
+                      Status
                     </th>
                     <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">
-                      Status
+                      Last Updated
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   {linkedHostnames.map(data => {
-                    const { detail } = getAssetStatusProperties(data.status);
                     const containsRisks = openRiskDataset[data.dns];
 
                     return (
                       <tr
                         key={data.dns}
-                        className="border-b border-gray-200 bg-white hover:bg-gray-100"
+                        className="border-b border-gray-200 bg-white hover:bg-gray-50"
                       >
-                        <td className="px-4 py-2 text-sm font-medium text-gray-800">
-                          Hostname
-                        </td>
-                        <td className="px-4 py-2 text-sm font-medium text-gray-800">
-                          <Link
-                            to={getAssetDrawerLink({
-                              dns: data.dns,
-                              name: data.name,
-                            })}
-                            className="text-blue-600 hover:underline"
-                          >
-                            {data.name}
-                          </Link>
+                        <td className="px-4 py-2 text-sm font-medium text-blue-500">
+                          <div className="flex flex-row items-center space-x-1">
+                            {containsRisks && (
+                              <Tooltip title="Contains open risks">
+                                <RisksIcon className="size-4 text-red-500" />
+                              </Tooltip>
+                            )}
+                            <Link
+                              to={getAssetDrawerLink({
+                                dns: data.dns,
+                                name: data.name,
+                              })}
+                              className="hover:underline"
+                            >
+                              {data.name}
+                            </Link>
+                          </div>
                         </td>
                         <td className="px-4 py-2 text-sm text-gray-500">
                           {data.dns}
                         </td>
                         <td className="px-4 py-2 text-sm text-gray-500">
-                          {formatDate(data.updated)}
+                          {AssetStatusLabel[data.status]}
                         </td>
-                        <td className="px-4 py-2">
-                          <Tooltip title={detail}>
-                            {getAssetStatusIcon(
-                              data.status,
-                              'h-4 w-4 text-green-500'
-                            )}
-                          </Tooltip>
-                          {containsRisks && (
-                            <Tooltip title="Contains open risks">
-                              <RisksIcon className="size-4 text-red-500" />
-                            </Tooltip>
-                          )}
+                        <td className="px-4 py-2 text-sm text-gray-500">
+                          {formatDate(data.updated)}
                         </td>
                       </tr>
                     );
                   })}
                   {linkedIps.map(data => {
-                    const { detail } = getAssetStatusProperties(data.status);
                     const containsRisks = openRiskDataset[data.dns];
 
                     return (
                       <tr
                         key={data.dns}
-                        className="border-b border-gray-200 bg-white hover:bg-gray-100"
+                        className="border-b border-gray-200 bg-white hover:bg-gray-50"
                       >
-                        <td className="px-4 py-2 text-sm font-medium text-gray-800">
-                          IP Address
-                        </td>
-                        <td className="px-4 py-2 text-sm font-medium text-gray-800">
-                          <Link
-                            to={getAssetDrawerLink({
-                              dns: data.dns,
-                              name: data.name,
-                            })}
-                            className="text-blue-600 hover:underline"
-                          >
-                            {data.name}
-                          </Link>
+                        <td className="px-4 py-2 text-sm font-medium text-blue-500">
+                          <div className="flex flex-row items-center space-x-1">
+                            {containsRisks && (
+                              <Tooltip title="Contains open risks">
+                                <RisksIcon className="size-4 text-red-500" />
+                              </Tooltip>
+                            )}
+                            <Link
+                              to={getAssetDrawerLink({
+                                dns: data.dns,
+                                name: data.name,
+                              })}
+                              className="hover:underline"
+                            >
+                              {data.name}
+                            </Link>
+                          </div>
                         </td>
                         <td className="px-4 py-2 text-sm text-gray-500">
                           {data.dns}
                         </td>
                         <td className="px-4 py-2 text-sm text-gray-500">
-                          {formatDate(data.updated)}
+                          {AssetStatusLabel[data.status]}
                         </td>
-                        <td className="px-4 py-2">
-                          <Tooltip title={detail}>
-                            {getAssetStatusIcon(
-                              data.status,
-                              'h-4 w-4 text-green-500'
-                            )}
-                          </Tooltip>
-                          {containsRisks && (
-                            <Tooltip title="Contains open risks">
-                              <RisksIcon className="size-4 text-red-500" />
-                            </Tooltip>
-                          )}
+                        <td className="px-4 py-2 text-sm text-gray-500">
+                          {formatDate(data.updated)}
                         </td>
                       </tr>
                     );
@@ -463,10 +430,10 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
             )}
           </div>
 
-          {/* History Timeline */}
-          <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all hover:shadow-md">
-            <h3 className="mb-4 text-lg font-medium text-gray-900">
-              <HistoryIcon className="mr-1 inline size-5" />
+          {/* History Section */}
+          <div className="rounded-sm border border-gray-200 bg-white p-4 shadow-sm transition-all hover:rounded-lg hover:shadow-md">
+            <h3 className="mb-4 text-lg font-medium tracking-wide text-gray-900">
+              <HistoryIcon className="mr-1 inline size-5 text-gray-800" />
               History
             </h3>
             <Timeline
@@ -477,7 +444,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
                   description: updated,
                   icon:
                     index === 0 ? (
-                      <AssetsIcon className="size-4 text-gray-700" />
+                      <AssetsIcon className="size-4 text-gray-800" />
                     ) : undefined,
                 };
               })}
