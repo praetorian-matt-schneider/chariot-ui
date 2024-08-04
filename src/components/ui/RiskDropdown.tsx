@@ -141,7 +141,7 @@ export const RiskDropdown: React.FC<Props> = ({
     return (
       <>
         <Dropdown
-          className={`justify-start rounded-[2px] py-1 ${className} border-1 min-w-32 border border-default`}
+          className={`border-1 min-w-32 justify-start rounded-[2px] border border-default py-1 ${className}`}
           menu={{
             items: riskStatusOptions,
             onClick: value => {

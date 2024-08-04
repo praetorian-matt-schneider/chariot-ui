@@ -28,6 +28,7 @@ import {
   RiskStatus,
   SeverityDef,
 } from '@/types';
+import { cn } from '@/utils/classname';
 import { formatDate } from '@/utils/date.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
 import { useSearchParams } from '@/utils/url.util';
@@ -165,12 +166,15 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
       open={open}
       onClose={() => removeSearchParams(StorageKey.DRAWER_COMPOSITE_KEY)}
       onBack={() => navigate(-1)}
-      className="w-full rounded-t-lg bg-white p-6 shadow-lg"
+      className={cn(
+        'w-full rounded-t-lg p-6 pb-0 shadow-lg',
+        openRisks.length === 0 ? 'bg-zinc-100' : 'bg-red-50'
+      )}
       header={
         isInitialLoading ? null : (
           <div className="flex w-full items-center justify-between">
             <div className="flex items-center space-x-3">
-              <h2 className="text-lg font-medium tracking-wide text-gray-900">
+              <h2 className="text-2xl font-medium tracking-wide text-gray-900">
                 {asset.name}{' '}
                 {asset.dns && (
                   <span className="font-normal text-gray-500">
@@ -189,11 +193,11 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
       }
     >
       <Loader isLoading={isInitialLoading} type="spinner">
-        <div className="flex h-full flex-col gap-4 px-6">
-          <div className="grid grid-cols-2 gap-8">
+        <div className="flex h-full flex-col gap-2 px-2">
+          <div className="grid grid-cols-2 gap-4">
             {/* Risks Section */}
             {openRisks.length === 0 ? (
-              <div className="rounded-sm border border-green-500 bg-white p-4  transition-all hover:rounded-lg hover:shadow-md">
+              <div className="rounded-lg bg-white p-8  transition-all hover:rounded-lg hover:shadow-md">
                 <h3 className="mb-4 text-2xl font-semibold tracking-wide text-green-600">
                   <CheckCircleIcon className="mr-1 inline size-6 text-green-600" />
                   This Asset is Safe!
@@ -215,7 +219,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
                 </div>
               </div>
             ) : (
-              <div className="rounded-sm border border-red-500 bg-white p-4  transition-all hover:rounded-lg hover:shadow-md">
+              <div className="rounded-lg border border-red-500 bg-white p-8  transition-all hover:rounded-lg hover:shadow-md">
                 <h3 className="mb-4 text-2xl font-semibold tracking-wide text-red-600">
                   <AlertTriangle className="mr-1 inline size-5 text-red-600" />
                   This Asset is at Risk!
@@ -278,7 +282,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
             )}
 
             {/* Attributes Section */}
-            <div className="rounded-sm border border-gray-200 bg-white p-4  transition-all hover:rounded-lg hover:shadow-md">
+            <div className="rounded-lg  bg-white p-8  transition-all hover:rounded-lg hover:shadow-md">
               <div className="flex flex-row justify-between">
                 <h3 className="mb-4 text-2xl font-semibold tracking-wide text-gray-900">
                   <NotepadText className="mr-1 inline size-6 text-gray-800" />
@@ -342,7 +346,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
           </div>
 
           {/* Related Assets Section */}
-          <div className="rounded-sm border border-gray-200 bg-white p-4  transition-all hover:rounded-lg hover:shadow-md">
+          <div className="rounded-lg  bg-white p-8 transition-all hover:rounded-lg hover:shadow-md">
             <h3 className="mb-4 text-2xl font-semibold tracking-wide text-gray-900">
               <AssetsIcon className="mr-1 inline size-6 text-gray-800" />
               Related Assets
@@ -453,7 +457,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
           </div>
 
           {/* History Section */}
-          <div className="rounded-sm border border-gray-200 bg-white p-4  transition-all hover:rounded-lg hover:shadow-md">
+          <div className="rounded-lg  bg-white p-8 transition-all hover:rounded-lg hover:shadow-md">
             <h3 className="mb-4 text-2xl font-semibold tracking-wide text-gray-900">
               <HistoryIcon className="mr-1 inline size-6 text-gray-800" />
               History

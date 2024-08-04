@@ -1,9 +1,5 @@
 import { useState } from 'react';
-import {
-  ChevronDownIcon,
-  ChevronUpIcon,
-  PlusIcon,
-} from '@heroicons/react/24/outline';
+import { ChevronDownIcon, PlusIcon } from '@heroicons/react/24/outline';
 
 import { Button } from '@/components/Button';
 import { Inputs } from '@/components/form/Inputs';
@@ -41,21 +37,15 @@ export const AddAttribute = (props: Props) => {
         open={open}
         setOpen={setOpen}
         styleType="none"
-        className="relative flex items-center border-2 border-default bg-default-light"
-        endIcon={
-          open ? (
-            <ChevronUpIcon className="ml-auto size-4 text-gray-500" />
-          ) : (
-            <ChevronDownIcon className="ml-auto size-4 text-gray-500" />
-          )
-        }
-        startIcon={<PlusIcon className="size-4 text-gray-500" />}
+        className="relative flex items-center text-nowrap rounded-sm bg-white"
+        endIcon={<ChevronDownIcon className="ml-auto size-3 text-default" />}
+        startIcon={<PlusIcon className="size-5 text-default" />}
         label="Add Attribute"
         style={{ zIndex: 1 }}
       >
         <div className="w-[360px]">
           <form
-            className="space-y-4 p-4"
+            className="space-y-4 px-4"
             onSubmit={event => {
               event.preventDefault();
               createAttribute(

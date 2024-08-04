@@ -223,7 +223,10 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
       onClose={() => removeSearchParams(StorageKey.DRAWER_COMPOSITE_KEY)}
       onBack={() => navigate(-1)}
       minWidth={DRAWER_WIDTH}
-      className="w-full rounded-t-lg bg-white  p-6 shadow-lg"
+      className={cn(
+        'w-full rounded-t-lg bg-zinc-100 p-6 pb-0 shadow-lg',
+        severityClass
+      )}
       header={
         isInitialLoading ? null : (
           <div className="flex w-full flex-col">
@@ -238,9 +241,9 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
             </div>
             <div className="mt-2 flex w-full items-center justify-between">
               <div className="flex items-center space-x-3">
-                <p className="text-lg font-medium text-gray-900">
+                <p className="text-2xl font-medium text-gray-900">
                   {risk.name}{' '}
-                  <span className="font-normal text-gray-500">
+                  <span className="ml-1 font-normal text-gray-500">
                     via {risk.source} on {risk.dns}
                   </span>
                   {knownExploitedThreats.includes(risk.name) && (
@@ -255,19 +258,19 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                   <RiskDropdown
                     type="status"
                     risk={risk}
-                    className="h-8 text-nowrap"
+                    className="h-12 text-nowrap border-none bg-white"
                   />
                 </Tooltip>
                 <Tooltip placement="top" title="Change risk severity">
                   <RiskDropdown
                     type="severity"
                     risk={risk}
-                    className={cn(severityClass, 'h-8')}
+                    className={'h-12 border-none bg-white'}
                   />
                 </Tooltip>
                 <Tooltip placement="top" title="View proof of exploit">
                   <Button
-                    className="h-8 text-nowrap border border-default"
+                    className="h-12 text-nowrap bg-white"
                     startIcon={<DocumentTextIcon className="size-5" />}
                     onClick={() => {
                       navigate(
@@ -291,7 +294,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                   }
                 >
                   <Button
-                    className="h-8 text-nowrap border border-default"
+                    className="h-12 text-nowrap bg-white"
                     startIcon={<ArrowPathIcon className="size-5" />}
                     disabled={
                       !risk.source ||
@@ -326,12 +329,12 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
       }
     >
       <Loader isLoading={isInitialLoading} type="spinner">
-        <div className="flex h-full flex-col gap-4 px-6">
-          <div className="grid grid-cols-2 gap-8">
+        <div className="flex h-full flex-col gap-2 px-2">
+          <div className="grid grid-cols-2 gap-4">
             {/* Description & Remediation */}
             <div
               className={cn(
-                'bg-white flex flex-col border border-gray-200 p-4 transition-all hover:rounded-lg hover:shadow-md'
+                'bg-white flex flex-col  p-8 transition-all rounded-lg hover:shadow-md'
               )}
             >
               <div className="mb-4 flex flex-row items-center space-x-1">
@@ -427,7 +430,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
               {/* Attributes Section */}
               <div
                 className={cn(
-                  ' bg-white border border-gray-200 p-4 transition-all hover:rounded-lg hover:shadow-md'
+                  ' bg-white p-8 transition-all rounded-lg hover:shadow-md'
                 )}
               >
                 <div className="mb-4 flex flex-row items-center space-x-1">
@@ -505,7 +508,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
               {/* Comment Section */}
               <div
                 className={cn(
-                  'bg-white border border-gray-200 p-4 transition-all hover:rounded-lg hover:shadow-md'
+                  'bg-white p-8 transition-all rounded-lg hover:shadow-md'
                 )}
               >
                 <div className="mb-4 flex flex-row items-center space-x-1">
@@ -527,7 +530,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
             {/* Occurrences Section */}
             <div
               className={cn(
-                'bg-white border border-gray-200 p-4 transition-all hover:rounded-lg hover:shadow-md'
+                'bg-white p-8 transition-all rounded-lg hover:shadow-md'
               )}
             >
               <div className="mb-4 flex flex-row items-center space-x-1">
@@ -613,7 +616,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
           {/* History Section */}
           <div
             className={cn(
-              'bg-white border border-gray-200 p-4 transition-all hover:rounded-lg hover:shadow-md'
+              'bg-white p-8 mb-8 transition-all rounded-lg hover:shadow-md'
             )}
           >
             <div className="mb-4 flex flex-row items-center space-x-1">
