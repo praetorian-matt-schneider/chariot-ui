@@ -37,7 +37,7 @@ export const AddAttribute = (props: Props) => {
         open={open}
         setOpen={setOpen}
         styleType="none"
-        className="relative flex items-center text-nowrap rounded-sm bg-white"
+        className="relative flex items-center text-nowrap rounded-md bg-white py-5"
         endIcon={<ChevronDownIcon className="ml-auto size-3 text-default" />}
         startIcon={<PlusIcon className="size-5 text-default" />}
         label="Add Attribute"

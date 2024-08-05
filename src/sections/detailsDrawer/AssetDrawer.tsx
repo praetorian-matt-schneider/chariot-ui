@@ -173,18 +173,15 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
       header={
         isInitialLoading ? null : (
           <div className="flex w-full items-center justify-between">
-            <div className="flex flex-col items-start">
+            <div className="flex flex-row items-center justify-center space-x-2">
               <h2 className="text-2xl font-medium tracking-wide text-gray-900">
                 {asset.name}{' '}
               </h2>
               {asset.dns && (
-                <p className="text-md font-normal text-gray-500">{asset.dns}</p>
+                <p className="text-md rounded-sm bg-zinc-800/10 px-4 py-2 font-normal text-gray-500">
+                  {asset.dns}
+                </p>
               )}
-            </div>
-
-            <div className="mr-2 flex flex-row space-x-4 text-right">
-              <AddAttribute resourceKey={asset.key} />
-              <AssetStatusDropdown asset={asset} />
             </div>
           </div>
         )
@@ -279,66 +276,74 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
               </div>
             )}
 
-            {/* Attributes Section */}
-            <div className="rounded-lg  bg-white p-8  transition-all hover:rounded-lg hover:shadow-md">
-              <div className="flex flex-row justify-between">
-                <h3 className="mb-4 text-2xl font-semibold tracking-wide text-gray-900">
-                  <NotepadText className="mr-1 inline size-6 text-gray-800" />
-                  Attributes
-                </h3>
+            <div className="flex w-full flex-col gap-2">
+              {/* Actions Section */}
+              <div className="flex flex-row justify-end space-x-4 text-right">
+                <AddAttribute resourceKey={asset.key} />
+                <AssetStatusDropdown asset={asset} />
               </div>
-              <div className="space-y-4">
-                {attributesGenericSearch?.attributes?.length === 0 ? (
-                  <div className="text-center text-gray-500">
-                    <p>No attributes added to this asset yet.</p>
-                  </div>
-                ) : (
-                  <table className="min-w-full table-auto">
-                    <thead>
-                      <tr>
-                        <th className="p-2 text-left text-sm font-medium text-gray-600">
-                          Name
-                        </th>
-                        <th className="p-2 text-left text-sm font-medium text-gray-600">
-                          Value
-                        </th>
-                        <th className="p-2 text-left text-sm font-medium text-gray-600">
-                          Last Updated
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {attributesGenericSearch?.attributes?.map(data => (
-                        <tr
-                          key={data.name}
-                          className="border-b border-gray-200 hover:bg-gray-50"
-                        >
-                          <td className="p-2 text-sm font-medium text-gray-800">
-                            {data.name}
-                          </td>
-                          <td className="break-all p-2 text-sm text-gray-500">
-                            {data.value?.startsWith('#asset') ? (
-                              <Link
-                                to={getAssetDrawerLink({
-                                  dns: data.value.split('#')[3],
-                                  name: data.value.split('#')[2],
-                                })}
-                                className="text-blue-500 hover:underline"
-                              >
-                                {data.value}
-                              </Link>
-                            ) : (
-                              data.value
-                            )}
-                          </td>
-                          <td className="p-2 text-sm text-gray-500">
-                            {formatDate(data.updated)}
-                          </td>
+
+              {/* Attributes Section */}
+              <div className="rounded-lg  bg-white p-8  transition-all hover:rounded-lg hover:shadow-md">
+                <div className="flex flex-row justify-between">
+                  <h3 className="mb-4 text-2xl font-semibold tracking-wide text-gray-900">
+                    <NotepadText className="mr-1 inline size-6 text-gray-800" />
+                    Attributes
+                  </h3>
+                </div>
+                <div className="space-y-4">
+                  {attributesGenericSearch?.attributes?.length === 0 ? (
+                    <div className="text-center text-gray-500">
+                      <p>No attributes added to this asset yet.</p>
+                    </div>
+                  ) : (
+                    <table className="min-w-full table-auto">
+                      <thead>
+                        <tr>
+                          <th className="p-2 text-left text-sm font-medium text-gray-600">
+                            Name
+                          </th>
+                          <th className="p-2 text-left text-sm font-medium text-gray-600">
+                            Value
+                          </th>
+                          <th className="p-2 text-left text-sm font-medium text-gray-600">
+                            Last Updated
+                          </th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
+                      </thead>
+                      <tbody>
+                        {attributesGenericSearch?.attributes?.map(data => (
+                          <tr
+                            key={data.name}
+                            className="border-b border-gray-200 hover:bg-gray-50"
+                          >
+                            <td className="p-2 text-sm font-medium text-gray-800">
+                              {data.name}
+                            </td>
+                            <td className="break-all p-2 text-sm text-gray-500">
+                              {data.value?.startsWith('#asset') ? (
+                                <Link
+                                  to={getAssetDrawerLink({
+                                    dns: data.value.split('#')[3],
+                                    name: data.value.split('#')[2],
+                                  })}
+                                  className="text-blue-500 hover:underline"
+                                >
+                                  {data.value}
+                                </Link>
+                              ) : (
+                                data.value
+                              )}
+                            </td>
+                            <td className="p-2 text-sm text-gray-500">
+                              {formatDate(data.updated)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
               </div>
             </div>
           </div>

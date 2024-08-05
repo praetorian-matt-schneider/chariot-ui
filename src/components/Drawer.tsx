@@ -139,8 +139,15 @@ export function Drawer({
                   <div>{children}</div>
                 </div>
                 {footer && (
-                  <div className={cn('w-full bg-layer1 p-3', footerClassname)}>
-                    {footer}
+                  <div className="absolute bottom-0 left-0 flex w-full flex-row items-center justify-center">
+                    <div
+                      className={cn(
+                        'rounded-t-lg bg-gray-200 px-8 py-4 shadow-lg',
+                        footerClassname
+                      )}
+                    >
+                      {footer}
+                    </div>
                   </div>
                 )}
               </div>

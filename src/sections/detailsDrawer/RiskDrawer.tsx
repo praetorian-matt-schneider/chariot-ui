@@ -227,108 +227,18 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
         'w-full rounded-t-lg bg-zinc-100 p-6 pb-0 shadow-lg',
         severityClass
       )}
+      footerClassname={'bg-zinc-200 bg-opacity-90'}
       header={
         isInitialLoading ? null : (
           <div className="flex w-full flex-col">
             {/* Job Timeline and Actions */}
-            <div>
-              <HorizontalTimeline
-                steps={jobTimeline}
-                current={jobTimeline.findIndex(
-                  ({ status }) => status === jobForThisRisk?.status
-                )}
-                className={severityClass + ' brightness-90'}
-              />
-            </div>
-            <div className="mt-2 flex w-full items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <p className="text-2xl font-medium text-gray-900">
-                  {risk.name}{' '}
-                  <span className="ml-1 font-normal text-gray-500">
-                    via {risk.source} on {risk.dns}
-                  </span>
-                  {knownExploitedThreats.includes(risk.name) && (
-                    <span className="text-red-500">
-                      [Known Exploited Threat]
-                    </span>
-                  )}
-                </p>
-              </div>
-              <div className="mr-2 flex space-x-3">
-                <Tooltip placement="top" title="Change risk status">
-                  <RiskDropdown
-                    type="status"
-                    risk={risk}
-                    className="h-12 text-nowrap border-none bg-white"
-                  />
-                </Tooltip>
-                <Tooltip placement="top" title="Change risk severity">
-                  <RiskDropdown
-                    type="severity"
-                    risk={risk}
-                    className={cn(
-                      'h-12 border-none bg-white',
-                      severityClass,
-                      'brightness-[110%]'
-                    )}
-                  />
-                </Tooltip>
-                <Tooltip placement="top" title="View proof of exploit">
-                  <Button
-                    className="h-12 text-nowrap bg-white"
-                    startIcon={<DocumentTextIcon className="size-5" />}
-                    onClick={() => {
-                      navigate(
-                        generatePathWithSearch({
-                          appendSearch: [[StorageKey.POE, `${dns}/${name}`]],
-                        })
-                      );
-                    }}
-                  >
-                    Proof of Exploit
-                  </Button>
-                </Tooltip>
-                <Tooltip
-                  placement="top"
-                  title={
-                    risk.source && !isManualORPRrovidedRisk(risk)
-                      ? isJobRunningForThisRisk
-                        ? 'Scanning in progress'
-                        : 'Revalidate the risk'
-                      : 'On-demand scanning is only available for automated risk discovery.'
-                  }
-                >
-                  <Button
-                    className="h-12 text-nowrap bg-white"
-                    startIcon={<ArrowPathIcon className="size-5" />}
-                    disabled={
-                      !risk.source ||
-                      isManualORPRrovidedRisk(risk) ||
-                      Boolean(isJobRunningForThisRisk)
-                    }
-                    isLoading={
-                      reRunJobStatus === 'pending' ||
-                      allAssetJobsStatus === 'pending'
-                    }
-                    onClick={async () => {
-                      attributesGenericSearch?.attributes?.forEach(
-                        async risk => {
-                          if (risk.value.startsWith('#asset')) {
-                            await reRunJob({
-                              capability: risk.source,
-                              jobKey: risk.value,
-                            });
-                            refetchAllAssetJobs();
-                          }
-                        }
-                      );
-                    }}
-                  >
-                    Scan Now
-                  </Button>
-                </Tooltip>
-              </div>
-            </div>
+            <HorizontalTimeline
+              steps={jobTimeline}
+              current={jobTimeline.findIndex(
+                ({ status }) => status === jobForThisRisk?.status
+              )}
+              className={severityClass + ' brightness-90'}
+            />
           </div>
         )
       }
@@ -342,14 +252,26 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                 'bg-white flex flex-col  p-8 transition-all rounded-lg hover:shadow-md'
               )}
             >
-              <div className="mb-4 flex flex-row items-center space-x-1">
-                <ClipboardCheck className="size-6 text-gray-800" />
+              <div className="mb-4 flex flex-row items-start space-x-1">
+                <ClipboardCheck className="mt-1 size-12 text-gray-800" />
                 <h3
                   className={cn(
                     'text-2xl font-semibold tracking-wide text-gray-900'
                   )}
                 >
-                  Description & Remediation
+                  <div className="flex flex-col justify-start text-left">
+                    <p className="text-2xl font-semibold text-gray-900">
+                      {risk.name}{' '}
+                      {knownExploitedThreats.includes(risk.name) && (
+                        <span className="text-red-500">
+                          [Known Exploited Threat]
+                        </span>
+                      )}
+                    </p>
+                    <p className="ml-1 text-sm font-normal text-gray-500">
+                      {risk.source} on {risk.dns}
+                    </p>
+                  </div>
                 </h3>
               </div>
               <Loader
@@ -432,6 +354,82 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
             </div>
 
             <div className="flex flex-col gap-4">
+              {/* Actions Section */}
+              <div className="flex flex-row justify-end space-x-3">
+                <Tooltip placement="top" title="Change risk status">
+                  <RiskDropdown
+                    type="status"
+                    risk={risk}
+                    className="h-14 rounded-md border-none bg-white text-default"
+                  />
+                </Tooltip>
+                <Tooltip placement="top" title="Change risk severity">
+                  <RiskDropdown
+                    type="severity"
+                    risk={risk}
+                    className={cn(
+                      'transition-all h-15 rounded-md border-none',
+                      severityClass,
+                      'brightness-90'
+                    )}
+                  />
+                </Tooltip>
+                <Tooltip placement="top" title="View proof of exploit">
+                  <Button
+                    className="h-15 text-nowrap rounded-md border-none bg-white"
+                    startIcon={<DocumentTextIcon className="size-5" />}
+                    onClick={() => {
+                      navigate(
+                        generatePathWithSearch({
+                          appendSearch: [[StorageKey.POE, `${dns}/${name}`]],
+                        })
+                      );
+                    }}
+                  >
+                    Proof of Exploit
+                  </Button>
+                </Tooltip>
+                <Tooltip
+                  placement="top"
+                  title={
+                    risk.source && !isManualORPRrovidedRisk(risk)
+                      ? isJobRunningForThisRisk
+                        ? 'Scanning in progress'
+                        : 'Revalidate the risk'
+                      : 'On-demand scanning is only available for automated risk discovery.'
+                  }
+                >
+                  <Button
+                    className="h-15 text-nowrap rounded-md border-none bg-white"
+                    startIcon={<ArrowPathIcon className="size-5" />}
+                    disabled={
+                      !risk.source ||
+                      isManualORPRrovidedRisk(risk) ||
+                      Boolean(isJobRunningForThisRisk)
+                    }
+                    isLoading={
+                      reRunJobStatus === 'pending' ||
+                      allAssetJobsStatus === 'pending'
+                    }
+                    onClick={async () => {
+                      attributesGenericSearch?.attributes?.forEach(
+                        async risk => {
+                          if (risk.value.startsWith('#asset')) {
+                            await reRunJob({
+                              capability: risk.source,
+                              jobKey: risk.value,
+                            });
+                            refetchAllAssetJobs();
+                          }
+                        }
+                      );
+                    }}
+                  >
+                    Scan Now
+                  </Button>
+                </Tooltip>
+              </div>
+
               {/* Attributes Section */}
               <div
                 className={cn(
