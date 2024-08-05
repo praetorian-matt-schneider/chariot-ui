@@ -224,13 +224,13 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
       onBack={() => navigate(-1)}
       minWidth={DRAWER_WIDTH}
       className={cn(
-        'w-full rounded-t-lg bg-zinc-100 p-6 pb-0 shadow-lg',
+        'w-full rounded-t-lg bg-zinc-100 pb-0 shadow-lg',
         severityClass
       )}
       footerClassname={'bg-zinc-200 bg-opacity-90'}
       header={
         isInitialLoading ? null : (
-          <div className="flex w-full flex-col">
+          <div className="flex w-full flex-col px-10 pb-0 pt-6">
             {/* Job Timeline and Actions */}
             <HorizontalTimeline
               steps={jobTimeline}
@@ -244,7 +244,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
       }
     >
       <Loader isLoading={isInitialLoading} type="spinner">
-        <div className="flex h-full flex-col gap-2 px-2">
+        <div className="flex h-full flex-col gap-2 px-8 pt-0">
           <div className="grid grid-cols-2 gap-4">
             {/* Description & Remediation */}
             <div
@@ -269,7 +269,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                       )}
                     </p>
                     <p className="ml-1 text-sm font-normal text-gray-500">
-                      {risk.source} on {risk.dns}
+                      via {risk.source} on {risk.dns}
                     </p>
                   </div>
                 </h3>

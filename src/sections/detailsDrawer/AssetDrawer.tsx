@@ -167,14 +167,14 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
       onClose={() => removeSearchParams(StorageKey.DRAWER_COMPOSITE_KEY)}
       onBack={() => navigate(-1)}
       className={cn(
-        'w-full rounded-t-lg p-6 pb-0 shadow-lg',
+        'w-full rounded-t-lg pb-0 shadow-lg pt-6',
         openRisks.length === 0 ? 'bg-zinc-100' : 'bg-red-50'
       )}
       header={
         isInitialLoading ? null : (
-          <div className="flex w-full items-center justify-between">
+          <div className="flex w-full items-center justify-between px-10 pt-0">
             <div className="flex flex-row items-center justify-center space-x-2">
-              <h2 className="text-2xl font-medium tracking-wide text-gray-900">
+              <h2 className="mt-0 text-2xl font-medium tracking-wide text-gray-900">
                 {asset.name}{' '}
               </h2>
               {asset.dns && (
@@ -188,7 +188,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
       }
     >
       <Loader isLoading={isInitialLoading} type="spinner">
-        <div className="flex h-full flex-col gap-2 px-2">
+        <div className="flex h-full flex-col gap-2 px-8 pt-0">
           <div className="grid grid-cols-2 gap-4">
             {/* Risks Section */}
             {openRisks.length === 0 ? (

@@ -118,12 +118,12 @@ export function Drawer({
                 }}
                 ref={ref}
               >
-                <div className="h-full overflow-auto">
-                  <div className="mb-2 flex items-center justify-between pb-4">
+                <div className="h-full overflow-auto text-default">
+                  <div className="mb-2 flex items-center justify-between px-10 pb-4">
                     <div className="flex w-full items-center">
                       <Tooltip title="Go Back">
                         <ChevronLeftIcon
-                          className="mr-2 size-5 cursor-pointer"
+                          className="mr-2 size-6 cursor-pointer"
                           onClick={onBack}
                         />{' '}
                       </Tooltip>
@@ -131,7 +131,7 @@ export function Drawer({
                     </div>
                     <Tooltip title="Close">
                       <XMarkIcon
-                        className="mt-2 size-5 cursor-pointer"
+                        className="mt-2 size-6 cursor-pointer"
                         onClick={onClose}
                       />
                     </Tooltip>
