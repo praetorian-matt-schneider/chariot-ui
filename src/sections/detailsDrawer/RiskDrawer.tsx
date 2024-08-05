@@ -394,7 +394,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                     }}
                   />
                 ) : (
-                  <div className="flex w-full flex-1 flex-col items-center justify-center text-center">
+                  <div className="flex w-full flex-1 flex-col items-center justify-center text-center text-default">
                     <UnionIcon className="mt-8 size-16 text-default-light" />
                     <p className="mt-7 text-lg font-bold">
                       Generate Description & Remediation
@@ -549,7 +549,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                   <p>No occurrences found.</p>
                 </div>
               ) : (
-                <table className="min-w-full table-auto">
+                <table className="min-w-full table-auto text-default">
                   <thead>
                     <tr>
                       <th className="w-28 p-2 text-left text-sm font-medium text-gray-600">
