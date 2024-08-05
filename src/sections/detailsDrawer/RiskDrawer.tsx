@@ -28,7 +28,7 @@ import { useMy } from '@/hooks';
 import { useGetKev } from '@/hooks/kev';
 import { useGetFile, useUploadFile } from '@/hooks/useFiles';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
-import { useReRunJob } from '@/hooks/useJobs';
+import { useBulkReRunJob } from '@/hooks/useJobs';
 import { useReportRisk, useUpdateRisk } from '@/hooks/useRisks';
 import { DRAWER_WIDTH } from '@/sections/detailsDrawer';
 import { AddAttribute } from '@/sections/detailsDrawer/AddAttribute';
@@ -109,8 +109,8 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
 
   const [isEditingMarkdown, setIsEditingMarkdown] = useState(false);
   const [markdownValue, setMarkdownValue] = useState('');
-
-  const { mutateAsync: reRunJob, status: reRunJobStatus } = useReRunJob();
+  const { mutateAsync: bulkReRunJobs, status: reRunJobStatus } =
+    useBulkReRunJob();
   const { mutateAsync: updateRisk, isPending: isRiskFetching } =
     useUpdateRisk();
   const { mutateAsync: updateFile, status: updateFileStatus } = useUploadFile();
@@ -142,6 +142,18 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
       enabled: open,
     }
   );
+  const jobKeys = useMemo(
+    () =>
+      (attributesGenericSearch?.attributes || [])
+        .filter(
+          ({ name, value }) =>
+            name === 'source' &&
+            (value.startsWith('#attribute') || value.startsWith('#asset'))
+        )
+        .map(attribute => attribute.value),
+    [attributesGenericSearch]
+  );
+
   const {
     data: allAssetJobs = [],
     status: allAssetJobsStatus,
@@ -306,18 +318,23 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
               <Tooltip
                 placement="top"
                 title={
-                  risk.source && !isManualORPRrovidedRisk(risk)
-                    ? isJobRunningForThisRisk
-                      ? 'Scanning in progress'
-                      : 'Revalidate the risk'
-                    : 'On-demand scanning is only available for automated risk discovery.'
+                  isInitialLoading
+                    ? ''
+                    : risk.source && !isManualORPRrovidedRisk(risk)
+                      ? isJobRunningForThisRisk
+                        ? 'Scanning in progress'
+                        : jobKeys.length === 0
+                          ? 'On-demand scanning is only available for risk which have a source attribute'
+                          : 'Revalidate the risk'
+                      : 'On-demand scanning is only available for automated risk discovery.'
                 }
               >
                 <Button
                   className="border-1 h-8 border border-default"
                   startIcon={<ArrowPathIcon className="size-5" />}
                   disabled={
-                    !risk.source ||
+                    isInitialLoading ||
+                    jobKeys.length === 0 ||
                     isManualORPRrovidedRisk(risk) ||
                     Boolean(isJobRunningForThisRisk)
                   }
@@ -326,7 +343,12 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                     allAssetJobsStatus === 'pending'
                   }
                   onClick={async () => {
-                    await reRunJob({ capability: risk.source, dns: risk.dns });
+                    await bulkReRunJobs(
+                      jobKeys.map(jobKey => ({
+                        capability: risk.source,
+                        jobKey,
+                      }))
+                    );
                     refetchAllAssetJobs();
                   }}
                 >
