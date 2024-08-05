@@ -71,13 +71,13 @@ const NessusInstructions = () => {
           1. Connecting to a Nessus server:
         </h2>
         <pre className="mb-4 rounded-md bg-gray-100 p-4">
-          <code>praetorian chariot plugin nessus-api</code>
+          <code>praetorian chariot script nessus-api</code>
         </pre>
         <h2 className="mb-2 mt-4 text-lg font-medium">
           2. Using an XML export file:
         </h2>
         <pre className="mb-4 rounded-md bg-gray-100 p-4">
-          <code>praetorian chariot plugin nessus-xml</code>
+          <code>praetorian chariot script nessus-xml</code>
         </pre>
       </div>
     </div>
