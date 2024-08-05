@@ -6,6 +6,18 @@ interface Props {
   className?: string;
 }
 
+function transformTextColorToBg(className: string): string {
+  const textColorClass = className
+    .split(' ')
+    .find(cls => cls.startsWith('text-'));
+
+  if (!textColorClass) return 'bg-gray-400';
+
+  const bgColorClass = textColorClass.replace('text-', 'bg-');
+
+  return className.replace(textColorClass, bgColorClass);
+}
+
 export const HorizontalTimeline = ({
   steps = [],
   current = 0,
@@ -42,7 +54,7 @@ export const HorizontalTimeline = ({
               className={cn(
                 'size-3 rounded-full bg-default cursor-pointer mb-1',
                 className,
-                filled >= index && 'bg-brand',
+                filled >= index && transformTextColorToBg(className),
                 step.className
               )}
             />
@@ -53,7 +65,7 @@ export const HorizontalTimeline = ({
                 index > 0 && index < steps.length - 1 && 'left-[-25px]',
                 index === steps.length - 1 && 'right-0',
                 className,
-                'bg-transparent brightness-60 opacity-70 hover:opacity-100'
+                'bg-transparent brightness-60 opacity-70 hover:'
               )}
             >
               {step.title}
