@@ -29,7 +29,7 @@ import { useMy } from '@/hooks';
 import { useGetKev } from '@/hooks/kev';
 import { useGetFile, useUploadFile } from '@/hooks/useFiles';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
-import { useReRunJob } from '@/hooks/useJobs';
+import { useBulkReRunJob } from '@/hooks/useJobs';
 import { useReportRisk, useUpdateRisk } from '@/hooks/useRisks';
 import { DRAWER_WIDTH } from '@/sections/detailsDrawer';
 import { Comment } from '@/sections/detailsDrawer/Comment';
@@ -107,8 +107,8 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
 
   const [isEditingMarkdown, setIsEditingMarkdown] = useState(false);
   const [markdownValue, setMarkdownValue] = useState('');
-
-  const { mutateAsync: reRunJob, status: reRunJobStatus } = useReRunJob();
+  const { mutateAsync: bulkReRunJobs, status: reRunJobStatus } =
+    useBulkReRunJob();
   const { mutateAsync: updateRisk, isPending: isRiskFetching } =
     useUpdateRisk();
   const { mutateAsync: updateFile, status: updateFileStatus } = useUploadFile();
@@ -140,6 +140,18 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
       enabled: open,
     }
   );
+  const jobKeys = useMemo(
+    () =>
+      (attributesGenericSearch?.attributes || [])
+        .filter(
+          ({ name, value }) =>
+            name === 'source' &&
+            (value.startsWith('#attribute') || value.startsWith('#asset'))
+        )
+        .map(attribute => attribute.value),
+    [attributesGenericSearch]
+  );
+
   const {
     data: allAssetJobs = [],
     status: allAssetJobsStatus,
@@ -389,21 +401,27 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                     Proof of Exploit
                   </Button>
                 </Tooltip>
+
                 <Tooltip
                   placement="top"
                   title={
-                    risk.source && !isManualORPRrovidedRisk(risk)
-                      ? isJobRunningForThisRisk
-                        ? 'Scanning in progress'
-                        : 'Revalidate the risk'
-                      : 'On-demand scanning is only available for automated risk discovery.'
+                    isInitialLoading
+                      ? ''
+                      : risk.source && !isManualORPRrovidedRisk(risk)
+                        ? isJobRunningForThisRisk
+                          ? 'Scanning in progress'
+                          : jobKeys.length === 0
+                            ? 'On-demand scanning is only available for risk which have a source attribute'
+                            : 'Revalidate the risk'
+                        : 'On-demand scanning is only available for automated risk discovery.'
                   }
                 >
                   <Button
-                    className="h-15 text-nowrap rounded-md border-none bg-white"
+                    className="border-1 h-8 border border-default"
                     startIcon={<ArrowPathIcon className="size-5" />}
                     disabled={
-                      !risk.source ||
+                      isInitialLoading ||
+                      jobKeys.length === 0 ||
                       isManualORPRrovidedRisk(risk) ||
                       Boolean(isJobRunningForThisRisk)
                     }
@@ -412,17 +430,13 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                       allAssetJobsStatus === 'pending'
                     }
                     onClick={async () => {
-                      attributesGenericSearch?.attributes?.forEach(
-                        async risk => {
-                          if (risk.value.startsWith('#asset')) {
-                            await reRunJob({
-                              capability: risk.source,
-                              jobKey: risk.value,
-                            });
-                            refetchAllAssetJobs();
-                          }
-                        }
+                      await bulkReRunJobs(
+                        jobKeys.map(jobKey => ({
+                          capability: risk.source,
+                          jobKey,
+                        }))
                       );
+                      refetchAllAssetJobs();
                     }}
                   >
                     Scan Now
