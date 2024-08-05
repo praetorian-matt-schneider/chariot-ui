@@ -177,7 +177,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
               <h2 className="mt-0 text-2xl font-medium tracking-wide text-gray-900">
                 {asset.name}{' '}
               </h2>
-              {asset.dns && (
+              {asset.dns && asset.dns !== asset.name && (
                 <p className="text-md rounded-sm bg-zinc-800/10 px-4 py-2 font-normal text-gray-500">
                   {asset.dns}
                 </p>
