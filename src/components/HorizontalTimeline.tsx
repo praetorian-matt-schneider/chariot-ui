@@ -24,10 +24,7 @@ export const HorizontalTimeline = ({
         )}
       >
         <div
-          className={cn(
-            'h-full bg-brand transition-all duration-1000',
-            className
-          )}
+          className={cn('h-full bg-brand transition-all duration-1000')}
           style={{
             width: `${(filled * 100) / (stepCount - 1)}%`,
           }}
