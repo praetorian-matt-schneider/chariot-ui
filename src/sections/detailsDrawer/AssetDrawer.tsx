@@ -30,6 +30,7 @@ import {
 } from '@/types';
 import { cn } from '@/utils/classname';
 import { formatDate } from '@/utils/date.util';
+import { getSeverityClass } from '@/utils/getSeverityClass.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
 import { useSearchParams } from '@/utils/url.util';
 
@@ -240,7 +241,10 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
                       return (
                         <tr
                           key={dns}
-                          className="border-b border-red-100 hover:bg-red-50"
+                          className={cn(
+                            'border-b',
+                            getSeverityClass(riskSeverityKey)
+                          )}
                         >
                           <td className="p-2">
                             <div className="flex flex-row items-center space-x-2">
