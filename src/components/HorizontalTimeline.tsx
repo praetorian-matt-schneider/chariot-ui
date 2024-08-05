@@ -1,4 +1,3 @@
-import { Tooltip } from '@/components/Tooltip';
 import { cn } from '@/utils/classname';
 
 interface Props {
@@ -39,36 +38,26 @@ export const HorizontalTimeline = ({
               'relative z-10 flex items-center justify-center bg-transparent px-1'
             }
           >
-            <Tooltip
-              title={
-                <div className="m-2 text-center">
-                  <div className="font-bold">{step.title}</div>
-                  {step.description && (
-                    <div className="mt-1">{step.description}</div>
-                  )}
-                </div>
-              }
-              placement="top"
+            <div
+              className={cn(
+                'size-3 rounded-full bg-default cursor-pointer mb-1',
+                className,
+                filled >= index && 'bg-brand',
+                step.className
+              )}
+            />
+            <span
+              className={cn(
+                'absolute text-sm font-semibold -bottom-6',
+                index === 0 && 'left-0',
+                index > 0 && index < steps.length - 1 && 'left-[-25px]',
+                index === steps.length - 1 && 'right-0',
+                className,
+                'bg-transparent brightness-60 opacity-70 hover:opacity-100'
+              )}
             >
-              <div
-                className={cn(
-                  'size-3 rounded-full bg-default cursor-pointer mb-1',
-                  className,
-                  filled >= index && 'bg-brand',
-                  step.className
-                )}
-              />
-              <span
-                className={cn(
-                  'absolute text-sm text-default font-medium -bottom-6',
-                  index === 0 && 'left-0',
-                  index > 0 && index < steps.length - 1 && 'left-[-25px]',
-                  index === steps.length - 1 && 'right-0'
-                )}
-              >
-                {step.title}
-              </span>
-            </Tooltip>
+              {step.title}
+            </span>
           </div>
         ))}
       </div>
