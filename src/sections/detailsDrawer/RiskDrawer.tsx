@@ -266,7 +266,11 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                   <RiskDropdown
                     type="severity"
                     risk={risk}
-                    className={'h-12 border-none bg-white'}
+                    className={cn(
+                      'h-12 border-none bg-white',
+                      severityClass,
+                      'brightness-[110%]'
+                    )}
                   />
                 </Tooltip>
                 <Tooltip placement="top" title="View proof of exploit">
@@ -635,6 +639,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                     return {
                       title,
                       description: updated,
+                      className: 'text-default',
                       icon:
                         itemIndex === 0 ? (
                           <RisksIcon className="stroke-1" />
