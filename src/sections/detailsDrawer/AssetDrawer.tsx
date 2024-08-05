@@ -16,6 +16,7 @@ import { Tooltip } from '@/components/Tooltip';
 import { AssetStatusDropdown } from '@/components/ui/AssetPriorityDropdown';
 import { useMy } from '@/hooks';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
+import { useReRunJob } from '@/hooks/useJobs';
 import { buildOpenRiskDataset } from '@/sections/Assets';
 import { AddAttribute } from '@/sections/detailsDrawer/AddAttribute';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
@@ -126,6 +127,8 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
     { enabled: open }
   );
 
+  const { mutateAsync: runJob } = useReRunJob();
+
   const openRiskDataset = useMemo(
     () => buildOpenRiskDataset(risks as Risk[]),
     [risks]
@@ -207,7 +210,10 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
                   <button
                     className="text-sm font-medium text-blue-500 hover:underline"
                     onClick={() => {
-                      // Trigger a new scan or redirect to a monitoring page
+                      runJob({
+                        capability: 'nuclei',
+                        jobKey: `#asset#${asset.name}#${asset.dns}`,
+                      });
                     }}
                   >
                     Schedule a scan now
