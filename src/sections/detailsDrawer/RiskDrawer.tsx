@@ -417,7 +417,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                   }
                 >
                   <Button
-                    className="border-1 h-8 border border-default"
+                    className="h-15 text-nowrap rounded-md border-none bg-white"
                     startIcon={<ArrowPathIcon className="size-5" />}
                     disabled={
                       isInitialLoading ||
