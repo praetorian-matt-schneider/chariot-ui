@@ -341,12 +341,7 @@ export function Risks() {
   );
 
   useEffect(() => {
-    if (
-      !search &&
-      !isRisksFetching &&
-      !isFetchingNextPage &&
-      sortedRisks.length < 50
-    ) {
+    if (!search && !isRisksFetching && !isFetchingNextPage) {
       setIsFilteredDataFetching(true);
       fetchNextPage?.();
 
