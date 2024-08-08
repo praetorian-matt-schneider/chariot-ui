@@ -4,6 +4,7 @@ import { useDebounce } from 'use-debounce';
 
 import { useAssetsWithAttributes } from '@/hooks/useAttribute';
 import { useAxios } from '@/hooks/useAxios';
+import { useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useMy } from '@/hooks/useMy';
 import { buildOpenRiskDataset } from '@/sections/Assets';
@@ -63,6 +64,9 @@ export const useUpdateAsset = () => {
       enabled: false,
     }
   );
+  const { invalidate: invalidateAlerts } = useGetAccountAlerts({
+    enabled: false,
+  });
 
   return useMutation<Asset, Error, UpdateAssetProps>({
     defaultErrorMessage: 'Failed to update asset',
@@ -82,6 +86,7 @@ export const useUpdateAsset = () => {
       const response = await promise;
       const data = response.data?.[0] as Asset;
 
+      invalidateAlerts();
       updateAllSubQueries(previous => {
         if (!previous) {
           return { pages: [[data]], pageParams: [undefined] };
@@ -351,7 +356,6 @@ export function useGetAssets(props: GetAssetProps) {
     assetsWithAttributesFilterStatus,
   ]);
 
-  console.log('data', data);
   useEffect(() => {
     if (!isFetching) {
       if (filters.search) {
