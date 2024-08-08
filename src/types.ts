@@ -432,14 +432,12 @@ export interface AuthState extends BackendStack {
 
 export interface AuthContextType extends AuthState {
   getToken: () => Promise<string>;
-  confirmOTP: (username: string, password: string, opt: string) => void;
   error: string;
   isLoading: boolean;
   login: (username: string, password: string) => void;
   logout: () => void;
   setBackendStack: (backend?: BackendStack) => void;
   setError: (error: string) => void;
-  signup: (username: string, password: string, gotoNext: () => void) => void;
   startImpersonation: (memberId: string, displayName: string) => void;
   stopImpersonation: () => void;
 }

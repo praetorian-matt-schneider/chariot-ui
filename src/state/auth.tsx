@@ -1,13 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Amplify } from 'aws-amplify';
-import {
-  confirmSignUp,
-  fetchAuthSession,
-  signIn,
-  signOut,
-  signUp,
-} from 'aws-amplify/auth';
+import { fetchAuthSession, signIn, signOut } from 'aws-amplify/auth';
 import { Hub } from 'aws-amplify/utils';
 import { toast } from 'sonner';
 
@@ -82,43 +76,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } catch (error) {
       error instanceof Error && error.message && setError(error.message);
     } finally {
-      setIsLoading(false);
-    }
-  }
-
-  async function signup(username = '', password = '', gotoNext = () => {}) {
-    try {
-      setIsLoading(true);
-      const { isSignUpComplete, nextStep } = await signUp({
-        username,
-        password,
-      });
-      const { signUpStep } = nextStep;
-      if (!isSignUpComplete && signUpStep === 'CONFIRM_SIGN_UP') {
-        gotoNext && gotoNext();
-      }
-    } catch (error) {
-      error instanceof Error && error.message && setError(error.message);
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  async function confirmOTP(username = '', password = '', otp: string = '') {
-    try {
-      setIsLoading(true);
-      const response = await confirmSignUp({
-        username,
-        confirmationCode: otp,
-      });
-      if (response.isSignUpComplete) {
-        login(username, password);
-      }
-    } catch (error) {
-      if (error instanceof Error && error.message) {
-        toast.error('Failed to confirm OTP');
-        console.error(error);
-      }
       setIsLoading(false);
     }
   }
@@ -241,12 +198,10 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         getToken,
         error,
         setError,
-        confirmOTP,
         isImpersonating: auth.friend !== '',
         isLoading,
         login,
         logout,
-        signup,
         startImpersonation,
         stopImpersonation,
         setBackendStack,

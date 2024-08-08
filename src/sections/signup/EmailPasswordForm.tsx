@@ -1,5 +1,6 @@
-import { Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { signUp } from 'aws-amplify/auth';
 
 import { Button } from '@/components/Button';
 import { Input } from '@/components/form/Input';
@@ -28,7 +29,26 @@ export const EmailPasswordForm = ({
 }) => {
   const { username, password } = credentials;
   const navigate = useNavigate();
-  const { isLoading, login, signup, error, setError } = useAuth();
+  const { isLoading, login, error, setError } = useAuth();
+  const [isLoadingSignup, setIsLoadingSignup] = useState(false);
+
+  async function signup() {
+    try {
+      setIsLoadingSignup(true);
+      const { isSignUpComplete, nextStep } = await signUp({
+        username,
+        password,
+      });
+      const { signUpStep } = nextStep;
+      if (!isSignUpComplete && signUpStep === 'CONFIRM_SIGN_UP' && onNext) {
+        onNext();
+      }
+    } catch (error) {
+      error instanceof Error && error.message && setError(error.message);
+    } finally {
+      setIsLoadingSignup(false);
+    }
+  }
 
   return (
     <form
@@ -37,7 +57,7 @@ export const EmailPasswordForm = ({
       onSubmit={e => {
         e.preventDefault();
         isLogin && login(username, password);
-        !isLogin && signup(username, password, onNext ? onNext : () => {});
+        !isLogin && signup();
       }}
     >
       <Inputs
@@ -64,7 +84,7 @@ export const EmailPasswordForm = ({
         }}
       />
       <Button
-        disabled={isLoading}
+        disabled={isLoading || isLoadingSignup}
         styleType="primary"
         className="w-full"
         type="submit"

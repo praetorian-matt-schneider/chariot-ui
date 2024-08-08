@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import { resendSignUpCode } from 'aws-amplify/auth';
+import { confirmSignUp, resendSignUpCode } from 'aws-amplify/auth';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/Button';
 import { ModalWrapper } from '@/components/Modal';
@@ -15,7 +16,8 @@ export const EmailConfirmation = ({
   username: string;
   password: string;
 }) => {
-  const { confirmOTP, isLoading } = useAuth();
+  const { login } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
   const [open, setOpen] = useState(true);
 
   async function resendEmail() {
@@ -23,6 +25,25 @@ export const EmailConfirmation = ({
       username,
     });
     setOpen(true);
+  }
+
+  async function confirmOTP(otp: string = '') {
+    try {
+      setIsLoading(true);
+      const response = await confirmSignUp({
+        username,
+        confirmationCode: otp,
+      });
+      if (response.isSignUpComplete) {
+        login(username, password);
+      }
+    } catch (error) {
+      if (error instanceof Error && error.message) {
+        toast.error('Failed to confirm OTP');
+        console.error(error);
+      }
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -66,7 +87,7 @@ export const EmailConfirmation = ({
             Please copy & paste the six-digit code emailed to your business
             address.
           </p>
-          <OTPInput onSubmit={otp => confirmOTP(username, password, otp)} />
+          <OTPInput onSubmit={confirmOTP} />
           <Button
             disabled={isLoading}
             className="mt-6 w-full"
