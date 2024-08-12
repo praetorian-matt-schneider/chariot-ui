@@ -37,7 +37,7 @@ export const NewUserSeedModal = () => {
   );
 
   useEffect(() => {
-    if (status === 'success' && assets.length === 0 && newUserSeedModal) {
+    if (status === 'success' && assets.length === 0) {
       setOpen(true);
     }
   }, [assets, status, newUserSeedModal]);
