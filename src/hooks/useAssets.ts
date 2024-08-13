@@ -88,13 +88,20 @@ export const useUpdateAsset = () => {
       invalidateAlerts();
       updateAllSubQueries(previous => {
         if (!previous) {
-          return { pages: [[data]], pageParams: [undefined] };
+          return {
+            pages: [{ data: [data], offset: undefined }],
+            pageParams: [undefined],
+          };
         }
-        const updatedPages = previous.pages.map(page =>
-          page.map(currentAsset =>
-            currentAsset.key === key ? data : currentAsset
-          )
-        );
+
+        const updatedPages = previous.pages.map(page => {
+          return {
+            ...page,
+            data: page.data.map(currentAsset =>
+              currentAsset.key === key ? data : currentAsset
+            ),
+          };
+        });
         return { ...previous, pages: updatedPages };
       });
 
@@ -245,6 +252,7 @@ export function useGetAssets(props: GetAssetProps) {
     fetchNextPage: myAssetsFetchNextPage,
     isFetchingNextPage: myAssetsIsFetchingNextPage,
     error: myAssetsError,
+    hasNextPage,
   } = useMy(
     {
       resource: 'asset',
@@ -358,7 +366,7 @@ export function useGetAssets(props: GetAssetProps) {
         setIsFilteredDataFetching(false);
         // If search is enabled, we need to fetch the search data
       } else {
-        if (myAssetsFetchNextPage && data.length < 50) {
+        if (hasNextPage && data.length < 50) {
           setIsFilteredDataFetching(true);
           myAssetsFetchNextPage();
         } else {
@@ -366,12 +374,7 @@ export function useGetAssets(props: GetAssetProps) {
         }
       }
     }
-  }, [
-    JSON.stringify({ data }),
-    filters.search,
-    isFetching,
-    Boolean(myAssetsFetchNextPage),
-  ]);
+  }, [JSON.stringify({ data }), filters.search, isFetching, hasNextPage]);
 
   return { data, status, fetchNextPage, error, isFetchingNextPage, isFetching };
 }

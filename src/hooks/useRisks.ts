@@ -33,7 +33,7 @@ export const useCreateRisk = () => {
       const newRisk = data.risks[0];
       updateAllSubQueries(previous => {
         const newPages = previous ? [...previous.pages] : [];
-        newPages[0] = [newRisk, ...newPages[0]]; // Add the new risk to the first page
+        newPages[0] = { ...newPages[0], data: [newRisk, ...newPages[0].data] }; // Add the new risk to the first page
 
         return {
           pages: newPages,
@@ -87,9 +87,14 @@ export const useUpdateRisk = () => {
       });
 
       updateAllSubQueries(previous => {
-        const updatedPages = previous.pages.map(page =>
-          page.map(risk => (risk.key === updatedRisk.key ? updatedRisk : risk))
-        );
+        const updatedPages = previous.pages.map(page => {
+          return {
+            ...page,
+            data: page.data.map(risk =>
+              risk.key === updatedRisk.key ? updatedRisk : risk
+            ),
+          };
+        });
 
         return { ...previous, pages: updatedPages };
       });
@@ -140,16 +145,19 @@ const useBulkUpdateRiskHook = () => {
         invalidateAlerts();
 
         updateAllSubQueries(previous => {
-          const updatedPages = previous.pages.map(page =>
-            page.map(risk =>
-              keys.includes(risk.key)
-                ? {
-                    ...risk,
-                    ...risks.find(r => r.key === risk.key),
-                  }
-                : risk
-            )
-          );
+          const updatedPages = previous.pages.map(page => {
+            return {
+              ...page,
+              data: page.data.map(risk =>
+                keys.includes(risk.key)
+                  ? {
+                      ...risk,
+                      ...risks.find(r => r.key === risk.key),
+                    }
+                  : risk
+              ),
+            };
+          });
 
           return { ...previous, pages: updatedPages };
         });

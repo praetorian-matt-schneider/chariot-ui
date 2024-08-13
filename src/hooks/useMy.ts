@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { AxiosHeaders } from 'axios';
 
 import { mapAssetStataus } from '@/hooks/useAssets';
@@ -26,8 +25,6 @@ export const useMy = <ResourceKey extends MyResourceKey>(
   const { isImpersonating } = useAuth();
   const axios = useAxios();
   const { hashSearchFromQuery, genericSearchFromQuery } = useSearchContext();
-
-  const [offset, setOffset] = useState<string | undefined>(undefined);
 
   let key = '';
   let compositeKey = '';
@@ -66,7 +63,7 @@ export const useMy = <ResourceKey extends MyResourceKey>(
       const { data } = await axios.get(`/my`, {
         params: {
           key,
-          offset: pageParam,
+          offset: pageParam ? JSON.stringify(pageParam) : undefined,
         },
         headers: options?.doNotImpersonate
           ? ({
@@ -76,30 +73,35 @@ export const useMy = <ResourceKey extends MyResourceKey>(
             } as unknown as AxiosHeaders)
           : undefined,
       });
-      setOffset(data?.offset);
 
       const resourceData = data[`${props.resource}s`] || [];
 
       if (props.resource === 'asset') {
-        return resourceData.map((asset: Asset) => {
-          return {
-            ...asset,
-            status: mapAssetStataus(asset),
-          };
-        });
+        return {
+          data: resourceData.map((asset: Asset) => {
+            return {
+              ...asset,
+              status: mapAssetStataus(asset),
+            };
+          }),
+          offset: data?.offset,
+        };
       }
 
-      return resourceData;
+      return { data: resourceData, offset: data?.offset };
     },
     initialPageParam: undefined,
-    getNextPageParam: () => (offset ? JSON.stringify(offset) : undefined),
+    getNextPageParam: lastPage => {
+      return lastPage.offset;
+    },
   });
 
-  const processedData = response.data ? response.data.pages.flat() : [];
+  const processedData = response.data
+    ? response.data.pages.map(({ data }) => data).flat()
+    : [];
 
   return {
     ...response,
     data: processedData,
-    fetchNextPage: offset ? response.fetchNextPage : undefined,
   };
 };

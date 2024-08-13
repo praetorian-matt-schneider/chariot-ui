@@ -198,6 +198,7 @@ export function Risks() {
     isFetchingNextPage,
     isFetching: isRisksFetching,
     fetchNextPage,
+    hasNextPage,
   } = useMy({
     resource: 'risk',
     filterByGlobalSearch: true,
@@ -345,20 +346,15 @@ export function Risks() {
       if (search) {
         setIsFilteredDataFetching(false);
       } else {
-        if (fetchNextPage && sortedRisks.length < 50) {
+        if (hasNextPage && sortedRisks.length < 50) {
           setIsFilteredDataFetching(true);
-          fetchNextPage?.();
+          fetchNextPage();
         } else {
           setIsFilteredDataFetching(false);
         }
       }
     }
-  }, [
-    JSON.stringify({ sortedRisks }),
-    search,
-    isRisksFetching,
-    Boolean(fetchNextPage),
-  ]);
+  }, [JSON.stringify({ sortedRisks }), search, isRisksFetching, hasNextPage]);
 
   return (
     <div className="flex w-full flex-col">

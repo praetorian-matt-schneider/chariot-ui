@@ -84,19 +84,19 @@ export function useQuery<
 export function useInfiniteQuery<
   TQueryFnData,
   TError = DefaultError,
-  TData = InfiniteData<TQueryFnData>,
+  TData = InfiniteData<InfinityData<TQueryFnData>>,
   TQueryKey extends QueryKey = QueryKey,
   TPageParam = unknown,
 >(
   options: UndefinedInitialDataInfiniteOptions<
-    TQueryFnData,
+    InfinityData<TQueryFnData>,
     TError,
     TData,
     TQueryKey,
     TPageParam
   > &
     CustomOptions & {
-      queryFn: QueryFunction<TQueryFnData, TQueryKey, TPageParam>;
+      queryFn: QueryFunction<InfinityData<TQueryFnData>, TQueryKey, TPageParam>;
     }
 ) {
   const query = useReactQueryInfinite({
@@ -114,8 +114,8 @@ export function useInfiniteQuery<
     ...query,
     updateAllSubQueries: (
       data: (
-        currentValue: InfiniteData<TQueryFnData>
-      ) => InfiniteData<TQueryFnData>
+        currentValue: InfiniteData<InfinityData<TQueryFnData>>
+      ) => InfiniteData<InfinityData<TQueryFnData>>
     ) => {
       updateAllQueryCache(options.queryKey, data);
     },
@@ -125,8 +125,14 @@ export function useInfiniteQuery<
   };
 }
 
+interface InfinityData<TData> {
+  data: TData;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  offset: any;
+}
+
 export type UseExtendInfiniteQueryOptions<TData> = Omit<
-  UndefinedInitialDataInfiniteOptions<TData, Error>,
+  UndefinedInitialDataInfiniteOptions<InfinityData<TData>, Error>,
   'queryKey' | 'getNextPageParam' | 'initialPageParam'
 >;
 
