@@ -1,16 +1,12 @@
 import { ReactNode, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import {
-  AlertTriangle,
-  CheckCircleIcon,
-  History as HistoryIcon,
-  NotepadText,
-} from 'lucide-react';
+import { History as HistoryIcon, NotepadText } from 'lucide-react';
 
 import { Drawer } from '@/components/Drawer';
 import { AssetsIcon, RisksIcon } from '@/components/icons';
 import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
 import { Loader } from '@/components/Loader';
+import { Table } from '@/components/table/Table';
 import { Timeline } from '@/components/Timeline';
 import { Tooltip } from '@/components/Tooltip';
 import { AssetStatusDropdown } from '@/components/ui/AssetPriorityDropdown';
@@ -20,6 +16,7 @@ import { useReRunJob } from '@/hooks/useJobs';
 import { buildOpenRiskDataset } from '@/sections/Assets';
 import { AddAttribute } from '@/sections/detailsDrawer/AddAttribute';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
+import { parseKeys } from '@/sections/SearchByType';
 import {
   Asset,
   AssetStatusLabel,
@@ -32,6 +29,7 @@ import {
 import { cn } from '@/utils/classname';
 import { formatDate } from '@/utils/date.util';
 import { getSeverityClass } from '@/utils/getSeverityClass.util';
+import { Regex } from '@/utils/regex.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
 import { useSearchParams } from '@/utils/url.util';
 
@@ -87,10 +85,11 @@ function getHistoryDiff(history: EntityHistory): {
 }
 
 export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
-  const [, dns] = compositeKey.split('#');
+  const [, dns, name] = compositeKey.split('#');
   const riskFilter = `#${dns}`;
-  const attributeFilter = `source:#asset${compositeKey}`;
-  const linkedIpsFilter = `#${dns}#`;
+  const attributeFilter = `source:#asset#${dns}#${name}`;
+  const childAssetsFilter = `#source##asset#${dns}#${name}`;
+
   const { removeSearchParams } = useSearchParams();
   const navigate = useNavigate();
 
@@ -101,29 +100,34 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
     },
     { enabled: open }
   );
-  const { data: attributesGenericSearch, status: attributesStatus } =
-    useGenericSearch(
-      {
-        query: attributeFilter,
-        exact: true,
-      },
-      { enabled: open }
-    );
+  const {
+    data: attributesGenericSearch,
+    status: attributesStatus,
+    error: attributesGenericSearchError,
+  } = useGenericSearch(
+    {
+      query: attributeFilter,
+      exact: true,
+    },
+    { enabled: open }
+  );
+
+  const {
+    data: childAssetsAttributes,
+    status: childAssetsStatus,
+    error: childAssetsError,
+  } = useMy(
+    {
+      resource: 'attribute',
+      query: childAssetsFilter,
+    },
+    { enabled: open }
+  );
 
   const { data: risks = [], status: risksStatus } = useMy(
     {
       resource: 'risk',
       query: riskFilter,
-    },
-    { enabled: open }
-  );
-  const {
-    data: rawLinkedHostnamesIncludingSelf = [],
-    status: linkedIpsStatus,
-  } = useMy(
-    {
-      resource: 'asset',
-      query: linkedIpsFilter,
     },
     { enabled: open }
   );
@@ -152,18 +156,45 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
   const isInitialLoading =
     assetsStatus === 'pending' ||
     risksStatus === 'pending' ||
-    linkedIpsStatus === 'pending' ||
     attributesStatus === 'pending';
-
-  const linkedHostnames = rawLinkedHostnamesIncludingSelf.filter(
-    ({ dns }) => dns !== asset.dns
-  );
-  const linkedIps = rawLinkedHostnamesIncludingSelf.filter(
-    ({ name }) => name !== asset.dns
-  );
 
   const openRisks = risks.filter(
     ({ status }) => status?.[0] === RiskStatus.Opened
+  );
+
+  const parentAssets = useMemo(() => {
+    return (
+      attributesGenericSearch?.attributes?.filter?.(attribute => {
+        return (
+          attribute.name === 'source' && attribute.value.match(Regex.ASSET)
+        );
+      }) || []
+    );
+  }, [JSON.stringify(attributesGenericSearch?.attributes)]);
+
+  const discovered = (
+    <div
+      className="flex w-full flex-wrap gap-2 overflow-hidden"
+      style={{ wordBreak: 'break-word' }}
+    >
+      {asset.dns && asset.dns !== asset.name && (
+        <>
+          <p className="text-sm font-normal text-gray-500">{asset.dns}</p>
+          <div className="border-l border-gray-400"></div>
+        </>
+      )}
+      <Tooltip title="First Seen">
+        <p className="text-sm font-normal text-gray-500">
+          {formatDate(asset.created)}
+        </p>
+      </Tooltip>
+      <p className="text-sm font-normal text-gray-500">-</p>
+      <Tooltip title="Last Seen">
+        <p className="text-sm font-normal text-gray-500">
+          {formatDate(asset.updated)}
+        </p>
+      </Tooltip>
+    </div>
   );
 
   return (
@@ -172,25 +203,9 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
       onClose={() => removeSearchParams(StorageKey.DRAWER_COMPOSITE_KEY)}
       onBack={() => navigate(-1)}
       className={cn(
-        'w-full rounded-t-lg pb-0 shadow-lg pt-6',
+        'w-full rounded-t-lg pb-0 shadow-lg',
         openRisks.length === 0 ? 'bg-zinc-100' : 'bg-red-50'
       )}
-      header={
-        isInitialLoading ? null : (
-          <div className="flex w-full items-center justify-between px-10 pt-0">
-            <div className="flex flex-row items-center justify-center space-x-2">
-              <h2 className="mt-0 text-2xl font-medium tracking-wide text-gray-900">
-                {asset.name}{' '}
-              </h2>
-              {asset.dns && asset.dns !== asset.name && (
-                <p className="text-md rounded-sm bg-zinc-800/10 px-4 py-2 font-normal text-gray-500">
-                  {asset.dns}
-                </p>
-              )}
-            </div>
-          </div>
-        )
-      }
     >
       <Loader isLoading={isInitialLoading} type="spinner">
         <div className="flex h-full flex-col gap-2 px-8 pt-0">
@@ -199,9 +214,10 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
             {openRisks.length === 0 ? (
               <div className="rounded-lg bg-white p-8  transition-all hover:rounded-lg hover:shadow-md">
                 <h3 className="mb-4 text-2xl font-semibold tracking-wide text-green-600">
-                  <CheckCircleIcon className="mr-1 inline size-6 text-green-600" />
-                  This Asset is Safe!
+                  {asset.name} is Safe!
+                  {discovered}
                 </h3>
+
                 <p className="text-sm text-gray-700">
                   No risks have been detected for this asset. However, it&apos;s
                   always a good practice to regularly monitor and scan for any
@@ -223,10 +239,12 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
               </div>
             ) : (
               <div className="rounded-lg border border-red-500 bg-white p-8  transition-all hover:rounded-lg hover:shadow-md">
-                <h3 className="mb-4 text-2xl font-semibold tracking-wide text-red-600">
-                  <AlertTriangle className="mr-1 inline size-5 text-red-600" />
-                  This Asset is at Risk!
-                </h3>
+                <div className="flex flex-row justify-between">
+                  <h3 className="mb-4 text-2xl font-semibold tracking-wide text-red-600">
+                    {asset.name} is at Risk!
+                    {discovered}
+                  </h3>
+                </div>
                 <table className="min-w-full table-auto">
                   <thead>
                     <tr>
@@ -334,10 +352,9 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
                             <td className="break-all p-2 text-sm text-gray-500">
                               {data.value?.startsWith('#asset') ? (
                                 <Link
-                                  to={getAssetDrawerLink({
-                                    dns: data.value.split('#')[3],
-                                    name: data.value.split('#')[2],
-                                  })}
+                                  to={getAssetDrawerLink(
+                                    parseKeys.assetKey(data.value)
+                                  )}
                                   className="text-blue-500 hover:underline"
                                 >
                                   {data.value}
@@ -359,115 +376,122 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
             </div>
           </div>
 
-          {/* Related Assets Section */}
-          <div className="rounded-lg  bg-white p-8 transition-all hover:rounded-lg hover:shadow-md">
-            <h3 className="mb-4 text-2xl font-semibold tracking-wide text-gray-900">
-              <AssetsIcon className="mr-1 inline size-6 text-gray-800" />
-              Related Assets
-            </h3>
-            {linkedHostnames.length === 0 && linkedIps.length === 0 ? (
-              <div className="text-center text-gray-500">
-                <p>No related assets found.</p>
-                <p>This asset has no related hostnames or IPs.</p>
-              </div>
-            ) : (
-              <table className="min-w-full table-auto">
-                <thead>
-                  <tr>
-                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">
-                      Name
-                    </th>
-                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">
-                      DNS
-                    </th>
-                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">
-                      Status
-                    </th>
-                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">
-                      Last Updated
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {linkedHostnames.map(data => {
-                    const containsRisks = openRiskDataset[data.dns];
+          <div className="grid grid-cols-2 gap-4">
+            {/* Parent Assets Section */}
+            <div className="rounded-lg  bg-white p-8 transition-all hover:rounded-lg hover:shadow-md">
+              <h3 className="mb-4 text-2xl font-semibold tracking-wide text-gray-900">
+                <AssetsIcon className="mr-1 inline size-6 text-gray-800" />
+                Parent Assets
+              </h3>
+              <Table
+                contentClassName="max-w-full"
+                tableClassName="border-0"
+                className={cn(
+                  'max-h-96',
+                  parentAssets.length === 0 && 'justify-center'
+                )}
+                name="parent assets"
+                columns={[
+                  {
+                    label: 'Name',
+                    id: 'name',
+                    cell: item => {
+                      const containsRisks = openRiskDataset[item.dns];
 
-                    return (
-                      <tr
-                        key={data.dns}
-                        className="border-b border-gray-200 hover:bg-gray-50"
-                      >
-                        <td className="px-4 py-2 text-sm font-medium text-blue-500">
-                          <div className="flex flex-row items-center space-x-1">
-                            {containsRisks && (
-                              <Tooltip title="Contains open risks">
-                                <RisksIcon className="size-4 text-red-500" />
-                              </Tooltip>
-                            )}
-                            <Link
-                              to={getAssetDrawerLink({
-                                dns: data.name.split('#')[3],
-                                name: data.name.split('#')[2],
-                              })}
-                              className="hover:underline"
-                            >
-                              {data.name}
-                            </Link>
-                          </div>
-                        </td>
-                        <td className="px-4 py-2 text-sm text-gray-500">
-                          {data.dns}
-                        </td>
-                        <td className="px-4 py-2 text-sm text-gray-500">
-                          {AssetStatusLabel[data.status]}
-                        </td>
-                        <td className="px-4 py-2 text-sm text-gray-500">
-                          {formatDate(data.updated)}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                  {linkedIps.map(data => {
-                    const containsRisks = openRiskDataset[data.dns];
+                      return (
+                        <div className="flex flex-row items-center space-x-1">
+                          {containsRisks && (
+                            <Tooltip title="Contains open risks">
+                              <RisksIcon className="size-4 text-red-500" />
+                            </Tooltip>
+                          )}
+                          <Link
+                            to={getAssetDrawerLink(item)}
+                            className="text-brand hover:underline"
+                          >
+                            {item.name}
+                          </Link>
+                        </div>
+                      );
+                    },
+                  },
+                  {
+                    className: 'text-default-light',
+                    label: 'DNS',
+                    id: 'dns',
+                  },
+                ]}
+                data={parentAssets.map(({ value }) => {
+                  return parseKeys.assetKey(value);
+                })}
+                error={attributesGenericSearchError}
+                loadingRowCount={1}
+                status={attributesStatus}
+                noData={{
+                  title: 'This asset has no parent assets.',
+                  styleType: 'text',
+                }}
+                isTableView={false}
+              />
+            </div>
 
-                    return (
-                      <tr
-                        key={data.dns}
-                        className="border-b border-gray-200 hover:bg-gray-50"
-                      >
-                        <td className="px-4 py-2 text-sm font-medium text-blue-500">
-                          <div className="flex flex-row items-center space-x-1">
-                            {containsRisks && (
-                              <Tooltip title="Contains open risks">
-                                <RisksIcon className="size-4 text-red-500" />
-                              </Tooltip>
-                            )}
-                            <Link
-                              to={getAssetDrawerLink({
-                                dns: data.dns,
-                                name: data.name,
-                              })}
-                              className="hover:underline"
-                            >
-                              {data.name}
-                            </Link>
-                          </div>
-                        </td>
-                        <td className="px-4 py-2 text-sm text-gray-500">
-                          {data.dns}
-                        </td>
-                        <td className="px-4 py-2 text-sm text-gray-500">
-                          {AssetStatusLabel[data.status]}
-                        </td>
-                        <td className="px-4 py-2 text-sm text-gray-500">
-                          {formatDate(data.updated)}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            )}
+            {/* Child Assets Section */}
+            <div className="rounded-lg  bg-white p-8 transition-all hover:rounded-lg hover:shadow-md">
+              <h3 className="mb-4 text-2xl font-semibold tracking-wide text-gray-900">
+                <AssetsIcon className="mr-1 inline size-6 text-gray-800" />
+                Child Assets
+              </h3>
+              <Table
+                contentClassName="max-w-full"
+                tableClassName="border-0"
+                className={cn(
+                  'max-h-96',
+                  childAssetsAttributes.length === 0 && 'justify-center'
+                )}
+                name="child assets"
+                columns={[
+                  {
+                    label: 'Name',
+                    id: 'name',
+                    cell: item => {
+                      const containsRisks = openRiskDataset[item.dns];
+
+                      return (
+                        <div className="flex flex-row items-center space-x-1">
+                          {containsRisks && (
+                            <Tooltip title="Contains open risks">
+                              <RisksIcon className="size-4 text-red-500" />
+                            </Tooltip>
+                          )}
+                          <Link
+                            to={getAssetDrawerLink(item)}
+                            className="text-brand hover:underline"
+                          >
+                            {item.name}
+                          </Link>
+                        </div>
+                      );
+                    },
+                  },
+                  {
+                    className: 'text-default-light',
+                    label: 'DNS',
+                    id: 'dns',
+                  },
+                ]}
+                data={childAssetsAttributes.map(({ source }) => {
+                  return parseKeys.assetKey(source);
+                })}
+                error={childAssetsError}
+                loadingRowCount={1}
+                status={childAssetsStatus}
+                noData={{
+                  title: 'This asset has no child assets.',
+                  styleType: 'text',
+                }}
+                isTableView={false}
+              />
+            </div>
           </div>
 
           {/* History Section */}

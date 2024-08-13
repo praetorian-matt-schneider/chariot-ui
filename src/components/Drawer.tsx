@@ -5,12 +5,10 @@ import { Transition } from '@headlessui/react';
 import { twMerge } from 'tailwind-merge';
 
 import { MODAL_WRAPPER_ID } from '@/components/Modal';
-import { Tooltip } from '@/components/Tooltip';
 import { useMutationObserver } from '@/hooks/useMutationObserver';
 import { cn } from '@/utils/classname';
 
 interface Props {
-  position?: 'bottom';
   open: boolean;
   onClose: () => void;
   onBack: () => void;
@@ -20,7 +18,6 @@ interface Props {
   footer?: ReactNode;
   footerClassname?: string;
   header?: ReactNode;
-  minWidth?: number;
   skipBack?: boolean;
 }
 
@@ -120,30 +117,24 @@ export function Drawer({
                 }}
                 ref={ref}
               >
-                <div className="h-full overflow-auto text-default">
-                  <div className="mb-2 flex items-center justify-between px-10 pb-4">
-                    <div className="flex w-full items-center">
-                      {!skipBack && (
-                        <Tooltip title="Go Back">
-                          <ChevronLeftIcon
-                            className="mr-2 size-6 cursor-pointer"
-                            onClick={onBack}
-                          />{' '}
-                        </Tooltip>
-                      )}
-                      {header}
-                    </div>
-                    <Tooltip title="Close">
-                      <XMarkIcon
-                        className={cn(
-                          'mt-2 size-6 cursor-pointer',
-                          skipBack &&
-                            'absolute -top-14 right-2 size-10 text-white stroke-2'
-                        )}
-                        onClick={onClose}
-                      />
-                    </Tooltip>
+                {!skipBack && (
+                  <div
+                    role="button"
+                    onClick={onBack}
+                    className="absolute left-6 top-0 -mt-11 flex cursor-pointer flex-row items-center  text-white"
+                  >
+                    <ChevronLeftIcon className="mr-2 size-10" /> Go Back
                   </div>
+                )}
+                <div
+                  role="button"
+                  onClick={onClose}
+                  className="absolute right-6 top-0 -mt-11 flex cursor-pointer flex-row items-center  text-white"
+                >
+                  Close <XMarkIcon className="mr-2 size-10" />
+                </div>
+
+                <div className="mt-4 h-full overflow-auto text-default">
                   <div>{children}</div>
                 </div>
                 {footer && (

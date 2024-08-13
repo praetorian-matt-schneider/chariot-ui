@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 // eslint-disable-next-line no-restricted-imports
 import { useQueries } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -7,12 +6,7 @@ import { useAxios } from '@/hooks/useAxios';
 import { useMy } from '@/hooks/useMy';
 import { getQueryKey } from '@/hooks/useQueryKeys';
 import { Job, JobStatus } from '@/types';
-import {
-  mergeJobStatus,
-  mergeStatus,
-  UseExtendQueryOptions,
-  useMutation,
-} from '@/utils/api';
+import { mergeStatus, UseExtendQueryOptions, useMutation } from '@/utils/api';
 import { formatDate } from '@/utils/date.util';
 
 export function useReRunJob() {
@@ -27,16 +21,14 @@ export function useReRunJob() {
     defaultErrorMessage: 'Failed to re run job',
     mutationFn: ({
       capability,
-      dns,
       jobKey,
     }: {
       capability: string;
-      dns?: string;
       jobKey?: string;
     }) => {
       return axios.post(`/job/`, {
         name: capability,
-        key: jobKey || `#asset#${dns}`,
+        key: jobKey,
       });
     },
     onSuccess: () => {
@@ -59,13 +51,19 @@ export function useBulkReRunJob() {
   return useMutation({
     defaultErrorMessage: 'Failed to re run job',
     mutationFn: async (
-      jobs: { capability: string; dns?: string; jobKey?: string }[]
+      jobs: {
+        capability: string;
+        dns?: string;
+        jobKey?: string;
+        config?: { test: string };
+      }[]
     ) => {
       const promises = jobs
-        .map(async ({ capability, dns, jobKey }) => {
+        .map(async ({ capability, dns, jobKey, config }) => {
           const { data } = await axios.post(`/job/`, {
             name: capability,
             key: jobKey || `#asset#${dns}`,
+            config,
           });
 
           return data;
@@ -90,43 +88,43 @@ export function useBulkReRunJob() {
 }
 
 export const useJobsStatus = (
-  jobKeys: string[],
-  options?: UseExtendQueryOptions<Job[]>
+  attributeJobMap: Record<string, string>,
+  options?: UseExtendQueryOptions<Job>
 ) => {
   const axios = useAxios();
-  return useQueries({
-    queries: jobKeys
-      .filter(x => Boolean(x))
-      .map(key => {
-        return {
-          ...options,
-          queryKey: getQueryKey.getMy('job', key),
-          queryFn: async () => {
-            const res = await axios.get(`/my`, {
-              params: {
-                key: `#job#${key}`,
-              },
-            });
 
-            // Get the jobs in descending order of updated
-            return res.data.jobs.sort((a: Job, b: Job) => {
-              return (
-                new Date(b.updated).getTime() - new Date(a.updated).getTime()
-              );
-            });
-          },
-        };
-      }),
+  return useQueries({
+    queries: Object.values(attributeJobMap).map(jobKey => {
+      return {
+        ...options,
+        queryKey: getQueryKey.getMy('job', jobKey),
+        queryFn: async () => {
+          const res = await axios.get(`/my`, {
+            params: {
+              key: jobKey,
+            },
+          });
+
+          return res.data.jobs[0] as Job;
+        },
+      };
+    }),
     combine: results => {
       return {
-        data: results.map(result => result.data) as Job[][],
+        data: Object.keys(attributeJobMap).reduce(
+          (acc, current, index) => ({
+            ...acc,
+            [current]: results[index].data,
+          }),
+          {}
+        ) as Record<string, Job>,
         status: mergeStatus(...results.map(result => result.status)),
       };
     },
   });
 };
 
-const getJobTimeline = ({
+export const getJobTimeline = ({
   status,
   updated = '',
 }: {
@@ -165,39 +163,4 @@ const getJobTimeline = ({
     ...current,
     description: current.status === status ? description : '',
   }));
-};
-
-export const useJobsTimeline = ({
-  allAssetJobs,
-  source,
-}: {
-  allAssetJobs: Job[];
-  source: string;
-}) => {
-  const jobs = allAssetJobs.filter(job => {
-    return job.source === source;
-  });
-
-  const jobsStatus: JobStatus | undefined = useMemo(
-    () => mergeJobStatus(jobs.map(job => job.status)),
-    [jobs]
-  );
-
-  const jobsTimeline = useMemo(() => {
-    return getJobTimeline({
-      status: jobsStatus,
-      updated:
-        jobs
-          .map(job => job.updated)
-          .sort()
-          .reverse()[0] || '',
-    });
-  }, [jobsStatus, jobs]);
-
-  return {
-    jobsTimeline,
-    jobsStatus,
-    isJobsRunning:
-      jobsStatus === JobStatus.Running || jobsStatus === JobStatus.Queued,
-  };
 };

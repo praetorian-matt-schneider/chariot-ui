@@ -40,6 +40,7 @@ import { useStorage } from '@/utils/storage/useStorage.util';
 export function Table<TData>(props: TableProps<TData>) {
   const {
     className,
+    contentClassName,
     filters,
     tableClassName,
     columns,
@@ -344,6 +345,7 @@ export function Table<TData>(props: TableProps<TData>) {
     <Body
       ref={parentRef}
       className={className}
+      contentClassName={contentClassName}
       footer={isTableView}
       header={isTableView}
     >
@@ -437,6 +439,7 @@ export function Table<TData>(props: TableProps<TData>) {
           title={noData?.title || `No ${tableName} found`}
           description={noData?.description}
           icon={noData?.icon}
+          styleType={noData?.styleType}
         />
       )}
       {isLoadingOrHaveData && (

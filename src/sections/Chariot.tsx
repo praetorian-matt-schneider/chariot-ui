@@ -152,7 +152,15 @@ const Chariot: React.FC = () => {
   );
 
   const { data: jobsData } = useJobsStatus(
-    currentIntegrations.map(integration => integration.member)
+    currentIntegrations
+      .map(integration => integration.member)
+      .reduce(
+        (acc, member) => {
+          acc[member] = member;
+          return acc;
+        },
+        {} as Record<string, string>
+      )
   );
 
   const {
@@ -166,8 +174,8 @@ const Chariot: React.FC = () => {
   const domainToDiplay = rootDomain?.value ?? (friend || me).split('@')[1];
 
   const jobs: JobI[] = currentIntegrations.map((integration, index) => {
-    const job = jobsData[index]?.[0];
-    const lastRunJob = jobsData[index]?.[1];
+    const job = jobsData[index];
+    const lastRunJob = jobsData[index];
     return {
       member: integration.member,
       status: job?.status,
@@ -646,7 +654,6 @@ const Chariot: React.FC = () => {
           className={cn('w-full rounded-t-sm shadow-lg p-0 bg-zinc-100')}
           header={''}
           skipBack={true}
-          footerClassname=""
           footer={
             selectedIntegrations.length > 0 && (
               <Button

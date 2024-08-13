@@ -14,9 +14,7 @@ import {
 
 import { Button } from '@/components/Button';
 import { Drawer } from '@/components/Drawer';
-import { HorizontalTimeline } from '@/components/HorizontalTimeline';
-import { RisksIcon } from '@/components/icons';
-import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
+import { AssetsIcon, RisksIcon } from '@/components/icons';
 import { UnionIcon } from '@/components/icons/Union.icon';
 import { Loader } from '@/components/Loader';
 import { MarkdownEditor } from '@/components/markdown/MarkdownEditor';
@@ -29,24 +27,27 @@ import { useMy } from '@/hooks';
 import { useGetKev } from '@/hooks/kev';
 import { useGetFile, useUploadFile } from '@/hooks/useFiles';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
-import { useBulkReRunJob, useJobsTimeline } from '@/hooks/useJobs';
+import { useBulkReRunJob, useJobsStatus } from '@/hooks/useJobs';
 import { useReportRisk, useUpdateRisk } from '@/hooks/useRisks';
-import { DRAWER_WIDTH } from '@/sections/detailsDrawer';
+import { AddAttribute } from '@/sections/detailsDrawer/AddAttribute';
 import { Comment } from '@/sections/detailsDrawer/Comment';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
+import { getStatusColor } from '@/sections/Jobs';
 import {
+  Attribute,
   EntityHistory,
+  JobStatus,
   Risk,
   RiskCombinedStatus,
-  RiskSeverity,
-  SeverityDef,
 } from '@/types';
+import { mergeJobStatus } from '@/utils/api';
 import { cn } from '@/utils/classname';
 import { formatDate } from '@/utils/date.util';
 import { sToMs } from '@/utils/date.util';
 import { getSeverityClass } from '@/utils/getSeverityClass.util';
+import { Regex } from '@/utils/regex.util';
 import { isManualORPRrovidedRisk } from '@/utils/risk.util';
-import { StorageKey } from '@/utils/storage/useStorage.util';
+import { StorageKey, useStorage } from '@/utils/storage/useStorage.util';
 import { generatePathWithSearch, useSearchParams } from '@/utils/url.util';
 
 interface RiskDrawerProps {
@@ -54,13 +55,25 @@ interface RiskDrawerProps {
   compositeKey: string;
 }
 
+const isScannable = (attribute: Attribute) =>
+  attribute.name === 'source' &&
+  (attribute.value.startsWith('#attribute') ||
+    attribute.value.startsWith('#asset'));
+
 export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
   const navigate = useNavigate();
   const { removeSearchParams } = useSearchParams();
-  const { getRiskDrawerLink, getAssetDrawerLink } = getDrawerLink();
+  const { getAssetDrawerLink } = getDrawerLink();
+  const [riskJobsMap, setRiskJobsMap] = useStorage<
+    Record<string, Record<string, string>>
+  >(
+    {
+      key: StorageKey.RISK_JOB_MAP,
+    },
+    {}
+  );
 
   const [, dns, name] = compositeKey.split('#');
-
   const attributesFilter = `source:#risk#${dns}#${name}`;
 
   const [isEditingMarkdown, setIsEditingMarkdown] = useState(false);
@@ -102,32 +115,12 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
   const sourceKeys = useMemo(
     () =>
       (attributesGenericSearch?.attributes || [])
-        .filter(
-          ({ name, value }) =>
-            name === 'source' &&
-            (value.startsWith('#attribute') || value.startsWith('#asset'))
-        )
+        .filter(attribute => isScannable(attribute))
         .map(attribute => attribute.value),
     [attributesGenericSearch]
   );
-  const {
-    data: allAssetJobs = [],
-    status: allAssetJobsStatus,
-    refetch: refetchAllAssetJobs,
-  } = useMy(
-    {
-      resource: 'job',
-      query: `#${dns}`,
-    },
-    { enabled: open, refetchInterval: sToMs(10) }
-  );
   const { data: knownExploitedThreats = [] } = useGetKev();
-  const { data: riskNameGenericSearch } = useGenericSearch(
-    { query: name },
-    { enabled: open }
-  );
 
-  const { risks: riskOccurrence = [] } = riskNameGenericSearch || {};
   const definitionsFileValue =
     typeof definitionsFile === 'string'
       ? definitionsFile
@@ -137,11 +130,34 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     riskStatus === 'pending' || definitionsFileStatus === 'pending';
   const risk: Risk = risks[0] || {};
 
+  // This variable filters the jobs from localStorage and only keeps the jobs that are related to the current risk
+  const attributeJobMap = Object.fromEntries(
+    Object.entries(riskJobsMap[risk.key] || {}).filter(([key]) =>
+      sourceKeys.includes(key)
+    )
+  );
+  const { data: jobsData = {}, status: allAssetJobsStatus } = useJobsStatus(
+    attributeJobMap,
+    {
+      enabled: open && sourceKeys.length > 0,
+      refetchInterval: sToMs(10),
+    }
+  );
+
+  const jobsStatus = mergeJobStatus(
+    Object.values(jobsData).map(job => job?.status)
+  );
+
+  const lastScan =
+    Object.values(jobsData)
+      .map(job => job?.updated)
+      .sort()
+      .reverse()[0] || '';
+
+  const isJobsRunning =
+    jobsStatus === JobStatus.Running || jobsStatus === JobStatus.Queued;
+
   const severityClass = getSeverityClass(risk.status?.[1]);
-  const { jobsTimeline, jobsStatus, isJobsRunning } = useJobsTimeline({
-    allAssetJobs,
-    source: risk.source,
-  });
 
   const resetMarkdownValue = useCallback(() => {
     setMarkdownValue(isEditingMarkdown ? definitionsFileValue : '');
@@ -173,31 +189,50 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     });
   }
 
+  const assetsOnRisk = useMemo(
+    () =>
+      attributesGenericSearch?.attributes
+        ?.filter(attribute => attribute.value.includes('#asset'))
+        .map(attribute => {
+          // remove everything before #asset
+          const newKey = attribute.value.split('#asset')[1];
+          const [, dns, name] = newKey.split('#') || [];
+
+          return {
+            key: `#asset#${name}#${dns}`,
+            dns,
+            name,
+            updated: attribute.updated,
+          };
+        }) || [],
+    [attributesGenericSearch?.attributes]
+  );
+
+  const discovered = (
+    <>
+      <Tooltip title="First Seen">
+        <p className="text-sm font-normal text-gray-500">
+          {formatDate(risk.created)}
+        </p>
+      </Tooltip>
+      <p className="text-sm font-normal text-gray-500">-</p>
+      <Tooltip title="Last Seen">
+        <p className="text-sm font-normal text-gray-500">
+          {formatDate(risk.updated)}
+        </p>
+      </Tooltip>
+    </>
+  );
+
   return (
     <Drawer
       open={open}
       onClose={() => removeSearchParams(StorageKey.DRAWER_COMPOSITE_KEY)}
       onBack={() => navigate(-1)}
-      minWidth={DRAWER_WIDTH}
       className={cn(
         'w-full rounded-t-lg bg-zinc-100 pb-0 shadow-lg',
         severityClass
       )}
-      footerClassname={'bg-zinc-200 bg-opacity-90'}
-      header={
-        isInitialLoading ? null : (
-          <div className="flex w-full flex-col px-10 pb-0 pt-6">
-            {/* Job Timeline and Actions */}
-            <HorizontalTimeline
-              steps={jobsTimeline}
-              current={jobsTimeline.findIndex(
-                ({ status }) => status === jobsStatus
-              )}
-              className={severityClass + ' brightness-90'}
-            />
-          </div>
-        )
-      }
     >
       <Loader isLoading={isInitialLoading} type="spinner">
         <div className="flex h-full flex-col gap-2 px-8 pt-0">
@@ -224,8 +259,13 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                         </span>
                       )}
                     </p>
-                    <p className="ml-1 text-sm font-normal text-gray-500">
+                    <p
+                      className="ml-1 flex w-full flex-wrap gap-2 overflow-hidden  text-sm font-normal text-gray-500"
+                      style={{ wordBreak: 'break-word' }}
+                    >
                       via {risk.source} on {risk.dns}
+                      <div className="border-l border-gray-400"></div>
+                      {discovered}
                     </p>
                   </div>
                 </h3>
@@ -280,7 +320,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                     <p className="mt-2">
                       Add a Description & Remediation to this Risk
                       <br />
-                      using Praetorian’s Machine Learning.
+                      {`using Praetorian's Machine Learning.`}
                     </p>
                     <Button
                       className="mt-10"
@@ -374,13 +414,25 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                       allAssetJobsStatus === 'pending'
                     }
                     onClick={async () => {
-                      await bulkReRunJobs(
+                      const [response] = await bulkReRunJobs(
                         sourceKeys.map(jobKey => ({
                           capability: risk.source,
                           jobKey,
+                          config: {
+                            test: risk.name,
+                          },
                         }))
                       );
-                      refetchAllAssetJobs();
+                      setRiskJobsMap(riskJobsMap => ({
+                        ...riskJobsMap,
+                        [risk.key]: sourceKeys.reduce(
+                          (acc, current, index) => ({
+                            ...acc,
+                            [current]: response[index].key,
+                          }),
+                          {}
+                        ),
+                      }));
                     }}
                   >
                     Scan Now
@@ -391,18 +443,24 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
               {/* Attributes Section */}
               <div
                 className={cn(
-                  ' bg-white p-8 transition-all rounded-lg hover:shadow-md'
+                  ' bg-white p-8 pb-2 transition-all rounded-lg hover:shadow-md'
                 )}
               >
-                <div className="mb-4 flex flex-row items-center space-x-1">
+                <div className="flex flex-row items-center space-x-1">
                   <NotepadText className="size-6 text-gray-800" />
                   <h3 className="text-2xl font-semibold tracking-wide text-gray-900">
                     Attributes
                   </h3>
+                  <AddAttribute className="ml-auto" resourceKey={risk.key} />
+                  <JobStatusBadge
+                    status={jobsStatus}
+                    lastScan={formatDate(lastScan)}
+                  />
                 </div>
 
                 <div className="space-y-4">
-                  {attributesGenericSearch?.attributes?.length === 0 ? (
+                  {attributesGenericSearch?.attributes?.length === 0 ||
+                  !attributesGenericSearch?.attributes ? (
                     <div className="text-center text-gray-500">
                       <p>No attributes added to this risk yet.</p>
                     </div>
@@ -422,45 +480,162 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                         </tr>
                       </thead>
                       <tbody>
-                        {attributesGenericSearch?.attributes?.map(data => (
-                          <tr
-                            key={data.name}
-                            className="hover: border-b border-gray-200 bg-white"
-                          >
-                            <td className="p-2 text-sm font-medium text-gray-800">
-                              {data.name}
-                            </td>
-                            <td className=" break-all p-2 text-sm text-gray-500">
-                              <span className="">
-                                {data.value.startsWith('#asset') ? (
-                                  <Link
-                                    to={getAssetDrawerLink({
-                                      dns: data.value.split('#')[3],
-                                      name: data.value.split('#')[2],
-                                    })}
-                                    className="text-blue-500 hover:underline"
-                                  >
-                                    {data.value}
-                                  </Link>
-                                ) : data.value.startsWith('http') ? (
-                                  <a
-                                    href={data.value}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="text-blue-500 hover:underline"
-                                  >
-                                    {data.value}
-                                  </a>
-                                ) : (
-                                  data.value
-                                )}
-                              </span>
-                            </td>
-                            <td className="p-2 text-sm text-gray-500">
-                              {formatDate(data.updated)}
-                            </td>
-                          </tr>
-                        ))}
+                        {attributesGenericSearch?.attributes?.map(data => {
+                          const job = isScannable(data)
+                            ? jobsData[data.value]
+                            : undefined;
+                          const status = job?.status;
+                          const lastScan = job?.updated
+                            ? formatDate(job.updated)
+                            : '';
+
+                          const [, assetLink] =
+                            data.value.match(Regex.CONTAINS_ASSET) || [];
+
+                          return (
+                            <tr
+                              key={data.name}
+                              className="hover: border-b border-gray-200 bg-white"
+                            >
+                              <td className="p-2 text-sm font-medium text-gray-800">
+                                {data.name}
+                              </td>
+                              <td className=" break-all p-2 text-sm text-gray-500">
+                                <span className="flex justify-between">
+                                  <span className="">
+                                    {assetLink ? (
+                                      data.value
+                                    ) : data.value.startsWith('http') ? (
+                                      <a
+                                        href={data.value}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="text-blue-500 hover:underline"
+                                      >
+                                        {data.value}
+                                      </a>
+                                    ) : (
+                                      data.value
+                                    )}
+                                  </span>
+                                  {isScannable(data) && (
+                                    <Tooltip
+                                      title={
+                                        status
+                                          ? getJobStatusText({
+                                              status,
+                                              lastScan,
+                                            })
+                                          : ''
+                                      }
+                                    >
+                                      <ArrowPathIcon
+                                        className={cn(
+                                          'size-5 cursor-pointer',
+                                          status &&
+                                            ![
+                                              JobStatus.Pass,
+                                              JobStatus.Fail,
+                                            ].includes(status) &&
+                                            'animate-spin cursor-not-allowed'
+                                        )}
+                                        onClick={
+                                          status !== JobStatus.Running
+                                            ? async () => {
+                                                const [response] =
+                                                  await bulkReRunJobs([
+                                                    {
+                                                      capability: risk.source,
+                                                      jobKey: data.value,
+                                                      config: {
+                                                        test: risk.name,
+                                                      },
+                                                    },
+                                                  ]);
+                                                setRiskJobsMap(riskJobsMap => ({
+                                                  ...riskJobsMap,
+                                                  [risk.key]: {
+                                                    ...riskJobsMap[risk.key],
+                                                    [data.value]:
+                                                      response[0].key,
+                                                  },
+                                                }));
+                                              }
+                                            : () => {}
+                                        }
+                                      />
+                                    </Tooltip>
+                                  )}
+                                </span>
+                              </td>
+                              <td className="p-2 text-sm text-gray-500">
+                                {formatDate(data.updated)}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              </div>
+              <div className="w-full">
+                {/* Assets Section */}
+                <div
+                  className={cn(
+                    'bg-white p-8 transition-all rounded-lg hover:shadow-md'
+                  )}
+                >
+                  <div className="mb-4 flex flex-row items-center space-x-1">
+                    <AssetsIcon className="size-6 text-gray-800" />
+                    <h3 className="text-2xl font-semibold text-gray-900">
+                      Assets
+                    </h3>
+                  </div>
+                  {assetsOnRisk?.length === 0 ? (
+                    <div className="text-center text-gray-500">
+                      <p>No assets found.</p>
+                    </div>
+                  ) : (
+                    <table className="min-w-full table-auto text-default">
+                      <thead>
+                        <tr>
+                          <th className="w-28 p-2 text-left text-sm font-medium text-gray-600">
+                            Name
+                          </th>
+                          <th className="p-2 text-left text-sm font-medium text-gray-600">
+                            DNS
+                          </th>
+                          <th className="p-2 text-left text-sm font-medium text-gray-600">
+                            Last Updated
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {assetsOnRisk?.map(asset => {
+                          return (
+                            <tr
+                              key={asset.key}
+                              className="hover: border-b border-gray-200 bg-white"
+                            >
+                              <td className="p-2 text-sm text-blue-500">
+                                <Link
+                                  to={getAssetDrawerLink({
+                                    dns: asset.dns,
+                                    name: asset.name,
+                                  })}
+                                  className="hover:underline"
+                                >
+                                  {asset.name}
+                                </Link>
+                              </td>
+                              <td className="p-2 text-sm">{asset.dns}</td>
+                              <td className="p-2 text-sm">
+                                {formatDate(asset.updated)}
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   )}
@@ -484,93 +659,6 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                   onSave={handleUpdateComment}
                 />
               </div>
-            </div>
-          </div>
-
-          <div className="w-full">
-            {/* Occurrences Section */}
-            <div
-              className={cn(
-                'bg-white p-8 transition-all rounded-lg hover:shadow-md'
-              )}
-            >
-              <div className="mb-4 flex flex-row items-center space-x-1">
-                <RisksIcon className="size-6 text-gray-800" />
-                <h3 className="text-2xl font-semibold text-gray-900">
-                  Occurrences
-                </h3>
-              </div>
-              {riskOccurrence.length === 0 ? (
-                <div className="text-center text-gray-500">
-                  <p>No occurrences found.</p>
-                </div>
-              ) : (
-                <table className="min-w-full table-auto text-default">
-                  <thead>
-                    <tr>
-                      <th className="w-28 p-2 text-left text-sm font-medium text-gray-600">
-                        Status
-                      </th>
-                      <th className="p-2 text-left text-sm font-medium text-gray-600">
-                        Name
-                      </th>
-                      <th className="p-2 text-left text-sm font-medium text-gray-600">
-                        DNS
-                      </th>
-                      <th className="p-2 text-left text-sm font-medium text-gray-600">
-                        Last Updated
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {riskOccurrence.map(data => {
-                      const riskSeverityKey = data.status?.[1] as RiskSeverity;
-
-                      return (
-                        <tr
-                          key={data.dns}
-                          className="hover: border-b border-gray-200 bg-white"
-                        >
-                          <td className="p-2 text-sm">
-                            <div className="flex flex-row items-center space-x-1">
-                              <Tooltip
-                                title={
-                                  SeverityDef[riskSeverityKey] + ' Severity'
-                                }
-                              >
-                                {getRiskSeverityIcon(
-                                  riskSeverityKey,
-                                  'h-4 w-4 text-red-500'
-                                )}
-                              </Tooltip>
-                              <p className="text-xs">
-                                {SeverityDef[riskSeverityKey]}
-                              </p>
-                            </div>
-                          </td>
-                          <td className="p-2 text-sm font-medium text-blue-500">
-                            <Link
-                              to={getRiskDrawerLink({
-                                dns: data.dns,
-                                name: data.name,
-                              })}
-                              className="hover:underline"
-                            >
-                              {data.name}
-                            </Link>
-                          </td>
-                          <td className="p-2 text-sm text-gray-500">
-                            {data.dns}
-                          </td>
-                          <td className="p-2 text-sm text-gray-500">
-                            {formatDate(data.updated)}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              )}
             </div>
           </div>
 
@@ -611,6 +699,52 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     </Drawer>
   );
 }
+
+const JobStatusBadge = ({
+  status,
+  lastScan,
+}: {
+  status?: JobStatus;
+  lastScan: string;
+}) => {
+  if (!status) {
+    return null;
+  }
+
+  return (
+    <div
+      className={`!ml-auto flex min-w-40 items-center justify-center rounded-md px-4 py-1 text-xs ${getStatusColor(status)}`}
+    >
+      <span className="flex gap-2">
+        {getJobStatusText({ status, lastScan })}
+        {status === JobStatus.Running && (
+          <ArrowPathIcon className="size-4 animate-spin" />
+        )}
+      </span>
+    </div>
+  );
+};
+
+const getJobStatusText = ({
+  status,
+  lastScan,
+}: {
+  status?: JobStatus;
+  lastScan: string;
+}) => {
+  switch (status) {
+    case JobStatus.Pass:
+      return `Last Scan: ${lastScan}`;
+    case JobStatus.Fail:
+      return `Failed: ${lastScan}`;
+    case JobStatus.Running:
+      return 'Scanning';
+    case JobStatus.Queued:
+      return 'Job Queued';
+    default:
+      return '';
+  }
+};
 
 function getHistoryDiff(
   history: EntityHistory,
