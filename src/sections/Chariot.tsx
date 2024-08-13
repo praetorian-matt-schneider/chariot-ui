@@ -224,6 +224,7 @@ const Chariot: React.FC = () => {
     });
 
     refetch();
+    setIsDomainDrawerOpen(false);
   };
 
   const displayName = useGetAccountDetails(accounts).name || friend || me;
@@ -680,11 +681,13 @@ const Chariot: React.FC = () => {
                 onChange={e => setSearch(e.target.value)}
               />
             </div>
-            <div className="flex flex-row flex-wrap justify-between gap-4 ">
+            <div
+              className="grid gap-4"
+              style={{
+                gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
+              }}
+            >
               {attackSurfaceIntegrations}
-
-              {/* Idea from: https://stackoverflow.com/a/34816625/704284 */}
-              <div className="flex flex-auto" />
             </div>
           </div>
         </Drawer>
