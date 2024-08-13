@@ -198,7 +198,7 @@ const Alerts: React.FC = () => {
                   }}
                   disabled={updateRiskStatus === 'pending'}
                 >
-                  Close
+                  Confirm
                 </Button>
               </Tooltip>
               <Tooltip title="Mark as Open">
