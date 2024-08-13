@@ -43,7 +43,7 @@ export const EmailPasswordForm = ({
       <Inputs
         inputs={[
           {
-            label: 'Email Address',
+            label: 'Business Email Address',
             value: credentials.username,
             placeholder: 'janelongestname@praetorian.com',
             name: 'username',
@@ -72,7 +72,13 @@ export const EmailPasswordForm = ({
       >
         Continue
       </Button>
-      <SignupError error={error} />
+      <SignupError
+        error={
+          error
+            ? "Sign up failed. Please ensure you're using a business email address."
+            : error
+        }
+      />
       {isLogin && (
         <div>
           <div className="flex justify-between">
