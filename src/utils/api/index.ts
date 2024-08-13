@@ -181,8 +181,9 @@ interface CustomOptions {
   errorByStatusCode?: Record<number, string>;
 }
 
-type JobStatusType = JobStatus | '';
-export function mergeJobStatus(jobStatus: JobStatusType[]): JobStatusType {
+export function mergeJobStatus(
+  jobStatus: (JobStatus | undefined)[]
+): JobStatus | undefined {
   if (jobStatus.includes(JobStatus.Queued)) {
     return JobStatus.Queued;
   }
@@ -195,7 +196,7 @@ export function mergeJobStatus(jobStatus: JobStatusType[]): JobStatusType {
   if (jobStatus.includes(JobStatus.Pass)) {
     return JobStatus.Pass;
   }
-  return '';
+  return undefined;
 }
 
 /**

@@ -1,3 +1,5 @@
+import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { To } from 'react-router-dom';
 import {
   ArrowPathIcon,
   InformationCircleIcon,
@@ -13,8 +15,6 @@ import {
   Radar,
   RefreshCcwDot,
 } from 'lucide-react';
-import { FormEvent, useEffect, useMemo, useState } from 'react';
-import { To } from 'react-router-dom';
 
 import { Button } from '@/components/Button';
 import { Dropzone, Files } from '@/components/Dropzone';
@@ -781,6 +781,166 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
         },
       },
     ],
+  },
+  godaddy: {
+    id: Integration.godaddy,
+    logo: '/icons/GoDaddy.svg',
+    name: 'GoDaddy',
+  },
+  gsuite: {
+    id: Integration.gsuite,
+    logo: '/icons/GoogleSuite.svg',
+    name: 'Google Suite',
+  },
+  cloudflare: {
+    id: Integration.cloudflare,
+    logo: '/icons/Cloudflare.svg',
+    name: 'Cloudflare',
+  },
+  shodan: {
+    id: Integration.shodan,
+    logo: '/icons/shodan.png',
+    name: 'Shodan',
+  },
+  securitytrails: {
+    id: Integration.securitytrails,
+    logo: '/icons/SecurityTrails.svg',
+    name: 'SecurityTrails',
+  },
+  greynoise: {
+    id: Integration.greynoise,
+    logo: '/icons/greynoise_logo.jpeg',
+    name: 'GreyNoise',
+  },
+  sentinel: {
+    id: Integration.sentinel,
+    logo: '/icons/Sentinel.jpg',
+    name: 'Sentinel',
+  },
+  sumologic: {
+    id: Integration.sumologic,
+    logo: '/icons/SumoLogic.jpg',
+    name: 'SumoLogic',
+  },
+  palo: {
+    id: Integration.palo,
+    logo: '/icons/PaloAlto.svg',
+    name: 'PaloAlto Networks',
+  },
+  splunk: {
+    id: Integration.splunk,
+    logo: '/icons/Splunk.svg',
+    name: 'Splunk',
+  },
+  graylog: {
+    id: Integration.graylog,
+    logo: '/icons/graylog.svg',
+    name: 'Graylog',
+  },
+  tanium: {
+    id: Integration.tanium,
+    logo: '/icons/Tanium.png',
+    name: 'Tanium',
+  },
+  orca: {
+    id: Integration.orca,
+    logo: '/icons/Orca.svg',
+    name: 'Orca',
+  },
+  snyk: {
+    id: Integration.snyk,
+    logo: '/icons/Snyk.svg',
+    name: 'Snyk',
+  },
+  ibmcloud: {
+    id: Integration.ibmcloud,
+    logo: '/icons/IBMCloud.svg',
+    name: 'IBMCloud',
+  },
+  qualys: {
+    id: Integration.qualys,
+    logo: '/icons/Qualys.svg',
+    name: 'Qualys',
+  },
+  mandiant: {
+    id: Integration.mandiant,
+    logo: '/icons/Mandiant.png',
+    name: 'Mandiant',
+  },
+  nexpose: {
+    id: Integration.nexpose,
+    logo: '/icons/Nexpose.png',
+    name: 'Nexpose',
+  },
+  jamf: {
+    id: Integration.jamf,
+    logo: '/icons/Jamf.png',
+    name: 'Jamf',
+  },
+  r7: {
+    id: Integration.r7,
+    logo: '/icons/Rapid7.svg',
+    name: 'Rapid7',
+  },
+  securityopscenter: {
+    id: Integration.securityopscenter,
+    logo: '/icons/ServiceNow.svg',
+    name: 'SecOps',
+  },
+  jupiterone: {
+    id: Integration.jupiterone,
+    logo: '/icons/JupiterOne.svg',
+    name: 'JupiterOne',
+  },
+  runzero: {
+    id: Integration.runzero,
+    logo: '/icons/RunZero.png',
+    name: 'RunZero',
+  },
+  traceable: {
+    id: Integration.traceable,
+    logo: '/icons/Traceable.png',
+    name: 'Traceable.ai',
+  },
+  trellix: {
+    id: Integration.trellix,
+    logo: '/icons/Trellix.svg',
+    name: 'Trellix',
+  },
+  elasticsearch: {
+    id: Integration.elasticsearch,
+    logo: '/icons/ElasticSearch.svg',
+    name: 'ElasticSearch',
+  },
+  defender: {
+    id: Integration.defender,
+    logo: '/icons/Defender.svg',
+    name: 'Defender',
+  },
+  sentinelone: {
+    id: Integration.sentinelone,
+    logo: '/icons/SentinelOne.png',
+    name: 'SentinelOne',
+  },
+  vulndb: {
+    id: Integration.vulndb,
+    logo: '/icons/vuldb.png',
+    name: 'VulDB',
+  },
+  imperva: {
+    id: Integration.imperva,
+    logo: '/icons/Imperva.svg',
+    name: 'Imperva',
+  },
+  f5: {
+    id: Integration.f5,
+    logo: '/icons/F5.svg',
+    name: 'F5',
+  },
+  carbonblack: {
+    id: Integration.carbonblack,
+    logo: '/icons/CarbonBlack.svg',
+    name: 'CarbonBlack',
   },
 };
 

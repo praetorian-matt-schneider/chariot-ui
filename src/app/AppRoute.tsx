@@ -7,12 +7,12 @@ import Account from '@/sections/Account';
 import Alerts from '@/sections/Alerts';
 import Assets from '@/sections/Assets';
 import { AuthenticatedApp } from '@/sections/AuthenticatedApp';
+import Chariot from '@/sections/Chariot';
 import Files from '@/sections/Files';
 import Hello from '@/sections/Hello';
 import Intelligence from '@/sections/Intelligence';
 import Jobs from '@/sections/Jobs';
 import Logout from '@/sections/Logout';
-import { Overview } from '@/sections/overview';
 import { Report } from '@/sections/Report';
 import { Risks } from '@/sections/RisksTable';
 import { ForgotPassword, Login, Signup } from '@/sections/signup';
@@ -139,9 +139,14 @@ const appRoutes = {
     },
     overview: {
       element: (
-        <Body className="bg-header">
-          <Overview />
-        </Body>
+        // <Body
+        //   style={{
+        //     background:
+        //       'radial-gradient(circle at center, rgb(41, 34, 90) 0%, rgb(24, 22, 60) 70%, rgb(13, 13, 40) 100%)',
+        //   }}
+        // >
+        <Chariot />
+        // </Body>
       ),
       title: 'Overview',
     },

@@ -5,9 +5,14 @@ import { AvailableIntegrations } from '@/sections/overview/Integration';
 import { Asset } from '@/types';
 
 export const useIntegration = () => {
-  const { data: accounts, status: accountStatus } = useMy({
-    resource: 'account',
-  });
+  const { data: accounts, status: accountStatus } = useMy(
+    {
+      resource: 'account',
+    },
+    {
+      refetchInterval: 3000,
+    }
+  );
 
   const integrationList = accounts.filter(account =>
     AvailableIntegrations.includes(account.member)
@@ -20,7 +25,12 @@ export const useIntegration = () => {
     [accountStatus]
   );
 
+  const getMyIntegrations = useCallback(() => {
+    return integrationList.filter(account => account.member !== 'hook');
+  }, [accountStatus, accounts]);
+
   return {
     isIntegration,
+    getMyIntegrations,
   };
 };

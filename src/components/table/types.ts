@@ -20,6 +20,7 @@ export interface TableProps<TData> {
   };
   status: 'error' | 'success' | 'pending';
   error: Error | null;
+  skipNoData?: boolean;
   noData?: Partial<NoDataProps>;
   fetchNextPage?: () => void;
   isFetchingNextPage?: boolean;

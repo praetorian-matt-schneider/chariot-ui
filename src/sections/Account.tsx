@@ -2,13 +2,16 @@ import React, { PropsWithChildren, useEffect, useState } from 'react';
 import { XMarkIcon } from '@heroicons/react/20/solid';
 import {
   ExclamationTriangleIcon,
+  InformationCircleIcon,
   TrashIcon,
 } from '@heroicons/react/24/outline';
 import MD5 from 'crypto-js/md5';
 
 import { Button } from '@/components/Button';
+import { CopyToClipboard } from '@/components/CopyToClipboard';
 import { Dropzone, Files } from '@/components/Dropzone';
 import { Input } from '@/components/form/Input';
+import { Link } from '@/components/Link';
 import { Loader } from '@/components/Loader';
 import { Modal } from '@/components/Modal';
 import { Paper } from '@/components/Paper';
@@ -25,23 +28,36 @@ import {
 import { useUploadFile } from '@/hooks/useFiles';
 import { useMy } from '@/hooks/useMy';
 import { CollaboratingWith } from '@/sections/CollaboratingWith';
+import { Integrations } from '@/sections/overview/Module';
 import { SSOSetupForm } from '@/sections/SSOSetupForm';
 import Avatar from '@/sections/topNavBar/Avatar';
 import { Users } from '@/sections/Users';
 import { useAuth } from '@/state/auth';
+import { getChariotWebhookURL } from '@/utils/integration.util';
+import { generateUuid } from '@/utils/uuid.util';
 
 const Account: React.FC = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [displayName, setDisplayName] = useState('');
 
-  const { isSSO, me, friend, isImpersonating } = useAuth();
+  const { isSSO, me, friend, isImpersonating, api } = useAuth();
   const { data, status } = useMy({ resource: 'account' });
   const { mutate: updateAccount } = useModifyAccount('updateSetting');
   const { mutateAsync: purgeAccount } = usePurgeAccount();
+  const { mutate: unlink } = useModifyAccount('unlink');
+  const { mutate: link, data: linkedHook } = useModifyAccount('link');
 
   const { name: accountDisplayName } = useGetAccountDetails(data);
   const isDirty = status === 'success' && accountDisplayName !== displayName;
   const header = MD5(friend || me).toString();
+  const hook = Integrations.hook;
+  const hookAccount = data.find(({ member }) => member === hook.id);
+
+  const hookUrl = getChariotWebhookURL({
+    api,
+    me,
+    pin: linkedHook?.config?.pin,
+  });
 
   useEffect(() => {
     if (status === 'success') {
@@ -150,6 +166,67 @@ const Account: React.FC = () => {
             Save
           </Button>
         </form>
+      </Section>
+
+      <Section title="Webhook URL" description={hook.description as string}>
+        {hook.help && (
+          <div className="mt-2 rounded-lg bg-gray-100 p-4">
+            <div className="flex flex-col space-y-2">
+              <Link
+                styleType="text"
+                to={hook.help.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                buttonClass="p-0 hover:underline text-indigo-600 font-normal"
+              >
+                <InformationCircleIcon className="size-5" />
+                <span>{hook.help.label}</span>
+              </Link>
+            </div>
+          </div>
+        )}
+        {hookAccount && linkedHook?.config?.pin && (
+          <>
+            <p className="mt-4 block text-sm font-medium leading-6 text-gray-900">
+              Webhook URL
+            </p>
+            <CopyToClipboard textToCopy={hookUrl}>
+              <p className="text-sm">{hookUrl}</p>
+            </CopyToClipboard>
+          </>
+        )}
+        {hookAccount && (
+          <Button
+            className="mt-4"
+            onClick={() => {
+              unlink({
+                config: hookAccount.config,
+                key: hookAccount.key,
+                member: hookAccount.member,
+                value: hookAccount.value,
+                username: hookAccount.member,
+              });
+            }}
+          >
+            Disconnect
+          </Button>
+        )}
+        {!hookAccount && (
+          <Button
+            className="mt-4"
+            styleType="primary"
+            onClick={() => {
+              link({
+                config: {
+                  pin: generateUuid(),
+                },
+                username: hook.id,
+              });
+            }}
+          >
+            Generate URL
+          </Button>
+        )}
       </Section>
 
       <Section

@@ -45,6 +45,7 @@ export function Table<TData>(props: TableProps<TData>) {
     columns,
     data: rawData,
     selection,
+    skipNoData,
     noData,
     status,
     error,
@@ -431,7 +432,7 @@ export function Table<TData>(props: TableProps<TData>) {
           icon={<ExclamationCircleIcon className={`size-20 text-red-400`} />}
         />
       )}
-      {isEmpty && (
+      {isEmpty && !skipNoData && (
         <NoData
           title={noData?.title || `No ${tableName} found`}
           description={noData?.description}

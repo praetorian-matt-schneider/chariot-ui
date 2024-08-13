@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-restricted-imports
-import { useQueries } from '@tanstack/react-query';
+import { useQueries, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import { useAxios } from '@/hooks/useAxios';
@@ -16,7 +16,61 @@ interface CreateAttribute {
   value: string;
 }
 
-export const useCreateAttribute = (resourceKey = '') => {
+// Hook to get the root domain
+export const useGetRootDomain = () => {
+  const axios = useAxios();
+  return useQuery({
+    queryKey: getQueryKey.getMy('attribute', 'CHARIOT__ROOT_DOMAIN'),
+    queryFn: async () => {
+      const res = await axios.get('/my', {
+        params: { key: '#attribute#CHARIOT__ROOT_DOMAIN' },
+      });
+      return res.data['attributes'][0] ?? {};
+    },
+  });
+};
+
+// Hook to create or update the root domain
+export const useSetRootDomain = () => {
+  const axios = useAxios();
+  const { invalidate: invalidateAttributeCounts } = useCounts(
+    { resource: 'attribute' },
+    { enabled: false }
+  );
+  const { invalidate: invalidateAttributesGenericSearch } = useGenericSearch(
+    {
+      query: `source:root`,
+    },
+    {
+      enabled: false,
+    }
+  );
+
+  return useMutation({
+    defaultErrorMessage: `Failed to set root domain`,
+    mutationFn: async (domain: string) => {
+      const promise = axios.post(`/attribute`, {
+        key: 'root',
+        name: 'Root Domain',
+        value: domain,
+      });
+
+      toast.promise(promise, {
+        loading: 'Setting root domain...',
+        success: 'Root domain set successfully',
+        error: 'Failed to set root domain',
+      });
+
+      const { data } = await promise;
+      invalidateAttributeCounts();
+      invalidateAttributesGenericSearch();
+
+      return data;
+    },
+  });
+};
+
+export const useCreateAttribute = (resourceKey = '', skipToast = false) => {
   const axios = useAxios();
   const { invalidate: invalidateAttributeCounts } = useCounts(
     { resource: 'attribute' },
@@ -40,11 +94,13 @@ export const useCreateAttribute = (resourceKey = '') => {
         value: attribute.value,
       });
 
-      toast.promise(promise, {
-        loading: 'Adding attribute...',
-        success: 'Attribute added',
-        error: 'Failed to add attribute',
-      });
+      if (!skipToast) {
+        toast.promise(promise, {
+          loading: 'Adding attribute...',
+          success: 'Attribute added',
+          error: 'Failed to add attribute',
+        });
+      }
 
       const { data } = await promise;
       invalidateAttributeCounts();

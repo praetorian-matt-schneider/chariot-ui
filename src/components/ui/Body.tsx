@@ -9,6 +9,7 @@ export const Body = forwardRef(function Paper(
     footer?: boolean;
     header?: boolean;
     className?: string;
+    style?: React.CSSProperties;
     children?: ReactNode;
   },
   ref?: React.Ref<HTMLDivElement>
@@ -23,7 +24,7 @@ export const Body = forwardRef(function Paper(
         className
       )}
       id="body"
-      style={{ overflowAnchor: 'none' }}
+      style={{ overflowAnchor: 'none', ...props.style }}
     >
       <div>
         {header && <Header />}
