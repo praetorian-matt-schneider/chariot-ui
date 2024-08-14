@@ -441,6 +441,13 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
         name: 'value',
         required: true,
       },
+      {
+        label: 'Role Name',
+        value: 'Chariot',
+        placeholder: 'Chariot',
+        name: 'role',
+        required: true,
+      },
     ],
     message: (
       <div>
