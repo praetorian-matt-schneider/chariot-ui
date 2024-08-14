@@ -396,7 +396,7 @@ const Chariot: React.FC = () => {
                 currentPlan={currentPlan}
                 used={totalAssets}
                 assetCountStatus={assetCountStatus}
-                total={500}
+                total={999}
               />
             </div>
           </div>
