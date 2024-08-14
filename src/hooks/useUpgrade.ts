@@ -15,7 +15,7 @@ export const useUpgrade = () => {
       return axios.post('upgrade');
     },
     onSuccess: () => {
-      toast.success('Account Upgraded');
+      toast.success('Upgrade request has been sent');
       invalidate();
     },
   });

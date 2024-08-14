@@ -3,6 +3,7 @@ import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
 import { Button } from '@/components/Button';
 import { useModifyAccount } from '@/hooks';
+import { useUpgrade } from '@/hooks/useUpgrade';
 import { Plan } from '@/types';
 
 interface Props {
@@ -22,6 +23,7 @@ const UpgradeMenu: React.FC<Props> = ({
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   const { mutate: upgrade, status: upgradeStatus } = useModifyAccount('link');
+  const { mutate: startFreeTrial } = useUpgrade();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -97,13 +99,10 @@ const UpgradeMenu: React.FC<Props> = ({
           <p className="text-sm text-gray-400">Go hands-free.</p>
           <Button
             className="mt-4 w-full bg-brand text-white"
-            onClick={() =>
-              window.open(
-                'https://www.praetorian.com/contact-us',
-                '_blank',
-                'noopener noreferrer'
-              )
-            }
+            onClick={() => {
+              onClose();
+              startFreeTrial();
+            }}
           >
             Free Trial
           </Button>
