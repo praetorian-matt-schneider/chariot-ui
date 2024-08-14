@@ -1,31 +1,30 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 
-import { Dropdown } from '@/components/Dropdown';
+import { Dropdown, DropdownMenu } from '@/components/Dropdown';
 import { countDescription } from '@/components/Menu';
 import { useCounts } from '@/hooks/useCounts';
 
 interface SourceDropdownProps {
   type: 'asset' | 'job' | 'risk';
-  onSelect: (selected: string[]) => void;
+  onChange: (selected: string[]) => void;
+  value: string[];
 }
 
 interface SourceData {
   [key: string]: number;
 }
 
-const SourceDropdown: React.FC<SourceDropdownProps> = ({ type, onSelect }) => {
-  const { data } = useCounts({
+const SourceDropdown: React.FC<SourceDropdownProps> = ({
+  type,
+  onChange: handleSelect,
+  value: sourcesFilter,
+}) => {
+  const { data, status: countsStatus } = useCounts({
     resource: type,
   });
 
-  const [sourcesFilter, setSourcesFilter] = useState<string[]>(['']);
   const sourceData: SourceData = (data?.source as unknown as SourceData) || {};
-
-  const handleSelect = (selectedRows: string[]) => {
-    setSourcesFilter(selectedRows);
-    onSelect(selectedRows);
-  };
 
   const name = 'Origins';
 
@@ -48,18 +47,19 @@ const SourceDropdown: React.FC<SourceDropdownProps> = ({ type, onSelect }) => {
     }
   }
 
-  return (
-    <Dropdown
-      styleType="header"
-      label={
-        sourcesFilter.filter(Boolean).length === 0
-          ? `All ${name}`
-          : sourcesFilter.join(', ')
-      }
-      className="capitalize"
-      endIcon={<ChevronDownIcon className="size-5 text-gray-500" />}
-      menu={{
-        items: [
+  const items: DropdownMenu['items'] =
+    countsStatus === 'pending'
+      ? Array(2)
+          .fill(0)
+          .map(() => {
+            return {
+              label: 'Loading...',
+              className: 'w-60 h-4',
+              value: '',
+              isLoading: true,
+            };
+          })
+      : [
           {
             label: `All ${name}`,
             labelSuffix: Object.values(sourceData)
@@ -77,9 +77,20 @@ const SourceDropdown: React.FC<SourceDropdownProps> = ({ type, onSelect }) => {
             value: item,
           })),
           countDescription,
-        ],
+        ];
+
+  return (
+    <Dropdown
+      styleType="header"
+      label={
+        sourcesFilter.length === 0 ? `All ${name}` : sourcesFilter.join(', ')
+      }
+      className="capitalize"
+      endIcon={<ChevronDownIcon className="size-5 text-gray-500" />}
+      menu={{
+        items,
         onSelect: handleSelect,
-        value: sourcesFilter,
+        value: sourcesFilter.length === 0 ? [''] : sourcesFilter,
         multiSelect: true,
       }}
     />

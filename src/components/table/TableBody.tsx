@@ -22,6 +22,7 @@ interface TableBodyProps<TData> {
   rowActions?: TableProps<TData>['rowActions'];
   rowData: InternalTData<TData>;
   rowIndex: number;
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   virtualRow: VirtualItem<Element>;
   isChecked: boolean;
   handleRowClick: (

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 
 import { Dropdown } from '@/components/Dropdown';
@@ -7,17 +7,19 @@ import { useCounts } from '@/hooks/useCounts';
 import { RiskStatus, RiskStatusLabel } from '@/types';
 
 interface StatusDropdownProps {
-  onSelect: (selected: RiskStatus[]) => void;
+  value: RiskStatus[];
+  onChange: (selected: RiskStatus[]) => void;
 }
 
-const StatusDropdown: React.FC<StatusDropdownProps> = ({ onSelect }) => {
+const StatusDropdown: React.FC<StatusDropdownProps> = ({
+  onChange: onSelect,
+  value: statusFilter,
+}) => {
   const { data } = useCounts({ resource: 'risk' });
-  const [statusFilter, setStatusFilter] = useState<RiskStatus[]>([]);
   const statusData: { [key: string]: number } = data?.status || {};
   const name = 'Statuses';
 
   const handleSelect = (selectedRows: RiskStatus[]) => {
-    setStatusFilter(selectedRows);
     onSelect(selectedRows);
   };
 
@@ -64,7 +66,7 @@ const StatusDropdown: React.FC<StatusDropdownProps> = ({ onSelect }) => {
     <Dropdown
       styleType="header"
       label={
-        statusFilter.filter(Boolean).length === 0
+        statusFilter.length === 0
           ? `All ${name}`
           : statusFilter.map(status => RiskStatusLabel[status]).join(', ')
       }
@@ -93,7 +95,7 @@ const StatusDropdown: React.FC<StatusDropdownProps> = ({ onSelect }) => {
           countDescription,
         ],
         onSelect: value => handleSelect(value as RiskStatus[]),
-        value: statusFilter,
+        value: statusFilter.length === 0 ? [''] : statusFilter,
         multiSelect: true,
       }}
     />

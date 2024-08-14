@@ -58,9 +58,7 @@ export const getFilterLabel = (
   const labels = filter.map(
     v => options.find(({ value }) => value === v)?.label || ''
   );
-  return filter.length === 1 && filter[0] === ''
-    ? `All ${label}`
-    : labels.join(', ');
+  return filter.length === 0 ? `All ${label}` : labels.join(', ');
 };
 
 export function getStatus(status: RiskCombinedStatus): RiskStatus {
@@ -151,18 +149,18 @@ export function Risks() {
     'risk-status',
     setSelectedRows
   );
-  const [severityFilter, setSeverityFilter] = useFilter(
-    [''],
+  const [severityFilter, setSeverityFilter] = useFilter<RiskSeverity[]>(
+    [],
     'risk-severity',
     setSelectedRows
   );
-  const [intelFilter, setIntelFilter] = useFilter(
-    [''],
+  const [intelFilter, setIntelFilter] = useFilter<string[]>(
+    [],
     'risk-intel',
     setSelectedRows
   );
-  const [sourcesFilter, setSourcesFilter] = useFilter(
-    [''],
+  const [sourcesFilter, setSourcesFilter] = useFilter<string[]>(
+    [],
     'risk-sources',
     setSelectedRows
   );
@@ -368,12 +366,14 @@ export function Risks() {
         filters={
           <div className="flex gap-4">
             <SeverityDropdown
-              onSelect={selectedRows => {
+              value={severityFilter}
+              onChange={selectedRows => {
                 setSeverityFilter(selectedRows);
               }}
             />
             <StatusDropdown
-              onSelect={selectedRows => {
+              value={statusFilter}
+              onChange={selectedRows => {
                 setStatusesFilter(selectedRows);
               }}
             />
@@ -405,13 +405,14 @@ export function Risks() {
                   countDescription,
                 ],
                 onSelect: selectedRows => setIntelFilter(selectedRows),
-                value: intelFilter,
+                value: intelFilter.length === 0 ? [''] : intelFilter,
                 multiSelect: true,
               }}
             />
             <SourceDropdown
               type="risk"
-              onSelect={selectedRows => {
+              value={sourcesFilter}
+              onChange={selectedRows => {
                 setSourcesFilter(selectedRows);
               }}
             />

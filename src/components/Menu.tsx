@@ -104,10 +104,10 @@ export const Menu: React.FC<MenuProps> = props => {
                   newSelected =
                     newSelected.length > 0
                       ? newSelected.filter(v => v !== '')
-                      : [''];
+                      : [];
                 } else {
                   // If 'All' option is selected, remove all other values
-                  newSelected = [''];
+                  newSelected = [];
                 }
               }
               return newSelected;

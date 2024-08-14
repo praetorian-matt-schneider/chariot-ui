@@ -225,7 +225,8 @@ const Jobs: React.FC = () => {
             />
             <SourceDropdown
               type="job"
-              onSelect={selectedRows => setSources(selectedRows)}
+              value={sources}
+              onChange={selectedRows => setSources(selectedRows)}
             />
           </div>
         }

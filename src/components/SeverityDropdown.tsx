@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 
 import { Dropdown } from '@/components/Dropdown';
@@ -7,17 +7,19 @@ import { useCounts } from '@/hooks/useCounts';
 import { RiskSeverity, SeverityDef } from '@/types';
 
 interface SeverityDropdownProps {
-  onSelect: (selected: RiskSeverity[]) => void;
+  value: RiskSeverity[];
+  onChange: (selected: RiskSeverity[]) => void;
 }
 
-const SeverityDropdown: React.FC<SeverityDropdownProps> = ({ onSelect }) => {
+const SeverityDropdown: React.FC<SeverityDropdownProps> = ({
+  onChange: onSelect,
+  value: severityFilter,
+}) => {
   const { data } = useCounts({ resource: 'risk' });
-  const [severityFilter, setSeverityFilter] = useState<RiskSeverity[]>([]);
   const statusData: { [key: string]: number } = data?.status || {};
   const name = 'Severities';
 
   const handleSelect = (selectedRows: RiskSeverity[]) => {
-    setSeverityFilter(selectedRows);
     onSelect(selectedRows);
   };
 
@@ -45,7 +47,7 @@ const SeverityDropdown: React.FC<SeverityDropdownProps> = ({ onSelect }) => {
     <Dropdown
       styleType="header"
       label={
-        severityFilter.filter(Boolean).length === 0
+        severityFilter.length === 0
           ? `All ${name}`
           : severityFilter.map(severity => SeverityDef[severity]).join(', ')
       }
@@ -76,7 +78,7 @@ const SeverityDropdown: React.FC<SeverityDropdownProps> = ({ onSelect }) => {
           countDescription,
         ],
         onSelect: value => handleSelect(value as RiskSeverity[]),
-        value: severityFilter,
+        value: severityFilter.length === 0 ? [''] : severityFilter,
         multiSelect: true,
       }}
     />

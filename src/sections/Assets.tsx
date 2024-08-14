@@ -208,7 +208,8 @@ const Assets: React.FC = () => {
               }}
             />
             <AssetStatusDropdown
-              onSelect={(selected: string[]) => {
+              value={filters.priorities}
+              onChange={(selected: string[]) => {
                 setFilters(prevFilters => {
                   return {
                     ...prevFilters,
@@ -219,7 +220,8 @@ const Assets: React.FC = () => {
             />
             <SourceDropdown
               type="asset"
-              onSelect={selected => {
+              value={filters.sources}
+              onChange={selected => {
                 setFilters(prevFilters => {
                   return {
                     ...prevFilters,
@@ -336,7 +338,6 @@ const Assets: React.FC = () => {
               : 'Try adjusting your filters or add new assets to see results.',
         }}
       />
-
       <AssetStatusWarning
         open={showAssetStatusWarning}
         onClose={() => setShowAssetStatusWarning(false)}

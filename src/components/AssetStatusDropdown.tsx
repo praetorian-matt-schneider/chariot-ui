@@ -1,20 +1,21 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 
-import { Dropdown } from '@/components/Dropdown';
+import { Dropdown, DropdownMenu } from '@/components/Dropdown';
 import { countDescription } from '@/components/Menu';
 import { useCounts } from '@/hooks/useCounts';
 import { AssetStatus, AssetStatusLabel } from '@/types';
 
 interface AssetStatusDropdownProps {
-  onSelect: (selected: AssetStatus[]) => void;
+  onChange: (selected: AssetStatus[]) => void;
+  value: AssetStatus[];
 }
 
 const AssetStatusDropdown: React.FC<AssetStatusDropdownProps> = ({
-  onSelect,
+  onChange: onSelect,
+  value: statusFilter,
 }) => {
-  const { data } = useCounts({ resource: 'asset' });
-  const [statusFilter, setStatusFilter] = useState<AssetStatus[]>([]);
+  const { data, status: countsStatus } = useCounts({ resource: 'asset' });
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, unused-imports/no-unused-vars
   const { FL, FH, ...restStatus } = data?.status || {};
@@ -38,10 +39,8 @@ const AssetStatusDropdown: React.FC<AssetStatusDropdownProps> = ({
       selectedRows.length === 0 ||
       selectedRows.length === Object.keys(AssetStatusLabel).length
     ) {
-      setStatusFilter([]);
       onSelect([]);
     } else {
-      setStatusFilter(selectedRows);
       onSelect(selectedRows);
     }
   };
@@ -50,18 +49,19 @@ const AssetStatusDropdown: React.FC<AssetStatusDropdownProps> = ({
     statusFilter.length === 0 ||
     statusFilter.length === Object.keys(AssetStatusLabel).length;
 
-  return (
-    <Dropdown
-      styleType="header"
-      label={
-        allSelected
-          ? `All ${name}`
-          : statusFilter.map(status => AssetStatusLabel[status]).join(', ')
-      }
-      className="capitalize"
-      endIcon={<ChevronDownIcon className="size-5 text-gray-500" />}
-      menu={{
-        items: [
+  const items: DropdownMenu['items'] =
+    countsStatus === 'pending'
+      ? Array(2)
+          .fill(0)
+          .map(() => {
+            return {
+              label: 'Loading...',
+              className: 'w-60 h-4',
+              value: '',
+              isLoading: true,
+            };
+          })
+      : [
           {
             label: `All ${name}`,
             labelSuffix: Object.values(statusData)
@@ -81,7 +81,20 @@ const AssetStatusDropdown: React.FC<AssetStatusDropdownProps> = ({
             value: status,
           })),
           countDescription,
-        ],
+        ];
+
+  return (
+    <Dropdown
+      styleType="header"
+      label={
+        allSelected
+          ? `All ${name}`
+          : statusFilter.map(status => AssetStatusLabel[status]).join(', ')
+      }
+      className="capitalize"
+      endIcon={<ChevronDownIcon className="size-5 text-gray-500" />}
+      menu={{
+        items,
         onSelect: value => {
           const selectedValues = value.filter(v => v !== '');
           handleSelect(selectedValues as AssetStatus[]);

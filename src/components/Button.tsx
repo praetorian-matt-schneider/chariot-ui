@@ -67,6 +67,14 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       }
     }
 
+    function getLoadingClass() {
+      if (styleType === 'header') {
+        return 'bg-header-light';
+      }
+
+      return 'bg-default-light';
+    }
+
     return (
       <>
         <button
@@ -81,8 +89,17 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           disabled={isLoading || disabled}
         >
           {isLoading && (
-            <div className="absolute left-0 top-0 z-10 size-full rounded-[2px] bg-layer1">
-              <Loader isLoading className="size-full rounded-[2px]" />
+            <div
+              className={cn(
+                'absolute left-0 top-0 z-10 size-full rounded-[2px]',
+                getLoadingClass()
+              )}
+            >
+              <Loader
+                isLoading
+                className="size-full rounded-[2px]"
+                styleType={styleType === 'header' ? 'header' : undefined}
+              />
             </div>
           )}
           {startIcon}
