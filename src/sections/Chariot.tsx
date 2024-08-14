@@ -510,7 +510,9 @@ const Chariot: React.FC = () => {
                     id: 'discoveredAssets',
                     cell: row => (
                       <div className={'text-gray-500'}>
-                        {row.discoveredAssets === '-'
+                        {notificationsIntegrations.some(
+                          integration => row.surface === integration.id
+                        )
                           ? 'Risk Notification'
                           : `${row.discoveredAssets.toLocaleString()} Assets`}
                       </div>
