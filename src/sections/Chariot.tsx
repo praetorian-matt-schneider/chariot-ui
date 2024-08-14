@@ -284,13 +284,16 @@ const Chariot: React.FC = () => {
   );
 
   const [selectedIntegrations, setSelectedIntegrations] = useStorage<string[]>(
-    { key: 'selectedIntegrations' },
+    { key: `${friend || me}-selectedIntegrations` },
     []
   );
   const [
     selectedNotificationIntegrations,
     setSelectedNotificationIntegrations,
-  ] = useStorage<string[]>({ key: 'selectedNotificationIntegrations' }, []);
+  ] = useStorage<string[]>(
+    { key: `${friend || me}-selectedNotificationIntegrations` },
+    []
+  );
 
   const [requiresSetupIntegrations, waitlistedIntegrations] = partition(
     [...selectedNotificationIntegrations, ...selectedIntegrations],
