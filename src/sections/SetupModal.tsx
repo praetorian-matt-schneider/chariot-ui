@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Fragment } from 'react/jsx-runtime';
+import { InformationCircleIcon } from '@heroicons/react/24/outline';
 import { Dialog, Transition } from '@headlessui/react';
 
 import { Button } from '@/components/Button';
 import { Inputs, Values } from '@/components/form/Inputs';
+import { Link } from '@/components/Link';
 import { useModifyAccount } from '@/hooks';
 import { Integrations } from '@/sections/overview/Module';
 import { LinkAccount } from '@/types';
@@ -63,6 +65,23 @@ const SetupModal: React.FC<{
                 >
                   {integration.name} Setup
                 </Dialog.Title>
+                {integration.help && (
+                  <div className="mt-4 rounded-lg bg-gray-100 p-4">
+                    <p className="mb-2 text-sm font-bold">Need help?</p>
+                    <div className="flex flex-col space-y-2">
+                      <Link
+                        styleType="text"
+                        to={integration.help.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        buttonClass="p-0 hover:underline text-indigo-600 font-normal"
+                      >
+                        <InformationCircleIcon className="size-5" />
+                        <span>{integration.help.label}</span>
+                      </Link>
+                    </div>
+                  </div>
+                )}
                 <div className="mt-4 space-y-4">
                   {integration.markup ? (
                     integration.markup
