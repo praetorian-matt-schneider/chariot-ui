@@ -430,7 +430,14 @@ const Chariot: React.FC = () => {
             attackSurface:
               selectedIntegrations.length > 0 ||
               currentIntegrations?.length > 0,
-            riskNotifications: selectedNotificationIntegrations.length > 0,
+            riskNotifications:
+              selectedNotificationIntegrations.length > 0 ||
+              currentIntegrations.some(integration =>
+                notificationsIntegrations.some(
+                  notificationIntegration =>
+                    notificationIntegration.id === integration.member
+                )
+              ),
           }}
           onRootDomainClick={() => setIsDomainDrawerOpen(true)}
           onAttackSurfaceClick={() => setIsDrawerOpen(true)}
