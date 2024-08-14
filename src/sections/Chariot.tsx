@@ -22,6 +22,7 @@ import { Input } from '@/components/form/Input';
 import { GettingStarted } from '@/components/GettingStarted';
 import { Loader } from '@/components/Loader';
 import { Modal } from '@/components/Modal';
+import MorphingButton from '@/components/MorphingButton';
 import { Table } from '@/components/table/Table';
 import { Tooltip } from '@/components/Tooltip';
 import { Body } from '@/components/ui/Body';
@@ -464,13 +465,14 @@ const Chariot: React.FC = () => {
                 styleType="primary"
                 startIcon={<PlusIcon />}
                 onClick={() => setIsDrawerOpen(true)}
-                className="rounded-sm py-1"
+                className="rounded-sm py-1 opacity-0"
                 style={{
                   padding: '0rem 1.5rem',
                 }}
               >
                 Add Attack Surface
               </Button>
+              <MorphingButton />
             </div>
             <div className="overflow-x-auto">
               <Table
