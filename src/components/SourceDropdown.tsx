@@ -49,7 +49,7 @@ const SourceDropdown: React.FC<SourceDropdownProps> = ({
 
   const items: DropdownMenu['items'] =
     countsStatus === 'pending'
-      ? Array(2)
+      ? Array(1)
           .fill(0)
           .map(() => {
             return {
