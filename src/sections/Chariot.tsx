@@ -173,6 +173,7 @@ const comingSoonIntegrations = [
   Integrations.dnsdb,
   Integrations.akamai,
   Integrations.datadog,
+  Integrations.wiz,
 ];
 
 const riskIntegrations = [

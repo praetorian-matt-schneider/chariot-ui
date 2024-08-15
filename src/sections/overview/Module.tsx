@@ -979,6 +979,11 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     logo: '/icons/datadog.png',
     name: 'Datadog',
   },
+  wiz: {
+    id: Integration.wiz,
+    logo: '/icons/wiz.png',
+    name: 'Wiz',
+  },
 };
 
 export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {

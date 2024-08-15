@@ -535,6 +535,7 @@ export enum Integration {
   dnsdb = 'dnsdb',
   akamai = 'akamai',
   datadog = 'datadog',
+  wiz = 'wiz',
 }
 
 export interface IntegrationMeta {
