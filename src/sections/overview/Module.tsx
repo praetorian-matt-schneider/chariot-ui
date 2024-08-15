@@ -789,6 +789,36 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
       },
     ],
   },
+  cloudflare: {
+    id: Integration.cloudflare,
+    name: 'Cloudflare DNS',
+    description: 'Discover and scan assets managed within your Cloudflare DNS',
+    logo: '/icons/Cloudflare.svg',
+    inputs: [
+      {
+        name: 'username',
+        value: 'cloudflare',
+        hidden: true,
+      },
+      {
+        name: 'value',
+        value: 'cloudflare',
+        hidden: true,
+      },
+      {
+        label: 'API Token',
+        value: '',
+        placeholder: 'examplejKg34KdVdfg61',
+        name: 'token',
+        required: true,
+        type: Input.Type.PASSWORD,
+        info: {
+          url: 'https://developers.cloudflare.com/fundamentals/api/get-started/create-token/',
+          text: 'Learn more',
+        },
+      },
+    ],
+  },
   godaddy: {
     id: Integration.godaddy,
     logo: '/icons/GoDaddy.svg',
@@ -798,11 +828,6 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     id: Integration.gsuite,
     logo: '/icons/GoogleSuite.svg',
     name: 'Google Suite',
-  },
-  cloudflare: {
-    id: Integration.cloudflare,
-    logo: '/icons/Cloudflare.svg',
-    name: 'Cloudflare',
   },
   shodan: {
     id: Integration.shodan,
@@ -1072,6 +1097,7 @@ export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {
       Integrations.azure,
       Integrations.gitlab,
       Integrations.crowdstrike,
+      Integrations.cloudflare,
     ],
   },
   BAS: {

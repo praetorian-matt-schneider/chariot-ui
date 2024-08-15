@@ -133,13 +133,13 @@ const availableIntegrations = [
   Integrations.gitlab,
   Integrations.crowdstrike,
   Integrations.nessus,
+  Integrations.cloudflare,
 ];
 
 // Begin "coming soon" integrations
 const comingSoonIntegrations = [
   Integrations.godaddy,
   Integrations.gsuite,
-  Integrations.cloudflare,
   Integrations.shodan,
   Integrations.securitytrails,
   Integrations.greynoise,
