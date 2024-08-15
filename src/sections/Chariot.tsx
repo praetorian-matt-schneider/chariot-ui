@@ -433,6 +433,8 @@ const Chariot: React.FC = () => {
     integration.name.toLowerCase().includes(search?.toLowerCase())
   );
 
+  allIntegrations.sort((a, b) => a.name.localeCompare(b.name));
+
   const notificationsIntegrations = riskIntegrations.filter(integration =>
     integration.name.toLowerCase().includes(search?.toLowerCase())
   );
