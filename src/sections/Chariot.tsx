@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   ArrowPathIcon,
   BellAlertIcon,
@@ -43,9 +43,7 @@ import SetupModal from '@/sections/SetupModal';
 import { useAuth } from '@/state/auth';
 import { Account, AssetStatus, Plan } from '@/types';
 import { Job, JobStatus, JobStatusLabel } from '@/types';
-import { partition } from '@/utils/array.util';
 import { cn } from '@/utils/classname';
-import { useStorage } from '@/utils/storage/useStorage.util';
 
 const getStatusIcon = (status: string) => {
   switch (status) {
@@ -126,33 +124,96 @@ interface RootDomain {
   scanOption: AssetStatus;
 }
 
+const availableIntegrations = [
+  Integrations.amazon,
+  Integrations.azure,
+  Integrations.gcp,
+  Integrations.ns1,
+  Integrations.github,
+  Integrations.gitlab,
+  Integrations.crowdstrike,
+  Integrations.nessus,
+];
+
+// Begin "coming soon" integrations
+const comingSoonIntegrations = [
+  Integrations.godaddy,
+  Integrations.gsuite,
+  Integrations.cloudflare,
+  Integrations.shodan,
+  Integrations.securitytrails,
+  Integrations.greynoise,
+  Integrations.sentinel,
+  Integrations.sumologic,
+  Integrations.palo,
+  Integrations.splunk,
+  Integrations.graylog,
+  Integrations.tanium,
+  Integrations.orca,
+  Integrations.snyk,
+  Integrations.ibmcloud,
+  Integrations.qualys,
+  Integrations.mandiant,
+  Integrations.r7,
+  Integrations.securityopscenter,
+  Integrations.jupiterone,
+  Integrations.runzero,
+  Integrations.traceable,
+  Integrations.trellix,
+  Integrations.elasticsearch,
+  Integrations.defender,
+  Integrations.sentinelone,
+  Integrations.vulndb,
+  Integrations.imperva,
+  Integrations.f5,
+  Integrations.carbonblack,
+];
+
+const riskIntegrations = [
+  Integrations.slack,
+  Integrations.jira,
+  Integrations.webhook,
+  Integrations.zulip,
+  Integrations.teams,
+];
+
 const Chariot: React.FC = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { me, friend } = useAuth();
+
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isDomainDrawerOpen, setIsDomainDrawerOpen] = useState(false);
   const [isNotificationsDrawerOpen, setIsNotificationsDrawerOpen] =
     useState(false);
-  const [showDisconnectWarning, setShowDisconnectWarning] = useState(false);
   const [disconnectIntegrationKey, setDisconnectIntegrationKey] =
     useState<string>('');
-  const { mutateAsync: createAsset } = useCreateAsset();
-  const { mutateAsync: createAttribute } = useCreateAttribute('', true);
-  const { mutateAsync: deleteAttribute } = useBulkDeleteAttributes({
-    showToast: false,
-  });
-
   const [search, setSearch] = useState('');
-  const [setupIntegration, setSetupIntegration] = useState<string | null>(null);
-  const { getMyIntegrations } = useIntegration();
-
-  const currentIntegrations = getMyIntegrations();
-  const integrationCounts = useIntegrationCounts(currentIntegrations);
-  const disconnectIntegration = currentIntegrations.find(
-    integration => integration.key === disconnectIntegrationKey
+  const [setupIntegration, setSetupIntegration] = useState<Account>();
+  const [updatedRootDomain, setUpdatedRootDomain] =
+    useState<RootDomain | null>();
+  const [selectedIntegrations, setSelectedIntegrations] = useState<string[]>(
+    []
   );
+  const [
+    selectedNotificationIntegrations,
+    setSelectedNotificationIntegrations,
+  ] = useState<string[]>([]);
 
-  const { data: jobsData } = useJobsStatus(
-    currentIntegrations
+  const { integrations: integrationWithHook } = useIntegration();
+
+  const {
+    currentIntegrations,
+    jobKeys,
+    requiresSetupIntegrations,
+    waitlistedIntegrations,
+    connectedIntegrations,
+    riskNotificationStatus,
+    attackSurfaceStatus,
+  } = useMemo(() => {
+    const integrationWithoutHook = integrationWithHook.filter(
+      account => account.member !== 'hook'
+    );
+
+    const updatedJobKeys = integrationWithoutHook
       .map(integration => integration.member)
       .reduce(
         (acc, member) => {
@@ -160,17 +221,156 @@ const Chariot: React.FC = () => {
           return acc;
         },
         {} as Record<string, string>
-      )
-  );
+      );
 
+    const {
+      waitlistedIntegrations,
+      requiresSetupIntegrations,
+      connectedIntegrations,
+      riskNotificationStatus,
+      attackSurfaceStatus,
+    } = integrationWithoutHook.reduce(
+      (acc, integration) => {
+        let updatedAcc = acc;
+
+        if (integration.value === 'setup') {
+          updatedAcc = {
+            ...acc,
+            requiresSetupIntegrations: [
+              ...acc.requiresSetupIntegrations,
+              integration,
+            ],
+          };
+        } else if (integration.value === 'waitlisted') {
+          const isNowAvailableToSetup = availableIntegrations.find(
+            i => i.id === integration.member
+          );
+
+          if (isNowAvailableToSetup) {
+            updatedAcc = {
+              ...acc,
+              requiresSetupIntegrations: [
+                ...acc.requiresSetupIntegrations,
+                integration,
+              ],
+            };
+          } else {
+            updatedAcc = {
+              ...acc,
+              waitlistedIntegrations: [
+                ...acc.waitlistedIntegrations,
+                integration,
+              ],
+            };
+          }
+        } else {
+          updatedAcc = {
+            ...acc,
+            connectedIntegrations: [...acc.connectedIntegrations, integration],
+          };
+        }
+
+        if (
+          integration.value !== 'waitlisted' &&
+          (acc.riskNotificationStatus !== 'connected' ||
+            acc.attackSurfaceStatus !== 'connected')
+        ) {
+          const isRiskIntegration = riskIntegrations.find(
+            ({ id }) => id === integration.member
+          );
+
+          if (isRiskIntegration) {
+            if (acc.riskNotificationStatus !== 'connected') {
+              if (integration.value === 'setup') {
+                updatedAcc = {
+                  ...updatedAcc,
+                  riskNotificationStatus: 'setup',
+                };
+              } else {
+                updatedAcc = {
+                  ...updatedAcc,
+                  riskNotificationStatus: 'connected',
+                };
+              }
+            }
+          } else {
+            if (acc.attackSurfaceStatus !== 'connected') {
+              if (integration.value === 'setup') {
+                updatedAcc = {
+                  ...updatedAcc,
+                  attackSurfaceStatus: 'setup',
+                };
+              } else {
+                updatedAcc = {
+                  ...updatedAcc,
+                  attackSurfaceStatus: 'connected',
+                };
+              }
+            }
+          }
+        }
+
+        return updatedAcc;
+      },
+      {
+        waitlistedIntegrations: [] as Account[],
+        requiresSetupIntegrations: [] as Account[],
+        connectedIntegrations: [] as Account[],
+        attackSurfaceStatus: 'notConnected' as
+          | 'notConnected'
+          | 'setup'
+          | 'connected',
+        riskNotificationStatus: 'notConnected' as
+          | 'notConnected'
+          | 'setup'
+          | 'connected',
+      }
+    );
+
+    return {
+      currentIntegrations: integrationWithoutHook,
+      connectedIntegrations,
+      jobKeys: updatedJobKeys,
+      requiresSetupIntegrations,
+      waitlistedIntegrations,
+      attackSurfaceStatus,
+      riskNotificationStatus,
+    };
+  }, [JSON.stringify(integrationWithHook)]);
+
+  const integrationCounts = useIntegrationCounts(connectedIntegrations);
+  const { data: jobsData } = useJobsStatus(jobKeys);
   const {
     data: rootDomain,
     refetch,
     status: rootDomainStatus,
   } = useGetRootDomain();
-  const [updatedRootDomain, setUpdatedRootDomain] =
-    useState<RootDomain | null>();
-  const { me, friend } = useAuth();
+  const { data: assetCount, status: assetCountStatus } = useCounts({
+    resource: 'asset',
+  });
+  const {
+    data: accounts,
+    status: accountsStatus,
+    invalidate: invalidateAccounts,
+  } = useMy({
+    resource: 'account',
+  });
+
+  const { mutateAsync: createAsset } = useCreateAsset();
+  const { mutateAsync: createAttribute } = useCreateAttribute('', true);
+  const { mutateAsync: deleteAttribute } = useBulkDeleteAttributes({
+    showToast: false,
+  });
+  const { mutate: unlink } = useModifyAccount('unlink');
+  const { mutateAsync: link, status: linkStatus } = useModifyAccount(
+    'link',
+    true
+  );
+
+  const disconnectIntegration = currentIntegrations.find(
+    integration => integration.key === disconnectIntegrationKey
+  );
+
   const domainToDiplay = rootDomain?.value ?? (friend || me).split('@')[1];
 
   const jobs: JobI[] = currentIntegrations.map((integration, index) => {
@@ -186,23 +386,13 @@ const Chariot: React.FC = () => {
 
   // Map the counts to each integration
   const counts = integrationCounts.map((result, index) => ({
-    member: currentIntegrations[index].member,
+    member: connectedIntegrations[index].member,
     count: result.data,
   }));
-
-  const { data: assetCount, status: assetCountStatus } = useCounts({
-    resource: 'asset',
-  });
-
-  const { mutate: unlink } = useModifyAccount('unlink');
 
   const totalAssets = assetCount
     ? Object.values(assetCount?.status || {}).reduce((acc, val) => acc + val, 0)
     : 0;
-
-  const { data: accounts, status: accountsStatus } = useMy({
-    resource: 'account',
-  });
 
   const currentPlan = getCurrentPlan({ accounts, friend });
 
@@ -229,84 +419,18 @@ const Chariot: React.FC = () => {
 
   const displayName = useGetAccountDetails(accounts).name || friend || me;
 
-  const availableIntegrations = [
-    Integrations.amazon,
-    Integrations.azure,
-    Integrations.gcp,
-    Integrations.ns1,
-    Integrations.github,
-    Integrations.gitlab,
-    Integrations.crowdstrike,
-    Integrations.nessus,
-    // Begin "coming soon" integrations
-    Integrations.godaddy,
-    Integrations.gsuite,
-    Integrations.cloudflare,
-    Integrations.shodan,
-    Integrations.securitytrails,
-    Integrations.greynoise,
-    Integrations.sentinel,
-    Integrations.sumologic,
-    Integrations.palo,
-    Integrations.splunk,
-    Integrations.graylog,
-    Integrations.tanium,
-    Integrations.orca,
-    Integrations.snyk,
-    Integrations.ibmcloud,
-    Integrations.qualys,
-    Integrations.mandiant,
-    Integrations.r7,
-    Integrations.securityopscenter,
-    Integrations.jupiterone,
-    Integrations.runzero,
-    Integrations.traceable,
-    Integrations.trellix,
-    Integrations.elasticsearch,
-    Integrations.defender,
-    Integrations.sentinelone,
-    Integrations.vulndb,
-    Integrations.imperva,
-    Integrations.f5,
-    Integrations.carbonblack,
+  const allIntegrations = [
+    ...availableIntegrations,
+    ...comingSoonIntegrations,
   ].filter(integration =>
     integration.name.toLowerCase().includes(search?.toLowerCase())
   );
 
-  const notificationsIntegrations = [
-    Integrations.slack,
-    Integrations.jira,
-    Integrations.webhook,
-    Integrations.zulip,
-    Integrations.teams,
-  ].filter(integration =>
+  const notificationsIntegrations = riskIntegrations.filter(integration =>
     integration.name.toLowerCase().includes(search?.toLowerCase())
   );
 
-  const [selectedIntegrations, setSelectedIntegrations] = useStorage<string[]>(
-    { key: `${friend || me}-selectedIntegrations` },
-    []
-  );
-  const [
-    selectedNotificationIntegrations,
-    setSelectedNotificationIntegrations,
-  ] = useStorage<string[]>(
-    { key: `${friend || me}-selectedNotificationIntegrations` },
-    []
-  );
-
-  const [requiresSetupIntegrations, waitlistedIntegrations] = partition(
-    [...selectedNotificationIntegrations, ...selectedIntegrations],
-    integration =>
-      Boolean(Integrations[integration as keyof typeof Integrations]?.inputs)
-  );
-
-  const handleSetupClick = (integrationName: string) => {
-    setSetupIntegration(integrationName);
-    setIsModalOpen(true);
-  };
-
-  const attackSurfaceIntegrations = availableIntegrations.map(integration => (
+  const attackSurfaceIntegrations = allIntegrations.map(integration => (
     <div
       key={integration.id}
       className={cn(
@@ -367,6 +491,18 @@ const Chariot: React.FC = () => {
       setSearch('');
     }
   }, [isDrawerOpen, isNotificationsDrawerOpen]);
+
+  function closeIntegrationDrawer() {
+    setSelectedIntegrations([]);
+
+    setIsDrawerOpen(false);
+  }
+
+  function closeNotificationDrawer() {
+    setSelectedNotificationIntegrations([]);
+
+    setIsNotificationsDrawerOpen(false);
+  }
 
   return (
     <Body
@@ -430,17 +566,8 @@ const Chariot: React.FC = () => {
         <GettingStarted
           completedSteps={{
             rootDomain: rootDomain?.value !== undefined,
-            attackSurface:
-              selectedIntegrations.length > 0 ||
-              currentIntegrations?.length > 0,
-            riskNotifications:
-              selectedNotificationIntegrations.length > 0 ||
-              currentIntegrations.some(integration =>
-                notificationsIntegrations.some(
-                  notificationIntegration =>
-                    notificationIntegration.id === integration.member
-                )
-              ),
+            attackSurface: attackSurfaceStatus === 'connected',
+            riskNotifications: riskNotificationStatus === 'connected',
           }}
           onRootDomainClick={() => setIsDomainDrawerOpen(true)}
           onAttackSurfaceClick={() => setIsDrawerOpen(true)}
@@ -513,7 +640,7 @@ const Chariot: React.FC = () => {
                     id: 'discoveredAssets',
                     cell: row => (
                       <div className={'text-gray-500'}>
-                        {notificationsIntegrations.some(
+                        {riskIntegrations.find(
                           integration => row.surface === integration.id
                         )
                           ? 'Risk Notification'
@@ -529,7 +656,7 @@ const Chariot: React.FC = () => {
                       <div className="flex flex-row items-center justify-center">
                         {row.actions === 'Setup' && (
                           <button
-                            onClick={() => handleSetupClick(row.id)}
+                            onClick={() => setSetupIntegration(row.account)}
                             className="w-[100px] rounded-sm bg-[#FFD700] px-3 py-1 text-sm font-medium text-black"
                           >
                             Setup
@@ -546,7 +673,6 @@ const Chariot: React.FC = () => {
                               styleType="none"
                               className="mx-auto"
                               onClick={() => {
-                                setShowDisconnectWarning(true);
                                 setDisconnectIntegrationKey(row.key);
                               }}
                             >
@@ -559,23 +685,31 @@ const Chariot: React.FC = () => {
                   },
                 ]}
                 data={[
-                  ...requiresSetupIntegrations.map(integrationName => {
-                    const integration =
-                      Integrations[
-                        integrationName as keyof typeof Integrations
-                      ];
+                  {
+                    status: 'success',
+                    surface: 'chariot',
+                    identifier: 'Provided',
+                    discoveredAssets: assetCount?.source?.provided || 0,
+                    actions: '',
+                    connected: false,
+                    id: 'providedAssets',
+                    key: 'providedAssets',
+                    account: undefined,
+                  },
+                  ...requiresSetupIntegrations.map(integration => {
                     return {
                       status: 'warning',
-                      surface: integration.name,
+                      surface: integration.member,
                       identifier: 'Requires Setup',
                       discoveredAssets: '-',
                       actions: 'Setup',
                       connected: false,
-                      id: integration.id,
-                      key: '',
+                      id: integration.member,
+                      key: integration.key,
+                      account: integration,
                     };
                   }),
-                  ...currentIntegrations.map(integration => ({
+                  ...connectedIntegrations.map(integration => ({
                     status: 'success',
                     surface: integration.member,
                     identifier: integration.value ?? '[Redacted]',
@@ -586,21 +720,19 @@ const Chariot: React.FC = () => {
                     connected: true,
                     id: integration.member,
                     key: integration.key,
+                    account: integration,
                   })),
-                  ...waitlistedIntegrations.map(integrationName => {
-                    const integration =
-                      Integrations[
-                        integrationName as keyof typeof Integrations
-                      ];
+                  ...waitlistedIntegrations.map(integration => {
                     return {
                       status: 'waitlist',
-                      surface: integration.name,
+                      surface: integration.member,
                       identifier: 'Coming Soon',
                       discoveredAssets: '-',
                       actions: 'Waitlist',
                       connected: false,
-                      id: integration.id,
-                      key: '',
+                      id: integration.member,
+                      key: integration.key,
+                      account: integration,
                     };
                   }),
                 ]}
@@ -614,11 +746,10 @@ const Chariot: React.FC = () => {
           }
           title={'Disconnect Integration'}
           onClose={() => {
-            setShowDisconnectWarning(false);
             setDisconnectIntegrationKey('');
           }}
           className="px-8"
-          open={showDisconnectWarning}
+          open={Boolean(disconnectIntegrationKey)}
           footer={{
             text: 'Disconnect',
             onClick: async () => {
@@ -630,7 +761,6 @@ const Chariot: React.FC = () => {
                   value: disconnectIntegration.value,
                   key: disconnectIntegration.key,
                 });
-                setShowDisconnectWarning(false);
                 setDisconnectIntegrationKey('');
               }
             },
@@ -640,30 +770,17 @@ const Chariot: React.FC = () => {
           <b>{disconnectIntegration?.member}</b> ?
         </Modal>
         <SetupModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
+          isOpen={Boolean(setupIntegration)}
+          onClose={() => setSetupIntegration(undefined)}
           onComplete={async () => {
-            setIsModalOpen(false);
-            setSetupIntegration(null);
-            setSelectedIntegrations(selectedIntegrations =>
-              selectedIntegrations.filter(
-                integration =>
-                  integration?.toLowerCase() !== setupIntegration?.toLowerCase()
-              )
-            );
-            setSelectedNotificationIntegrations(selectedIntegrations =>
-              selectedIntegrations.filter(
-                integration =>
-                  integration?.toLowerCase() !== setupIntegration?.toLowerCase()
-              )
-            );
+            setSetupIntegration(undefined);
           }}
           selectedIntegration={setupIntegration}
         />
         <Drawer
           open={isDrawerOpen}
-          onClose={() => setIsDrawerOpen(false)}
-          onBack={() => setIsDrawerOpen(false)}
+          onClose={closeIntegrationDrawer}
+          onBack={closeIntegrationDrawer}
           className={cn('w-full rounded-t-sm shadow-lg p-0 bg-zinc-100')}
           header={''}
           skipBack={true}
@@ -672,7 +789,35 @@ const Chariot: React.FC = () => {
               <Button
                 styleType="primary"
                 className="mx-20 mb-10 h-20 w-full text-xl font-bold"
-                onClick={() => setIsDrawerOpen(false)}
+                isLoading={linkStatus === 'pending'}
+                onClick={async () => {
+                  // add integration   accounts
+                  const promises = selectedIntegrations
+                    .map((integration: string) => {
+                      const isWaitlisted = comingSoonIntegrations.find(
+                        i => i.id === integration
+                      );
+
+                      return link({
+                        username: integration,
+                        value: isWaitlisted ? 'waitlisted' : 'setup',
+                        config: {},
+                      });
+                    })
+                    .map(promise => promise.catch(error => error));
+
+                  const response = await Promise.all(promises);
+
+                  const validResults = response.filter(
+                    result => !(result instanceof Error)
+                  );
+
+                  if (validResults.length > 0) {
+                    invalidateAccounts();
+                  }
+
+                  closeIntegrationDrawer();
+                }}
               >
                 Build Attack Surface ({selectedIntegrations.length} selected)
               </Button>
@@ -705,8 +850,8 @@ const Chariot: React.FC = () => {
         </Drawer>
         <Drawer
           open={isNotificationsDrawerOpen}
-          onClose={() => setIsNotificationsDrawerOpen(false)}
-          onBack={() => setIsNotificationsDrawerOpen(false)}
+          onClose={closeNotificationDrawer}
+          onBack={closeNotificationDrawer}
           className={cn('w-full rounded-t-sm shadow-lg pb-0 bg-zinc-100')}
           header={''}
           footerClassname=""
@@ -716,7 +861,30 @@ const Chariot: React.FC = () => {
               <Button
                 styleType="primary"
                 className="mx-20 mb-10 h-20 w-full text-xl font-bold"
-                onClick={() => setIsNotificationsDrawerOpen(false)}
+                onClick={async () => {
+                  // add integration   accounts
+                  const promises = selectedNotificationIntegrations
+                    .map((integration: string) => {
+                      return link({
+                        username: integration,
+                        value: 'setup',
+                        config: {},
+                      });
+                    })
+                    .map(promise => promise.catch(error => error));
+
+                  const response = await Promise.all(promises);
+
+                  const validResults = response.filter(
+                    result => !(result instanceof Error)
+                  );
+
+                  if (validResults.length > 0) {
+                    invalidateAccounts();
+                  }
+
+                  closeNotificationDrawer();
+                }}
               >
                 Set Notification Channels (
                 {selectedNotificationIntegrations.length} selected)

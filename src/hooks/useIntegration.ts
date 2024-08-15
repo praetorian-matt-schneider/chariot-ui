@@ -1,11 +1,11 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { useMy } from '@/hooks/useMy';
 import { AvailableIntegrations } from '@/sections/overview/Integration';
 import { Asset } from '@/types';
 
 export const useIntegration = () => {
-  const { data: accounts, status: accountStatus } = useMy(
+  const { data: accounts, status } = useMy(
     {
       resource: 'account',
     },
@@ -14,23 +14,22 @@ export const useIntegration = () => {
     }
   );
 
-  const integrationList = accounts.filter(account =>
-    AvailableIntegrations.includes(account.member)
-  );
+  const integrations = useMemo(() => {
+    return accounts.filter(account =>
+      AvailableIntegrations.includes(account.member)
+    );
+  }, [JSON.stringify(accounts)]);
 
   const isIntegration = useCallback(
     (asset: Asset) => {
-      return integrationList.some(account => account.member === asset.dns);
+      return integrations.some(account => account.member === asset.dns);
     },
-    [accountStatus]
+    [JSON.stringify(integrations)]
   );
-
-  const getMyIntegrations = useCallback(() => {
-    return integrationList.filter(account => account.member !== 'hook');
-  }, [accountStatus, accounts]);
 
   return {
     isIntegration,
-    getMyIntegrations,
+    integrations,
+    status,
   };
 };

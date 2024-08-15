@@ -8,26 +8,39 @@ import { Inputs, Values } from '@/components/form/Inputs';
 import { Link } from '@/components/Link';
 import { useModifyAccount } from '@/hooks';
 import { Integrations } from '@/sections/overview/Module';
-import { LinkAccount } from '@/types';
+import { Account, LinkAccount } from '@/types';
 
 const SetupModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
   onComplete: () => void;
-  selectedIntegration: string | null;
+  selectedIntegration?: Account;
+  account?: Account;
 }> = ({ isOpen, onClose, onComplete, selectedIntegration }) => {
   const { mutateAsync: link, status: linkStatus } = useModifyAccount('link');
+  const { mutateAsync: unLink, status: unLinkStatus } =
+    useModifyAccount('unlink');
+
   const integration =
-    Integrations[selectedIntegration as keyof typeof Integrations];
+    Integrations[selectedIntegration?.member as keyof typeof Integrations];
   const [formData, setFormData] = useState<Values>();
 
-  if (!integration) return null;
+  if (!selectedIntegration) return null;
 
   const handleInputsChange = (newValues: Values) => {
     setFormData(newValues);
   };
 
   const handleLinkIntegration = async () => {
+    console.log('handleLinkIntegration', selectedIntegration);
+    if (selectedIntegration) {
+      await unLink({
+        username: selectedIntegration.member,
+        value: selectedIntegration.value,
+        config: selectedIntegration.config,
+      });
+    }
+
     await link(formData as unknown as LinkAccount);
     onComplete();
   };
@@ -103,7 +116,9 @@ const SetupModal: React.FC<{
                   <Button
                     styleType="primary"
                     onClick={handleLinkIntegration}
-                    disabled={linkStatus === 'pending'}
+                    disabled={
+                      unLinkStatus === 'pending' || linkStatus === 'pending'
+                    }
                   >
                     Finish
                   </Button>

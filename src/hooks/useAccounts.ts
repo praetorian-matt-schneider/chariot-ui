@@ -11,7 +11,8 @@ import { getChariotWebhookURL } from '@/utils/integration.util';
 import { capitalize } from '@/utils/lodash.util';
 
 export const useModifyAccount = (
-  action: 'link' | 'unlink' | 'updateSetting'
+  action: 'link' | 'unlink' | 'updateSetting',
+  skipOnSuccess?: boolean
 ) => {
   const axios = useAxios();
   const { invalidate: invalidateAccount } = useMy(
@@ -57,8 +58,20 @@ export const useModifyAccount = (
           data = response.data as Account;
         }
 
-        invalidateAccount();
-        invalidateAsset();
+        return data;
+      } catch (error) {
+        toast.error(
+          `Error ${action === 'link' ? 'connecting' : 'disconnecting'} account`,
+          {
+            description: 'Please check your username and secret and try again.',
+          }
+        );
+        throw error;
+      }
+    },
+    onSuccess: (data, account) => {
+      if (!skipOnSuccess) {
+        const { username } = account;
 
         const snackbarTitle = AvailableIntegrations.includes(username)
           ? 'integration'
@@ -80,6 +93,9 @@ export const useModifyAccount = (
           navigator.clipboard.writeText(webhookUrl);
         }
 
+        invalidateAccount();
+        invalidateAsset();
+
         // Show success snackbar
         toast.success(`${capitalize(snackbarTitle)} ${snackbarAction}`, {
           description:
@@ -89,16 +105,6 @@ export const useModifyAccount = (
                 : 'Webhook URL was destroyed.'
               : `Your ${snackbarTitle} has been successfully ${snackbarAction}.`,
         });
-
-        return data;
-      } catch (error) {
-        toast.error(
-          `Error ${action === 'link' ? 'connecting' : 'disconnecting'} account`,
-          {
-            description: 'Please check your username and secret and try again.',
-          }
-        );
-        throw error;
       }
     },
   });
