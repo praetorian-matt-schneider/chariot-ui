@@ -67,6 +67,64 @@ const Alerts: React.FC = () => {
       enabled: !!query,
     }
   );
+  function getAlertDescription(query: string) {
+    const statusCode = query.split(':')[1] as AssetStatus | RiskStatus;
+    switch (statusCode) {
+      case RiskStatus.Opened:
+        return (
+          <>
+            <h1 className="text-xl font-bold text-gray-900">
+              These are all your open risks that need remediation.
+            </h1>
+            <p className="mt-4 text-sm text-gray-700">
+              <span className="font-semibold">Recommended Action:</span>{' '}
+              Remediate the risk, then either rescan to confirm or close if no
+              longer valid.
+            </p>
+          </>
+        );
+      case RiskStatus.Triaged:
+        return (
+          <>
+            <h1 className="text-xl font-bold text-gray-900">
+              These are newly discovered risks that require triaging.
+            </h1>
+            <p className="mt-4 text-sm text-gray-700">
+              <span className="font-semibold">Recommended Action:</span> Accept
+              the risk if it is valid, or reject it if it is invalid.
+            </p>
+          </>
+        );
+      case RiskStatus.Machine:
+        return (
+          <>
+            <h1 className="text-xl font-bold text-gray-900">
+              These risks were previously open but are no longer detected.
+            </h1>
+            <p className="mt-4 text-sm text-gray-700">
+              <span className="font-semibold">Recommended Action:</span> Confirm
+              that the risk is no longer present or reopen the risk if
+              necessary.
+            </p>
+          </>
+        );
+      case AssetStatus.ActiveLow:
+        return (
+          <>
+            <h1 className="text-xl font-bold text-gray-900">
+              These assets are not being scanned for risks.
+            </h1>
+            <p className="mt-4 text-sm text-gray-700">
+              <span className="font-semibold">Recommended Action:</span> Enable
+              risk scanning for these assets or delete them if they are not of
+              interest.
+            </p>
+          </>
+        );
+      default:
+        return <></>;
+    }
+  }
 
   function handleAssetChange(asset: Asset, status: AssetStatus) {
     updateAsset({
@@ -397,6 +455,7 @@ const Alerts: React.FC = () => {
         )}
         {query && (
           <div className="flex h-full flex-col">
+            <div className="p-4">{getAlertDescription(query)}</div>
             <div ref={parentRef} className="flex-1 overflow-auto">
               <div
                 className="relative"
