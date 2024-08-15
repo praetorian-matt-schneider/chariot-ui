@@ -18,6 +18,8 @@ export enum StorageKey {
   ASESET_PRIORITY_FILTER = 'asset-priority',
   RESIZE = 'resizeColumn',
   RISK_JOB_MAP = 'riskJobMap',
+  AWS_MARKETPLACE_CONFIG = 'awsMarketplaceConfig',
+  CONFIRM_LINK_AWS = 'confirmLinkAWS',
 }
 
 interface UseStorageOptions<S> {

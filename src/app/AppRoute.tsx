@@ -7,6 +7,7 @@ import Account from '@/sections/Account';
 import Alerts from '@/sections/Alerts';
 import Assets from '@/sections/Assets';
 import { AuthenticatedApp } from '@/sections/AuthenticatedApp';
+import AWSMarketplace from '@/sections/AWSMarketplace';
 import Chariot from '@/sections/Chariot';
 import Files from '@/sections/Files';
 import Hello from '@/sections/Hello';
@@ -76,6 +77,10 @@ const appRoutes = {
       </CheckNoAuth>
     ),
     title: 'Forgot Password',
+  },
+  'marketplace/aws': {
+    element: <AWSMarketplace />,
+    title: 'Sign Up - AWS',
   },
   hello: {
     element: (

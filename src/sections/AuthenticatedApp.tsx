@@ -9,6 +9,7 @@ import { AddAsset } from '@/sections/add/AddAsset';
 import { AddFile } from '@/sections/add/AddFile';
 import { AddRisks } from '@/sections/add/AddRisks';
 import { DetailsDrawer } from '@/sections/detailsDrawer';
+import { LinkAWS } from '@/sections/LinkAWS';
 import { NewUserSeedModal } from '@/sections/NewUserSeedModal';
 import { ModulesModal } from '@/sections/overview';
 import { ProofOfExploit } from '@/sections/ProofOfExploit';
@@ -110,6 +111,7 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
       <AddFile />
       <ModulesModal />
       <UpgradeModal />
+      <LinkAWS />
     </div>
   );
 }

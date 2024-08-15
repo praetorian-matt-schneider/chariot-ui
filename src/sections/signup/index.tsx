@@ -23,7 +23,13 @@ export const Login = () => {
   );
 };
 
-export const Signup = () => {
+export const Signup = ({
+  onComplete,
+  description,
+}: {
+  onComplete?: () => void;
+  description?: React.ReactNode;
+}) => {
   const [stepIndex, setStepIndex] = useState<number>(0);
   const [credentials, setCredentials] = useState<{
     username: string;
@@ -31,7 +37,7 @@ export const Signup = () => {
   }>({ username: '', password: '' });
 
   return (
-    <PageWrapper title="Sign Up for a Free Account">
+    <PageWrapper title="Sign Up for a Free Account" description={description}>
       <div className="space-y-8">
         <div className="flex border-2 border-default">
           {[
@@ -81,6 +87,7 @@ export const Signup = () => {
           <EmailConfirmation
             username={credentials.username}
             password={credentials.password}
+            onComplete={onComplete}
           />
         )}
       </div>

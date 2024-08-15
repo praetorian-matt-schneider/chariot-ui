@@ -112,7 +112,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         confirmationCode: otp,
       });
       if (response.isSignUpComplete) {
-        login(username, password);
+        await login(username, password);
       }
     } catch (error) {
       if (error instanceof Error && error.message) {

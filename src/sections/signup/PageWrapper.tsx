@@ -1,4 +1,4 @@
-import { PropsWithChildren } from 'react';
+import React, { PropsWithChildren } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { ConfigIniParser } from 'config-ini-parser';
@@ -11,7 +11,7 @@ import { BackendStack } from '@/types';
 
 interface Props extends PropsWithChildren {
   title: string;
-  description?: string;
+  description?: React.ReactNode;
 }
 
 export const PageWrapper = ({

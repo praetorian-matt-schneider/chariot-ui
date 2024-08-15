@@ -11,9 +11,11 @@ import { useAuth } from '@/state/auth';
 export const EmailConfirmation = ({
   username,
   password,
+  onComplete,
 }: {
   username: string;
   password: string;
+  onComplete?: () => void;
 }) => {
   const { confirmOTP, isLoading } = useAuth();
   const [open, setOpen] = useState(true);
@@ -23,6 +25,11 @@ export const EmailConfirmation = ({
       username,
     });
     setOpen(true);
+  }
+
+  async function confirmOtpFn(otp: string) {
+    await confirmOTP(username, password, otp);
+    onComplete && onComplete();
   }
 
   return (
@@ -66,7 +73,7 @@ export const EmailConfirmation = ({
             Please copy & paste the six-digit code emailed to your business
             address.
           </p>
-          <OTPInput onSubmit={otp => confirmOTP(username, password, otp)} />
+          <OTPInput onSubmit={confirmOtpFn} />
           <Button
             disabled={isLoading}
             className="mt-6 w-full"
