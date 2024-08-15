@@ -1,14 +1,15 @@
 // eslint-disable-next-line no-restricted-imports
 
-import { useGenericSearch } from '@/hooks/useGenericSearch';
+import { useMy } from '@/hooks/useMy';
 
 export function useGetKev() {
-  const { data, status } = useGenericSearch({
-    query: '#attribute#source#kev',
+  const { data, status } = useMy({
+    resource: 'attribute',
+    filters: [['#attribute#source#kev']],
   });
 
   return {
-    data: data?.attributes?.map(({ source }) => source),
+    data: data?.map(({ source }) => source),
     status,
   };
 }

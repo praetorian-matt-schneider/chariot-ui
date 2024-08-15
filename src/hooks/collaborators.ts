@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { getDisplayName, useGetCollaboratorEmails } from '@/hooks/useAccounts';
 import { useAxios } from '@/hooks/useAxios';
 import { useMy } from '@/hooks/useMy';
-import { useAuth } from '@/state/auth';
 import { Account, Statistics } from '@/types';
 import { QueryStatus, useMergeStatus } from '@/utils/api';
 
@@ -19,8 +18,6 @@ interface CollaboratorProps {
 }
 
 export function useGetCollaborators(props?: CollaboratorProps) {
-  const { getToken } = useAuth();
-
   const axios = useAxios();
 
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
@@ -42,23 +39,21 @@ export function useGetCollaborators(props?: CollaboratorProps) {
 
       const requests = collaboratorEmails.map(
         async (email): Promise<Collaborator> => {
-          const token = await getToken();
-
           const promises = [
             axios<{ accounts: Account[] }>({
-              method: 'get',
-              url: `/my?key=${encodeURIComponent('#account')}`,
+              method: 'post',
+              data: [[`#account`]],
+              url: `/my?key=account`,
               headers: {
-                Authorization: token ? `Bearer ${token}` : '',
                 account: email,
               },
             }).then(response => response.data.accounts),
             props?.getRiskCounts
               ? axios<Statistics>({
-                  method: 'get',
-                  url: `/my/count?key=${encodeURIComponent('#risk')}`,
+                  method: 'post',
+                  data: [[`#risk`]],
+                  url: `/my/count?key=risk`,
                   headers: {
-                    Authorization: token ? `Bearer ${token}` : '',
                     account: email,
                   },
                 }).then(response => response.data)

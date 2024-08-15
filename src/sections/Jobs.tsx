@@ -55,7 +55,6 @@ const Jobs: React.FC = () => {
 
   const { data: stats = {} } = useCounts({
     resource: 'job',
-    filterByGlobalSearch: true,
   });
   const {
     data: jobs = [],
@@ -66,7 +65,6 @@ const Jobs: React.FC = () => {
     fetchNextPage,
   } = useMy({
     resource: 'job',
-    filterByGlobalSearch: true,
   });
   const { mutateAsync: reRunJob } = useReRunJob();
 

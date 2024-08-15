@@ -14,12 +14,11 @@ export const useGenericSearch = (
   return useQuery<GenericResource>({
     ...options,
     defaultErrorMessage: `Failed to fetch search result`,
-    queryKey: getQueryKey.genericSearch(query),
+    queryKey: getQueryKey.genericSearch([[query]]),
     enabled: options?.enabled ?? Boolean(query),
     queryFn: async () => {
-      const { data } = await axios.get<GenericResource>(`/my`, {
+      const { data } = await axios.post<GenericResource>(`/my`, [[query]], {
         params: {
-          key: query,
           exact: exact,
         },
       });

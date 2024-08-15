@@ -14,17 +14,14 @@ export const useAggregateCounts = (): {
 } => {
   const { data: assetStats = {}, status: assetStatus } = useCounts({
     resource: 'asset',
-    filterByGlobalSearch: true,
   });
 
   const { data: riskStats = {}, status: riskStatus } = useCounts({
     resource: 'risk',
-    filterByGlobalSearch: true,
   });
 
   const { data: jobStats = {}, status: jobStatus } = useCounts({
     resource: 'job',
-    filterByGlobalSearch: true,
   });
 
   const isPending = [assetStatus, riskStatus, jobStatus].some(

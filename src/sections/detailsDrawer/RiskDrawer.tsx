@@ -88,7 +88,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
   const { data: risks = [], status: riskStatus } = useMy(
     {
       resource: 'risk',
-      query: compositeKey,
+      filters: [[`#risk${compositeKey}`]],
     },
     { enabled: open }
   );

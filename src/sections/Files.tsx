@@ -143,7 +143,7 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
   const { data: files = [], status } = useMy(
     {
       resource: 'file',
-      query: query ? `#${query}` : '',
+      filters: query ? [[`#file#${query}`]] : undefined,
     },
     { enabled: Boolean(query) }
   );

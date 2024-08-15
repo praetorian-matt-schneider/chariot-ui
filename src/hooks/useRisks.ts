@@ -1,6 +1,7 @@
 import { toast } from 'sonner';
 
 import { useAxios } from '@/hooks/useAxios';
+import { useCounts } from '@/hooks/useCounts';
 import { useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
 import { useMy } from '@/hooks/useMy';
 import { getQueryKey } from '@/hooks/useQueryKeys';
@@ -60,6 +61,12 @@ export const useUpdateRisk = () => {
       enabled: false,
     }
   );
+
+  const { invalidate: invalideRiskCounts } = useCounts(
+    { resource: 'risk' },
+    { enabled: false }
+  );
+
   const { invalidate: invalidateAlerts } = useGetAccountAlerts({
     enabled: false,
   });
@@ -82,9 +89,7 @@ export const useUpdateRisk = () => {
       const updatedRisk = data.risks[0];
 
       invalidateAlerts();
-      queryClient.invalidateQueries({
-        queryKey: getQueryKey.getCounts('risk'),
-      });
+      invalideRiskCounts();
 
       updateAllSubQueries(previous => {
         const updatedPages = previous.pages.map(page => {

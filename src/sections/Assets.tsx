@@ -19,7 +19,6 @@ import { parseKeys } from '@/sections/SearchByType';
 import { useGlobalState } from '@/state/global.state';
 import {
   Asset,
-  AssetFilters,
   AssetStatus,
   AssetStatusLabel,
   AssetsWithRisk,
@@ -27,7 +26,6 @@ import {
   Severity,
   SeverityOpenCounts,
 } from '@/types';
-import { useStorage } from '@/utils/storage/useStorage.util';
 
 export function buildOpenRiskDataset(
   risks: Risk[]
@@ -64,20 +62,15 @@ const Assets: React.FC = () => {
     },
   } = useGlobalState();
 
-  const [filters, setFilters] = useStorage<AssetFilters>(
-    { queryKey: 'assetFilters' },
-    { search: '', attributes: [], priorities: [], sources: [] }
-  );
-
   const {
     data: assets,
     status: assetsStatus,
     error: assetsError,
     fetchNextPage,
     isFetchingNextPage,
-  } = useGetAssets({
     filters,
-  });
+    setFilters,
+  } = useGetAssets();
 
   const { getAssetDrawerLink } = getDrawerLink();
   const { isIntegration } = useIntegration();
@@ -208,12 +201,12 @@ const Assets: React.FC = () => {
               }}
             />
             <AssetStatusDropdown
-              value={filters.priorities}
+              value={filters.status}
               onChange={(selected: string[]) => {
                 setFilters(prevFilters => {
                   return {
                     ...prevFilters,
-                    priorities: selected as AssetStatus[],
+                    status: selected as AssetStatus[],
                   };
                 });
               }}

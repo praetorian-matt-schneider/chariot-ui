@@ -556,7 +556,14 @@ export interface IntegrationMeta {
 
 export interface AssetFilters {
   attributes: string[];
-  priorities: AssetStatus[];
+  status: AssetStatus[];
+  sources: string[];
+  search: string;
+}
+
+export interface RiskFilters {
+  attributes: string[];
+  status: string[];
   sources: string[];
   search: string;
 }

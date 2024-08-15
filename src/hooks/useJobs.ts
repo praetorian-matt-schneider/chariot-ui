@@ -5,9 +5,8 @@ import { toast } from 'sonner';
 import { useAxios } from '@/hooks/useAxios';
 import { useMy } from '@/hooks/useMy';
 import { getQueryKey } from '@/hooks/useQueryKeys';
-import { Job, JobStatus } from '@/types';
+import { Job } from '@/types';
 import { mergeStatus, UseExtendQueryOptions, useMutation } from '@/utils/api';
-import { formatDate } from '@/utils/date.util';
 
 export function useReRunJob() {
   const axios = useAxios();
@@ -89,7 +88,10 @@ export function useBulkReRunJob() {
 
 export const useJobsStatus = (
   attributeJobMap: Record<string, string>,
-  options?: UseExtendQueryOptions<Job>
+  options?: UseExtendQueryOptions<{
+    data: Job[];
+    offset: string;
+  }>
 ) => {
   const axios = useAxios();
 
@@ -97,15 +99,17 @@ export const useJobsStatus = (
     queries: Object.values(attributeJobMap).map(jobKey => {
       return {
         ...options,
-        queryKey: getQueryKey.getMy('job', jobKey),
+        queryKey: getQueryKey.getMy('job', [[jobKey]]),
         queryFn: async () => {
-          const res = await axios.get(`/my`, {
+          const res = await axios.post(`/my`, [[jobKey]], {
             params: {
               key: jobKey,
             },
           });
 
-          return res.data.jobs[0] as Job;
+          const resourceData = res.data[`jobs`] || [];
+
+          return { data: resourceData, offset: res.data?.offset };
         },
       };
     }),
@@ -114,7 +118,7 @@ export const useJobsStatus = (
         data: Object.keys(attributeJobMap).reduce(
           (acc, current, index) => ({
             ...acc,
-            [current]: results[index].data,
+            [current]: results[index].data?.data[0],
           }),
           {}
         ) as Record<string, Job>,
@@ -122,45 +126,4 @@ export const useJobsStatus = (
       };
     },
   });
-};
-
-export const getJobTimeline = ({
-  status,
-  updated = '',
-}: {
-  status?: JobStatus;
-  updated?: string;
-}) => {
-  const description = `Last Checked: ${formatDate(updated)}`;
-  return [
-    {
-      title: 'Idle',
-      status: '',
-    },
-    {
-      title: 'Queued',
-      status: JobStatus.Queued,
-    },
-    {
-      title: 'Scanning',
-      status: JobStatus.Running,
-    },
-    ...(status === JobStatus.Fail
-      ? [
-          {
-            title: 'Failed',
-            status: JobStatus.Fail,
-            className: 'bg-error',
-          },
-        ]
-      : [
-          {
-            title: 'Completed',
-            status: JobStatus.Pass,
-          },
-        ]),
-  ].map(current => ({
-    ...current,
-    description: current.status === status ? description : '',
-  }));
 };

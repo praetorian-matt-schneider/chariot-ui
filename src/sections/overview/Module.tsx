@@ -1333,21 +1333,21 @@ export function useGetModuleData(props?: GetModuleDataProps): {
   const { data: basAttributes, status: basAttributesStatus } = useMy(
     {
       resource: 'attribute',
-      query: '#source#bas',
+      filters: [['#attribute#source#bas']],
     },
     { enabled }
   );
   const { data: kevAttributes, status: ctiAttributeStatus } = useMy(
     {
       resource: 'attribute',
-      query: '#source#kev',
+      filters: [['#attribute#source#kev']],
     },
     { enabled }
   );
   const { data: nessusAttributes, status: nessusAttributesStatus } = useMy(
     {
       resource: 'attribute',
-      query: '#source#nessus',
+      filters: [['#attribute#source#nessus']],
     },
     { enabled }
   );
@@ -1539,7 +1539,7 @@ export function BasIntegration() {
 
   const { data: basLabelAttributes, status: basLabelAttributesStatus } = useMy({
     resource: 'attribute',
-    query: '#basAgentName',
+    filters: [['#attribute#basAgentName']],
   });
 
   const { mutateAsync: createBulkAsset, status: createBulkAssetStatus } =

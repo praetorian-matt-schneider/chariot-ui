@@ -10,11 +10,15 @@ const fetchIntegrationCounts = async (
   integration: Account
 ) => {
   try {
-    const { data } = (await axios.get('/my/count', {
-      params: {
-        key: `#attribute#source##asset#${integration.member}`,
-      },
-    })) as { data: Statistics };
+    const { data } = (await axios.post(
+      '/my/count',
+      [[`#attribute#source##asset#${integration.member}`]],
+      {
+        params: {
+          key: `attribute`,
+        },
+      }
+    )) as { data: Statistics };
 
     // Extract the asset count from the `attributes` field with the new key structure
     const assetCount = data.attributes

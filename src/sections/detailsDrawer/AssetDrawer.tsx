@@ -96,7 +96,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
   const { data: assets = [], status: assetsStatus } = useMy(
     {
       resource: 'asset',
-      query: compositeKey,
+      filters: [[`#asset${compositeKey}`]],
     },
     { enabled: open }
   );
@@ -119,7 +119,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
   } = useMy(
     {
       resource: 'attribute',
-      query: childAssetsFilter,
+      filters: [[`#attribute${childAssetsFilter}`]],
     },
     { enabled: open }
   );
@@ -127,7 +127,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
   const { data: risks = [], status: risksStatus } = useMy(
     {
       resource: 'risk',
-      query: riskFilter,
+      filters: [[`#risk${riskFilter}`]],
     },
     { enabled: open }
   );

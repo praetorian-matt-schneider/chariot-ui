@@ -1,14 +1,12 @@
 // eslint-disable-next-line no-restricted-imports
-import { useQueries, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import { useAxios } from '@/hooks/useAxios';
 import { useCounts } from '@/hooks/useCounts';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useMy } from '@/hooks/useMy';
-import { getQueryKey } from '@/hooks/useQueryKeys';
 import { Attribute } from '@/types';
-import { mergeStatus, useMutation } from '@/utils/api';
+import { useMutation } from '@/utils/api';
 
 interface CreateAttribute {
   key: string;
@@ -18,16 +16,15 @@ interface CreateAttribute {
 
 // Hook to get the root domain
 export const useGetRootDomain = () => {
-  const axios = useAxios();
-  return useQuery({
-    queryKey: getQueryKey.getMy('attribute', 'CHARIOT__ROOT_DOMAIN'),
-    queryFn: async () => {
-      const res = await axios.get('/my', {
-        params: { key: '#attribute#CHARIOT__ROOT_DOMAIN' },
-      });
-      return res.data['attributes'][0] ?? {};
-    },
+  const rootDomainQuery = useMy({
+    resource: 'attribute',
+    filters: [['#attribute#CHARIOT__ROOT_DOMAIN']],
   });
+
+  return {
+    ...rootDomainQuery,
+    data: rootDomainQuery?.data?.[0] ?? {},
+  };
 };
 
 // Hook to create or update the root domain
@@ -209,45 +206,6 @@ export const useBulkDeleteAttributes = (props?: { showToast?: boolean }) => {
       }
 
       return response;
-    },
-  });
-};
-
-export const useAssetsWithAttributes = (attributes: string[]) => {
-  const axios = useAxios();
-  return useQueries({
-    queries: attributes
-      .filter(x => Boolean(x))
-      .map(attribute => {
-        return {
-          queryKey: getQueryKey.getMy('attribute', `#${attribute}`),
-          queryFn: async () => {
-            const res = await axios.get(`/my`, {
-              params: {
-                key: `#attribute#${attribute}`,
-              },
-            });
-
-            return { pages: [res.data['attributes'] || []], pageParams: [] };
-          },
-        };
-      }),
-    combine: results => {
-      return {
-        data: results
-          .filter(x => x)
-          .reduce((acc, result) => {
-            const processedData = result.data ? result.data.pages.flat() : [];
-
-            const currentSources = processedData.map(
-              (attribute: Attribute) => attribute.source
-            );
-            return acc.length === 0
-              ? currentSources
-              : [...new Set([...acc, ...currentSources])];
-          }, [] as string[]),
-        status: mergeStatus(...results.map(result => result.status)),
-      };
     },
   });
 };

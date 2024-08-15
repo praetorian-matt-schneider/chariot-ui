@@ -1,10 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { toast } from 'sonner';
 import { useDebounce } from 'use-debounce';
 
-import { useAssetsWithAttributes } from '@/hooks/useAttribute';
 import { useAxios } from '@/hooks/useAxios';
-import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
 import { useMy } from '@/hooks/useMy';
 import { buildOpenRiskDataset } from '@/sections/Assets';
@@ -19,6 +17,7 @@ import {
 } from '@/types';
 import { useMutation } from '@/utils/api';
 import { useMergeStatus } from '@/utils/api';
+import { useStorage } from '@/utils/storage/useStorage.util';
 
 interface UpdateAssetProps {
   key: string;
@@ -214,52 +213,45 @@ export const useBulkAddAsset = () => {
   });
 };
 
-interface GetAssetProps {
-  filters: AssetFilters;
-}
-
-export function useGetAssets(props: GetAssetProps) {
-  const { filters } = props;
-
-  const [isFilteredDataFetching, setIsFilteredDataFetching] = useState(false);
+export function useGetAssets() {
+  const [filters, setFilters] = useStorage<AssetFilters>(
+    { queryKey: 'assetFilters' },
+    { search: '', attributes: [], status: [], sources: [] }
+  );
 
   const [debouncedSearch] = useDebounce(filters.search, 500);
-  const isSearched = Boolean(filters.search);
 
-  const {
-    data: assetSearchByName,
-    status: assetByNameStatus,
-    error: assetSearchByNameError,
-    isFetching: isFetchingAssetSearchByName,
-  } = useGenericSearch(
-    { query: `name:${debouncedSearch}` },
-    { enabled: isSearched }
-  );
-  const {
-    data: assetSearchByDns,
-    status: assetSearchByDnsStatus,
-    error: assetSearchByDnsError,
-    isFetching: isFetchingAssetSearchByDns,
-  } = useGenericSearch(
-    { query: `dns:${debouncedSearch}` },
-    { enabled: isSearched }
-  );
+  const apiFilters = [];
+
+  if (debouncedSearch) {
+    apiFilters.push([debouncedSearch, `dns|${debouncedSearch}`]);
+  }
+
+  if (filters.status.length > 0) {
+    apiFilters.push(filters.status.map(s => `status:${s}`));
+  }
+
+  if (filters.sources.length > 0) {
+    apiFilters.push(filters.sources.map(priority => `source:${priority}`));
+  }
+
+  if (filters.attributes.length > 0) {
+    apiFilters.push(filters.sources.map(priority => `attributes:${priority}`));
+  }
+
+  console.log('apiFilters', apiFilters);
 
   const {
     status: myAssetsStatus,
-    data: myAssets = [],
+    data: assets = [],
     isFetching: isFetchingMyAssets,
     fetchNextPage: myAssetsFetchNextPage,
     isFetchingNextPage: myAssetsIsFetchingNextPage,
     error: myAssetsError,
-    hasNextPage,
-  } = useMy(
-    {
-      resource: 'asset',
-      filterByGlobalSearch: true,
-    },
-    { enabled: !isSearched }
-  );
+  } = useMy({
+    resource: 'asset',
+    filters: apiFilters,
+  });
 
   const {
     data: risks = [],
@@ -268,49 +260,12 @@ export function useGetAssets(props: GetAssetProps) {
     isFetching: isFetchingRisks,
   } = useMy({ resource: 'risk' });
 
-  const {
-    data: assetsWithAttributesFilter,
-    status: assetsWithAttributesFilterStatus,
-  } = useAssetsWithAttributes(filters.attributes || []);
+  const status = useMergeStatus(myAssetsStatus, riskStatus);
 
-  const apiStatus = useMergeStatus(
-    ...(debouncedSearch
-      ? [assetByNameStatus, assetSearchByDnsStatus, riskStatus]
-      : [myAssetsStatus, riskStatus])
-  );
-  const isFetchingNextPage = debouncedSearch
-    ? false
-    : myAssetsIsFetchingNextPage;
-  const error = debouncedSearch
-    ? assetSearchByNameError || assetSearchByDnsError || risksError
-    : myAssetsError || risksError;
-  const fetchNextPage = debouncedSearch ? undefined : myAssetsFetchNextPage;
-  const isFetching = debouncedSearch
-    ? isFetchingAssetSearchByName ||
-      isFetchingAssetSearchByDns ||
-      isFetchingRisks
-    : isFetchingMyAssets || isFetchingRisks;
-
-  const status = isFilteredDataFetching ? 'pending' : apiStatus;
-
-  const assets: Asset[] = useMemo(
-    () =>
-      debouncedSearch
-        ? [
-            ...(assetSearchByName?.assets || []),
-            ...(assetSearchByDns?.assets || []),
-          ].reduce((acc, asset: Asset) => {
-            if (!acc.find(a => a.key === asset.key)) {
-              acc.push(asset);
-            }
-            return acc;
-          }, [] as Asset[])
-        : myAssets,
-    [
-      debouncedSearch,
-      JSON.stringify({ assetSearchByName, assetSearchByDns, myAssets }),
-    ]
-  );
+  const isFetchingNextPage = myAssetsIsFetchingNextPage;
+  const error = myAssetsError || risksError;
+  const fetchNextPage = myAssetsFetchNextPage;
+  const isFetching = isFetchingMyAssets || isFetchingRisks;
 
   const openRiskDataset = useMemo(
     () => buildOpenRiskDataset(risks as Risk[]),
@@ -318,32 +273,8 @@ export function useGetAssets(props: GetAssetProps) {
   );
 
   const data = useMemo(() => {
-    let filteredAssets = assets;
-
-    if (assetsWithAttributesFilter.length > 0) {
-      filteredAssets = assetsWithAttributesFilter
-        .map(key => assets.find(asset => asset.key === key))
-        .filter(Boolean) as Asset[];
-    }
-
-    if (filters.priorities.length > 0) {
-      filteredAssets = filteredAssets.filter(({ status }) => {
-        const parsedSource = status.startsWith('F')
-          ? AssetStatus.Frozen
-          : status;
-
-        return filters.priorities.includes(parsedSource);
-      });
-    }
-
-    if (filters.sources?.filter(Boolean).length > 0) {
-      filteredAssets = filteredAssets.filter(({ source }) =>
-        filters.sources.includes(source)
-      );
-    }
-
     // merge risk data with asset data
-    return filteredAssets.map(asset => {
+    return assets.map(asset => {
       const riskSummary = openRiskDataset[asset.dns];
 
       if (riskSummary) {
@@ -355,26 +286,18 @@ export function useGetAssets(props: GetAssetProps) {
   }, [
     JSON.stringify({
       assets,
-      filters,
+      openRiskDataset,
     }),
-    assetsWithAttributesFilterStatus,
   ]);
 
-  useEffect(() => {
-    if (!isFetching) {
-      if (filters.search) {
-        setIsFilteredDataFetching(false);
-        // If search is enabled, we need to fetch the search data
-      } else {
-        if (hasNextPage && data.length < 50) {
-          setIsFilteredDataFetching(true);
-          myAssetsFetchNextPage();
-        } else {
-          setIsFilteredDataFetching(false);
-        }
-      }
-    }
-  }, [JSON.stringify({ data }), filters.search, isFetching, hasNextPage]);
-
-  return { data, status, fetchNextPage, error, isFetchingNextPage, isFetching };
+  return {
+    data,
+    status,
+    fetchNextPage,
+    error,
+    isFetchingNextPage,
+    isFetching,
+    setFilters,
+    filters,
+  };
 }

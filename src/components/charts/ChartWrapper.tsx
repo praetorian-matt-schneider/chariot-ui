@@ -28,7 +28,6 @@ const ChartWrapper: React.FC<ChartWrapperProps> = ({
 }) => {
   const { data, isLoading } = useMy({
     resource: endpoint,
-    query: '',
   });
 
   if (!isLoading && data) {
