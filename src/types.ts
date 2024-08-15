@@ -529,6 +529,12 @@ export enum Integration {
   imperva = 'imperva',
   f5 = 'f5',
   carbonblack = 'carbonblack',
+  devo = 'devo',
+  exabeam = 'exabeam',
+  newrelic = 'newrelic',
+  dnsdb = 'dnsdb',
+  akamai = 'akamai',
+  datadog = 'datadog',
 }
 
 export interface IntegrationMeta {

@@ -949,6 +949,36 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     logo: '/icons/CarbonBlack.svg',
     name: 'CarbonBlack',
   },
+  devo: {
+    id: Integration.devo,
+    logo: '/icons/devo.png',
+    name: 'Devo',
+  },
+  exabeam: {
+    id: Integration.exabeam,
+    logo: '/icons/exabeam.png',
+    name: 'Exabeam',
+  },
+  newrelic: {
+    id: Integration.newrelic,
+    logo: '/icons/newrelic.jpeg',
+    name: 'NewRelic',
+  },
+  dnsdb: {
+    id: Integration.dnsdb,
+    logo: '/icons/dnsdb.png',
+    name: 'dnsdb',
+  },
+  akamai: {
+    id: Integration.akamai,
+    logo: '/icons/akamai.jpeg',
+    name: 'Akamai',
+  },
+  datadog: {
+    id: Integration.datadog,
+    logo: '/icons/datadog.png',
+    name: 'Datadog',
+  },
 };
 
 export const Modules: Record<Module, Omit<ModuleMeta, 'risks' | 'status'>> = {

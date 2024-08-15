@@ -167,6 +167,12 @@ const comingSoonIntegrations = [
   Integrations.imperva,
   Integrations.f5,
   Integrations.carbonblack,
+  Integrations.devo,
+  Integrations.exabeam,
+  Integrations.newrelic,
+  Integrations.dnsdb,
+  Integrations.akamai,
+  Integrations.datadog,
 ];
 
 const riskIntegrations = [
