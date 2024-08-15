@@ -22,13 +22,11 @@ export const useMy = <ResourceKey extends MyResourceKey>(
 ) => {
   const axios = useAxios();
 
-  const filter: string[][] = [...(props.filters || [])];
-
   const response = useInfiniteQuery<MyResource[ResourceKey], Error>({
     ...options,
     defaultErrorMessage: `Failed to fetch ${props.resource} data`,
     retry: false,
-    queryKey: getQueryKey.getMy(props.resource, filter),
+    queryKey: getQueryKey.getMy(props.resource, props.filters),
     queryFn: async ({ pageParam }) => {
       const headers = options?.doNotImpersonate
         ? ({
@@ -40,7 +38,9 @@ export const useMy = <ResourceKey extends MyResourceKey>(
 
       const { data } = await axios.post(
         `/my`,
-        [[`#${props.resource}`], ...filter],
+        (props.filters?.length || 0) > 0
+          ? props.filters
+          : [[`#${props.resource}`]],
         {
           params: {
             key: props.resource,

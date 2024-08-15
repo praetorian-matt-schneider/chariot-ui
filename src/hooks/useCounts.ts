@@ -15,9 +15,7 @@ export const useCounts = <ResourceKey extends MyResourceKey>(
 ) => {
   const axios = useAxios();
 
-  console.log('props.filters', props.filters);
-  const filter: string[][] = [...(props.filters || [])];
-  const queryKey = getQueryKey.getCounts(props.resource, filter);
+  const queryKey = getQueryKey.getCounts(props.resource, props.filters);
 
   return useQuery<Statistics, Error>({
     ...options,
@@ -27,7 +25,9 @@ export const useCounts = <ResourceKey extends MyResourceKey>(
     queryFn: async () => {
       const { data } = await axios.post(
         `/my/count`,
-        [[`#${props.resource}`, ...filter]],
+        (props.filters?.length || 0) > 0
+          ? props.filters
+          : [[`#${props.resource}`]],
         {
           params: {
             key: props.resource,

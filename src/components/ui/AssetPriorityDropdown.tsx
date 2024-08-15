@@ -21,7 +21,7 @@ export const AssetStatusDropdown = (props: Props) => {
   const { asset } = props;
   const { mutateAsync: updateAsset, status: updateAssetStatus } =
     useUpdateAsset();
-  const simplifiedStatus = asset.status.startsWith('F')
+  const simplifiedStatus = asset?.status?.startsWith?.('F')
     ? AssetStatus.Frozen
     : asset.status;
   const [status, setStatus] = useState(simplifiedStatus);
