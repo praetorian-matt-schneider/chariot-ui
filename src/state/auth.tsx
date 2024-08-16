@@ -163,7 +163,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     navigate(getRoute(['login']));
   }
 
-  function setBackendStack(backendStack?: BackendStack) {
+  function setBackendStack(backendStack: BackendStack = defaultStack) {
     initAmplify(backendStack);
 
     setAuth(prevAuth => ({

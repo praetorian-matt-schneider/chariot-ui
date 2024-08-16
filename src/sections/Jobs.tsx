@@ -71,7 +71,7 @@ const Jobs: React.FC = () => {
   const { mutateAsync: reRunJob } = useReRunJob();
 
   const [filter, setFilter] = useFilter('', 'job-status');
-  const [sources, setSources] = useFilter([''], 'job-sources');
+  const [sources, setSources] = useFilter<string[]>([], 'job-sources');
   const [searchParams, setSearchParams] = useSearchParams();
 
   const filteredJobs: Job[] = useMemo(() => {
