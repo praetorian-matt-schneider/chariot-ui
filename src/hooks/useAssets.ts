@@ -228,7 +228,17 @@ export function useGetAssets() {
   }
 
   if (filters.status.length > 0) {
-    apiFilters.push(filters.status.map(s => `status:${s}`));
+    apiFilters.push(
+      filters.status
+        .map(s => {
+          if (s === AssetStatus.Frozen) {
+            return ['status:F', 'status:FL', 'status:FH'];
+          }
+
+          return `status:${s}`;
+        })
+        .flatMap(x => x)
+    );
   }
 
   if (filters.sources.length > 0) {
