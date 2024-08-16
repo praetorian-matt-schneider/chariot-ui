@@ -1,3 +1,4 @@
+import { useLayoutEffect, useState } from 'react';
 import { AxiosHeaders } from 'axios';
 
 import { mapAssetStataus } from '@/hooks/useAssets';
@@ -20,6 +21,8 @@ export const useMy = <ResourceKey extends MyResourceKey>(
     doNotImpersonate?: boolean;
   }
 ) => {
+  const [isFilteredDataFetching, setIsFilteredDataFetching] = useState(false);
+
   const axios = useAxios();
 
   const response = useInfiniteQuery<MyResource[ResourceKey], Error>({
@@ -76,8 +79,24 @@ export const useMy = <ResourceKey extends MyResourceKey>(
     ? response.data.pages.map(({ data }) => data).flat()
     : [];
 
+  useLayoutEffect(() => {
+    if (!response.isFetching) {
+      if (response.hasNextPage && processedData.length < 50) {
+        setIsFilteredDataFetching(true);
+        response.fetchNextPage();
+      } else {
+        setIsFilteredDataFetching(false);
+      }
+    }
+  }, [
+    JSON.stringify({ processedData }),
+    response.isFetching,
+    response.hasNextPage,
+  ]);
+
   return {
     ...response,
+    status: isFilteredDataFetching ? 'pending' : response.status,
     data: processedData,
   };
 };

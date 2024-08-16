@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ChevronDownIcon,
@@ -369,8 +369,6 @@ export function Risks() {
 }
 
 function useGetRisks() {
-  const [isFilteredDataFetching, setIsFilteredDataFetching] = useState(false);
-
   const [filters, setFilters] = useStorage<RiskFilters>(
     { queryKey: 'riskFilters' },
     { search: '', attributes: [], status: [], sources: [] }
@@ -396,33 +394,15 @@ function useGetRisks() {
     apiFilters.push(filters.sources.map(priority => `attributes:${priority}`));
   }
 
-  const {
-    status,
-    data,
-    isFetching,
-    fetchNextPage,
-    isFetchingNextPage,
-    error,
-    hasNextPage,
-  } = useMy({
-    resource: 'risk',
-    filters: apiFilters,
-  });
-
-  useLayoutEffect(() => {
-    if (!isFetching) {
-      if (hasNextPage && data.length < 50) {
-        setIsFilteredDataFetching(true);
-        fetchNextPage();
-      } else {
-        setIsFilteredDataFetching(false);
-      }
-    }
-  }, [JSON.stringify({ data }), isFetching, hasNextPage]);
+  const { status, data, isFetching, fetchNextPage, isFetchingNextPage, error } =
+    useMy({
+      resource: 'risk',
+      filters: apiFilters,
+    });
 
   return {
     data,
-    status: isFilteredDataFetching ? 'pending' : status,
+    status,
     fetchNextPage,
     error,
     isFetchingNextPage,

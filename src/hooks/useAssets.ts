@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { toast } from 'sonner';
 import { useDebounce } from 'use-debounce';
 
@@ -214,8 +214,6 @@ export const useBulkAddAsset = () => {
 };
 
 export function useGetAssets() {
-  const [isFilteredDataFetching, setIsFilteredDataFetching] = useState(false);
-
   const [filters, setFilters] = useStorage<AssetFilters>(
     { queryKey: 'assetFilters' },
     { search: '', attributes: [], status: [], sources: [] }
@@ -248,7 +246,6 @@ export function useGetAssets() {
     fetchNextPage: myAssetsFetchNextPage,
     isFetchingNextPage: myAssetsIsFetchingNextPage,
     error: myAssetsError,
-    hasNextPage,
   } = useMy({
     resource: 'asset',
     filters: apiFilters,
@@ -291,20 +288,9 @@ export function useGetAssets() {
     }),
   ]);
 
-  useLayoutEffect(() => {
-    if (!isFetching) {
-      if (hasNextPage && data.length < 50) {
-        setIsFilteredDataFetching(true);
-        fetchNextPage();
-      } else {
-        setIsFilteredDataFetching(false);
-      }
-    }
-  }, [JSON.stringify({ data }), isFetching, hasNextPage]);
-
   return {
     data,
-    status: isFilteredDataFetching ? 'pending' : status,
+    status,
     fetchNextPage,
     error,
     isFetchingNextPage,
