@@ -11,7 +11,11 @@ import { Columns } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
 import { getAssetStatusProperties } from '@/components/ui/AssetStatusChip';
 import { AttributeFilter } from '@/components/ui/AttributeFilter';
-import { useGetAssets, useUpdateAsset } from '@/hooks/useAssets';
+import {
+  useGetAssets,
+  useMapAssetFilters,
+  useUpdateAsset,
+} from '@/hooks/useAssets';
 import { useIntegration } from '@/hooks/useIntegration';
 import { AssetStatusWarning } from '@/sections/AssetStatusWarning';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
@@ -26,6 +30,7 @@ import {
   Severity,
   SeverityOpenCounts,
 } from '@/types';
+import { omit } from '@/utils/lodash.util';
 
 export function buildOpenRiskDataset(
   risks: Risk[]
@@ -201,6 +206,7 @@ const Assets: React.FC = () => {
               }}
             />
             <AssetStatusDropdown
+              countFilters={useMapAssetFilters(omit(filters, 'status'))}
               value={filters.status}
               onChange={(selected: string[]) => {
                 setFilters(prevFilters => {
@@ -213,6 +219,7 @@ const Assets: React.FC = () => {
             />
             <SourceDropdown
               type="asset"
+              countFilters={useMapAssetFilters(omit(filters, 'sources'))}
               value={filters.sources}
               onChange={selected => {
                 setFilters(prevFilters => {

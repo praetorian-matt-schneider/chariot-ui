@@ -10,13 +10,18 @@ import { omit } from '@/utils/lodash.util';
 interface AssetStatusDropdownProps {
   onChange: (selected: AssetStatus[]) => void;
   value: AssetStatus[];
+  countFilters: string[][];
 }
 
 const AssetStatusDropdown: React.FC<AssetStatusDropdownProps> = ({
   onChange: onSelect,
   value: statusFilter,
+  countFilters,
 }) => {
-  const { data, status: countsStatus } = useCounts({ resource: 'asset' });
+  const { data, status: countsStatus } = useCounts({
+    resource: 'asset',
+    filters: countFilters,
+  });
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, unused-imports/no-unused-vars
   const { FL, FH, ...restStatus } = data?.status || {};

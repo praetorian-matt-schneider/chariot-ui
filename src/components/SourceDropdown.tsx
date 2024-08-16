@@ -9,6 +9,7 @@ interface SourceDropdownProps {
   type: 'asset' | 'job' | 'risk';
   onChange: (selected: string[]) => void;
   value: string[];
+  countFilters: string[][];
 }
 
 interface SourceData {
@@ -19,9 +20,11 @@ const SourceDropdown: React.FC<SourceDropdownProps> = ({
   type,
   onChange: handleSelect,
   value: sourcesFilter,
+  countFilters,
 }) => {
   const { data, status: countsStatus } = useCounts({
     resource: type,
+    filters: countFilters,
   });
 
   const sourceData: SourceData = (data?.source as unknown as SourceData) || {};

@@ -11,7 +11,6 @@ import {
   ChevronDoubleUpIcon,
   ChevronUpIcon,
 } from '@heroicons/react/24/outline';
-import { useDebounce } from 'use-debounce';
 
 import { Dropdown } from '@/components/Dropdown';
 import { RisksIcon } from '@/components/icons';
@@ -24,19 +23,22 @@ import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
 import { ClosedStateModal } from '@/components/ui/ClosedStateModal';
-import { useMy } from '@/hooks/useMy';
-import { useBulkUpdateRisk } from '@/hooks/useRisks';
+import {
+  useBulkUpdateRisk,
+  useGetRisks,
+  useMapRiskFilters,
+} from '@/hooks/useRisks';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { useGlobalState } from '@/state/global.state';
 import {
   Risk,
-  RiskFilters,
   RiskSeverity,
   RiskStatus,
   RiskStatusLabel,
   SeverityDef,
 } from '@/types';
-import { StorageKey, useStorage } from '@/utils/storage/useStorage.util';
+import { omit } from '@/utils/lodash.util';
+import { StorageKey } from '@/utils/storage/useStorage.util';
 import { generatePathWithSearch } from '@/utils/url.util';
 
 const DownIcon = (
@@ -222,6 +224,7 @@ export function Risks() {
             />
             <SourceDropdown
               type="risk"
+              countFilters={useMapRiskFilters(omit(filters, 'sources'))}
               value={filters.sources}
               onChange={selectedSources => {
                 setFilters(prevFilters => {
@@ -366,48 +369,4 @@ export function Risks() {
       />
     </div>
   );
-}
-
-function useGetRisks() {
-  const [filters, setFilters] = useStorage<RiskFilters>(
-    { queryKey: 'riskFilters' },
-    { search: '', attributes: [], status: [], sources: [] }
-  );
-
-  const [debouncedSearch] = useDebounce(filters.search, 500);
-
-  const apiFilters = [['#risk']];
-
-  if (debouncedSearch) {
-    apiFilters.push([debouncedSearch, `dns|${debouncedSearch}`]);
-  }
-
-  if (filters.status.length > 0) {
-    apiFilters.push(filters.status.map(s => `status:${s}`));
-  }
-
-  if (filters.sources.length > 0) {
-    apiFilters.push(filters.sources.map(priority => `source:${priority}`));
-  }
-
-  if (filters.attributes.length > 0) {
-    apiFilters.push(filters.sources.map(priority => `attributes:${priority}`));
-  }
-
-  const { status, data, isFetching, fetchNextPage, isFetchingNextPage, error } =
-    useMy({
-      resource: 'risk',
-      filters: apiFilters,
-    });
-
-  return {
-    data,
-    status,
-    fetchNextPage,
-    error,
-    isFetchingNextPage,
-    isFetching,
-    setFilters,
-    filters,
-  };
 }

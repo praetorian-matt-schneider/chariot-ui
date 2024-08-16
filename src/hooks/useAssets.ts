@@ -17,6 +17,7 @@ import {
 } from '@/types';
 import { useMutation } from '@/utils/api';
 import { useMergeStatus } from '@/utils/api';
+import { omit } from '@/utils/lodash.util';
 import { useStorage } from '@/utils/storage/useStorage.util';
 
 interface UpdateAssetProps {
@@ -219,35 +220,7 @@ export function useGetAssets() {
     { search: '', attributes: [], status: [], sources: [] }
   );
 
-  const [debouncedSearch] = useDebounce(filters.search, 500);
-
-  const apiFilters = [['#asset']];
-
-  if (debouncedSearch) {
-    apiFilters.push([debouncedSearch, `dns|${debouncedSearch}`]);
-  }
-
-  if (filters.status.length > 0) {
-    apiFilters.push(
-      filters.status
-        .map(s => {
-          if (s === AssetStatus.Frozen) {
-            return ['status:F', 'status:FL', 'status:FH'];
-          }
-
-          return `status:${s}`;
-        })
-        .flatMap(x => x)
-    );
-  }
-
-  if (filters.sources.length > 0) {
-    apiFilters.push(filters.sources.map(priority => `source:${priority}`));
-  }
-
-  if (filters.attributes.length > 0) {
-    apiFilters.push(filters.sources.map(priority => `attributes:${priority}`));
-  }
+  const apiFilters = useMapAssetFilters(filters);
 
   const {
     status: myAssetsStatus,
@@ -308,4 +281,42 @@ export function useGetAssets() {
     setFilters,
     filters,
   };
+}
+
+export function useMapAssetFilters(filters: Partial<AssetFilters>) {
+  const [debouncedSearch] = useDebounce(filters.search, 500);
+
+  return useMemo(() => {
+    const apiFilters = [['#asset']];
+
+    if (debouncedSearch) {
+      apiFilters.push([debouncedSearch, `dns|${debouncedSearch}`]);
+    }
+
+    if (filters.status && filters.status.length > 0) {
+      apiFilters.push(
+        filters.status
+          .map(s => {
+            if (s === AssetStatus.Frozen) {
+              return ['status:F', 'status:FL', 'status:FH'];
+            }
+
+            return `status:${s}`;
+          })
+          .flatMap(x => x)
+      );
+    }
+
+    if (filters.sources && filters.sources.length > 0) {
+      apiFilters.push(filters.sources.map(priority => `source:${priority}`));
+    }
+
+    if (filters.attributes && filters.attributes.length > 0) {
+      apiFilters.push(
+        filters.attributes.map(priority => `attributes:${priority}`)
+      );
+    }
+
+    return apiFilters;
+  }, [debouncedSearch, JSON.stringify(omit(filters, 'search'))]);
 }

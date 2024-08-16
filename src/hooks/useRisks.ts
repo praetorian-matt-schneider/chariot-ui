@@ -1,4 +1,6 @@
+import { useMemo } from 'react';
 import { toast } from 'sonner';
+import { useDebounce } from 'use-debounce';
 
 import { useAxios } from '@/hooks/useAxios';
 import { useCounts } from '@/hooks/useCounts';
@@ -6,8 +8,10 @@ import { useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
 import { useMy } from '@/hooks/useMy';
 import { getQueryKey } from '@/hooks/useQueryKeys';
 import { queryClient } from '@/queryclient';
-import { Risk, RiskStatus, RiskTemplate } from '@/types';
+import { Risk, RiskFilters, RiskStatus, RiskTemplate } from '@/types';
 import { useMutation } from '@/utils/api';
+import { omit } from '@/utils/lodash.util';
+import { useStorage } from '@/utils/storage/useStorage.util';
 
 export const useCreateRisk = () => {
   const axios = useAxios();
@@ -241,4 +245,58 @@ export function useReportRisk() {
       });
     },
   });
+}
+
+export function useGetRisks() {
+  const [filters, setFilters] = useStorage<RiskFilters>(
+    { queryKey: 'riskFilters' },
+    { search: '', attributes: [], status: [], sources: [] }
+  );
+
+  const apiFilters = useMapRiskFilters(filters);
+
+  const { status, data, isFetching, fetchNextPage, isFetchingNextPage, error } =
+    useMy({
+      resource: 'risk',
+      filters: apiFilters,
+    });
+
+  return {
+    data,
+    status,
+    fetchNextPage,
+    error,
+    isFetchingNextPage,
+    isFetching,
+    setFilters,
+    filters,
+  };
+}
+
+export function useMapRiskFilters(filters: Partial<RiskFilters>) {
+  const [debouncedSearch] = useDebounce(filters.search, 500);
+
+  return useMemo(() => {
+    const apiFilters = [['#risk']];
+
+    if (debouncedSearch) {
+      apiFilters.push([debouncedSearch, `dns|${debouncedSearch}`]);
+    }
+
+    if (filters.status && filters.status.length > 0) {
+      apiFilters.push(filters.status.map(s => `status:${s}`));
+    }
+
+    if (filters.sources && filters.sources.length > 0) {
+      apiFilters.push(filters.sources.map(priority => `source:${priority}`));
+    }
+
+    if (filters.attributes && filters.attributes.length > 0) {
+      apiFilters.push(
+        filters.attributes.map(priority => `attributes:${priority}`)
+      );
+    }
+
+    return apiFilters;
+  }, [debouncedSearch, JSON.stringify(omit(filters, 'search'))]);
 }

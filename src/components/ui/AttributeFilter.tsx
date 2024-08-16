@@ -5,7 +5,6 @@ import { Square } from 'lucide-react';
 import { InputText } from '@/components/form/InputText';
 import { Popover } from '@/components/Popover';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
-import { useStorage } from '@/utils/storage/useStorage.util';
 
 export type AttributeFilterType = Record<string, string[]>;
 
@@ -21,10 +20,8 @@ interface Props {
 }
 
 export const AttributeFilter = (props: Props) => {
-  const [attributesFilter, setAttributesFilter] = useStorage<string[]>(
-    { parentState: props.value, onParentStateChange: props.onChange },
-    []
-  );
+  const { value: attributesFilter, onChange: setAttributesFilter } = props;
+
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedAttributes, setSelectedAttributes] = useState<
     Record<string, boolean>
