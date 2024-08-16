@@ -5,6 +5,7 @@ import { Dropdown, DropdownMenu } from '@/components/Dropdown';
 import { countDescription } from '@/components/Menu';
 import { useCounts } from '@/hooks/useCounts';
 import { AssetStatus, AssetStatusLabel } from '@/types';
+import { omit } from '@/utils/lodash.util';
 
 interface AssetStatusDropdownProps {
   onChange: (selected: AssetStatus[]) => void;
@@ -73,13 +74,15 @@ const AssetStatusDropdown: React.FC<AssetStatusDropdownProps> = ({
             label: 'Divider',
             type: 'divider',
           },
-          ...Object.keys(AssetStatusLabel).map(status => ({
-            label: AssetStatusLabel[status as AssetStatus],
-            labelSuffix: (
-              statusData[status as AssetStatus] || 0
-            ).toLocaleString(),
-            value: status,
-          })),
+          ...Object.keys(omit(AssetStatusLabel, AssetStatus.Deleted)).map(
+            status => ({
+              label: AssetStatusLabel[status as AssetStatus],
+              labelSuffix: (
+                statusData[status as AssetStatus] || 0
+              ).toLocaleString(),
+              value: status,
+            })
+          ),
           countDescription,
         ];
 
