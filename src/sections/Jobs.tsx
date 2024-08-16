@@ -1,8 +1,9 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
+import { useDebounce } from 'use-debounce';
 
 import { Dropdown } from '@/components/Dropdown';
 import SourceDropdown from '@/components/SourceDropdown';
@@ -64,15 +65,21 @@ const Jobs: React.FC = () => {
     status,
     isFetchingNextPage,
     fetchNextPage,
+    isFetching,
+    hasNextPage,
   } = useMy({
     resource: 'job',
     filterByGlobalSearch: true,
   });
   const { mutateAsync: reRunJob } = useReRunJob();
 
+  const [search, setSearch] = useState('');
+  const [isFilteredDataFetching, setIsFilteredDataFetching] = useState(false);
   const [filter, setFilter] = useFilter('', 'job-status');
   const [sources, setSources] = useFilter<string[]>([], 'job-sources');
   const [searchParams, setSearchParams] = useSearchParams();
+
+  const [debouncedSearch] = useDebounce(search, 500);
 
   const filteredJobs: Job[] = useMemo(() => {
     let filteredJobs = jobs;
@@ -85,8 +92,18 @@ const Jobs: React.FC = () => {
       filteredJobs = jobs.filter(job => sources.includes(job.source));
     }
 
+    if (debouncedSearch && debouncedSearch.length > 0) {
+      filteredJobs = jobs.filter(item => {
+        const found = Object.values(item).find(value =>
+          String(value).toLowerCase().includes(debouncedSearch.toLowerCase())
+        );
+
+        return found;
+      });
+    }
+
     return filteredJobs;
-  }, [filter, sources, JSON.stringify(jobs)]);
+  }, [filter, sources, debouncedSearch, JSON.stringify(jobs)]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -180,6 +197,17 @@ const Jobs: React.FC = () => {
     },
   ];
 
+  useEffect(() => {
+    if (!isFetching) {
+      if (hasNextPage && filteredJobs.length < 50) {
+        setIsFilteredDataFetching(true);
+        fetchNextPage();
+      } else {
+        setIsFilteredDataFetching(false);
+      }
+    }
+  }, [JSON.stringify({ filteredJobs }), isFetching, hasNextPage]);
+
   return (
     <div className="flex w-full flex-col">
       <Table
@@ -233,10 +261,14 @@ const Jobs: React.FC = () => {
         columns={columns}
         data={filteredJobs}
         error={error}
-        status={status}
+        status={isFilteredDataFetching ? 'pending' : status}
         name="jobs"
         isFetchingNextPage={isFetchingNextPage}
         fetchNextPage={fetchNextPage}
+        search={{
+          value: search,
+          onChange: setSearch,
+        }}
         noData={{
           title: 'No Jobs Found',
           description: (
