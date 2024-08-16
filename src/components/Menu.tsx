@@ -98,7 +98,7 @@ export const Menu: React.FC<MenuProps> = props => {
 
             setSelected(prev => {
               let newSelected = prev;
-              if (multiSelect && item.value !== undefined) {
+              if (item.value !== undefined) {
                 if (item.value) {
                   // Toggle the value
                   if (prev.includes(item.value)) {
