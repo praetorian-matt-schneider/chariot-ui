@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ChevronDownIcon,
@@ -19,32 +19,25 @@ import { HorseIcon } from '@/components/icons/Horse.icon';
 import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
 import { getRiskStatusIcon } from '@/components/icons/RiskStatus.icon';
 import { countDescription, MenuItemProps } from '@/components/Menu';
-import SeverityDropdown from '@/components/SeverityDropdown';
 import SourceDropdown from '@/components/SourceDropdown';
-import StatusDropdown from '@/components/StatusDropdown';
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
 import { ClosedStateModal } from '@/components/ui/ClosedStateModal';
-import { useGetKev } from '@/hooks/kev';
-import { useFilter } from '@/hooks/useFilter';
-import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useMy } from '@/hooks/useMy';
 import { useBulkUpdateRisk } from '@/hooks/useRisks';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { useGlobalState } from '@/state/global.state';
 import {
   Risk,
-  RiskCombinedStatus,
+  RiskFilters,
   RiskSeverity,
   RiskStatus,
   RiskStatusLabel,
   SeverityDef,
 } from '@/types';
-import { useMergeStatus } from '@/utils/api';
-import { isKEVRisk } from '@/utils/risk.util';
-import { StorageKey } from '@/utils/storage/useStorage.util';
-import { generatePathWithSearch, useSearchParams } from '@/utils/url.util';
+import { StorageKey, useStorage } from '@/utils/storage/useStorage.util';
+import { generatePathWithSearch } from '@/utils/url.util';
 
 const DownIcon = (
   <ChevronDownIcon className="size-3 stroke-[4px] text-header-dark" />
@@ -61,79 +54,6 @@ export const getFilterLabel = (
   return filter.length === 0 ? `All ${label}` : labels.join(', ');
 };
 
-export function getStatus(status: RiskCombinedStatus): RiskStatus {
-  const baseStatus = status[0];
-  const subStatus = status.length > 1 ? status.slice(2) : '';
-
-  if (baseStatus === 'C' && subStatus) {
-    return `C${subStatus}` as RiskStatus;
-  }
-
-  return baseStatus as RiskStatus;
-}
-
-const getFilteredRisksByCISA = (
-  risks: Risk[],
-  knownExploitedThreats?: string[]
-) => {
-  if (knownExploitedThreats && knownExploitedThreats.length > 0) {
-    return risks.filter(risk => {
-      return isKEVRisk(risk, knownExploitedThreats);
-    });
-  }
-  return [];
-};
-
-const getFilteredRisks = (
-  risks: Risk[],
-  {
-    statusFilter = [],
-    severityFilter = [],
-    intelFilter = [],
-    sourcesFilter = [],
-    knownExploitedThreats,
-  }: {
-    statusFilter?: string[];
-    severityFilter?: string[];
-    intelFilter?: string[];
-    sourcesFilter?: string[];
-    knownExploitedThreats?: string[];
-  }
-) => {
-  let filteredRisks = risks;
-  const trimmedStatusFilter = statusFilter.filter(Boolean);
-  const trimmedSeverityFilter = severityFilter.filter(Boolean);
-  const trimmedIntelFilter = intelFilter.filter(Boolean);
-  const trimmedSourcesFilter = sourcesFilter.filter(Boolean);
-
-  if (trimmedStatusFilter.length > 0) {
-    filteredRisks = filteredRisks.filter(risk =>
-      trimmedStatusFilter.filter(Boolean).includes(getStatus(risk.status))
-    );
-  }
-
-  if (trimmedSeverityFilter.length > 0) {
-    filteredRisks = filteredRisks.filter(risk =>
-      trimmedSeverityFilter.filter(Boolean).includes(risk.status[1])
-    );
-  }
-
-  if (trimmedIntelFilter.length > 0) {
-    filteredRisks = getFilteredRisksByCISA(
-      filteredRisks,
-      knownExploitedThreats
-    );
-  }
-
-  if (trimmedSourcesFilter.length > 0) {
-    filteredRisks = filteredRisks.filter(risk =>
-      trimmedSourcesFilter.filter(Boolean).includes(risk.source)
-    );
-  }
-
-  return filteredRisks;
-};
-
 export function Risks() {
   const { getRiskDrawerLink } = getDrawerLink();
   const { handleUpdate: updateRisk, status: updateRiskStatus } =
@@ -144,26 +64,6 @@ export function Risks() {
   } = useGlobalState();
 
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
-  const [statusFilter, setStatusesFilter] = useFilter<RiskStatus[]>(
-    [],
-    'risk-status',
-    setSelectedRows
-  );
-  const [severityFilter, setSeverityFilter] = useFilter<RiskSeverity[]>(
-    [],
-    'risk-severity',
-    setSelectedRows
-  );
-  const [intelFilter, setIntelFilter] = useFilter<string[]>(
-    [],
-    'risk-intel',
-    setSelectedRows
-  );
-  const [sourcesFilter, setSourcesFilter] = useFilter<string[]>(
-    [],
-    'risk-sources',
-    setSelectedRows
-  );
 
   useEffect(() => {
     if (updateRiskStatus === 'success') {
@@ -171,84 +71,18 @@ export function Risks() {
     }
   }, [updateRiskStatus]);
 
-  const [isFilteredDataFetching, setIsFilteredDataFetching] = useState(false);
-
-  const [search, setSearch] = useState('');
-  const [debouncedSearch] = useDebounce(search, 500);
-  const { data: dataDebouncedSearch, status: statusDebouncedSearch } =
-    useGenericSearch(
-      { query: `name:${debouncedSearch}` },
-      { enabled: Boolean(debouncedSearch) }
-    );
-
-  const { searchParams, addSearchParams } = useSearchParams();
-
   const [isClosedSubStateModalOpen, setIsClosedSubStateModalOpen] =
     useState(false);
 
-  const { data: knownExploitedThreats = [], status: threatsStatus } =
-    useGetKev();
-
   const {
-    data: risksUseMy = [],
+    data: risks,
     status: risksStatus,
     error,
     isFetchingNextPage,
-    isFetching: isRisksFetching,
     fetchNextPage,
-    hasNextPage,
-  } = useMy({
-    resource: 'risk',
-  });
-
-  useEffect(() => {
-    if (searchParams.has('q')) {
-      setSearch(searchParams.get('q') || '');
-    }
-  }, [searchParams]);
-
-  const risks: Risk[] = debouncedSearch
-    ? dataDebouncedSearch?.risks || []
-    : risksUseMy;
-
-  const apiStatus = useMergeStatus(
-    debouncedSearch ? statusDebouncedSearch : risksStatus,
-    threatsStatus
-  );
-
-  const status = isFilteredDataFetching ? 'pending' : apiStatus;
-
-  const filteredRisks = useMemo(() => {
-    return getFilteredRisks(risks, {
-      statusFilter,
-      severityFilter,
-      intelFilter,
-      sourcesFilter,
-      knownExploitedThreats,
-    });
-  }, [
-    severityFilter,
-    statusFilter,
-    intelFilter,
-    sourcesFilter,
-    risks,
-    knownExploitedThreats,
-  ]);
-
-  const sortedRisks = useMemo(() => {
-    const sortOrder = ['C', 'H', 'M', 'L', 'I'];
-    return filteredRisks.sort((a, b) => {
-      return (
-        sortOrder.indexOf(a.status[1]) - sortOrder.indexOf(b.status[1]) ||
-        new Date(b.updated).getTime() - new Date(a.updated).getTime()
-      );
-    });
-  }, [filteredRisks]);
-
-  function handleSearchUpdate(value: string) {
-    setSearch(value);
-    addSearchParams('q', value);
-  }
+    filters,
+    setFilters,
+  } = useGetRisks();
 
   const columns: Columns<Risk> = useMemo(
     () => [
@@ -338,48 +172,25 @@ export function Risks() {
     []
   );
 
-  useEffect(() => {
-    if (!isRisksFetching) {
-      if (search) {
-        setIsFilteredDataFetching(false);
-      } else {
-        if (hasNextPage && sortedRisks.length < 50) {
-          setIsFilteredDataFetching(true);
-          fetchNextPage();
-        } else {
-          setIsFilteredDataFetching(false);
-        }
-      }
-    }
-  }, [JSON.stringify({ sortedRisks }), search, isRisksFetching, hasNextPage]);
-
   return (
     <div className="flex w-full flex-col">
       <Table
         name={'risks'}
         search={{
-          value: search,
-          onChange: handleSearchUpdate,
+          value: filters.search,
+          onChange: updatedSearch => {
+            setFilters(prevFilters => {
+              return { ...prevFilters, search: updatedSearch };
+            });
+          },
         }}
         resize={true}
         filters={
           <div className="flex gap-4">
-            <SeverityDropdown
-              value={severityFilter}
-              onChange={selectedRows => {
-                setSeverityFilter(selectedRows);
-              }}
-            />
-            <StatusDropdown
-              value={statusFilter}
-              onChange={selectedRows => {
-                setStatusesFilter(selectedRows);
-              }}
-            />
             <Dropdown
               styleType="header"
-              label={getFilterLabel('Threat Intel', intelFilter, [
-                { label: 'CISA KEV', value: 'cisa_kev' },
+              label={getFilterLabel('Threat Intel', filters.attributes, [
+                { label: 'CISA KEV', value: '#attribute#source#kev' },
               ])}
               endIcon={DownIcon}
               menu={{
@@ -395,24 +206,27 @@ export function Risks() {
                   },
                   {
                     label: 'CISA KEV',
-                    labelSuffix: getFilteredRisksByCISA(
-                      risks,
-                      knownExploitedThreats
-                    ).length,
-                    value: 'cisa_kev',
+                    labelSuffix: 0,
+                    value: '#attribute#source#kev',
                   },
                   countDescription,
                 ],
-                onSelect: selectedRows => setIntelFilter(selectedRows),
-                value: intelFilter.length === 0 ? [''] : intelFilter,
+                onSelect: selectedAttributes => {
+                  setFilters(prevFilters => {
+                    return { ...prevFilters, attributes: selectedAttributes };
+                  });
+                },
+                value: filters.attributes,
                 multiSelect: true,
               }}
             />
             <SourceDropdown
               type="risk"
-              value={sourcesFilter}
-              onChange={selectedRows => {
-                setSourcesFilter(selectedRows);
+              value={filters.sources}
+              onChange={selectedSources => {
+                setFilters(prevFilters => {
+                  return { ...prevFilters, sources: selectedSources };
+                });
               }}
             />
           </div>
@@ -521,8 +335,8 @@ export function Risks() {
           };
         }}
         columns={columns}
-        data={sortedRisks}
-        status={status}
+        data={risks}
+        status={risksStatus}
         error={error}
         selection={{ value: selectedRows, onChange: setSelectedRows }}
         noData={{
@@ -542,7 +356,7 @@ export function Risks() {
         onStatusChange={({ status, comment }) => {
           updateRisk({
             selectedRows: selectedRows
-              .map(i => sortedRisks[Number(i)])
+              .map(i => risks[Number(i)])
               .filter(Boolean),
             status,
             comment,
@@ -552,4 +366,68 @@ export function Risks() {
       />
     </div>
   );
+}
+
+function useGetRisks() {
+  const [isFilteredDataFetching, setIsFilteredDataFetching] = useState(false);
+
+  const [filters, setFilters] = useStorage<RiskFilters>(
+    { queryKey: 'riskFilters' },
+    { search: '', attributes: [], status: [], sources: [] }
+  );
+
+  const [debouncedSearch] = useDebounce(filters.search, 500);
+
+  const apiFilters = [['#risk']];
+
+  if (debouncedSearch) {
+    apiFilters.push([debouncedSearch, `dns|${debouncedSearch}`]);
+  }
+
+  if (filters.status.length > 0) {
+    apiFilters.push(filters.status.map(s => `status:${s}`));
+  }
+
+  if (filters.sources.length > 0) {
+    apiFilters.push(filters.sources.map(priority => `source:${priority}`));
+  }
+
+  if (filters.attributes.length > 0) {
+    apiFilters.push(filters.sources.map(priority => `attributes:${priority}`));
+  }
+
+  const {
+    status,
+    data,
+    isFetching,
+    fetchNextPage,
+    isFetchingNextPage,
+    error,
+    hasNextPage,
+  } = useMy({
+    resource: 'risk',
+    filters: apiFilters,
+  });
+
+  useLayoutEffect(() => {
+    if (!isFetching) {
+      if (hasNextPage && data.length < 50) {
+        setIsFilteredDataFetching(true);
+        fetchNextPage();
+      } else {
+        setIsFilteredDataFetching(false);
+      }
+    }
+  }, [JSON.stringify({ data }), isFetching, hasNextPage]);
+
+  return {
+    data,
+    status: isFilteredDataFetching ? 'pending' : status,
+    fetchNextPage,
+    error,
+    isFetchingNextPage,
+    isFetching,
+    setFilters,
+    filters,
+  };
 }
