@@ -198,6 +198,7 @@ const Assets: React.FC = () => {
         filters={
           <div className="flex gap-4">
             <AttributeFilter
+              type="asset"
               value={filters.attributes}
               onChange={attributes => {
                 setFilters(prevFilters => {

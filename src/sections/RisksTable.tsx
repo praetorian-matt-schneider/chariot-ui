@@ -22,6 +22,7 @@ import SourceDropdown from '@/components/SourceDropdown';
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
+import { AttributeFilter } from '@/components/ui/AttributeFilter';
 import { ClosedStateModal } from '@/components/ui/ClosedStateModal';
 import {
   useBulkUpdateRisk,
@@ -44,6 +45,8 @@ import { generatePathWithSearch } from '@/utils/url.util';
 const DownIcon = (
   <ChevronDownIcon className="size-3 stroke-[4px] text-header-dark" />
 );
+
+const KEV_ATTRIBUTE = '#attribute#source#kev';
 
 export const getFilterLabel = (
   label = '',
@@ -189,10 +192,19 @@ export function Risks() {
         resize={true}
         filters={
           <div className="flex gap-4">
+            <AttributeFilter
+              type="risk"
+              value={filters.attributes.filter(att => att !== KEV_ATTRIBUTE)}
+              onChange={attributes => {
+                setFilters(prevFilters => {
+                  return { ...prevFilters, attributes };
+                });
+              }}
+            />
             <Dropdown
               styleType="header"
               label={getFilterLabel('Threat Intel', filters.attributes, [
-                { label: 'CISA KEV', value: '#attribute#source#kev' },
+                { label: 'CISA KEV', value: KEV_ATTRIBUTE },
               ])}
               endIcon={DownIcon}
               menu={{
@@ -209,7 +221,7 @@ export function Risks() {
                   {
                     label: 'CISA KEV',
                     labelSuffix: 0,
-                    value: '#attribute#source#kev',
+                    value: KEV_ATTRIBUTE,
                   },
                   countDescription,
                 ],

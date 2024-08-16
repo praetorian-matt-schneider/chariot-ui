@@ -15,12 +15,17 @@ export const getSelectedAttributes = (attributes: AttributeFilterType) => {
 };
 
 interface Props {
+  type: 'asset' | 'job' | 'risk';
   value: string[];
   onChange: (assets: string[]) => void;
 }
 
 export const AttributeFilter = (props: Props) => {
-  const { value: attributesFilter, onChange: setAttributesFilter } = props;
+  const {
+    value: attributesFilter,
+    onChange: setAttributesFilter,
+    type,
+  } = props;
 
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedAttributes, setSelectedAttributes] = useState<
@@ -52,6 +57,9 @@ export const AttributeFilter = (props: Props) => {
     if (!searchResults?.attributes) return {};
     return searchResults.attributes.reduce(
       (acc, attr) => {
+        if (!attr.source.startsWith(`#${type}`)) {
+          return acc;
+        }
         if (!acc[attr.name]) {
           acc[attr.name] = {};
         }
