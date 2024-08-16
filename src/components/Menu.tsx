@@ -30,6 +30,8 @@ export type MenuProps = {
 interface subMenuOpenProps {
   isSubMenuOpen: boolean;
   setIsSubMenuOpen: (isSubMenuOpen: boolean) => void;
+  subMenuValue?: string[];
+  subMenuOnSelect?: (value: string[]) => void;
 }
 
 export const Menu: React.FC<MenuProps> = props => {
@@ -43,7 +45,7 @@ export const Menu: React.FC<MenuProps> = props => {
 
   const ulRef = useRef<HTMLUListElement>(null);
 
-  const [isSubMenuOpen, setIsSubMenuOpen] = useState(false);
+  const [isSubMenuOpenIndex, setIsSubMenuOpenIndex] = useState<number>();
   const [selected, setSelected] = useStorage<string[]>(
     {
       parentState:
@@ -81,8 +83,12 @@ export const Menu: React.FC<MenuProps> = props => {
           key={index}
           {...item}
           multiSelect={multiSelect}
-          isSubMenuOpen={isSubMenuOpen}
-          setIsSubMenuOpen={setIsSubMenuOpen}
+          isSubMenuOpen={index === isSubMenuOpenIndex}
+          setIsSubMenuOpen={() => {
+            setIsSubMenuOpenIndex(index);
+          }}
+          subMenuValue={selected}
+          subMenuOnSelect={setSelected}
           isSelected={
             item.value === undefined ? false : selected.includes(item.value)
           }
@@ -143,6 +149,7 @@ export interface MenuItemProps {
   isLoading?: boolean;
   // checked?: boolean;
   submenu?: MenuItemProps[];
+  subMenuMultiSelect?: boolean;
 }
 
 const MenuItem: React.FC<
@@ -270,6 +277,9 @@ function MenuButton(
             items: submenu,
             open: isSubMenuOpen,
             onOpenChange: setIsSubMenuOpen,
+            multiSelect: props.subMenuMultiSelect,
+            value: props.subMenuValue,
+            onSelect: props.subMenuOnSelect,
           }}
         >
           {children}

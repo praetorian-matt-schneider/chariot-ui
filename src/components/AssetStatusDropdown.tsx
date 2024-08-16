@@ -2,7 +2,6 @@ import React from 'react';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 
 import { Dropdown, DropdownMenu } from '@/components/Dropdown';
-import { countDescription } from '@/components/Menu';
 import { useCounts } from '@/hooks/useCounts';
 import { AssetStatus, AssetStatusLabel } from '@/types';
 import { omit } from '@/utils/lodash.util';
@@ -88,7 +87,6 @@ const AssetStatusDropdown: React.FC<AssetStatusDropdownProps> = ({
               value: status,
             })
           ),
-          countDescription,
         ];
 
   return (

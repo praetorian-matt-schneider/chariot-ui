@@ -17,13 +17,14 @@ import { RisksIcon } from '@/components/icons';
 import { HorseIcon } from '@/components/icons/Horse.icon';
 import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
 import { getRiskStatusIcon } from '@/components/icons/RiskStatus.icon';
-import { countDescription, MenuItemProps } from '@/components/Menu';
+import { MenuItemProps } from '@/components/Menu';
 import SourceDropdown from '@/components/SourceDropdown';
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
 import { AttributeFilter } from '@/components/ui/AttributeFilter';
 import { ClosedStateModal } from '@/components/ui/ClosedStateModal';
+import { useCounts } from '@/hooks/useCounts';
 import {
   useBulkUpdateRisk,
   useGetRisks,
@@ -201,6 +202,15 @@ export function Risks() {
                 });
               }}
             />
+            <RiskStatusFilter
+              onChange={updatedStatus => {
+                setFilters(prevFilters => {
+                  return { ...prevFilters, status: updatedStatus };
+                });
+              }}
+              value={filters.status}
+              countFilters={useMapRiskFilters(omit(filters, 'status'))}
+            />
             <Dropdown
               styleType="header"
               label={getFilterLabel('Threat Intel', filters.attributes, [
@@ -223,7 +233,6 @@ export function Risks() {
                     labelSuffix: 0,
                     value: KEV_ATTRIBUTE,
                   },
-                  countDescription,
                 ],
                 onSelect: selectedAttributes => {
                   setFilters(prevFilters => {
@@ -380,5 +389,62 @@ export function Risks() {
         }}
       />
     </div>
+  );
+}
+
+interface RiskStatusFilterProps {
+  onChange: (selected: string[]) => void;
+  value: string[];
+  countFilters: string[][];
+}
+
+function RiskStatusFilter(props: RiskStatusFilterProps) {
+  const { data } = useCounts({ resource: 'risk', filters: props.countFilters });
+  const statusData = data?.status || {};
+
+  const name = 'priorities';
+
+  return (
+    <Dropdown
+      styleType="header"
+      label={props.value.length === 0 ? `All ${name}` : props.value.join(', ')}
+      className="capitalize"
+      endIcon={<ChevronDownIcon className="size-5 text-gray-500" />}
+      menu={{
+        items: [
+          {
+            label: `All ${name}`,
+            labelSuffix: Object.values(statusData)
+              .reduce((a, b) => a + b, 0)
+              .toLocaleString(),
+            value: '',
+          },
+          {
+            label: 'Divider',
+            type: 'divider',
+          },
+          ...Object.keys(RiskStatusLabel).map(status => ({
+            label: RiskStatusLabel[status as RiskStatus],
+            value: status,
+            subMenuMultiSelect: true,
+            submenu: Object.keys(SeverityDef)
+              .map(severity => {
+                const value = status[1]
+                  ? status[0] + severity[0] + status[1]
+                  : status[0] + severity[0];
+
+                return {
+                  label: SeverityDef[severity as keyof typeof SeverityDef],
+                  labelSuffix: statusData[value] || 0,
+                  value: value,
+                };
+              })
+              .reverse(),
+          })),
+        ],
+        onSelect: value => props.onChange(value as string[]),
+        value: props.value.length === 0 ? [''] : props.value,
+      }}
+    />
   );
 }
