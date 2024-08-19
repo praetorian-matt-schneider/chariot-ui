@@ -92,6 +92,11 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const { isSignUpComplete, nextStep } = await signUp({
         username,
         password,
+        options: {
+          userAttributes: {
+            'custom:query': window.location.search,
+          },
+        },
       });
       const { signUpStep } = nextStep;
       if (!isSignUpComplete && signUpStep === 'CONFIRM_SIGN_UP') {
