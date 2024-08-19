@@ -268,6 +268,46 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
       },
     ],
   },
+  phone: {
+    id: Integration.phone,
+    name: 'Phone Number',
+    description: 'Receive SMS alerts when new risks are discovered.',
+    logo: '/icons/IMessage_logo.svg',
+    inputs: [
+      {
+        name: 'username',
+        value: 'phone',
+        hidden: true,
+      },
+      {
+        label: 'Phone Number',
+        value: '',
+        placeholder: '+1 123-456-7890',
+        name: 'number',
+        required: true,
+      },
+    ],
+  },
+  email: {
+    id: Integration.email,
+    name: 'Email',
+    description: 'Receive SMS alerts when new risks are discovered.',
+    logo: '/icons/Mail.svg',
+    inputs: [
+      {
+        name: 'username',
+        value: 'email',
+        hidden: true,
+      },
+      {
+        label: 'Email Address',
+        value: '',
+        placeholder: 'example@companydomain.com',
+        name: 'address',
+        required: true,
+      },
+    ],
+  },
   jira: {
     id: Integration.jira,
     name: 'Atlassian Jira',

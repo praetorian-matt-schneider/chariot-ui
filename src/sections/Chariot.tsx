@@ -177,6 +177,8 @@ const comingSoonIntegrations = [
 ];
 
 const riskIntegrations = [
+  Integrations.email,
+  Integrations.phone,
   Integrations.slack,
   Integrations.jira,
   Integrations.webhook,

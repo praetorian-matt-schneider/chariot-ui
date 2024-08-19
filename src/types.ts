@@ -484,6 +484,8 @@ export enum Integration {
   hook = 'hook',
   webhook = 'webhook',
   slack = 'slack',
+  phone = 'phone',
+  email = 'email',
   jira = 'jira',
   github = 'github',
   amazon = 'amazon',
