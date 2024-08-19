@@ -9,6 +9,7 @@ import { SignupError } from '@/sections/signup/SignupError';
 import { SSO } from '@/sections/signup/SSO';
 import { useAuth } from '@/state/auth';
 import { getRoute } from '@/utils/route.util';
+import { generatePathWithSearch } from '@/utils/url.util';
 
 interface Credentials {
   username: string;
@@ -84,7 +85,13 @@ export const EmailPasswordForm = ({
           <div className="flex justify-between">
             <div className="py-3 text-xs">
               <Button
-                onClick={() => navigate(getRoute(['forgot-password']))}
+                onClick={() =>
+                  navigate(
+                    generatePathWithSearch({
+                      pathname: getRoute(['forgot-password']),
+                    })
+                  )
+                }
                 className="p-0 text-xs"
                 styleType="textPrimary"
               >
@@ -94,7 +101,11 @@ export const EmailPasswordForm = ({
             <p className="text-xs">
               {`Need an account ? `}
               <Button
-                onClick={() => navigate(getRoute(['signup']))}
+                onClick={() =>
+                  navigate(
+                    generatePathWithSearch({ pathname: getRoute(['signup']) })
+                  )
+                }
                 className="text-xs"
                 styleType="textPrimary"
               >
@@ -105,7 +116,11 @@ export const EmailPasswordForm = ({
           <p className="text-xs">
             {`SSO user ? `}
             <Button
-              onClick={() => navigate(getRoute(['login-sso']))}
+              onClick={() =>
+                navigate(
+                  generatePathWithSearch({ pathname: getRoute(['login-sso']) })
+                )
+              }
               className="text-xs"
               styleType="textPrimary"
             >
@@ -118,7 +133,11 @@ export const EmailPasswordForm = ({
         <p className="text-xs">
           {`Already have an account ? `}
           <Button
-            onClick={() => navigate(getRoute(['login']))}
+            onClick={() =>
+              navigate(
+                generatePathWithSearch({ pathname: getRoute(['login']) })
+              )
+            }
             className="text-xs"
             styleType="textPrimary"
           >

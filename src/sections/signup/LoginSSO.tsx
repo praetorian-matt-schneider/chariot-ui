@@ -7,6 +7,7 @@ import { Input } from '@/components/form/Input';
 import { Disclaimer } from '@/sections/signup/Disclaimer';
 import { PageWrapper } from '@/sections/signup/PageWrapper';
 import { getRoute } from '@/utils/route.util';
+import { generatePathWithSearch } from '@/utils/url.util';
 
 export const LoginSSO = () => {
   const navigate = useNavigate();
@@ -52,7 +53,11 @@ export const LoginSSO = () => {
         <p className="text-xs">
           {`Login with Email and Password ? `}
           <Button
-            onClick={() => navigate(getRoute(['login']))}
+            onClick={() =>
+              navigate(
+                generatePathWithSearch({ pathname: getRoute(['login']) })
+              )
+            }
             className="text-xs"
             styleType="textPrimary"
           >

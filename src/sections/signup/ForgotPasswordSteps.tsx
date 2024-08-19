@@ -9,6 +9,7 @@ import { Disclaimer } from '@/sections/signup/Disclaimer';
 import { SignupError } from '@/sections/signup/SignupError';
 import { cn } from '@/utils/classname';
 import { getRoute } from '@/utils/route.util';
+import { generatePathWithSearch } from '@/utils/url.util';
 
 export const ForgotPasswordSteps = () => {
   const [stepIndex, setStepIndex] = useState<number>(0);
@@ -142,7 +143,11 @@ export const ForgotPasswordSteps = () => {
           <p className="text-xs">
             {`Need an account ? `}
             <Button
-              onClick={() => navigate(getRoute(['signup']))}
+              onClick={() =>
+                navigate(
+                  generatePathWithSearch({ pathname: getRoute(['signup']) })
+                )
+              }
               className="text-xs"
               styleType="textPrimary"
             >
