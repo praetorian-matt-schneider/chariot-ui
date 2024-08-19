@@ -1,24 +1,35 @@
+import { useEffect } from 'react';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
 import { Modal } from '@/components/Modal';
 import { useModifyAccount } from '@/hooks';
+import { useGlobalState } from '@/state/global.state';
 import { AccountMetadata } from '@/types';
-import { appStorage } from '@/utils/storage/appStorage.util';
-import { StorageKey } from '@/utils/storage/useStorage.util';
 
 export const LinkAWS = () => {
+  const { awsMarketplaceConfig } = useGlobalState();
+
   const { mutate: link, status } = useModifyAccount('link');
-  const awsMarketplaceConfig = appStorage.getItem<AccountMetadata>(
-    StorageKey.AWS_MARKETPLACE_CONFIG
-  );
-  const confirmLinkAWS = appStorage.getItem<boolean>(
-    StorageKey.CONFIRM_LINK_AWS
-  );
 
   function onClose() {
-    appStorage.removeItem(StorageKey.CONFIRM_LINK_AWS);
-    appStorage.removeItem(StorageKey.AWS_MARKETPLACE_CONFIG);
+    awsMarketplaceConfig.onChange(undefined);
+    awsMarketplaceConfig.onVerifyLinkingChange(false);
   }
+
+  function linkAws() {
+    link({
+      username: 'awsmarketplace',
+      value: '',
+      config: awsMarketplaceConfig.value as AccountMetadata,
+    });
+    onClose();
+  }
+
+  useEffect(() => {
+    if (awsMarketplaceConfig.value && !awsMarketplaceConfig.verifyLinking) {
+      linkAws();
+    }
+  }, []);
 
   return (
     <Modal
@@ -26,19 +37,12 @@ export const LinkAWS = () => {
       title={'Link to AWS'}
       onClose={onClose}
       className="px-8"
-      open={Boolean(confirmLinkAWS)}
+      open={awsMarketplaceConfig.verifyLinking}
       footer={{
         text: 'Confirm',
         disabled: status === 'pending',
         onClick: async () => {
-          if (awsMarketplaceConfig) {
-            await link({
-              username: 'awsmarketplace',
-              value: '',
-              config: awsMarketplaceConfig,
-            });
-            onClose();
-          }
+          linkAws();
         },
       }}
     >

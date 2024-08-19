@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
 
 import { Module } from '@/types';
-import { useStorage } from '@/utils/storage/useStorage.util';
+import { StorageKey, useStorage } from '@/utils/storage/useStorage.util';
 
 interface UseModalState {
   open: boolean;
@@ -30,6 +30,12 @@ interface GlobalState {
     };
     upgrade: UseModalState;
   };
+  awsMarketplaceConfig: {
+    value?: Record<string, string>;
+    onChange: React.Dispatch<GlobalState['awsMarketplaceConfig']['value']>;
+    verifyLinking: boolean;
+    onVerifyLinkingChange: React.Dispatch<React.SetStateAction<boolean>>;
+  };
 }
 
 const GlobalStateContext = createContext<GlobalState | undefined>(undefined);
@@ -55,6 +61,19 @@ export const GlobalStateProvider: React.FC<{ children: React.ReactNode }> = ({
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   const [selectedAssets, setSelectedAssets] = useState<string[]>([]);
+  const [awsMarketplaceConfig, setAwsMarketplaceConfig] = useStorage<
+    GlobalState['awsMarketplaceConfig']['value']
+  >({
+    key: StorageKey.AWS_MARKETPLACE_CONFIG,
+  });
+  const [verifyLinking, setVerifyLinking] = useStorage<
+    GlobalState['awsMarketplaceConfig']['verifyLinking']
+  >(
+    {
+      key: StorageKey.AWS_MARKETPLACE_CONFIG_VERIFY_LINKING,
+    },
+    false
+  );
 
   return (
     <GlobalStateContext.Provider
@@ -77,6 +96,12 @@ export const GlobalStateProvider: React.FC<{ children: React.ReactNode }> = ({
           },
           asset: { open: assetOpen, onOpenChange: setAssetOpen },
           file: { open: fileOpen, onOpenChange: setFileOpen },
+        },
+        awsMarketplaceConfig: {
+          value: awsMarketplaceConfig,
+          onChange: setAwsMarketplaceConfig,
+          verifyLinking,
+          onVerifyLinkingChange: setVerifyLinking,
         },
       }}
     >

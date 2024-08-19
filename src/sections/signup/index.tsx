@@ -23,13 +23,7 @@ export const Login = () => {
   );
 };
 
-export const Signup = ({
-  onComplete,
-  description,
-}: {
-  onComplete?: () => void;
-  description?: React.ReactNode;
-}) => {
+export const Signup = ({ description }: { description?: React.ReactNode }) => {
   const [stepIndex, setStepIndex] = useState<number>(0);
   const [credentials, setCredentials] = useState<{
     username: string;
@@ -87,7 +81,6 @@ export const Signup = ({
           <EmailConfirmation
             username={credentials.username}
             password={credentials.password}
-            onComplete={onComplete}
           />
         )}
       </div>

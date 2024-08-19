@@ -11,11 +11,9 @@ import { useAuth } from '@/state/auth';
 export const EmailConfirmation = ({
   username,
   password,
-  onComplete,
 }: {
   username: string;
   password: string;
-  onComplete?: () => void;
 }) => {
   const { confirmOTP, isLoading } = useAuth();
   const [open, setOpen] = useState(true);
@@ -29,7 +27,6 @@ export const EmailConfirmation = ({
 
   async function confirmOtpFn(otp: string) {
     await confirmOTP(username, password, otp);
-    onComplete && onComplete();
   }
 
   return (
