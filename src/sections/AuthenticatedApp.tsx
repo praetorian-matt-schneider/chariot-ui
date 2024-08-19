@@ -133,10 +133,10 @@ export function Header() {
     <>
       <div
         className={cn(
-          `flex flex-col items-center w-full bg-header text-header px-4`
+          `flex flex-col items-center w-full bg-header text-header`
         )}
       >
-        <div className="w-full max-w-screen-xl">
+        <div className="w-full max-w-screen-xl px-4">
           <TopNavBar />
         </div>
       </div>
@@ -146,7 +146,7 @@ export function Header() {
       >
         <div
           id={HeaderPortalSections.EXTRA_CONTENT}
-          className="m-auto max-w-screen-xl text-[10px] [&:has(*)]:pb-7"
+          className="m-auto max-w-screen-xl px-4 text-[10px] [&:has(*)]:pb-7"
         />
       </div>
     </>

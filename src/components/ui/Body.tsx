@@ -36,7 +36,7 @@ export const Body = forwardRef(function Paper(
         {header && <Header />}
         <div
           className={cn(
-            'mx-auto w-full max-w-screen-xl rounded-sm',
+            'mx-auto w-full max-w-screen-xl rounded-sm px-4',
             contentClassName
           )}
           style={{ marginTop: header ? -16 : 0 }}
