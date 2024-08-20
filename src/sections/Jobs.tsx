@@ -85,15 +85,15 @@ const Jobs: React.FC = () => {
     let filteredJobs = jobs;
 
     if (filter?.length > 0) {
-      filteredJobs = jobs.filter(job => job.status === filter);
+      filteredJobs = filteredJobs.filter(job => job.status === filter);
     }
 
     if (sources.filter(Boolean).length > 0) {
-      filteredJobs = jobs.filter(job => sources.includes(job.source));
+      filteredJobs = filteredJobs.filter(job => sources.includes(job.source));
     }
 
     if (debouncedSearch && debouncedSearch.length > 0) {
-      filteredJobs = jobs.filter(item => {
+      filteredJobs = filteredJobs.filter(item => {
         const found = Object.values(item).find(value =>
           String(value).toLowerCase().includes(debouncedSearch.toLowerCase())
         );
