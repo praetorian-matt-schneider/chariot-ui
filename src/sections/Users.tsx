@@ -8,7 +8,7 @@ import { Columns } from '@/components/table/types';
 import { InviteUser } from '@/components/ui/InviteUser';
 import { useModifyAccount, useMy } from '@/hooks';
 import { useGetPrimaryEmail } from '@/hooks/useAccounts';
-import { AvailableIntegrations } from '@/sections/overview/Integration';
+import { Integrations } from '@/sections/overview/Integrations';
 import { useAuth } from '@/state/auth';
 import { Account } from '@/types';
 import { useMergeStatus } from '@/utils/api';
@@ -41,7 +41,7 @@ export const Users: React.FC = () => {
     },
     ...(accounts || []).filter(
       account =>
-        !AvailableIntegrations.includes(account.member) &&
+        !(account.member in Integrations) &&
         account.member !== account.username &&
         account.member.includes('@')
     ),

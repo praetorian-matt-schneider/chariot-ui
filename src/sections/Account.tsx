@@ -28,7 +28,7 @@ import {
 import { useUploadFile } from '@/hooks/useFiles';
 import { useMy } from '@/hooks/useMy';
 import { CollaboratingWith } from '@/sections/CollaboratingWith';
-import { Integrations } from '@/sections/overview/Module';
+import { Integrations } from '@/sections/overview/Integrations';
 import { SSOSetupForm } from '@/sections/SSOSetupForm';
 import Avatar from '@/sections/topNavBar/Avatar';
 import { Users } from '@/sections/Users';

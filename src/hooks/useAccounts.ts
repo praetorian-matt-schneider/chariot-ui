@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 
 import { useAxios } from '@/hooks/useAxios';
 import { useMy } from '@/hooks/useMy';
-import { AvailableIntegrations } from '@/sections/overview/Integration';
+import { Integrations } from '@/sections/overview/Integrations';
 import { useAuth } from '@/state/auth';
 import { Account, LinkAccount } from '@/types';
 import { useMutation } from '@/utils/api';
@@ -73,9 +73,8 @@ export const useModifyAccount = (
       if (!skipOnSuccess) {
         const { username } = account;
 
-        const snackbarTitle = AvailableIntegrations.includes(username)
-          ? 'integration'
-          : 'account';
+        const snackbarTitle =
+          username in Integrations ? 'integration' : 'account';
 
         const snackbarAction =
           action === 'link'

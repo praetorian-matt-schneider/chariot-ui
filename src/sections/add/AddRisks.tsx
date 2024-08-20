@@ -6,6 +6,7 @@ import { Button } from '@/components/Button';
 import { Input } from '@/components/form/Input';
 import { Inputs } from '@/components/form/Inputs';
 import { RisksIcon } from '@/components/icons';
+import { Link } from '@/components/Link';
 import { MarkdownEditor } from '@/components/markdown/MarkdownEditor';
 import { Modal } from '@/components/Modal';
 import { riskSeverityOptions } from '@/components/ui/RiskDropdown';
@@ -13,7 +14,8 @@ import { useUploadFile } from '@/hooks';
 import { useCreateRisk } from '@/hooks/useRisks';
 import { parseKeys, TypeSearch } from '@/sections/SearchByType';
 import { useGlobalState } from '@/state/global.state';
-import { Module, RiskCombinedStatus } from '@/types';
+import { RiskCombinedStatus } from '@/types';
+import { getRoute } from '@/utils/route.util';
 
 const DEFAULT_FORM_VALUE = {
   key: '',
@@ -32,7 +34,6 @@ export const AddRisks = () => {
         selectedAssets,
         onSelectedAssetsChange,
       },
-      module: moduleState,
     },
   } = useGlobalState();
 
@@ -127,17 +128,18 @@ export const AddRisks = () => {
         <div className="mb-4 flex items-center space-x-2 rounded-md  border border-yellow-500 bg-yellow-50 p-3 text-gray-700">
           <ExclamationTriangleIcon className="size-5 text-yellow-700" />
           <span>Looking for integrations?</span>
-          <button
+          <Link
+            to={{
+              pathname: getRoute(['app', 'overview']),
+              search: `?riskNotificationDrawer=true`,
+            }}
             onClick={() => {
-              moduleState.onValueChange({
-                module: Module.PM,
-                integration: '',
-              });
+              onClose();
             }}
             className="font-medium text-blue-600 hover:underline"
           >
             Add Integration
-          </button>
+          </Link>
         </div>
         <div>
           <div className="flex flex-1 flex-col justify-center">

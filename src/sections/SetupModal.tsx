@@ -7,7 +7,7 @@ import { Button } from '@/components/Button';
 import { Inputs, Values } from '@/components/form/Inputs';
 import { Link } from '@/components/Link';
 import { useModifyAccount } from '@/hooks';
-import { Integrations } from '@/sections/overview/Module';
+import { Integrations } from '@/sections/overview/Integrations';
 import { Account, LinkAccount } from '@/types';
 
 const SetupModal: React.FC<{

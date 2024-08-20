@@ -5,12 +5,14 @@ import { ArrowUpRight, CheckCircle, LoaderCircle } from 'lucide-react';
 import { Input } from '@/components/form/Input';
 import { Inputs, Values } from '@/components/form/Inputs';
 import { AssetsIcon } from '@/components/icons';
+import { Link } from '@/components/Link';
 import { Modal } from '@/components/Modal';
 import { useCreateAsset } from '@/hooks/useAssets';
 import { useUpgrade } from '@/hooks/useUpgrade';
 import { useGlobalState } from '@/state/global.state';
-import { Asset, AssetStatus, AssetStatusLabel, Module } from '@/types';
+import { Asset, AssetStatus, AssetStatusLabel } from '@/types';
 import { cn } from '@/utils/classname';
+import { getRoute } from '@/utils/route.util';
 
 const AddAssetExamples = () => (
   <div className="mt-4 rounded-md bg-gray-100 p-3 text-sm text-gray-600">
@@ -35,7 +37,6 @@ export function AddAsset() {
   const {
     modal: {
       asset: { open, onOpenChange },
-      module: moduleState,
     },
   } = useGlobalState();
 
@@ -128,17 +129,18 @@ export function AddAsset() {
           <div className="mb-4 flex items-center space-x-2 rounded-md border border-yellow-400 bg-yellow-50 p-3 text-gray-600">
             <ExclamationTriangleIcon className="size-5 text-yellow-600" />
             <span>Looking for integrations?</span>
-            <button
+            <Link
+              to={{
+                pathname: getRoute(['app', 'overview']),
+                search: `?attackSurfaceDrawer=true`,
+              }}
               onClick={() => {
-                moduleState.onValueChange({
-                  module: Module.ASM,
-                  integration: '',
-                });
+                onClose();
               }}
               className="font-medium text-blue-600 hover:underline"
             >
               Add Integration
-            </button>
+            </Link>
           </div>
         )}
 

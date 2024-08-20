@@ -80,7 +80,7 @@ const Assets: React.FC = () => {
   });
 
   const { getAssetDrawerLink } = getDrawerLink();
-  const { isIntegration } = useIntegration();
+  const { isAssetIntegration: isIntegration } = useIntegration();
   const { mutateAsync: updateAsset } = useUpdateAsset();
 
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
