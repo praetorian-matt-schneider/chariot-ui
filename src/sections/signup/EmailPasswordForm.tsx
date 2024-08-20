@@ -40,8 +40,8 @@ const PasswordRequirements = [
     regex: Regex.PASSWORD.NUMERIC_CHARACTERS,
   },
   {
-    label: 'At least 1 special character without space',
-    regex: Regex.PASSWORD.SPECIAL_CHARACTERS_WITHOUT_SPACE,
+    label: 'At least 1 special character',
+    regex: Regex.PASSWORD.SPECIAL_CHARACTERS,
   },
 ];
 

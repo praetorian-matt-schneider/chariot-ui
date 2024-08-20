@@ -15,10 +15,10 @@ export const Regex = {
   CONTAINS_ASSET: new RegExp(`.*(${ASSET.source})`),
   PASSWORD: {
     CHARACTERS_LENGTH: /(?=.{8,})/,
-    UPPER_CASE: /(?=.*[A-Z])/,
-    LOWER_CASE: /(?=.*[a-z])/,
-    NUMERIC_CHARACTERS: /(?=.*\d)/,
-    SPECIAL_CHARACTERS_WITHOUT_SPACE: /^(?=.*[\W_])(?!.*\s).+$/,
+    UPPER_CASE: /[A-Z]/,
+    LOWER_CASE: /[a-z]/,
+    NUMERIC_CHARACTERS: /\d/,
+    SPECIAL_CHARACTERS: /[^\w\s]/,
   },
 };
 
