@@ -4,7 +4,7 @@ import { Quotes } from '@/components/icons/Quotes.icon';
 const Data = {
   avatar: '/icons/SignupAvatar.png',
   quote:
-    'Praetorian has been phenomenal- not only as a tactical partner in helping to address what I need to focus on today, but as a strategic partner engaging in our security roadmap so they can identify how they can plug-in and support me tomorrow.',
+    'Praetorian has been phenomenal - not only as a tactical partner in helping to address what I need to focus on today, but as a strategic partner engaging in our security roadmap so they can identify how they can plug-in and support me tomorrow.',
   name: 'Rinki Sethi',
   designation: 'CISO @ Bill.com',
 };
