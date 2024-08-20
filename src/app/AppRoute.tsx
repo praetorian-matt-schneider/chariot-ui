@@ -8,13 +8,13 @@ import Alerts from '@/sections/Alerts';
 import Assets from '@/sections/Assets';
 import { AuthenticatedApp } from '@/sections/AuthenticatedApp';
 import AWSMarketplace from '@/sections/AWSMarketplace';
-import Chariot from '@/sections/Chariot';
 import Files from '@/sections/Files';
 import Hello from '@/sections/Hello';
 import Intelligence from '@/sections/Intelligence';
 import Jobs from '@/sections/Jobs';
 import Logout from '@/sections/Logout';
-import { Report } from '@/sections/Report';
+import { Overview } from '@/sections/overview/Overview';
+import { Report } from '@/sections/report/Report';
 import { Risks } from '@/sections/RisksTable';
 import { ForgotPassword, Login, Signup } from '@/sections/signup';
 import { LoginSSO } from '@/sections/signup/LoginSSO';
@@ -143,16 +143,7 @@ const appRoutes = {
       title: 'Documents',
     },
     overview: {
-      element: (
-        // <Body
-        //   style={{
-        //     background:
-        //       'radial-gradient(circle at center, rgb(41, 34, 90) 0%, rgb(24, 22, 60) 70%, rgb(13, 13, 40) 100%)',
-        //   }}
-        // >
-        <Chariot />
-        // </Body>
-      ),
+      element: <Overview />,
       title: 'Overview',
     },
     report: {
