@@ -4,6 +4,7 @@ import { useDebounce } from 'use-debounce';
 
 import { useAssetsWithAttributes } from '@/hooks/useAttribute';
 import { useAxios } from '@/hooks/useAxios';
+import { useCounts } from '@/hooks/useCounts';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
 import { useMy } from '@/hooks/useMy';
@@ -132,6 +133,9 @@ export const useCreateAsset = () => {
     { resource: 'asset' },
     { enabled: false }
   );
+  const { invalidate: invalidateCounts } = useCounts({
+    resource: 'asset',
+  });
 
   return useMutation<Asset, Error, Pick<Asset, 'name' | 'status'>>({
     defaultErrorMessage: `Failed to add asset`,
@@ -152,6 +156,7 @@ export const useCreateAsset = () => {
 
       invalidateJob();
       invalidateAssets();
+      invalidateCounts();
 
       return data;
     },

@@ -5,6 +5,7 @@ import {
   ExclamationTriangleIcon as ExclamationTriangleIconOutline,
   MagnifyingGlassIcon,
   PencilSquareIcon,
+  PlusCircleIcon,
   XCircleIcon,
 } from '@heroicons/react/24/outline';
 import {
@@ -41,6 +42,7 @@ import { RenderHeaderExtraContentSection } from '@/sections/AuthenticatedApp';
 import { Integrations } from '@/sections/overview/Module';
 import SetupModal from '@/sections/SetupModal';
 import { useAuth } from '@/state/auth';
+import { useGlobalState } from '@/state/global.state';
 import { Account, AssetStatus, Plan } from '@/types';
 import { Job, JobStatus, JobStatusLabel } from '@/types';
 import { cn } from '@/utils/classname';
@@ -206,6 +208,11 @@ const Chariot: React.FC = () => {
     selectedNotificationIntegrations,
     setSelectedNotificationIntegrations,
   ] = useState<string[]>([]);
+  const {
+    modal: {
+      asset: { onOpenChange: onAddAssetOpenChange },
+    },
+  } = useGlobalState();
 
   const { integrations: integrationWithHook } = useIntegration();
 
@@ -665,6 +672,20 @@ const Chariot: React.FC = () => {
                     align: 'center',
                     cell: row => (
                       <div className="flex flex-row items-center justify-center">
+                        {row.actions === 'AddAsset' && (
+                          <Tooltip title="Add Asset" placement="right">
+                            <Button
+                              styleType="none"
+                              className="mx-auto"
+                              onClick={() => {
+                                onAddAssetOpenChange(true);
+                              }}
+                              startIcon={
+                                <PlusCircleIcon className="size-6 text-white" />
+                              }
+                            />
+                          </Tooltip>
+                        )}
                         {row.actions === 'Setup' && (
                           <button
                             onClick={() => setSetupIntegration(row.account)}
@@ -701,7 +722,7 @@ const Chariot: React.FC = () => {
                     surface: 'chariot',
                     identifier: 'Provided',
                     discoveredAssets: assetCount?.source?.provided || 0,
-                    actions: '',
+                    actions: 'AddAsset',
                     connected: false,
                     id: 'providedAssets',
                     key: 'providedAssets',
