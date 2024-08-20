@@ -73,13 +73,15 @@ const AssetStatusDropdown: React.FC<AssetStatusDropdownProps> = ({
             label: 'Divider',
             type: 'divider',
           },
-          ...Object.keys(AssetStatusLabel).map(status => ({
-            label: AssetStatusLabel[status as AssetStatus],
-            labelSuffix: (
-              statusData[status as AssetStatus] || 0
-            ).toLocaleString(),
-            value: status,
-          })),
+          ...Object.keys(AssetStatusLabel)
+            .filter(status => status !== AssetStatus.Deleted)
+            .map(status => ({
+              label: AssetStatusLabel[status as AssetStatus],
+              labelSuffix: (
+                statusData[status as AssetStatus] || 0
+              ).toLocaleString(),
+              value: status,
+            })),
           countDescription,
         ];
 
