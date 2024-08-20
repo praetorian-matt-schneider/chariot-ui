@@ -87,7 +87,7 @@ export const useModifyAccount = (
           const webhookUrl = getChariotWebhookURL({
             api,
             me,
-            pin: data.config.pin,
+            pin: data.value,
           });
           navigator.clipboard.writeText(webhookUrl);
         }

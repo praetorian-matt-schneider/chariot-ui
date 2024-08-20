@@ -56,7 +56,7 @@ const Account: React.FC = () => {
   const hookUrl = getChariotWebhookURL({
     api,
     me,
-    pin: linkedHook?.config?.pin,
+    pin: hookAccount?.value,
   });
 
   useEffect(() => {
@@ -185,7 +185,7 @@ const Account: React.FC = () => {
             </div>
           </div>
         )}
-        {hookAccount && linkedHook?.config?.pin && (
+        {hookUrl && (
           <>
             <p className="mt-4 block text-sm font-medium leading-6 text-gray-900">
               Webhook URL
@@ -217,9 +217,8 @@ const Account: React.FC = () => {
             styleType="primary"
             onClick={() => {
               link({
-                config: {
-                  pin: generateUuid(),
-                },
+                value: generateUuid(),
+                config: {},
                 username: hook.id,
               });
             }}

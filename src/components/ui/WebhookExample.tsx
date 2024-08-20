@@ -10,8 +10,7 @@ const WebhookExample: React.FC<Props> = ({ defaultPin }) => {
   const { me, api } = useAuth();
   const { data: accounts } = useMy({ resource: 'account' });
   const pin =
-    accounts?.find(account => account.member === 'hook')?.config?.pin ??
-    defaultPin;
+    accounts?.find(account => account.member === 'hook')?.value ?? defaultPin;
   const url = getChariotWebhookURL({ api, me, pin });
 
   const samples = [
