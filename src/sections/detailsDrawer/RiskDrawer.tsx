@@ -277,7 +277,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                 className="h-6"
               >
                 <Modal
-                  size="xl"
+                  size="6xl"
                   open={isEditingMarkdown}
                   onClose={() => setIsEditingMarkdown(false)}
                   title="Description & Remediation"

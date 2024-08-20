@@ -46,7 +46,7 @@ export const FormGroup = (props: FormGroupProps) => {
         <div className="mb-1 flex items-center gap-1">
           <label
             htmlFor={name}
-            className="block text-sm font-medium leading-6 text-gray-900"
+            className="block text-sm font-medium leading-6 text-default-dark"
           >
             {label}
           </label>

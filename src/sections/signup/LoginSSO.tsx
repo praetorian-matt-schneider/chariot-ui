@@ -1,16 +1,12 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { signInWithRedirect } from 'aws-amplify/auth';
 
 import { Button } from '@/components/Button';
 import { Input } from '@/components/form/Input';
 import { Disclaimer } from '@/sections/signup/Disclaimer';
 import { PageWrapper } from '@/sections/signup/PageWrapper';
-import { getRoute } from '@/utils/route.util';
-import { generatePathWithSearch } from '@/utils/url.util';
 
 export const LoginSSO = () => {
-  const navigate = useNavigate();
   const [username, setUsername] = useState<string>('');
 
   const handleSignin = async () => {
@@ -22,7 +18,7 @@ export const LoginSSO = () => {
   };
 
   return (
-    <PageWrapper title="Sign in with SSO">
+    <PageWrapper title="Sign in with SSO" showBack={true}>
       <form
         className="flex flex-1 flex-col gap-4 space-y-4 p-2"
         id="signup"
@@ -49,21 +45,6 @@ export const LoginSSO = () => {
         >
           Continue
         </Button>
-
-        <p className="text-xs">
-          {`Login with Email and Password ? `}
-          <Button
-            onClick={() =>
-              navigate(
-                generatePathWithSearch({ pathname: getRoute(['login']) })
-              )
-            }
-            className="text-xs"
-            styleType="textPrimary"
-          >
-            Sign In
-          </Button>
-        </p>
         <Disclaimer />
       </form>
     </PageWrapper>

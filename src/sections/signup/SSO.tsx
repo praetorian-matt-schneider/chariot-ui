@@ -18,7 +18,7 @@ export const SSO = () => {
 
   return (
     <>
-      <div className="relative text-center">
+      <div className="relative w-full text-center">
         <hr className="absolute top-2.5 w-full border-t-2 border-default" />
         <span className="relative bg-layer0 px-8 text-center font-semibold">
           OR

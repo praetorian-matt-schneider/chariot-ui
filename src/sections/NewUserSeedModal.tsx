@@ -65,7 +65,7 @@ export const NewUserSeedModal = () => {
     <ModalWrapper
       open={open}
       onClose={handleClose}
-      size="xl"
+      size="6xl"
       className="border-none"
     >
       <div className="bg-header">

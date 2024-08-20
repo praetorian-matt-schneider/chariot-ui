@@ -117,7 +117,7 @@ export const AddRisks = () => {
         icon={<RisksIcon className="size-6 text-default-light" />}
         open={isOpen}
         onClose={onClose}
-        size="md"
+        size="lg"
         closeOnOutsideClick={false}
         footer={{
           text: 'Add',
@@ -244,7 +244,7 @@ function AddDefinition(props: AddDefinitionProps) {
 
   return (
     <Modal
-      size="xl"
+      size="6xl"
       open={props.open}
       onClose={() => {
         props.onOpenChange(false);
@@ -292,7 +292,7 @@ function AddProofOfExploit(props: AddProofOfExploitProps) {
 
   return (
     <Modal
-      size="xl"
+      size="6xl"
       open={props.open}
       onClose={() => {
         props.onOpenChange(false);

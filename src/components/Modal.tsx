@@ -12,7 +12,7 @@ import { Button, ButtonProps } from '@/components/Button';
 import { cn } from '@/utils/classname';
 import { getTransitionSettings } from '@/utils/transition.util';
 
-type Size = 'sm' | 'md' | 'lg' | 'xl';
+type Size = 'xs' | 'lg' | 'xl' | '3xl' | '6xl';
 interface Props extends PropsWithChildren {
   className?: string;
   footer?: {
@@ -58,7 +58,7 @@ export const Modal: React.FC<Props> = props => {
     logo = '',
     subtitle = '',
     open = false,
-    size = 'md',
+    size = 'lg',
     title = '',
     icon,
     style = 'default',
@@ -239,15 +239,16 @@ export const ModalWrapper: React.FC<ModalWrapperProps> = props => {
     className = '',
     onClose = () => {},
     open = false,
-    size = 'md',
+    size = 'lg',
     closeOnOutsideClick = true,
   } = props;
 
   const widthMap = {
-    sm: 'max-w-xs',
-    md: 'max-w-lg',
-    lg: 'max-w-3xl',
-    xl: 'max-w-6xl',
+    xs: 'max-w-xs',
+    lg: 'max-w-lg',
+    xl: 'max-w-xl',
+    '3xl': 'max-w-3xl',
+    '6xl': 'max-w-6xl',
   };
 
   return (

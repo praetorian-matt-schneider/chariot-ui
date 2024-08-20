@@ -12,7 +12,7 @@ export const UpgradeModal = () => {
   return (
     <Modal
       title={'Free Upgrade'}
-      size="lg"
+      size="3xl"
       open={upgradeState.open}
       onClose={() => upgradeState.onOpenChange(false)}
       footer={{

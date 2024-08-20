@@ -71,7 +71,7 @@ export const SSOSetupForm = () => {
         open={showModal}
         onClose={() => setShowModal(false)}
         title="Setup SSO"
-        size="md"
+        size="lg"
         footer={{
           form: 'sso-setup-form',
           text: 'Save',

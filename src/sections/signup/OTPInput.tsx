@@ -90,7 +90,7 @@ export const OTPInput = ({ length = 6, onSubmit = () => {} }: Props) => {
       {otp.map((value, index) => {
         return (
           <input
-            className="h-40 min-w-0 border-2 border-default text-center text-6xl font-bold focus:border-brand"
+            className="h-28 min-w-0 border-2 border-default text-center text-4xl font-bold focus:border-brand"
             key={index}
             onPaste={e => handlePaste(index, e)}
             type="text"

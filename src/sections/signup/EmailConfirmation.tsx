@@ -35,6 +35,13 @@ export const EmailConfirmation = ({
         <p>
           An email was sent to{' '}
           <span className="font-bold text-default">{username}</span>
+          <Button
+            className="inline p-0 pl-2"
+            styleType="textPrimary"
+            onClick={() => setOpen(true)}
+          >
+            Re-enter Code
+          </Button>
         </p>
         <ul className="mt-4 list-disc">
           <li>{`Can't find it? Don't forget to check your spam box.`}</li>
@@ -55,7 +62,7 @@ export const EmailConfirmation = ({
         open={open}
         onClose={() => setOpen(false)}
         className="border-none"
-        size="lg"
+        size="xl"
       >
         <Button
           className="ml-auto text-default-light"

@@ -378,7 +378,7 @@ export function ModulesModal() {
         moduleState.onValueChange(undefined);
       }}
       className="h-[500px] p-0"
-      size="xl"
+      size="6xl"
       closeOnOutsideClick={false}
       footer={
         renderForm

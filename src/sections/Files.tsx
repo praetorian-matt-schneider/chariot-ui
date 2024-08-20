@@ -368,7 +368,7 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
       <Modal
         open={filename.length > 0}
         onClose={() => setFilename('')}
-        size="xl"
+        size="6xl"
         title={filename}
         footer={
           fileType === ParsedFileTypes.DOCUMENT

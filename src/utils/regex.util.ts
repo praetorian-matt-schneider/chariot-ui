@@ -13,6 +13,13 @@ export const Regex = {
   IMAGE: /.*\.(jpg|jpeg|png|gif|bmp)$/,
   ASSET,
   CONTAINS_ASSET: new RegExp(`.*(${ASSET.source})`),
+  PASSWORD: {
+    CHARACTERS_LENGTH: /(?=.{8,})/,
+    UPPER_CASE: /(?=.*[A-Z])/,
+    LOWER_CASE: /(?=.*[a-z])/,
+    NUMERIC_CHARACTERS: /(?=.*\d)/,
+    SPECIAL_CHARACTERS: /(?=.*[!@#$%^&*])/,
+  },
 };
 
 export const AllowedSeedRegex = new RegExp(

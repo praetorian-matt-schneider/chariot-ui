@@ -7,7 +7,6 @@ import { Input } from '@/components/form/Input';
 import { Inputs } from '@/components/form/Inputs';
 import { Disclaimer } from '@/sections/signup/Disclaimer';
 import { SignupError } from '@/sections/signup/SignupError';
-import { cn } from '@/utils/classname';
 import { getRoute } from '@/utils/route.util';
 import { generatePathWithSearch } from '@/utils/url.util';
 
@@ -73,46 +72,11 @@ export const ForgotPasswordSteps = () => {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex border-2 border-default">
-        {[
-          {
-            title: 'Step One',
-            description: 'Input Your Email',
-          },
-          {
-            title: 'Step Two',
-            description: 'Reset Password',
-          },
-        ].map((step, currentIndex) => (
-          <div
-            className={cn(
-              'grow px-4 py-2 cursor-pointer',
-              currentIndex > 0 && 'border-0 border-l-2 border-default',
-              currentIndex > stepIndex &&
-                'bg-layer1 text-default-light cursor-not-allowed'
-            )}
-            key={step.title}
-            onClick={() =>
-              currentIndex <= stepIndex ? setStepIndex(currentIndex) : null
-            }
-          >
-            <h6
-              className={cn(
-                'text-xs font-semibold text-brand',
-                stepIndex < currentIndex && 'text-default-light'
-              )}
-            >
-              {step.title}
-            </h6>
-            <p className="text-sm font-bold text-current">{step.description}</p>
-          </div>
-        ))}
-      </div>
-      <hr className="border-t-2 border-default" />
+    <>
+      <i className="text-sm"> Step {stepIndex + 1} of 2</i>
       {stepIndex === 0 ? (
         <form
-          className="flex flex-1 flex-col gap-4 space-y-4 p-2"
+          className="flex flex-1 flex-col gap-4 p-2"
           id="signup"
           onSubmit={e => {
             e.preventDefault();
@@ -214,6 +178,6 @@ export const ForgotPasswordSteps = () => {
           </form>
         </div>
       )}
-    </div>
+    </>
   );
 };

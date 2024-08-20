@@ -169,7 +169,7 @@ export const CollaboratingWith = () => {
           <div>{`${collaborator?.displayName || collaborator?.email}'s Export`}</div>
         }
         icon={<ArrowDownCircleIcon className="size-5" />}
-        size="md"
+        size="lg"
       >
         <div className="flex flex-col space-y-4 p-4">
           <p className="text-xl font-semibold text-gray-700">

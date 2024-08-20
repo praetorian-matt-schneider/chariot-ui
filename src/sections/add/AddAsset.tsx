@@ -75,7 +75,7 @@ export function AddAsset() {
         text: 'Add',
         onClick: handleAddAsset,
       }}
-      size="md"
+      size="lg"
       closeOnOutsideClick={false}
       icon={<AssetsIcon className="size-6 text-default-light" />}
     >
