@@ -188,7 +188,7 @@ const riskIntegrations = [
   Integrations.teams,
 ];
 
-const Chariot: React.FC = () => {
+export const Overview: React.FC = () => {
   const { me, friend } = useAuth();
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -1000,5 +1000,3 @@ export const getCurrentPlan = ({
   }
   return 'freemium';
 };
-
-export default Chariot;

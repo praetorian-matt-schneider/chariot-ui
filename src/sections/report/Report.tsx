@@ -9,7 +9,7 @@ import { useGetAccountDetails } from '@/hooks/useAccounts';
 import { useAggregateCounts } from '@/hooks/useAggregateCounts';
 import { useGetFile } from '@/hooks/useFiles';
 import { useMy } from '@/hooks/useMy';
-import { getReportSections } from '@/sections/overview/constants';
+import { getReportSections } from '@/sections/report/constants';
 import { useAuth } from '@/state/auth';
 import { cn } from '@/utils/classname';
 
