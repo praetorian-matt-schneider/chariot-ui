@@ -40,8 +40,8 @@ const PasswordRequirements = [
     regex: Regex.PASSWORD.NUMERIC_CHARACTERS,
   },
   {
-    label: 'At least 1 special character',
-    regex: Regex.PASSWORD.SPECIAL_CHARACTERS,
+    label: 'At least 1 special character without space',
+    regex: Regex.PASSWORD.SPECIAL_CHARACTERS_WITHOUT_SPACE,
   },
 ];
 
@@ -99,7 +99,7 @@ export const EmailPasswordForm = ({
           <h3 className="mb-2 text-sm font-medium text-default-dark">
             Password Requirements
           </h3>
-          <div className="grid grid-cols-1 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-x-4 lg:grid-cols-2">
             {PasswordRequirements.map(({ label, regex }) => (
               <div
                 className="flex gap-2 text-sm"

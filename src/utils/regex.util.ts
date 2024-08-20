@@ -18,7 +18,7 @@ export const Regex = {
     UPPER_CASE: /(?=.*[A-Z])/,
     LOWER_CASE: /(?=.*[a-z])/,
     NUMERIC_CHARACTERS: /(?=.*\d)/,
-    SPECIAL_CHARACTERS: /(?=.*[!@#$%^&*])/,
+    SPECIAL_CHARACTERS_WITHOUT_SPACE: /^(?=.*[\W_])(?!.*\s).+$/,
   },
 };
 
