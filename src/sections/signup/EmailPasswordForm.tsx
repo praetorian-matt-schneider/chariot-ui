@@ -24,7 +24,7 @@ const UserLambdaValidationException =
 
 const PasswordRequirements = [
   {
-    label: 'At least 8 characters',
+    label: 'At least 16 characters',
     regex: Regex.PASSWORD.CHARACTERS_LENGTH,
   },
   {
