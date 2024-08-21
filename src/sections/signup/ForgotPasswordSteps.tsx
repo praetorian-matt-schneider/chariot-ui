@@ -5,6 +5,10 @@ import { confirmResetPassword, resetPassword } from 'aws-amplify/auth';
 import { Button } from '@/components/Button';
 import { Input } from '@/components/form/Input';
 import { Inputs } from '@/components/form/Inputs';
+import {
+  isPasswordNotValid,
+  PasswordRequirement,
+} from '@/components/ui/PasswordRequirement';
 import { Disclaimer } from '@/sections/signup/Disclaimer';
 import { SignupError } from '@/sections/signup/SignupError';
 import { getRoute } from '@/utils/route.util';
@@ -164,9 +168,13 @@ export const ForgotPasswordSteps = () => {
                 }));
               }}
             />
+            <PasswordRequirement password={forgotPasswordForm.password} />
             <SignupError error={error} />
             <Button
-              disabled={isLoading}
+              disabled={
+                isLoading ||
+                isPasswordNotValid({ password: forgotPasswordForm.password })
+              }
               styleType="primary"
               className="w-full"
               type="submit"

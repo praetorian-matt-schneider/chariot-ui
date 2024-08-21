@@ -1,12 +1,10 @@
 import React, { FormEvent, useEffect, useState } from 'react';
-import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { PlusIcon } from '@heroicons/react/24/solid';
 
 import { Button } from '@/components/Button';
 import { Input } from '@/components/form/Input';
 import { Inputs } from '@/components/form/Inputs';
 import { RisksIcon } from '@/components/icons';
-import { Link } from '@/components/Link';
 import { MarkdownEditor } from '@/components/markdown/MarkdownEditor';
 import { Modal } from '@/components/Modal';
 import { riskSeverityOptions } from '@/components/ui/RiskDropdown';
@@ -15,7 +13,6 @@ import { useCreateRisk } from '@/hooks/useRisks';
 import { parseKeys, TypeSearch } from '@/sections/SearchByType';
 import { useGlobalState } from '@/state/global.state';
 import { RiskCombinedStatus } from '@/types';
-import { getRoute } from '@/utils/route.util';
 
 const DEFAULT_FORM_VALUE = {
   key: '',
@@ -125,22 +122,6 @@ export const AddRisks = () => {
           form: 'addRisk',
         }}
       >
-        <div className="mb-4 flex items-center space-x-2 rounded-md  border border-yellow-500 bg-yellow-50 p-3 text-gray-700">
-          <ExclamationTriangleIcon className="size-5 text-yellow-700" />
-          <span>Looking for integrations?</span>
-          <Link
-            to={{
-              pathname: getRoute(['app', 'overview']),
-              search: `?riskNotificationDrawer=true`,
-            }}
-            onClick={() => {
-              onClose();
-            }}
-            className="font-medium text-blue-600 hover:underline"
-          >
-            Add Integration
-          </Link>
-        </div>
         <div>
           <div className="flex flex-1 flex-col justify-center">
             <form id="addRisk" onSubmit={handleSubmit} className="space-y-4">

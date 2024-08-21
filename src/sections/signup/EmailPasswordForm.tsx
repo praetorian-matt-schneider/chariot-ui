@@ -1,16 +1,17 @@
 import { Dispatch, SetStateAction } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircleIcon } from '@heroicons/react/24/solid';
 
 import { Button } from '@/components/Button';
 import { Input } from '@/components/form/Input';
 import { Inputs } from '@/components/form/Inputs';
+import {
+  isPasswordNotValid,
+  PasswordRequirement,
+} from '@/components/ui/PasswordRequirement';
 import { Disclaimer } from '@/sections/signup/Disclaimer';
 import { SignupError } from '@/sections/signup/SignupError';
 import { SSO } from '@/sections/signup/SSO';
 import { useAuth } from '@/state/auth';
-import { cn } from '@/utils/classname';
-import { Regex } from '@/utils/regex.util';
 import { getRoute } from '@/utils/route.util';
 import { generatePathWithSearch } from '@/utils/url.util';
 
@@ -21,29 +22,6 @@ interface Credentials {
 
 const UserLambdaValidationException =
   'PreSignUp failed with error email validation failed.';
-
-const PasswordRequirements = [
-  {
-    label: 'At least 8 characters',
-    regex: Regex.PASSWORD.CHARACTERS_LENGTH,
-  },
-  {
-    label: 'At least 1 uppercase letter',
-    regex: Regex.PASSWORD.UPPER_CASE,
-  },
-  {
-    label: 'At least 1 lowercase letter',
-    regex: Regex.PASSWORD.LOWER_CASE,
-  },
-  {
-    label: 'At least 1 number',
-    regex: Regex.PASSWORD.NUMERIC_CHARACTERS,
-  },
-  {
-    label: 'At least 1 special character',
-    regex: Regex.PASSWORD.SPECIAL_CHARACTERS,
-  },
-];
 
 export const EmailPasswordForm = ({
   credentials,
@@ -94,40 +72,11 @@ export const EmailPasswordForm = ({
         }}
       />
       {/* Regex satisfactions */}
-      {!isLogin && (
-        <div>
-          <h3 className="mb-2 text-sm font-medium text-default-dark">
-            Password Requirements
-          </h3>
-          <div className="grid grid-cols-1 gap-x-4 lg:grid-cols-2">
-            {PasswordRequirements.map(({ label, regex }) => (
-              <div
-                className="flex gap-2 text-sm"
-                key={label.split(' ').join('_')}
-              >
-                <CheckCircleIcon
-                  className={cn(
-                    'size-5',
-                    regex.exec(password)
-                      ? 'text-green-500'
-                      : 'text-default-light'
-                  )}
-                />
-                <p>{label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {!isLogin && <PasswordRequirement password={password} />}
       {/* Disable continue on Signup till all regex are satisfied */}
       <Button
         disabled={
-          isLogin
-            ? isLoading
-            : isLoading ||
-              [...PasswordRequirements].some(
-                ({ regex }) => !regex.exec(password)
-              )
+          isLogin ? isLoading : isLoading || isPasswordNotValid({ password })
         }
         styleType="primary"
         className="w-full"
