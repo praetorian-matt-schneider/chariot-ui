@@ -8,14 +8,9 @@ import { OTPInput } from '@/sections/signup/OTPInput';
 import { SSO } from '@/sections/signup/SSO';
 import { useAuth } from '@/state/auth';
 
-export const EmailConfirmation = ({
-  username,
-  password,
-}: {
-  username: string;
-  password: string;
-}) => {
-  const { confirmOTP, isLoading } = useAuth();
+export const EmailConfirmation = () => {
+  const { confirmOTP, isLoading, credentials } = useAuth();
+  const { username, password } = credentials;
   const [open, setOpen] = useState(true);
 
   async function resendEmail() {

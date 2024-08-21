@@ -4,6 +4,7 @@ import { Amplify } from 'aws-amplify';
 import {
   confirmSignUp,
   fetchAuthSession,
+  resendSignUpCode,
   signIn,
   signOut,
   signUp,
@@ -42,11 +43,15 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
   const [error, setError] = useState<string>('');
 
+  const [credentials, setCredentials] = useState<{
+    username: string;
+    password: string;
+  }>({ username: '', password: '' });
   const [auth, setAuth] = useStorage<AuthState>(
     { key: StorageKey.AUTH },
     emptyAuth
   );
-
+  const [signupStepIndex, setSignupStepIndex] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
   const [isTokenFetching, setIsTokenFetching] = useState(true);
 
@@ -70,14 +75,25 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     window.location.assign('/app/account');
   }
 
+  async function resendEmail(username: string) {
+    await resendSignUpCode({
+      username,
+    });
+  }
+
   async function login(username: string, password: string) {
     try {
       if (username && password) {
         setIsLoading(true);
-        await signIn({
+        const { isSignedIn, nextStep } = await signIn({
           username,
           password,
         });
+        if (!isSignedIn && nextStep.signInStep === 'CONFIRM_SIGN_UP') {
+          setSignupStepIndex(1);
+          resendEmail(username);
+          navigate(getRoute(['signup']));
+        }
       }
     } catch (error) {
       error instanceof Error && error.message && setError(error.message);
@@ -98,12 +114,17 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           },
         },
       });
-      const { signUpStep } = nextStep;
-      if (!isSignUpComplete && signUpStep === 'CONFIRM_SIGN_UP') {
+      if (!isSignUpComplete && nextStep.signUpStep === 'CONFIRM_SIGN_UP') {
         gotoNext && gotoNext();
       }
     } catch (error) {
-      error instanceof Error && error.message && setError(error.message);
+      if (error instanceof Error && error.message) {
+        if (error.message === 'User already exists') {
+          login(username, password);
+        } else {
+          setError(error.message);
+        }
+      }
     } finally {
       setIsLoading(false);
     }
@@ -190,12 +211,18 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return token;
   }
 
+  function reset() {
+    setCredentials({ username: '', password: '' });
+    setSignupStepIndex(0);
+  }
+
   useEffect(() => {
     const stopListen = Hub.listen('auth', async ({ payload }) => {
       console.log('Hub', payload);
 
       switch (payload.event) {
         case 'signedIn': {
+          reset();
           await fetchUserEmail();
           navigate('/');
 
@@ -255,6 +282,10 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         startImpersonation,
         stopImpersonation,
         setBackendStack,
+        signupStepIndex,
+        setSignupStepIndex,
+        credentials,
+        setCredentials,
       }}
     >
       {children}

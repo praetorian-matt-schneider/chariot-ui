@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { Dispatch, ReactNode, SetStateAction } from 'react';
 
 import { InputsT } from '@/components/form/Inputs';
 
@@ -452,6 +452,12 @@ export interface AuthContextType extends AuthState {
   signup: (username: string, password: string, gotoNext: () => void) => void;
   startImpersonation: (memberId: string, displayName: string) => void;
   stopImpersonation: () => void;
+  signupStepIndex: number;
+  setSignupStepIndex: Dispatch<SetStateAction<number>>;
+  credentials: { username: string; password: string };
+  setCredentials: Dispatch<
+    SetStateAction<{ username: string; password: string }>
+  >;
 }
 
 export interface CognitoAuthStates {

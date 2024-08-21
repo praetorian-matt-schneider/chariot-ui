@@ -27,7 +27,7 @@ export const PageWrapper = ({
   showBack = false,
 }: Props) => {
   const configIniParser = new ConfigIniParser();
-  const { login, setBackendStack, backend } = useAuth();
+  const { login, setBackendStack, backend, setCredentials } = useAuth();
   const navigate = useNavigate();
 
   const processFile = (files: File[]) => {
@@ -97,11 +97,12 @@ export const PageWrapper = ({
             styleType="text"
             className="px-0 py-3 hover:bg-transparent"
             startIcon={<ArrowLeftIcon className="size-5" />}
-            onClick={() =>
+            onClick={() => {
+              setCredentials({ username: '', password: '' });
               navigate(
                 generatePathWithSearch({ pathname: getRoute(['login']) })
-              )
-            }
+              );
+            }}
           >
             Back to Login
           </Button>

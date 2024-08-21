@@ -1,4 +1,3 @@
-import { Dispatch, SetStateAction } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { Button } from '@/components/Button';
@@ -15,28 +14,27 @@ import { useAuth } from '@/state/auth';
 import { getRoute } from '@/utils/route.util';
 import { generatePathWithSearch } from '@/utils/url.util';
 
-interface Credentials {
-  username: string;
-  password: string;
-}
-
 const UserLambdaValidationException =
   'PreSignUp failed with error email validation failed.';
 
 export const EmailPasswordForm = ({
-  credentials,
-  setCredentials,
   onNext,
   isLogin = false,
 }: {
-  credentials: Credentials;
-  setCredentials: Dispatch<SetStateAction<Credentials>>;
   onNext?: () => void;
   isLogin?: boolean;
 }) => {
+  const {
+    isLoading,
+    login,
+    signup,
+    error,
+    setError,
+    credentials,
+    setCredentials,
+  } = useAuth();
   const { username, password } = credentials;
   const navigate = useNavigate();
-  const { isLoading, login, signup, error, setError } = useAuth();
 
   return (
     <form
@@ -113,11 +111,12 @@ export const EmailPasswordForm = ({
             <p className="text-xs">
               {`Need an account ? `}
               <Button
-                onClick={() =>
+                onClick={() => {
+                  setCredentials({ username: '', password: '' });
                   navigate(
                     generatePathWithSearch({ pathname: getRoute(['signup']) })
-                  )
-                }
+                  );
+                }}
                 className="text-xs"
                 styleType="textPrimary"
               >
