@@ -2,8 +2,6 @@ import React from 'react';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 
 import { Dropdown, DropdownMenu } from '@/components/Dropdown';
-import { countDescription } from '@/components/Menu';
-import { useCounts } from '@/hooks/useCounts';
 import { AssetStatus, AssetStatusLabel } from '@/types';
 
 interface AssetStatusDropdownProps {
@@ -15,23 +13,6 @@ const AssetStatusDropdown: React.FC<AssetStatusDropdownProps> = ({
   onChange: onSelect,
   value: statusFilter,
 }) => {
-  const { data, status: countsStatus } = useCounts({ resource: 'asset' });
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, unused-imports/no-unused-vars
-  const { FL, FH, ...restStatus } = data?.status || {};
-  const statusData: { [key: string]: number } = {
-    ...restStatus,
-    [AssetStatus.Frozen]: Object.entries(data?.status || {}).reduce(
-      (acc, [key, value]) => {
-        if (key.startsWith('F')) {
-          return acc + value;
-        }
-
-        return acc;
-      },
-      0
-    ),
-  };
   const name = 'Statuses';
 
   const handleSelect = (selectedRows: AssetStatus[]) => {
@@ -49,41 +30,23 @@ const AssetStatusDropdown: React.FC<AssetStatusDropdownProps> = ({
     statusFilter.length === 0 ||
     statusFilter.length === Object.keys(AssetStatusLabel).length;
 
-  const items: DropdownMenu['items'] =
-    countsStatus === 'pending'
-      ? Array(1)
-          .fill(0)
-          .map(() => {
-            return {
-              label: 'Loading...',
-              className: 'w-60 h-4',
-              value: '',
-              isLoading: true,
-            };
-          })
-      : [
-          {
-            label: `All ${name}`,
-            labelSuffix: Object.values(statusData)
-              .reduce((a, b) => a + b, 0)
-              .toLocaleString(),
-            value: '',
-          },
-          {
-            label: 'Divider',
-            type: 'divider',
-          },
-          ...Object.keys(AssetStatusLabel)
-            .filter(status => status !== AssetStatus.Deleted)
-            .map(status => ({
-              label: AssetStatusLabel[status as AssetStatus],
-              labelSuffix: (
-                statusData[status as AssetStatus] || 0
-              ).toLocaleString(),
-              value: status,
-            })),
-          countDescription,
-        ];
+  const items: DropdownMenu['items'] = [
+    {
+      label: `All ${name}`,
+
+      value: '',
+    },
+    {
+      label: 'Divider',
+      type: 'divider',
+    },
+    ...Object.keys(AssetStatusLabel)
+      .filter(status => status !== AssetStatus.Deleted)
+      .map(status => ({
+        label: AssetStatusLabel[status as AssetStatus],
+        value: status,
+      })),
+  ];
 
   return (
     <Dropdown

@@ -18,7 +18,7 @@ import { RisksIcon } from '@/components/icons';
 import { HorseIcon } from '@/components/icons/Horse.icon';
 import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
 import { getRiskStatusIcon } from '@/components/icons/RiskStatus.icon';
-import { countDescription, MenuItemProps } from '@/components/Menu';
+import { MenuItemProps } from '@/components/Menu';
 import SeverityDropdown from '@/components/SeverityDropdown';
 import SourceDropdown from '@/components/SourceDropdown';
 import StatusDropdown from '@/components/StatusDropdown';
@@ -387,7 +387,6 @@ export function Risks() {
                 items: [
                   {
                     label: 'All Threat Intel',
-                    labelSuffix: risks.length,
                     value: '',
                   },
                   {
@@ -396,13 +395,8 @@ export function Risks() {
                   },
                   {
                     label: 'CISA KEV',
-                    labelSuffix: getFilteredRisksByCISA(
-                      risks,
-                      knownExploitedThreats
-                    ).length,
                     value: 'cisa_kev',
                   },
-                  countDescription,
                 ],
                 onSelect: selectedRows => setIntelFilter(selectedRows),
                 value: intelFilter.length === 0 ? [''] : intelFilter,

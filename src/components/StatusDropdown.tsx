@@ -2,8 +2,6 @@ import React from 'react';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 
 import { Dropdown } from '@/components/Dropdown';
-import { countDescription } from '@/components/Menu';
-import { useCounts } from '@/hooks/useCounts';
 import { RiskStatus, RiskStatusLabel } from '@/types';
 
 interface StatusDropdownProps {
@@ -15,52 +13,11 @@ const StatusDropdown: React.FC<StatusDropdownProps> = ({
   onChange: onSelect,
   value: statusFilter,
 }) => {
-  const { data } = useCounts({ resource: 'risk' });
-  const statusData: { [key: string]: number } = data?.status || {};
   const name = 'Statuses';
 
   const handleSelect = (selectedRows: RiskStatus[]) => {
     onSelect(selectedRows);
   };
-
-  // Compute the counts for each status
-  const getStatusCounts = (): { [key in RiskStatus]: number } => {
-    const counts: { [key in RiskStatus]: number } = {
-      T: 0,
-      O: 0,
-      C: 0,
-      CR: 0,
-      CF: 0,
-      CS: 0,
-      M: 0,
-    };
-
-    Object.keys(statusData).forEach(key => {
-      const baseStatus = key[0];
-      const subStatus = key.length > 1 ? key.slice(2) : '';
-      const count = statusData[key];
-
-      if (baseStatus === 'M') {
-        counts.M += count;
-      } else if (baseStatus === 'T') {
-        counts.T += count;
-      } else if (baseStatus === 'O') {
-        counts.O += count;
-      } else if (baseStatus === 'C') {
-        if (subStatus === '') {
-          counts.C += count;
-        } else if (subStatus === 'R') {
-          counts.CR += count;
-        } else if (subStatus === 'F') {
-          counts.CF += count;
-        }
-      }
-    });
-
-    return counts;
-  };
-
-  const statusCounts = getStatusCounts();
 
   return (
     <Dropdown
@@ -76,9 +33,6 @@ const StatusDropdown: React.FC<StatusDropdownProps> = ({
         items: [
           {
             label: `All ${name}`,
-            labelSuffix: Object.values(statusCounts)
-              .reduce((a, b) => a + b, 0)
-              .toLocaleString(),
             value: '',
           },
           {
@@ -87,12 +41,8 @@ const StatusDropdown: React.FC<StatusDropdownProps> = ({
           },
           ...Object.keys(RiskStatusLabel).map(status => ({
             label: RiskStatusLabel[status as RiskStatus],
-            labelSuffix: (
-              statusCounts[status as RiskStatus] || 0
-            ).toLocaleString(),
             value: status,
           })),
-          countDescription,
         ],
         onSelect: value => handleSelect(value as RiskStatus[]),
         value: statusFilter.length === 0 ? [''] : statusFilter,

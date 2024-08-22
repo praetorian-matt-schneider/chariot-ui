@@ -371,9 +371,3 @@ const CheckboxIcon = ({ isChecked }: { isChecked: boolean }) => {
     <StopIcon className={className} />
   );
 };
-
-export const countDescription: MenuItemProps = {
-  type: 'label',
-  label: 'Counts reflect total known items.',
-  className: 'text-center -translate-y-4 h-0',
-};

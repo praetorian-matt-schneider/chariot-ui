@@ -152,9 +152,6 @@ export const AttributeFilter = (props: Props) => {
                                 {value}
                               </span>
                             </div>
-                            <span className="text-gray-500">
-                              ({nestedResults[attribute][value].length})
-                            </span>
                           </div>
                         </li>
                       )

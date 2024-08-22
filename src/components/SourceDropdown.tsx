@@ -2,7 +2,6 @@ import React from 'react';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 
 import { Dropdown, DropdownMenu } from '@/components/Dropdown';
-import { countDescription } from '@/components/Menu';
 import { useCounts } from '@/hooks/useCounts';
 
 interface SourceDropdownProps {
@@ -62,9 +61,6 @@ const SourceDropdown: React.FC<SourceDropdownProps> = ({
       : [
           {
             label: `All ${name}`,
-            labelSuffix: Object.values(sourceData)
-              ?.reduce((a, b) => a + b, 0)
-              ?.toLocaleString(),
             value: '',
           },
           {
@@ -73,10 +69,8 @@ const SourceDropdown: React.FC<SourceDropdownProps> = ({
           },
           ...Object.keys(sourceData).map(item => ({
             label: override(item),
-            labelSuffix: sourceData[item].toLocaleString(),
             value: item,
           })),
-          countDescription,
         ];
 
   return (
