@@ -91,53 +91,32 @@ export const EmailPasswordForm = ({
         }
       />
       {isLogin && (
-        <div>
-          <div className="flex flex-col justify-between md:flex-row">
-            <div className="py-3 text-xs">
-              <Button
-                onClick={() =>
-                  navigate(
-                    generatePathWithSearch({
-                      pathname: getRoute(['forgot-password']),
-                    })
-                  )
-                }
-                className="p-0 text-xs"
-                styleType="textPrimary"
-              >
-                Forgot Password ?
-              </Button>
-            </div>
-            <p className="text-xs">
-              {`Need an account ? `}
-              <Button
-                onClick={() => {
-                  setCredentials({ username: '', password: '' });
-                  navigate(
-                    generatePathWithSearch({ pathname: getRoute(['signup']) })
-                  );
-                }}
-                className="text-xs"
-                styleType="textPrimary"
-              >
-                Sign Up
-              </Button>
-            </p>
-          </div>
-          <p className="text-xs">
-            {`SSO user ? `}
-            <Button
-              onClick={() =>
-                navigate(
-                  generatePathWithSearch({ pathname: getRoute(['login-sso']) })
-                )
-              }
-              className="text-xs"
-              styleType="textPrimary"
-            >
-              Sign In
-            </Button>
-          </p>
+        <div className="flex justify-between">
+          <Button
+            onClick={() => {
+              setCredentials({ username: '', password: '' });
+              navigate(
+                generatePathWithSearch({ pathname: getRoute(['signup']) })
+              );
+            }}
+            className="text-md p-0"
+            styleType="textPrimary"
+          >
+            Sign Up
+          </Button>
+          <Button
+            onClick={() =>
+              navigate(
+                generatePathWithSearch({
+                  pathname: getRoute(['forgot-password']),
+                })
+              )
+            }
+            className="text-md p-0"
+            styleType="textPrimary"
+          >
+            Forgot Password?
+          </Button>
         </div>
       )}
       <SSO />

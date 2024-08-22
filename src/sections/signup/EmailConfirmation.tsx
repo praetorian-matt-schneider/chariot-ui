@@ -38,10 +38,10 @@ export const EmailConfirmation = () => {
             Re-enter Code
           </Button>
         </p>
-        <ul className="mt-4 list-disc">
+        <ul className="mt-4 list-inside list-disc">
           <li>{`Can't find it? Don't forget to check your spam box.`}</li>
           <li>
-            {`If it's not received within 10 minutes, feel free to `}
+            {`If it's not received within 10 minutes, feel free to  `}
             <Button
               className="inline p-0"
               styleType="textPrimary"
@@ -72,6 +72,7 @@ export const EmailConfirmation = () => {
             Please copy & paste the six-digit code emailed to your business
             address.
           </p>
+
           <OTPInput onSubmit={confirmOtpFn} />
           <Button
             disabled={isLoading}
@@ -79,6 +80,14 @@ export const EmailConfirmation = () => {
             styleType="primary"
           >
             Submit
+          </Button>
+
+          <Button
+            disabled={isLoading}
+            styleType="textPrimary"
+            onClick={resendEmail}
+          >
+            Re-send Code
           </Button>
         </div>
       </ModalWrapper>

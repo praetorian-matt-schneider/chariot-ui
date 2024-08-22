@@ -1,11 +1,16 @@
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { signInWithRedirect } from 'aws-amplify/auth';
 import { Hub } from 'aws-amplify/utils';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/Button';
+import { getRoute } from '@/utils/route.util';
+import { generatePathWithSearch } from '@/utils/url.util';
 
 export const SSO = () => {
+  const navigate = useNavigate();
+
   useEffect(() => {
     const unsubscribe = Hub.listen('auth', ({ payload }) => {
       if (payload.event === 'signInWithRedirect_failure') {
@@ -35,6 +40,17 @@ export const SSO = () => {
           className="mr-2 size-5"
         />
         <span>Sign in with Google</span>
+      </Button>
+      <Button
+        className="w-full"
+        styleType="secondary"
+        onClick={() =>
+          navigate(
+            generatePathWithSearch({ pathname: getRoute(['login-sso']) })
+          )
+        }
+      >
+        Sign in with SSO
       </Button>
     </>
   );

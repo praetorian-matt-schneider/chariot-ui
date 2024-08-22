@@ -27,7 +27,13 @@ export const PageWrapper = ({
   showBack = false,
 }: Props) => {
   const configIniParser = new ConfigIniParser();
-  const { login, setBackendStack, backend, setCredentials } = useAuth();
+  const {
+    login,
+    setBackendStack,
+    backend,
+    setCredentials,
+    setSignupStepIndex,
+  } = useAuth();
   const navigate = useNavigate();
 
   const processFile = (files: File[]) => {
@@ -99,6 +105,7 @@ export const PageWrapper = ({
             startIcon={<ArrowLeftIcon className="size-5" />}
             onClick={() => {
               setCredentials({ username: '', password: '' });
+              setSignupStepIndex(0);
               navigate(
                 generatePathWithSearch({ pathname: getRoute(['login']) })
               );

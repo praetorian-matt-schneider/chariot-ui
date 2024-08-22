@@ -108,20 +108,18 @@ export const ForgotPasswordSteps = () => {
             Continue
           </Button>
           <SignupError error={error} />
-          <p className="text-xs">
-            {`Need an account ? `}
-            <Button
-              onClick={() =>
-                navigate(
-                  generatePathWithSearch({ pathname: getRoute(['signup']) })
-                )
-              }
-              className="text-xs"
-              styleType="textPrimary"
-            >
-              Sign Up
-            </Button>
-          </p>
+
+          <Button
+            onClick={() => {
+              navigate(
+                generatePathWithSearch({ pathname: getRoute(['signup']) })
+              );
+            }}
+            className="text-md mr-auto p-0"
+            styleType="textPrimary"
+          >
+            Sign Up
+          </Button>
           <Disclaimer />
         </form>
       ) : (
