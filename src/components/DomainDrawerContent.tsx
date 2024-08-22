@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { useAuth } from '@/state/auth';
-import { AssetStatus, AssetStatusLabel } from '@/types';
+import { AssetStatus } from '@/types';
 
 interface DomainDrawerContentProps {
   domain: string;
@@ -18,11 +18,10 @@ export const DomainDrawerContent: React.FC<DomainDrawerContentProps> = ({
   const domainToDiplay = domain ?? emailDomain;
 
   const [newDomain, setNewDomain] = useState<string>(domainToDiplay);
-  const [scanOption, setScanOption] = useState<AssetStatus>(AssetStatus.Active); // Default to risk scanning
 
   useEffect(() => {
-    onChange(newDomain, scanOption);
-  }, [newDomain, scanOption]);
+    onChange(newDomain, AssetStatus.Active);
+  }, [newDomain]);
 
   return (
     <div className="mx-12">
@@ -51,36 +50,6 @@ export const DomainDrawerContent: React.FC<DomainDrawerContentProps> = ({
           value={newDomain}
           onChange={e => setNewDomain(e.target.value)}
         />
-      </div>
-
-      <div className="mt-8">
-        <h4 className="text-md font-medium">Choose your scanning option:</h4>
-        <div className="mt-3 space-y-3">
-          <label className="flex items-center space-x-3">
-            <input
-              type="radio"
-              className="form-radio"
-              name="scanOption"
-              value="discovery"
-              checked={scanOption === AssetStatus.ActiveLow}
-              onChange={() => setScanOption(AssetStatus.ActiveLow)}
-            />
-            <span>
-              {AssetStatusLabel[AssetStatus.ActiveLow]} (enumerate assets)
-            </span>
-          </label>
-          <label className="flex items-center space-x-3">
-            <input
-              type="radio"
-              className="form-radio"
-              name="scanOption"
-              value="risk"
-              checked={scanOption === AssetStatus.Active}
-              onChange={() => setScanOption(AssetStatus.Active)}
-            />
-            <span>{AssetStatusLabel[AssetStatus.Active]} (preferred)</span>
-          </label>
-        </div>
       </div>
     </div>
   );

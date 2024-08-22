@@ -10,19 +10,15 @@ const fetchIntegrationCounts = async (
   integration: Account
 ) => {
   try {
+    const sourceKey = `#source##asset#${integration.member}#${integration.value}#asset`;
     const { data } = (await axios.get('/my/count', {
       params: {
-        key: `#attribute#source##asset#${integration.member}`,
+        key: `#attribute${sourceKey}`,
       },
     })) as { data: Statistics };
 
     // Extract the asset count from the `attributes` field with the new key structure
-    const assetCount = data.attributes
-      ? data.attributes[
-          `#source##asset#${integration.member}#${integration.value ?? integration.member}#asset`
-        ] || 0
-      : 0;
-
+    const assetCount = data.attributes ? data.attributes[sourceKey] || 0 : 0;
     return assetCount;
   } catch (error) {
     console.error(`Failed to fetch counts for ${integration.member}:`, error);

@@ -28,6 +28,7 @@
     --text-header-dark: theme('colors.gray.300');
 
     --border-header: theme('colors.gray.600');
+    --border-header-dark: #323452;
 
     /*Default*/
     --default-light: theme('colors.gray.100');

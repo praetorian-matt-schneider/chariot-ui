@@ -2,6 +2,8 @@ import { Dispatch, ReactNode, SetStateAction } from 'react';
 
 import { InputsT } from '@/components/form/Inputs';
 
+export const FREEMIUM_ASSETS_LIMIT = 999;
+
 export enum RiskScanMessage {
   Stop = 'Risk scanning will stop.',
   Start = 'Risk scanning will start automatically.',

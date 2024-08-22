@@ -1,12 +1,15 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   ArrowPathIcon,
   BellAlertIcon,
   ExclamationTriangleIcon as ExclamationTriangleIconOutline,
   MagnifyingGlassIcon,
+  PencilIcon,
   PencilSquareIcon,
   PlusCircleIcon,
   XCircleIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import {
   CheckCircleIcon,
@@ -26,6 +29,7 @@ import { Modal } from '@/components/Modal';
 import { Table } from '@/components/table/Table';
 import { Tooltip } from '@/components/Tooltip';
 import { Body } from '@/components/ui/Body';
+import UpgradeMenu from '@/components/UpgradeMenu';
 import { useMy } from '@/hooks';
 import { useGetAccountDetails, useModifyAccount } from '@/hooks/useAccounts';
 import { useCreateAsset } from '@/hooks/useAssets';
@@ -51,10 +55,12 @@ import {
 import SetupModal from '@/sections/SetupModal';
 import { useAuth } from '@/state/auth';
 import { useGlobalState } from '@/state/global.state';
-import { Account, AssetStatus, Plan } from '@/types';
+import { Account, AssetStatus, FREEMIUM_ASSETS_LIMIT, Plan } from '@/types';
 import { Job, JobStatus, JobStatusLabel } from '@/types';
 import { cn } from '@/utils/classname';
+import { getRoute } from '@/utils/route.util';
 import { useStorage } from '@/utils/storage/useStorage.util';
+import { generatePathWithSearch } from '@/utils/url.util';
 
 const getStatusIcon = (status: string) => {
   switch (status) {
@@ -132,6 +138,7 @@ const getJobsStatus = (job?: JobI) => {
 
 export const Overview: React.FC = () => {
   const { me, friend } = useAuth();
+  const navigate = useNavigate();
 
   const [isAttackSurfaceDrawerOpen, setIsAttackSurfaceDrawerOpen] = useStorage(
     { queryKey: 'attackSurfaceDrawer' },
@@ -143,6 +150,7 @@ export const Overview: React.FC = () => {
   const [isDomainDrawerOpen, setIsDomainDrawerOpen] = useState(false);
   const [disconnectIntegrationKey, setDisconnectIntegrationKey] =
     useState<string>('');
+  const [isUpgradePlanOpen, setIsUpgradePlanOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [setupIntegration, setSetupIntegration] = useState<Account>();
   const [updatedRootDomain, setUpdatedRootDomain] = useState<{
@@ -211,7 +219,7 @@ export const Overview: React.FC = () => {
   const displayName = useGetAccountDetails(accounts).name || friend || me;
 
   const disconnectIntegration = useMemo(() => {
-    return connectedIntegrations.find(
+    return [...connectedIntegrations, ...requiresSetupIntegrations].find(
       integration => integration.key === disconnectIntegrationKey
     );
   }, [stringifiedConnectedIntegrations, disconnectIntegrationKey]);
@@ -231,10 +239,11 @@ export const Overview: React.FC = () => {
   const counts = useMemo(() => {
     return integrationCounts.map((result, index) => ({
       member: connectedIntegrations[index].member,
+      value: connectedIntegrations[index].value,
       count: result.data,
     }));
   }, [stringifiedConnectedIntegrations, JSON.stringify(integrationCounts)]);
-  const totalAssets = useMemo(() => {
+  const usedAssets = useMemo(() => {
     return assetCount
       ? Object.values(assetCount?.status || {}).reduce(
           (acc, val) => acc + val,
@@ -333,17 +342,18 @@ export const Overview: React.FC = () => {
               </div>
               <AssetUsage
                 currentPlan={currentPlan}
-                used={totalAssets}
+                used={usedAssets}
                 assetCountStatus={assetCountStatus}
-                total={999}
+                total={FREEMIUM_ASSETS_LIMIT}
+                setIsUpgradePlanOpen={setIsUpgradePlanOpen}
               />
             </div>
           </div>
         </div>
       </RenderHeaderExtraContentSection>
       <div className="flex flex-col space-y-4">
-        <div className="flex w-full flex-row text-sm font-semibold text-layer0 underline">
-          <div className="flex-1 rounded-l-sm border border-gray-600 bg-header p-2 text-center">
+        <div className="flex w-full flex-row overflow-hidden rounded-lg border-2 border-header-dark bg-header text-sm font-semibold text-layer0 underline [&_div:not(:last-child)]:border-r-2 [&_div:not(:last-child)]:border-header-dark">
+          <div className="flex-1 p-2 text-center">
             <button
               onClick={() => setIsDomainDrawerOpen(true)}
               className="mx-auto flex flex-row items-center justify-center space-x-1 text-center underline"
@@ -354,13 +364,22 @@ export const Overview: React.FC = () => {
               </Loader>
             </button>
           </div>
-          <div className="flex-1 rounded-r-sm border border-gray-600 bg-header p-2 text-center">
+          <div className="flex-1 p-2 text-center">
             <button
               onClick={() => setIsRiskNotificationsDrawerOpen(true)}
               className="underline"
             >
               <BellAlertIcon className="mr-1 inline size-5 text-layer0" />
               Manage Risk Notifications
+            </button>
+          </div>
+          <div className="flex-1 p-2 text-center">
+            <button
+              onClick={() => setIsUpgradePlanOpen(true)}
+              className="underline"
+            >
+              <PencilIcon className="mr-1 inline size-5 text-layer0" />
+              Manage Account Plan
             </button>
           </div>
         </div>
@@ -377,9 +396,14 @@ export const Overview: React.FC = () => {
           onRiskNotificationsClick={() =>
             setIsRiskNotificationsDrawerOpen(true)
           }
+          total={FREEMIUM_ASSETS_LIMIT}
+          isFreemiumMaxed={
+            currentPlan === 'freemium' &&
+            FREEMIUM_ASSETS_LIMIT - usedAssets <= 0
+          }
         />
         <main className="mt-6 w-full">
-          <div className="rounded-sm border border-gray-600 bg-header shadow-md">
+          <div className="overflow-hidden rounded-lg border-2 border-header-dark bg-header shadow-md">
             <div className="flex w-full p-8">
               <div className="flex flex-1 flex-col">
                 <p className="text-xl font-bold text-white">Attack Surface</p>
@@ -394,19 +418,17 @@ export const Overview: React.FC = () => {
               </div>
               <Button
                 styleType="primary"
-                startIcon={<PlusIcon />}
+                startIcon={<PlusIcon className="size-4" />}
                 onClick={() => setIsAttackSurfaceDrawerOpen(true)}
-                className="rounded-sm py-1"
-                style={{
-                  padding: '0rem 1.5rem',
-                }}
+                className="h-10 rounded-md py-0"
               >
                 Add Attack Surface
               </Button>
             </div>
             <div className="overflow-x-auto">
               <Table
-                tableClassName="bg-header border-0 [&_thead_tr]:bg-header [&_tr_td]:text-layer0 [&_td_div]:border-1 [&_td_div]:border-gray-600 [&_th_div]:border-0"
+                tableClassName="bg-header border-0 [&_thead_tr]:bg-header [&_tbody_tr:nth-child(odd)]:bg-header-dark [&_tr_td]:text-layer0 [&__tr_td_div:first]:border-t-4 [&_td_div]:border-header-dark [&_th_div]:border-0"
+                contentClassName="px-0"
                 name="attack-surface"
                 status="success"
                 isTableView={false}
@@ -450,9 +472,41 @@ export const Overview: React.FC = () => {
                         >
                           {riskIntegrations.find(
                             integration => row.surface === integration.id
-                          )
-                            ? 'Risk Notification'
-                            : `${row.discoveredAssets.toLocaleString()} Assets`}
+                          ) ? (
+                            'Risk Notification'
+                          ) : (
+                            <div
+                              className={cn(
+                                'flex items-center justify-between gap-4',
+                                row.status === 'success' &&
+                                  Number(row.discoveredAssets) > 0
+                                  ? 'cursor-pointer text-white'
+                                  : 'pointer-events-none'
+                              )}
+                              onClick={() => {
+                                navigate(
+                                  generatePathWithSearch({
+                                    pathname: getRoute(['app', 'assets']),
+                                    appendSearch: [
+                                      [
+                                        'assetFilters',
+                                        JSON.stringify({
+                                          search: '',
+                                          attributes: [
+                                            `source##asset#${row.surface}#${row.identifier}`,
+                                          ],
+                                          priorities: [],
+                                          sources: [],
+                                        }),
+                                      ],
+                                    ],
+                                  })
+                                );
+                              }}
+                            >
+                              <span>{`${row.discoveredAssets.toLocaleString()} Assets`}</span>
+                            </div>
+                          )}
                         </Loader>
                       </div>
                     ),
@@ -478,12 +532,26 @@ export const Overview: React.FC = () => {
                           </Tooltip>
                         )}
                         {row.actions === 'Setup' && (
-                          <button
-                            onClick={() => setSetupIntegration(row.account)}
-                            className="w-[100px] rounded-sm bg-[#FFD700] px-3 py-1 text-sm font-medium text-black"
-                          >
-                            Setup
-                          </button>
+                          <div className="flex items-center gap-4">
+                            <button
+                              onClick={() => setSetupIntegration(row.account)}
+                              className="w-[100px] rounded-sm bg-[#FFD700] px-3 py-1 text-sm font-medium text-black"
+                            >
+                              Setup
+                            </button>
+                            <Tooltip title="Disconnect" placement="right">
+                              <Button
+                                className="p-0"
+                                onClick={() => {
+                                  setDisconnectIntegrationKey(row.key);
+                                }}
+                                startIcon={
+                                  <XMarkIcon className="size-4 text-layer0" />
+                                }
+                                styleType="textPrimary"
+                              />
+                            </Tooltip>
+                          </div>
                         )}
                         {row.actions === 'Waitlist' && (
                           <p className="min-w-24 font-medium italic text-gray-500">
@@ -539,8 +607,11 @@ export const Overview: React.FC = () => {
                     surface: integration.member,
                     identifier: integration.value ?? '[Redacted]',
                     discoveredAssets:
-                      counts.find(count => count.member === integration.member)
-                        ?.count || 0,
+                      counts.find(
+                        count =>
+                          count.member === integration.member &&
+                          count.value === integration.value
+                      )?.count || 0,
                     discoveredAssetsStatus: assetCountStatus,
                     actions: 'Disconnect',
                     connected: true,
@@ -567,6 +638,15 @@ export const Overview: React.FC = () => {
             </div>
           </div>
         </main>
+        {isUpgradePlanOpen && (
+          <UpgradeMenu
+            open={isUpgradePlanOpen}
+            onClose={() => setIsUpgradePlanOpen(false)}
+            currentPlan={currentPlan}
+            used={usedAssets}
+            total={FREEMIUM_ASSETS_LIMIT}
+          />
+        )}
         <Modal
           icon={
             <ExclamationTriangleIconOutline className="size-7 text-yellow-600" />

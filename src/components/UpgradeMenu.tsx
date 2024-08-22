@@ -1,7 +1,13 @@
-import React, { useEffect, useRef } from 'react';
-import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import React from 'react';
+import {
+  ExclamationTriangleIcon,
+  XMarkIcon,
+} from '@heroicons/react/24/outline';
+import { Layers } from 'lucide-react';
 
 import { Button } from '@/components/Button';
+import { ManagedPlanIcon } from '@/components/icons/ManagedPlan.icon';
+import { ModalWrapper } from '@/components/Modal';
 import { useModifyAccount } from '@/hooks';
 import { useUpgrade } from '@/hooks/useUpgrade';
 import { Plan } from '@/types';
@@ -21,93 +27,98 @@ const UpgradeMenu: React.FC<Props> = ({
   total,
   onClose,
 }) => {
-  const ref = useRef<HTMLDivElement>(null);
   const { mutate: upgrade, status: upgradeStatus } = useModifyAccount('link');
   const { mutate: startFreeTrial } = useUpgrade();
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
-        if ((event.target as HTMLElement).id !== 'upgrade-plan') {
-          onClose();
-        }
-      }
-    };
-
-    const handleEscapeKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('keydown', handleEscapeKey);
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleEscapeKey);
-    };
-  }, [onClose]);
-
   return (
-    <div
-      ref={ref}
-      className={`absolute right-0 top-12 z-50 rounded-md border border-gray-500 bg-header p-4 shadow-2xl transition-all duration-200 ease-out ${
-        open
-          ? 'pointer-events-auto translate-y-0 opacity-100'
-          : 'pointer-events-none -translate-y-5 opacity-0'
-      }`}
+    <ModalWrapper
+      className="overflow-hidden rounded-md border-[#323452]"
+      open={open}
+      onClose={onClose}
     >
-      <div className="mb-4 flex items-center justify-between space-x-2">
-        <div className="">
-          <p className="flex space-x-1 text-sm">
-            <span className="font-normal text-gray-400">Current Plan:</span>
-            <span className="font-medium capitalize text-white">
-              {currentPlan}
-            </span>
-          </p>
+      {/* Title */}
+      <div className="text-md flex items-center gap-4 bg-[#323452] py-4 pl-8 pr-4 text-layer0">
+        {used >= total && currentPlan === 'freemium' && (
+          <ExclamationTriangleIcon className="size-10 text-yellow-500" />
+        )}
+        <div className="flex-1 text-sm font-light">
+          <div>
+            Current Plan:{' '}
+            <span className="font-semibold capitalize">{currentPlan}</span>
+          </div>
           {currentPlan === 'freemium' && (
-            <p className="text-xs text-gray-400">
-              Used {used?.toLocaleString()} of {total?.toLocaleString()}{' '}
-              available assets
-            </p>
+            <p>{`Used ${used} of ${total} available assets`}</p>
           )}
         </div>
-        {used >= total && currentPlan === 'freemium' && (
-          <ExclamationTriangleIcon className="size-8 text-yellow-500" />
-        )}
+        <Button aria-label="CloseIcon" onClick={onClose} styleType="none">
+          <XMarkIcon className="size-6" />
+        </Button>
       </div>
-      <div className="flex space-x-4">
-        {/* Unmanaged Plan */}
+      {/* Content */}
+      <div className="flex flex-col gap-8 bg-header p-8 text-layer0">
         {currentPlan === 'freemium' && (
-          <div className="relative w-48 rounded-md bg-header-dark p-4 text-white shadow-md">
-            <h3 className="text-lg font-semibold">Unmanaged</h3>
-            <p className="text-sm text-gray-400">Unlimited assets</p>
-            <Button
-              className="mt-4 w-full bg-brand text-white"
-              onClick={() => upgrade({ username: 'license', config: {} })}
-              disabled={upgradeStatus === 'pending'}
-            >
-              Upgrade
-            </Button>
-          </div>
+          <>
+            {/* Unmanaged Plan */}
+            <UpgradePlanRow
+              icon={<Layers className="size-8" />}
+              title="Unmanaged"
+              description="Unlimited Access"
+              button={
+                <Button
+                  styleType="primary"
+                  className="h-8"
+                  onClick={() => upgrade({ username: 'license', config: {} })}
+                  disabled={upgradeStatus === 'pending'}
+                >
+                  Upgrade
+                </Button>
+              }
+            />
+            <hr className="border-gray-700" />
+          </>
         )}
-
         {/* Managed Plan */}
-        <div className="relative w-48 rounded-md bg-header-dark p-4 text-white shadow-md">
-          <h3 className="text-lg font-semibold">Managed</h3>
-          <p className="text-sm text-gray-400">Go hands-free.</p>
-          <Button
-            className="mt-4 w-full bg-brand text-white"
-            onClick={() => {
-              onClose();
-              startFreeTrial();
-            }}
-          >
-            Free Trial
-          </Button>
-        </div>
+        <UpgradePlanRow
+          title="Managed"
+          description="MSP Support Included"
+          icon={<ManagedPlanIcon className="size-8 text-brand" />}
+          button={
+            <Button
+              styleType="primary"
+              className="h-8"
+              onClick={() => {
+                onClose();
+                startFreeTrial();
+              }}
+            >
+              Free Trial
+            </Button>
+          }
+        />
       </div>
+    </ModalWrapper>
+  );
+};
+
+const UpgradePlanRow = ({
+  title,
+  description,
+  button,
+  icon,
+}: {
+  title: string;
+  description: string;
+  button: React.ReactElement;
+  icon: React.ReactElement;
+}) => {
+  return (
+    <div className="flex items-center gap-4">
+      <div className="rounded bg-[#5F47B740] p-2 text-brand">{icon}</div>
+      <div className="flex-1 text-sm">
+        <h3 className="font-semibold">{title}</h3>
+        <p className="text-gray-400">{description}</p>
+      </div>
+      {button}
     </div>
   );
 };

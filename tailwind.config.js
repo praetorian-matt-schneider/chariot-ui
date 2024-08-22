@@ -130,6 +130,9 @@ module.exports = {
       header: {
         DEFAULT: addAlphaValue('var(--border-header)'),
       },
+      'header-dark': {
+        DEFAULT: addAlphaValue('var(--border-header-dark)'),
+      },
       default: {
         DEFAULT: addAlphaValue('var(--border-default)'),
       },

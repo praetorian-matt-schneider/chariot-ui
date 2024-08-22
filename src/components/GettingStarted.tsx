@@ -1,9 +1,14 @@
-import { useEffect } from 'react';
-import { CheckIcon } from '@heroicons/react/24/outline';
-import { Bell, Cloud, Globe } from 'lucide-react';
+import { ExclamationTriangleIcon, PlusIcon } from '@heroicons/react/24/outline';
+import {
+  BellIcon,
+  CheckCircleIcon,
+  CloudIcon,
+  DocumentPlusIcon,
+  GlobeAltIcon,
+} from '@heroicons/react/24/solid';
 
-import { cn } from '@/utils/classname';
-import { useStorage } from '@/utils/storage/useStorage.util';
+import { Button } from '@/components/Button';
+import { useModifyAccount } from '@/hooks';
 
 export const GettingStartedStep: React.FC<{
   title: string;
@@ -14,24 +19,22 @@ export const GettingStartedStep: React.FC<{
 }> = ({ title, description, isCompleted, icon, onClick }) => {
   return (
     <div
-      className="mx-2 flex flex-1 cursor-pointer flex-col items-center rounded-lg bg-header-dark p-4 shadow-md"
+      className="flex flex-1 cursor-pointer flex-col items-center rounded-lg border-2 border-header-dark p-4 pt-0"
       onClick={onClick}
     >
       <div
-        className={cn(
-          'flex items-center justify-center rounded-full text-white mb-4',
-          'h-14 w-14 text-lg font-bold',
-          isCompleted
-            ? 'bg-green-500'
-            : title?.toLowerCase().includes('root domain')
-              ? 'bg-blue-500'
-              : 'bg-gray-700'
-        )}
+        className={
+          'flex size-14 items-center justify-center text-lg font-bold text-header'
+        }
       >
-        {isCompleted ? <CheckIcon className="size-8" /> : icon}
+        {isCompleted ? (
+          <CheckCircleIcon className="size-8 text-green-500" />
+        ) : (
+          icon
+        )}
       </div>
-      <h3 className="mb-2 text-lg font-semibold text-white">{title}</h3>
-      <p className="text-center text-sm text-gray-300">{description}</p>
+      <h3 className="mb-2 text-lg font-semibold text-header">{title}</h3>
+      <p className="text-center text-xs text-default-light">{description}</p>
     </div>
   );
 };
@@ -45,79 +48,90 @@ export const GettingStarted: React.FC<{
   onRootDomainClick: () => void;
   onAttackSurfaceClick: () => void;
   onRiskNotificationsClick: () => void;
+  total: number;
+  isFreemiumMaxed: boolean;
 }> = ({
   completedSteps,
   onRootDomainClick,
   onAttackSurfaceClick,
   onRiskNotificationsClick,
+  total,
+  isFreemiumMaxed,
 }) => {
-  const [isDismissed, setIsDismissed] = useStorage<boolean>(
-    { key: 'gettingStartedDismissed' },
-    false
-  );
-
   const allStepsCompleted =
     completedSteps.rootDomain &&
     completedSteps.attackSurface &&
     completedSteps.riskNotifications;
 
-  // Reopen the Getting Started section if any step becomes unconfigured
-  useEffect(() => {
-    if (!allStepsCompleted && isDismissed) {
-      setIsDismissed(false);
-    }
-  }, [completedSteps, allStepsCompleted, isDismissed, setIsDismissed]);
-
-  const handleDismiss = () => {
-    setIsDismissed(true);
-  };
-
-  if (isDismissed) return null;
+  const { mutate: upgrade, status: upgradeStatus } = useModifyAccount('link');
 
   return (
-    <div className="mt-6 rounded-sm border border-gray-600 bg-header shadow-md">
-      <div className="w-full rounded-sm bg-header p-6 shadow-lg">
-        {allStepsCompleted ? (
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-white">
-              Attack Surface Configured
+    <div className="mt-6 rounded-sm">
+      <div className="w-full rounded-sm">
+        {isFreemiumMaxed && (
+          <div className="m-auto flex w-2/5 flex-col items-center rounded-lg border-2 border-header-dark p-8 text-center">
+            <ExclamationTriangleIcon className="mb-2 size-12 text-yellow-500" />
+            <h2 className="text-xl font-bold text-header-light">
+              Uh oh, You are out of Space
             </h2>
-            <p className="mb-6 text-sm text-gray-500">
-              All caught up! Your attack surface is properly configured.
+            <p className="text-sm text-default-light">
+              {`Your current plan only allows up to ${total} assets. But don't worry, we got a plan for you.`}
             </p>
-            <button
-              onClick={handleDismiss}
-              className="rounded-sm bg-green-600 px-4 py-2 text-white transition-colors hover:bg-green-700"
+            <Button
+              styleType="primary"
+              onClick={() => upgrade({ username: 'license', config: {} })}
+              disabled={upgradeStatus === 'pending'}
+              className="mt-6 h-10 rounded-md py-0"
             >
-              Dismiss
-            </button>
+              Upgrade Plan
+            </Button>
           </div>
-        ) : (
+        )}
+        {allStepsCompleted && !isFreemiumMaxed && (
+          <div className="m-auto flex w-2/5 flex-col items-center rounded-lg border-4 border-dashed border-header-dark p-8">
+            <DocumentPlusIcon className="mb-2 size-12 text-default-light" />
+            <h2 className="text-xl font-bold text-header-light">
+              Add Attack Surface
+            </h2>
+            <p className="text-sm text-default-light">
+              Continue adding more to attack surface
+            </p>
+            <Button
+              styleType="primary"
+              startIcon={<PlusIcon className="size-4" />}
+              onClick={onAttackSurfaceClick}
+              className="mt-6 h-10 rounded-md py-0"
+            >
+              Add Attack Surface
+            </Button>
+          </div>
+        )}
+        {!allStepsCompleted && !isFreemiumMaxed && (
           <>
             <h2 className="text-2xl font-bold text-white">Getting Started</h2>
             <p className="mb-6 text-sm text-gray-500">
               Follow these steps to complete the setup of your account.
             </p>
-            <div className="mb-6 flex w-full justify-between">
+            <div className="mb-6 flex w-full justify-between gap-6">
               <GettingStartedStep
                 title="Set Your Root Domain"
                 description="Start by defining your root domain. This helps us identify the core assets you need to monitor."
                 isCompleted={completedSteps.rootDomain}
-                icon={<Globe size={28} />}
+                icon={<GlobeAltIcon className="size-8 text-default-light" />}
                 onClick={onRootDomainClick}
               />
               <GettingStartedStep
                 title="Build Your Attack Surface"
                 description="Add integrations to map out and monitor all the assets within your organization."
                 isCompleted={completedSteps.attackSurface}
-                icon={<Cloud size={28} />}
+                icon={<CloudIcon className="size-8 text-default-light" />}
                 onClick={onAttackSurfaceClick}
               />
               <GettingStartedStep
                 title="Set Risk Notifications"
                 description="Configure notifications to stay informed about potential risks and vulnerabilities."
                 isCompleted={completedSteps.riskNotifications}
-                icon={<Bell size={28} />}
+                icon={<BellIcon className="size-8 text-default-light" />}
                 onClick={onRiskNotificationsClick}
               />
             </div>
