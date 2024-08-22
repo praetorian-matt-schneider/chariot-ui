@@ -3,7 +3,6 @@ import {
   BellIcon,
   CheckCircleIcon,
   CloudIcon,
-  DocumentPlusIcon,
   GlobeAltIcon,
 } from '@heroicons/react/24/solid';
 
@@ -19,7 +18,7 @@ export const GettingStartedStep: React.FC<{
 }> = ({ title, description, isCompleted, icon, onClick }) => {
   return (
     <div
-      className="flex flex-1 cursor-pointer flex-col items-center rounded-lg border-2 border-header-dark p-4 pt-0"
+      className="flex flex-1 cursor-pointer flex-col items-center rounded-lg border-2 border-dashed border-header-dark bg-header p-4 pt-0"
       onClick={onClick}
     >
       <div
@@ -66,10 +65,10 @@ export const GettingStarted: React.FC<{
   const { mutate: upgrade, status: upgradeStatus } = useModifyAccount('link');
 
   return (
-    <div className="mt-6 rounded-sm">
+    <div className="flex justify-center space-x-6">
       <div className="w-full rounded-sm">
         {isFreemiumMaxed && (
-          <div className="m-auto flex w-2/5 flex-col items-center rounded-lg border-2 border-header-dark p-8 text-center">
+          <div className="m-auto flex w-full flex-col items-center rounded-lg border-2 border-dashed border-header-dark bg-header p-8 text-center">
             <ExclamationTriangleIcon className="mb-2 size-12 text-yellow-500" />
             <h2 className="text-xl font-bold text-header-light">
               Uh oh, You are out of Space
@@ -88,13 +87,10 @@ export const GettingStarted: React.FC<{
           </div>
         )}
         {allStepsCompleted && !isFreemiumMaxed && (
-          <div className="m-auto flex w-2/5 flex-col items-center rounded-lg border-4 border-dashed border-header-dark p-8">
-            <DocumentPlusIcon className="mb-2 size-12 text-default-light" />
-            <h2 className="text-xl font-bold text-header-light">
-              Add Attack Surface
-            </h2>
+          <div className="m-auto flex w-full flex-col items-center rounded-lg border-4 border-dashed border-header-dark bg-header p-8">
+            <h2 className="text-xl font-bold text-header-light">Add Surface</h2>
             <p className="text-sm text-default-light">
-              Continue adding more to attack surface
+              Continue adding more to build your attack surface
             </p>
             <Button
               styleType="primary"
@@ -102,16 +98,12 @@ export const GettingStarted: React.FC<{
               onClick={onAttackSurfaceClick}
               className="mt-6 h-10 rounded-md py-0"
             >
-              Add Attack Surface
+              Add Surface
             </Button>
           </div>
         )}
         {!allStepsCompleted && !isFreemiumMaxed && (
           <>
-            <h2 className="text-2xl font-bold text-white">Getting Started</h2>
-            <p className="mb-6 text-sm text-gray-500">
-              Follow these steps to complete the setup of your account.
-            </p>
             <div className="mb-6 flex w-full justify-between gap-6">
               <GettingStartedStep
                 title="Set Your Root Domain"
@@ -138,6 +130,23 @@ export const GettingStarted: React.FC<{
           </>
         )}
       </div>
+
+      {allStepsCompleted && !isFreemiumMaxed && (
+        <div className="m-auto flex w-full flex-col items-center rounded-lg border-4 border-dashed border-header-dark bg-header p-8">
+          <h2 className="text-xl font-bold text-header-light">Add Workflow</h2>
+          <p className="text-sm text-default-light">
+            Continue adding more to manage your notifications
+          </p>
+          <Button
+            styleType="primary"
+            startIcon={<PlusIcon className="size-4" />}
+            onClick={onRiskNotificationsClick}
+            className="mt-6 h-10 rounded-md py-0"
+          >
+            Add Workflow
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

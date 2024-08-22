@@ -2,10 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowPathIcon,
-  BellAlertIcon,
   ExclamationTriangleIcon as ExclamationTriangleIconOutline,
   MagnifyingGlassIcon,
-  PencilIcon,
   PencilSquareIcon,
   PlusCircleIcon,
   XCircleIcon,
@@ -16,7 +14,7 @@ import {
   ExclamationTriangleIcon,
   WrenchScrewdriverIcon,
 } from '@heroicons/react/24/solid';
-import { Hourglass, Inbox, PlusIcon, Unplug } from 'lucide-react';
+import { Hourglass, Inbox, Unplug } from 'lucide-react';
 
 import { AssetUsage } from '@/components/AssetUsage';
 import { Button } from '@/components/Button';
@@ -339,6 +337,15 @@ export const Overview: React.FC = () => {
                     {displayName}&apos;s Organization
                   </p>
                 </Loader>
+                <button
+                  onClick={() => setIsDomainDrawerOpen(true)}
+                  className=" flex flex-row items-center justify-center space-x-1 text-center text-sm text-white underline"
+                >
+                  <Loader isLoading={rootDomainStatus === 'pending'}>
+                    {domainToDiplay}
+                  </Loader>
+                  <PencilSquareIcon className="ml-1 inline size-5 text-layer0" />{' '}
+                </button>
               </div>
               <AssetUsage
                 currentPlan={currentPlan}
@@ -351,40 +358,8 @@ export const Overview: React.FC = () => {
           </div>
         </div>
       </RenderHeaderExtraContentSection>
-      <div className="flex flex-col space-y-4">
-        <div className="flex w-full flex-row overflow-hidden rounded-lg border-2 border-header-dark bg-header text-sm font-semibold text-layer0 underline [&_div:not(:last-child)]:border-r-2 [&_div:not(:last-child)]:border-header-dark">
-          <div className="flex-1 p-2 text-center">
-            <button
-              onClick={() => setIsDomainDrawerOpen(true)}
-              className="mx-auto flex flex-row items-center justify-center space-x-1 text-center underline"
-            >
-              <PencilSquareIcon className="mr-1 inline size-5 text-layer0" />{' '}
-              <Loader isLoading={rootDomainStatus === 'pending'}>
-                {domainToDiplay}
-              </Loader>
-            </button>
-          </div>
-          <div className="flex-1 p-2 text-center">
-            <button
-              onClick={() => setIsRiskNotificationsDrawerOpen(true)}
-              className="underline"
-            >
-              <BellAlertIcon className="mr-1 inline size-5 text-layer0" />
-              Manage Risk Notifications
-            </button>
-          </div>
-          <div className="flex-1 p-2 text-center">
-            <button
-              onClick={() => setIsUpgradePlanOpen(true)}
-              className="underline"
-            >
-              <PencilIcon className="mr-1 inline size-5 text-layer0" />
-              Manage Account Plan
-            </button>
-          </div>
-        </div>
-      </div>
-      <div className="flex flex-col text-gray-200">
+
+      <div className="flex w-full flex-col text-gray-200">
         <GettingStarted
           completedSteps={{
             rootDomain: rootDomain?.value !== undefined,
@@ -416,14 +391,6 @@ export const Overview: React.FC = () => {
                   these points effectively.
                 </p>
               </div>
-              <Button
-                styleType="primary"
-                startIcon={<PlusIcon className="size-4" />}
-                onClick={() => setIsAttackSurfaceDrawerOpen(true)}
-                className="h-10 rounded-md py-0"
-              >
-                Add Attack Surface
-              </Button>
             </div>
             <div className="overflow-x-auto">
               <Table
