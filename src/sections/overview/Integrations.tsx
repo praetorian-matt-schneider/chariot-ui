@@ -2,6 +2,10 @@ import { Input } from '@/components/form/Input';
 import WebhookExample from '@/components/ui/WebhookExample';
 import { Integration, IntegrationMeta } from '@/types';
 import { generateUuid } from '@/utils/uuid.util';
+import {useAuth} from "@/state/auth";
+import {Button} from "@/components/Button";
+import {RocketIcon} from "lucide-react";
+import React from "react";
 
 const NessusInstructions = () => {
   return (
@@ -36,6 +40,36 @@ const NessusInstructions = () => {
         </pre>
       </div>
     </div>
+  );
+};
+
+const AWSInstructions = () => {
+  const { me, friend } = useAuth();
+  const template =
+      'https://s3.us-east-2.amazonaws.com/preview.chariot.praetorian.com/templates/aws-permissions-template.yaml';
+  const url = `https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=${template}&param_ExternalId=${friend || me}&stackName=Chariot`;
+  return (
+      <div>
+        <p className="mb-4 block text-sm leading-6">
+          Deploy the CloudFormation Stack into your management account, and then
+          enter your management account ID and role name here.
+        </p>
+        <div>
+          <Button
+              styleType="primary"
+              startIcon={<RocketIcon />}
+              onClick={() => {
+                window.open(url)?.focus();
+              }}
+              className="rounded-sm py-1"
+              style={{
+                padding: '0.5rem 0.5rem',
+              }}
+          >
+            Launch CloudFormation Stack
+          </Button>
+        </div>
+      </div>
   );
 };
 
@@ -443,31 +477,7 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
         required: true,
       },
     ],
-    message: (
-      <div>
-        <label className="block text-sm font-medium leading-6 text-gray-900">
-          CloudFormation Templates
-        </label>
-        <div className="mt-1">
-          <a
-            className="text-brand"
-            href="/templates/aws-permissions-template.yaml"
-            download
-          >
-            Pull-Based (IAM Role)
-          </a>
-        </div>
-        <div className="mt-1">
-          <a
-            className="text-brand"
-            href="/templates/aws-events-template.yaml"
-            download
-          >
-            Event-Based (AWS EventBridge)
-          </a>
-        </div>
-      </div>
-    ),
+    markup: <AWSInstructions />,
   },
   ns1: {
     id: Integration.ns1,

@@ -1,8 +1,17 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: CloudFormation for Chariot Role
+Conditions:
+  HasTargets:
+    Fn::Not:
+      - Fn::Equals:
+          - Fn::Select:
+              - 0
+              - !Ref Targets
+          - ""
 Resources:
   ChariotStackSet:
     Type: 'AWS::CloudFormation::StackSet'
+    Condition: HasTargets
     Properties:
       StackSetName: !Sub ${AWS::StackName}
       Description: Role for Chariot
@@ -16,6 +25,11 @@ Resources:
       AutoDeployment:
         Enabled: true
         RetainStacksOnAccountRemoval: false
+      StackInstancesGroup:
+        - DeploymentTargets:
+            OrganizationalUnitIds: !Ref Targets
+          Regions:
+            - us-east-1
       Parameters:
         - ParameterKey: ExternalId
           ParameterValue: !Ref ExternalId
@@ -71,3 +85,6 @@ Parameters:
     Type: String
     Description: Name of the role to create
     Default: Chariot
+  Targets:
+    Type: CommaDelimitedList
+    Description: List of organizational units to deploy to. Leave blank to apply to this account only.

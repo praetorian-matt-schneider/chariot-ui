@@ -96,14 +96,11 @@ const SetupModal: React.FC<{
                   </div>
                 )}
                 <div className="mt-4 space-y-4">
-                  {integration.markup ? (
-                    integration.markup
-                  ) : (
-                    <Inputs
-                      inputs={integration.inputs || []}
-                      onChange={handleInputsChange}
-                    />
-                  )}
+                  {integration.markup}
+                  <Inputs
+                    inputs={integration.inputs || []}
+                    onChange={handleInputsChange}
+                  />
                 </div>
                 <div className="mt-4 flex flex-row justify-end space-x-1">
                   <Button
