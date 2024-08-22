@@ -88,7 +88,9 @@ export const GettingStarted: React.FC<{
         )}
         {allStepsCompleted && !isFreemiumMaxed && (
           <div className="m-auto flex w-full flex-col items-center rounded-lg border-4 border-dashed border-header-dark bg-header p-8">
-            <h2 className="text-xl font-bold text-header-light">Add Surface</h2>
+            <h2 className="text-xl font-bold text-header-light">
+              Build Your Attack Surface
+            </h2>
             <p className="text-sm text-default-light">
               Continue adding more to build your attack surface
             </p>
@@ -133,7 +135,9 @@ export const GettingStarted: React.FC<{
 
       {allStepsCompleted && !isFreemiumMaxed && (
         <div className="m-auto flex w-full flex-col items-center rounded-lg border-4 border-dashed border-header-dark bg-header p-8">
-          <h2 className="text-xl font-bold text-header-light">Add Workflow</h2>
+          <h2 className="text-xl font-bold text-header-light">
+            Set Risk Notifications
+          </h2>
           <p className="text-sm text-default-light">
             Continue adding more to manage your notifications
           </p>
