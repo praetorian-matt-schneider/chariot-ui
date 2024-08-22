@@ -1,10 +1,55 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: CloudFormation for Chariot Role
 Resources:
+  ChariotStackSet:
+    Type: 'AWS::CloudFormation::StackSet'
+    Properties:
+      StackSetName: !Sub ${AWS::StackName}
+      Description: Role for Chariot
+      Capabilities:
+        - CAPABILITY_NAMED_IAM
+      ManagedExecution:
+        Active: true
+      OperationPreferences:
+        FailureTolerancePercentage: 100
+      PermissionModel: SERVICE_MANAGED
+      AutoDeployment:
+        Enabled: true
+        RetainStacksOnAccountRemoval: false
+      Parameters:
+        - ParameterKey: ExternalId
+          ParameterValue: !Ref ExternalId
+        - ParameterKey: RoleName
+          ParameterValue: !Ref RoleName
+      TemplateBody: |
+        AWSTemplateFormatVersion: '2010-09-09'
+        Description: Role for Chariot
+        Resources:
+          ChariotRole:
+           Type: 'AWS::IAM::Role'
+           Properties:
+             RoleName: !Ref RoleName
+             AssumeRolePolicyDocument:
+               Version: '2012-10-17'
+               Statement:
+                 - Effect: Allow
+                   Principal:
+                     AWS: 992382785633
+                   Action: 'sts:AssumeRole'
+                   Condition:
+                     StringEquals:
+                       'sts:ExternalId': !Ref ExternalId
+             ManagedPolicyArns:
+               - arn:aws:iam::aws:policy/SecurityAudit
+        Parameters:
+          ExternalId:
+            Type: String
+          RoleName:
+            Type: String
   ChariotRole:
     Type: 'AWS::IAM::Role'
     Properties:
-      RoleName: Chariot
+      RoleName: !Ref RoleName
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -17,7 +62,12 @@ Resources:
                 'sts:ExternalId': !Ref ExternalId
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/SecurityAudit
+
 Parameters:
   ExternalId:
     Type: String
     Description: Email address of your Chariot organization
+  RoleName:
+    Type: String
+    Description: Name of the role to create
+    Default: Chariot
