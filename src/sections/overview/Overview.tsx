@@ -897,7 +897,7 @@ export const getCurrentPlan = ({
     (friend.startsWith('chariot+') && friend.endsWith('@praetorian.com')) ||
     accounts.some(
       account =>
-        account.member.startsWith('chariot+') &&
+        account.member.startsWith('research') &&
         account.member.endsWith('@praetorian.com')
     );
   const isUnmanaged = Boolean(
