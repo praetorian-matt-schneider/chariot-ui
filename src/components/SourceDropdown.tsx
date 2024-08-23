@@ -2,7 +2,6 @@ import React from 'react';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 
 import { Dropdown, DropdownMenu } from '@/components/Dropdown';
-import { useCounts } from '@/hooks/useCounts';
 
 interface SourceDropdownProps {
   type: 'asset' | 'job' | 'risk';
@@ -10,21 +9,10 @@ interface SourceDropdownProps {
   value: string[];
 }
 
-interface SourceData {
-  [key: string]: number;
-}
-
 const SourceDropdown: React.FC<SourceDropdownProps> = ({
-  type,
   onChange: handleSelect,
   value: sourcesFilter,
 }) => {
-  const { data, status: countsStatus } = useCounts({
-    resource: type,
-  });
-
-  const sourceData: SourceData = (data?.source as unknown as SourceData) || {};
-
   const name = 'Origins';
 
   function override(item: string) {
@@ -46,32 +34,20 @@ const SourceDropdown: React.FC<SourceDropdownProps> = ({
     }
   }
 
-  const items: DropdownMenu['items'] =
-    countsStatus === 'pending'
-      ? Array(1)
-          .fill(0)
-          .map(() => {
-            return {
-              label: 'Loading...',
-              className: 'w-60 h-4',
-              value: '',
-              isLoading: true,
-            };
-          })
-      : [
-          {
-            label: `All ${name}`,
-            value: '',
-          },
-          {
-            label: 'Divider',
-            type: 'divider',
-          },
-          ...Object.keys(sourceData).map(item => ({
-            label: override(item),
-            value: item,
-          })),
-        ];
+  const items: DropdownMenu['items'] = [
+    {
+      label: `All ${name}`,
+      value: '',
+    },
+    {
+      label: 'Divider',
+      type: 'divider',
+    },
+    ...['discovered', 'provided'].map(item => ({
+      label: override(item),
+      value: item,
+    })),
+  ];
 
   return (
     <Dropdown
