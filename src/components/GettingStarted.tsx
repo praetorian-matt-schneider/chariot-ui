@@ -1,5 +1,5 @@
 import { ComponentType } from 'react';
-import { ExclamationTriangleIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import {
   BellIcon,
   CheckCircleIcon,
@@ -113,25 +113,7 @@ export const GettingStarted: React.FC<{
             </Button>
           </div>
         )}
-        {allStepsCompleted && !isFreemiumMaxed && (
-          <div className="m-auto flex w-full flex-col items-center rounded-lg border-4 border-dashed border-header-dark bg-header p-8">
-            <h2 className="text-xl font-bold text-header-light">
-              Build Your Attack Surface
-            </h2>
-            <p className="text-sm text-default-light">
-              Continue adding more to build your attack surface
-            </p>
-            <Button
-              styleType="primary"
-              startIcon={<PlusIcon className="size-4" />}
-              onClick={onAttackSurfaceClick}
-              className="mt-6 h-10 rounded-md py-0"
-            >
-              Add Surface
-            </Button>
-          </div>
-        )}
-        {!allStepsCompleted && !isFreemiumMaxed && (
+        {!isFreemiumMaxed && (
           <>
             <div className="mb-6 flex w-full justify-between gap-6">
               <GettingStartedStep
@@ -162,25 +144,6 @@ export const GettingStarted: React.FC<{
           </>
         )}
       </div>
-
-      {allStepsCompleted && !isFreemiumMaxed && (
-        <div className="m-auto flex w-full flex-col items-center rounded-lg border-4 border-dashed border-header-dark bg-header p-8">
-          <h2 className="text-xl font-bold text-header-light">
-            Set Risk Notifications
-          </h2>
-          <p className="text-sm text-default-light">
-            Continue adding more to manage your notifications
-          </p>
-          <Button
-            styleType="primary"
-            startIcon={<PlusIcon className="size-4" />}
-            onClick={onRiskNotificationsClick}
-            className="mt-6 h-10 rounded-md py-0"
-          >
-            Add Workflow
-          </Button>
-        </div>
-      )}
     </div>
   );
 };
