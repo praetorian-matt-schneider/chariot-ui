@@ -10,11 +10,12 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 import {
+  BellIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
   WrenchScrewdriverIcon,
 } from '@heroicons/react/24/solid';
-import { Hourglass, Inbox, Unplug } from 'lucide-react';
+import { Hourglass, Unplug } from 'lucide-react';
 
 import { AssetUsage } from '@/components/AssetUsage';
 import { Button } from '@/components/Button';
@@ -55,6 +56,7 @@ import { useAuth } from '@/state/auth';
 import { useGlobalState } from '@/state/global.state';
 import { Account, AssetStatus, FREEMIUM_ASSETS_LIMIT, Plan } from '@/types';
 import { Job, JobStatus, JobStatusLabel } from '@/types';
+import { partition } from '@/utils/array.util';
 import { cn } from '@/utils/classname';
 import { getRoute } from '@/utils/route.util';
 import { useStorage } from '@/utils/storage/useStorage.util';
@@ -314,6 +316,93 @@ export const Overview: React.FC = () => {
     setIsDomainDrawerOpen(false);
   }
 
+  const data = useMemo(() => {
+    const tableData = [
+      {
+        status: 'success',
+        surface: 'Chariot',
+        identifier: 'Provided',
+        discoveredAssets: assetCount?.source?.provided || 0,
+        discoveredAssetsStatus: assetCountStatus,
+        actions: 'AddAsset',
+        connected: false,
+        id: 'chariot',
+        key: 'chariot',
+        account: undefined,
+        type: 'chariot',
+      },
+      ...requiresSetupIntegrations.map(integration => {
+        return {
+          status: 'warning',
+          surface: integration.displayName,
+          identifier: 'Requires Setup',
+          discoveredAssets: '0',
+          discoveredAssetsStatus: 'success',
+          actions: 'Setup',
+          connected: false,
+          id: integration.member,
+          key: integration.key,
+          account: integration,
+          type: integration.type,
+        };
+      }),
+      ...connectedIntegrations.map(integration => ({
+        status: 'success',
+        surface: integration.displayName,
+        identifier: integration.value ?? '[Redacted]',
+        discoveredAssets:
+          counts.find(
+            count =>
+              count.member === integration.member &&
+              count.value === integration.value
+          )?.count || 0,
+        discoveredAssetsStatus: assetCountStatus,
+        actions: 'Disconnect',
+        connected: true,
+        id: integration.member,
+        key: integration.key,
+        account: integration,
+        type: integration.type,
+      })),
+    ];
+
+    const waitlistedIntegrationsData = waitlistedIntegrations.map(
+      integration => {
+        return {
+          status: 'waitlist',
+          surface: integration.displayName,
+          identifier: 'Coming Soon',
+          discoveredAssets: '0',
+          discoveredAssetsStatus: 'success',
+          actions: 'Waitlist',
+          connected: false,
+          id: integration.member,
+          key: integration.key,
+          account: integration,
+          type: integration.type,
+        };
+      }
+    );
+
+    const [riskNotification, rest] = partition(
+      tableData,
+      row => row.type === 'riskNotification'
+    );
+
+    return [
+      ...riskNotification.sort((a, b) => a.surface.localeCompare(b.surface)),
+      ...rest.sort((a, b) => a.surface.localeCompare(b.surface)),
+      ...waitlistedIntegrationsData,
+    ];
+  }, [
+    assetCount,
+    assetCountStatus,
+    requiresSetupIntegrations,
+    connectedIntegrations,
+    counts,
+    waitlistedIntegrations,
+  ]);
+
   return (
     <Body
       style={{
@@ -362,9 +451,10 @@ export const Overview: React.FC = () => {
       <div className="flex w-full flex-col text-gray-200">
         <GettingStarted
           completedSteps={{
-            rootDomain: rootDomain?.value !== undefined,
-            attackSurface: attackSurfaceStatus === 'connected',
-            riskNotifications: riskNotificationStatus === 'connected',
+            rootDomain:
+              rootDomain?.value !== undefined ? 'connected' : 'notConnected',
+            attackSurface: attackSurfaceStatus,
+            riskNotifications: riskNotificationStatus,
           }}
           onRootDomainClick={() => setIsDomainDrawerOpen(true)}
           onAttackSurfaceClick={() => setIsAttackSurfaceDrawerOpen(true)}
@@ -413,7 +503,11 @@ export const Overview: React.FC = () => {
                         : getStatusIcon(row.status);
                     },
                   },
-                  { label: 'Surface', id: 'surface', className: 'font-bold' },
+                  {
+                    label: 'Surface',
+                    id: 'surface',
+                    className: 'font-bold',
+                  },
                   {
                     label: 'Identifier',
                     id: 'identifier',
@@ -433,13 +527,14 @@ export const Overview: React.FC = () => {
                     label: 'Description',
                     id: 'discoveredAssets',
                     cell: row => (
-                      <div className={'text-gray-500'}>
+                      <div className={'flex gap-2 text-gray-500'}>
                         <Loader
                           isLoading={row.discoveredAssetsStatus === 'pending'}
                         >
-                          {riskIntegrations.find(
-                            integration => row.surface === integration.id
-                          ) ? (
+                          {row.type === 'riskNotification' && (
+                            <BellIcon className="size-4 text-default-light" />
+                          )}
+                          {row.type === 'riskNotification' ? (
                             'Risk Notification'
                           ) : (
                             <div
@@ -460,7 +555,7 @@ export const Overview: React.FC = () => {
                                         JSON.stringify({
                                           search: '',
                                           attributes: [
-                                            `source##asset#${row.surface}#${row.identifier}`,
+                                            `source##asset#${row.id}#${row.identifier}`,
                                           ],
                                           priorities: [],
                                           sources: [],
@@ -542,65 +637,7 @@ export const Overview: React.FC = () => {
                     ),
                   },
                 ]}
-                data={[
-                  {
-                    status: 'success',
-                    surface: 'chariot',
-                    identifier: 'Provided',
-                    discoveredAssets: assetCount?.source?.provided || 0,
-                    discoveredAssetsStatus: assetCountStatus,
-                    actions: 'AddAsset',
-                    connected: false,
-                    id: 'providedAssets',
-                    key: 'providedAssets',
-                    account: undefined,
-                  },
-                  ...requiresSetupIntegrations.map(integration => {
-                    return {
-                      status: 'warning',
-                      surface: integration.member,
-                      identifier: 'Requires Setup',
-                      discoveredAssets: '-',
-                      discoveredAssetsStatus: 'success',
-                      actions: 'Setup',
-                      connected: false,
-                      id: integration.member,
-                      key: integration.key,
-                      account: integration,
-                    };
-                  }),
-                  ...connectedIntegrations.map(integration => ({
-                    status: 'success',
-                    surface: integration.member,
-                    identifier: integration.value ?? '[Redacted]',
-                    discoveredAssets:
-                      counts.find(
-                        count =>
-                          count.member === integration.member &&
-                          count.value === integration.value
-                      )?.count || 0,
-                    discoveredAssetsStatus: assetCountStatus,
-                    actions: 'Disconnect',
-                    connected: true,
-                    id: integration.member,
-                    key: integration.key,
-                    account: integration,
-                  })),
-                  ...waitlistedIntegrations.map(integration => {
-                    return {
-                      status: 'waitlist',
-                      surface: integration.member,
-                      identifier: 'Coming Soon',
-                      discoveredAssets: '-',
-                      discoveredAssetsStatus: 'success',
-                      actions: 'Waitlist',
-                      connected: false,
-                      id: integration.member,
-                      key: integration.key,
-                      account: integration,
-                    };
-                  }),
-                ]}
+                data={data}
               />
             </div>
           </div>
@@ -733,6 +770,12 @@ export const Overview: React.FC = () => {
                 );
               })}
             </div>
+            <p className="mt-4 text-sm italic">
+              {`Contact us for more integrations support: `}
+              <a className="text-brand" href="mailto:support@praetorian.com">
+                support@praetorian.com
+              </a>
+            </p>
           </div>
         </Drawer>
         <Drawer
@@ -784,17 +827,9 @@ export const Overview: React.FC = () => {
               Where do you want to be notified?
             </h1>
             <p className="mb-8 text-lg text-gray-700">
-              Select your notification channels for alerts. View your current
-              alerts to stay updated.
+              Select where you would like to be notified when new risks are
+              identified in your attack surface.
             </p>
-            <Button
-              styleType="none"
-              className="mb mx-auto mb-3 h-14 w-full rounded-sm bg-white text-lg font-semibold"
-              onClick={() => (window.location.href = '/app/alerts')}
-            >
-              <Inbox className="mr-2 size-6 text-gray-700" /> View My Current
-              Alerts
-            </Button>
             <div className="mb-8 flex flex-row flex-wrap gap-4">
               {filteredRiskNotificationIntegrations.map(
                 (integration, index) => {
@@ -813,6 +848,12 @@ export const Overview: React.FC = () => {
                 }
               )}
             </div>
+            <p className="mb-8 text-sm italic">
+              {`Contact us for more integrations support: `}
+              <a className="text-brand" href="mailto:support@praetorian.com">
+                support@praetorian.com
+              </a>
+            </p>
           </div>
         </Drawer>
         <Drawer

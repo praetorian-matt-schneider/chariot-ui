@@ -1,3 +1,4 @@
+import { ComponentType } from 'react';
 import { ExclamationTriangleIcon, PlusIcon } from '@heroicons/react/24/outline';
 import {
   BellIcon,
@@ -7,31 +8,50 @@ import {
 } from '@heroicons/react/24/solid';
 
 import { Button } from '@/components/Button';
+import { Tooltip } from '@/components/Tooltip';
 import { useModifyAccount } from '@/hooks';
+import { GetStartedStatus } from '@/hooks/useIntegration';
+import { cn } from '@/utils/classname';
 
 export const GettingStartedStep: React.FC<{
   title: string;
   description: string;
-  isCompleted: boolean;
-  icon: JSX.Element;
+  status: GetStartedStatus;
+  focusedStep: boolean;
+  Icon: ComponentType<React.SVGProps<SVGSVGElement>>;
   onClick: () => void;
-}> = ({ title, description, isCompleted, icon, onClick }) => {
+}> = ({ title, description, status, focusedStep, Icon, onClick }) => {
   return (
     <div
       className="flex flex-1 cursor-pointer flex-col items-center rounded-lg border-2 border-dashed border-header-dark bg-header p-4 pt-0"
       onClick={onClick}
     >
-      <div
-        className={
-          'flex size-14 items-center justify-center text-lg font-bold text-header'
-        }
+      <Tooltip
+        title={status === 'setup' ? 'Requires Setup' : ''}
+        placement="right"
       >
-        {isCompleted ? (
-          <CheckCircleIcon className="size-8 text-green-500" />
-        ) : (
-          icon
-        )}
-      </div>
+        <div
+          className={cn(
+            'flex size-14 items-center justify-center text-lg font-bold text-header',
+            focusedStep && 'animate-bounce'
+          )}
+        >
+          {status === 'connected' && (
+            <CheckCircleIcon className="size-8 text-green-500" />
+          )}
+          {status === 'setup' && (
+            <CheckCircleIcon className="size-8 text-yellow-500" />
+          )}
+          {status === 'notConnected' && (
+            <Icon
+              className={cn(
+                'size-8',
+                focusedStep ? 'text-default-white' : 'text-default-light'
+              )}
+            />
+          )}
+        </div>
+      </Tooltip>
       <h3 className="mb-2 text-lg font-semibold text-header">{title}</h3>
       <p className="text-center text-xs text-default-light">{description}</p>
     </div>
@@ -40,9 +60,9 @@ export const GettingStartedStep: React.FC<{
 
 export const GettingStarted: React.FC<{
   completedSteps: {
-    rootDomain: boolean;
-    attackSurface: boolean;
-    riskNotifications: boolean;
+    rootDomain: GetStartedStatus;
+    attackSurface: GetStartedStatus;
+    riskNotifications: GetStartedStatus;
   };
   onRootDomainClick: () => void;
   onAttackSurfaceClick: () => void;
@@ -57,10 +77,17 @@ export const GettingStarted: React.FC<{
   total,
   isFreemiumMaxed,
 }) => {
-  const allStepsCompleted =
-    completedSteps.rootDomain &&
-    completedSteps.attackSurface &&
-    completedSteps.riskNotifications;
+  const allStepsCompleted = [
+    completedSteps.rootDomain,
+    completedSteps.attackSurface,
+    completedSteps.riskNotifications,
+  ].every(status => status === 'connected');
+
+  const focusedStepIndex = [
+    completedSteps.rootDomain,
+    completedSteps.attackSurface,
+    completedSteps.riskNotifications,
+  ].findIndex(status => status === 'notConnected');
 
   const { mutate: upgrade, status: upgradeStatus } = useModifyAccount('link');
 
@@ -110,22 +137,25 @@ export const GettingStarted: React.FC<{
               <GettingStartedStep
                 title="Set Your Root Domain"
                 description="Start by defining your root domain. This helps us identify the core assets you need to monitor."
-                isCompleted={completedSteps.rootDomain}
-                icon={<GlobeAltIcon className="size-8 text-default-light" />}
+                status={completedSteps.rootDomain}
+                focusedStep={focusedStepIndex === 0}
+                Icon={GlobeAltIcon}
                 onClick={onRootDomainClick}
               />
               <GettingStartedStep
                 title="Build Your Attack Surface"
                 description="Add integrations to map out and monitor all the assets within your organization."
-                isCompleted={completedSteps.attackSurface}
-                icon={<CloudIcon className="size-8 text-default-light" />}
+                status={completedSteps.attackSurface}
+                focusedStep={focusedStepIndex === 1}
+                Icon={CloudIcon}
                 onClick={onAttackSurfaceClick}
               />
               <GettingStartedStep
                 title="Set Risk Notifications"
                 description="Configure notifications to stay informed about potential risks and vulnerabilities."
-                isCompleted={completedSteps.riskNotifications}
-                icon={<BellIcon className="size-8 text-default-light" />}
+                status={completedSteps.riskNotifications}
+                focusedStep={focusedStepIndex === 2}
+                Icon={BellIcon}
                 onClick={onRiskNotificationsClick}
               />
             </div>

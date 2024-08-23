@@ -2,11 +2,16 @@ import { useCallback, useMemo } from 'react';
 
 import { useMy } from '@/hooks/useMy';
 import {
+  allIntegrations,
   availableAttackSurfaceIntegrations,
   Integrations,
   riskIntegrations,
 } from '@/sections/overview/Integrations';
 import { Account, Asset } from '@/types';
+
+export type GetStartedStatus = 'notConnected' | 'setup' | 'connected';
+
+type AccountWithType = Account & { type: string; displayName: string };
 
 export const useIntegration = () => {
   const { data: accounts, status } = useMy(
@@ -53,8 +58,22 @@ export const useIntegration = () => {
       riskNotificationStatus,
       attackSurfaceStatus,
     } = integrationsWithoutHook.reduce(
-      (acc, integration) => {
+      (acc, integrationWithoutType) => {
         let updatedAcc = acc;
+        const integration = {
+          ...integrationWithoutType,
+          type: riskIntegrations.find(
+            current => current.id === integrationWithoutType.member
+          )
+            ? 'riskNotification'
+            : 'attack',
+          displayName:
+            (
+              allIntegrations.find(
+                current => current.id === integrationWithoutType.member
+              )?.name || ''
+            )?.split(' ')[0] || integrationWithoutType.member,
+        };
 
         if (integration.value === 'setup') {
           updatedAcc = {
@@ -136,17 +155,11 @@ export const useIntegration = () => {
         return updatedAcc;
       },
       {
-        waitlistedIntegrations: [] as Account[],
-        requiresSetupIntegrations: [] as Account[],
-        connectedIntegrations: [] as Account[],
-        attackSurfaceStatus: 'notConnected' as
-          | 'notConnected'
-          | 'setup'
-          | 'connected',
-        riskNotificationStatus: 'notConnected' as
-          | 'notConnected'
-          | 'setup'
-          | 'connected',
+        waitlistedIntegrations: [] as AccountWithType[],
+        requiresSetupIntegrations: [] as AccountWithType[],
+        connectedIntegrations: [] as AccountWithType[],
+        attackSurfaceStatus: 'notConnected' as GetStartedStatus,
+        riskNotificationStatus: 'notConnected' as GetStartedStatus,
       }
     );
 

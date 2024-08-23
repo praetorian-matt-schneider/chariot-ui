@@ -3,14 +3,16 @@ import React from 'react';
 interface Props {
   skipHover?: boolean;
   fill?: string;
+  className?: string;
 }
-export const HorseIcon: React.FC<Props> = ({ skipHover, fill }) => (
+export const HorseIcon: React.FC<Props> = ({ skipHover, className, fill }) => (
   <svg
     width="74"
     height={skipHover ? '74' : '86'}
     viewBox={`0 0 74 ${skipHover ? '74' : '86'}`}
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
+    className={className}
   >
     <path
       fillRule="evenodd"

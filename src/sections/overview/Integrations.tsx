@@ -299,7 +299,7 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
   },
   jira: {
     id: Integration.jira,
-    name: 'Atlassian Jira',
+    name: 'Jira',
     help: {
       href: 'https://docs.praetorian.com/hc/en-us/articles/25815095834267-Ticketing-Systems#jira',
       label: 'How to: Ticketing Systems - Jira',
@@ -1076,4 +1076,10 @@ export const riskIntegrations = [
   Integrations.webhook,
   Integrations.zulip,
   Integrations.teams,
+];
+
+export const allIntegrations = [
+  ...availableAttackSurfaceIntegrations,
+  ...comingSoonAttackSurfaceIntegrations,
+  ...riskIntegrations,
 ];
