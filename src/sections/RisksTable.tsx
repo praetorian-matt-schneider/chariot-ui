@@ -199,7 +199,6 @@ export function Risks() {
     hasNextPage,
   } = useMy({
     resource: 'risk',
-    filterByGlobalSearch: true,
   });
 
   useEffect(() => {

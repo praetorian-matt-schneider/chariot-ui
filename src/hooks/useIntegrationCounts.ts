@@ -1,9 +1,9 @@
 // eslint-disable-next-line no-restricted-imports
-import { useQueries } from '@tanstack/react-query';
 import { AxiosInstance } from 'axios';
 
 import { useAxios } from '@/hooks/useAxios';
 import { Account, Statistics } from '@/types';
+import { useQueries } from '@/utils/api';
 
 const fetchIntegrationCounts = async (
   axios: AxiosInstance,
@@ -35,7 +35,10 @@ const useIntegrationCounts = (integrations: Account[]) => {
     enabled: !!integration.member,
   }));
 
-  const results = useQueries({ queries });
+  const results = useQueries({
+    // defaultErrorMessage: 'Failed to fetch integration counts',
+    queries,
+  });
 
   return results;
 };

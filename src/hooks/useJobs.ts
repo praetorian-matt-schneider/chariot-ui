@@ -94,6 +94,7 @@ export const useJobsStatus = (
   const axios = useAxios();
 
   return useQueries({
+    // defaultErrorMessage: 'Failed to fetch job status',
     queries: Object.values(attributeJobMap).map(jobKey => {
       return {
         ...options,

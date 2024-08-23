@@ -261,7 +261,6 @@ export function useGetAssets(props: GetAssetProps) {
   } = useMy(
     {
       resource: 'asset',
-      filterByGlobalSearch: true,
     },
     { enabled: !isSearched }
   );
