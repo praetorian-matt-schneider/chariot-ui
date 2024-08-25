@@ -3,12 +3,12 @@ import { useCallback, useEffect } from 'react';
 import { debounce } from '@/utils/debounce.util';
 
 export const useScroll = (
-  parentRef: React.RefObject<HTMLDivElement>,
+  parentRef: HTMLElement | null,
   fetchNextPage?: () => void
 ) => {
   const handleScroll = useCallback(() => {
-    if (parentRef && parentRef.current) {
-      const { scrollTop, clientHeight, scrollHeight } = parentRef.current;
+    if (parentRef) {
+      const { scrollTop, clientHeight, scrollHeight } = parentRef;
       if (scrollTop + clientHeight >= scrollHeight - 200) {
         fetchNextPage && fetchNextPage();
       }
@@ -18,11 +18,11 @@ export const useScroll = (
   useEffect(() => {
     const debounceHandleScroll = debounce(handleScroll, 500);
 
-    if (parentRef && parentRef.current) {
-      parentRef.current.addEventListener('scroll', debounceHandleScroll);
+    if (parentRef && parentRef) {
+      parentRef.addEventListener('scroll', debounceHandleScroll);
       return () => {
-        parentRef.current &&
-          parentRef.current.removeEventListener('scroll', debounceHandleScroll);
+        parentRef &&
+          parentRef.removeEventListener('scroll', debounceHandleScroll);
       };
     }
   }, [parentRef]);

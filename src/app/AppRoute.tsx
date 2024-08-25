@@ -94,7 +94,9 @@ const appRoutes = {
     element: (
       <CheckAuth>
         <AuthenticatedApp>
-          <Outlet />
+          <Body>
+            <Outlet />
+          </Body>
         </AuthenticatedApp>
       </CheckAuth>
     ),
@@ -103,19 +105,11 @@ const appRoutes = {
       title: 'logout',
     },
     widgets: {
-      element: (
-        <Body>
-          <Intelligence />
-        </Body>
-      ),
+      element: <Intelligence />,
       title: 'Widgets',
     },
     alerts: {
-      element: (
-        <Body>
-          <Alerts />
-        </Body>
-      ),
+      element: <Alerts />,
       title: 'Alerts',
     },
     assets: {
@@ -131,11 +125,7 @@ const appRoutes = {
       title: 'Jobs',
     },
     account: {
-      element: (
-        <Body>
-          <Account />
-        </Body>
-      ),
+      element: <Account />,
       title: 'Organization Settings',
     },
     files: {
@@ -147,11 +137,7 @@ const appRoutes = {
       title: 'Overview',
     },
     report: {
-      element: (
-        <Body>
-          <Report />
-        </Body>
-      ),
+      element: <Report />,
       title: 'Overview',
     },
     '*': <Navigate to="/app/overview" replace />,

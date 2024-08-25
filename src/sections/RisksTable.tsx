@@ -356,13 +356,14 @@ export function Risks() {
   return (
     <div className="flex w-full flex-col">
       <Table
+        isTableView
         name={'risks'}
         search={{
           value: search,
           onChange: handleSearchUpdate,
         }}
         resize={true}
-        filters={
+        bodyHeader={
           <div className="flex gap-4">
             <SeverityDropdown
               value={severityFilter}
@@ -421,7 +422,7 @@ export function Risks() {
             },
           };
         }}
-        actions={(selectedRows: Risk[]) => {
+        bulkActions={(selectedRows: Risk[]) => {
           return {
             menu: {
               items: [

@@ -210,7 +210,7 @@ const Jobs: React.FC = () => {
     <div className="flex w-full flex-col">
       <Table
         resize={true}
-        filters={
+        bodyHeader={
           <div className="flex gap-4">
             <Dropdown
               styleType="header"

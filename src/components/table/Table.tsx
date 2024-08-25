@@ -14,7 +14,6 @@ import { Slash } from 'lucide-react';
 import { Button } from '@/components/Button';
 import { Dropdown } from '@/components/Dropdown';
 import { Input } from '@/components/form/Input';
-import { Loader } from '@/components/Loader';
 import { CELL_WIDTHS, ROW_HEIGHT } from '@/components/table/constants';
 import { TableBody } from '@/components/table/TableBody';
 import { TableCheckBoxIcon } from '@/components/table/TableCheckboxIcon';
@@ -24,29 +23,22 @@ import {
   TableProps,
 } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
-import { Body } from '@/components/ui/Body';
 import { NoData } from '@/components/ui/NoData';
 import { useScroll } from '@/hooks';
 import { useResize } from '@/hooks/useResize';
-import {
-  HeaderPortalSections,
-  RenderHeaderBreadcrumbSection,
-  RenderHeaderExtraContentSection,
-} from '@/sections/AuthenticatedApp';
+import { RenderHeaderExtraContentSection } from '@/sections/AuthenticatedApp';
 import { cn } from '@/utils/classname';
+import { useGetStickyHeight } from '@/utils/misc.util';
 import { useStorage } from '@/utils/storage/useStorage.util';
 
 // eslint-disable-next-line complexity
 export function Table<TData>(props: TableProps<TData>) {
   const {
-    className,
-    contentClassName,
-    filters,
+    bodyHeader,
     tableClassName,
     columns,
     data: rawData,
     selection,
-    skipNoData,
     noData,
     status,
     error,
@@ -54,19 +46,18 @@ export function Table<TData>(props: TableProps<TData>) {
     fetchNextPage,
     isFetchingNextPage,
     rowActions,
-    actions,
+    bulkActions,
     groupBy,
     onRowClick,
     loadingRowCount = 25,
-    isTableView = true,
+    isTableView = false,
     primaryAction,
-    skipHeader,
     resize = false,
     search: controlledSearch,
   } = props;
-  const headerSectionHeight = document.getElementById(
-    HeaderPortalSections.EXTRA_CONTENT
-  )?.offsetHeight;
+
+  const { stickyTopHeight, ref: containerRef } = useGetStickyHeight(-16);
+
   const [expandedGroups, setExpandedGroups] = useState(
     groupBy?.map(group => group.label) || []
   );
@@ -112,7 +103,8 @@ export function Table<TData>(props: TableProps<TData>) {
     status,
   ]);
 
-  const parentRef = useRef<HTMLDivElement>(null);
+  const parentRef = document.getElementById(isTableView ? 'body' : 'localBody');
+
   useScroll(parentRef, fetchNextPage);
 
   const [isBulkSelectionEnabled, setIsBulkSelectionEnabled] = useState(false);
@@ -129,7 +121,7 @@ export function Table<TData>(props: TableProps<TData>) {
   const isLoading = status === 'pending';
   const virtualizer = useVirtualizer({
     count: isLoading ? loadingRowCount : groupedData.length,
-    getScrollElement: () => parentRef.current,
+    getScrollElement: () => parentRef,
     estimateSize: () => ROW_HEIGHT,
     overscan: 5,
   });
@@ -295,10 +287,10 @@ export function Table<TData>(props: TableProps<TData>) {
       .filter(Boolean);
 
     return {
-      parsedActions: actions?.(selectedRowData),
+      parsedActions: bulkActions?.(selectedRowData),
       parsedPrimaryAction: primaryAction?.(selectedRowData),
     };
-  }, [JSON.stringify({ selectedRows, rawData }), actions]);
+  }, [JSON.stringify({ selectedRows, rawData }), bulkActions]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -323,17 +315,11 @@ export function Table<TData>(props: TableProps<TData>) {
   }, []);
 
   return (
-    <Body
-      ref={parentRef}
-      className={className}
-      contentClassName={contentClassName}
-      footer={isTableView}
-      header={isTableView}
-    >
-      {(filters || parsedActions || parsedPrimaryAction) && (
+    <div id="localBody" ref={containerRef}>
+      {(bodyHeader || parsedActions || parsedPrimaryAction) && (
         <RenderHeaderExtraContentSection>
-          <div className="flex flex-col justify-between gap-4 lg:flex-row">
-            {filters}
+          <div className=" flex flex-col justify-between gap-4 lg:flex-row">
+            {bodyHeader}
             <div className="flex space-x-4">
               {controlledSearch && (
                 <Input
@@ -399,15 +385,6 @@ export function Table<TData>(props: TableProps<TData>) {
           </div>
         </RenderHeaderExtraContentSection>
       )}
-      {isTableView && (
-        <RenderHeaderBreadcrumbSection>
-          <Loader styleType="header" className="h-8 w-28" isLoading={isLoading}>
-            {rawData.length > 0 && (
-              <span className="ml-auto text-2xl font-bold">{`${rawData.length?.toLocaleString()} Shown`}</span>
-            )}
-          </Loader>
-        </RenderHeaderBreadcrumbSection>
-      )}
       {isError && (
         <NoData
           title={`Unable to retrieve your ${tableName}`}
@@ -417,7 +394,7 @@ export function Table<TData>(props: TableProps<TData>) {
           icon={<ExclamationCircleIcon className={`size-20 text-red-400`} />}
         />
       )}
-      {isEmpty && !skipNoData && (
+      {isEmpty && (
         <NoData
           title={noData?.title || `No ${tableName} found`}
           description={noData?.description}
@@ -437,7 +414,7 @@ export function Table<TData>(props: TableProps<TData>) {
             className={'sticky bg-layer0'}
             style={{
               zIndex: 1,
-              top: isTableView && !skipHeader ? headerSectionHeight : 0,
+              top: stickyTopHeight,
             }}
           >
             <tr className="relative">
@@ -481,7 +458,7 @@ export function Table<TData>(props: TableProps<TData>) {
                   fixedWidth={CELL_WIDTHS.actions}
                   storageKey={`${tableName}-actions`}
                 >
-                  Actions
+                  {''}
                 </Th>
               )}
             </tr>
@@ -532,7 +509,7 @@ export function Table<TData>(props: TableProps<TData>) {
           Loading more data...
         </div>
       )}
-    </Body>
+    </div>
   );
 }
 

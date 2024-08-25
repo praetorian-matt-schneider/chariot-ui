@@ -26,7 +26,6 @@ import { Loader } from '@/components/Loader';
 import { Modal } from '@/components/Modal';
 import { Table } from '@/components/table/Table';
 import { Tooltip } from '@/components/Tooltip';
-import { Body } from '@/components/ui/Body';
 import UpgradeMenu from '@/components/UpgradeMenu';
 import { useMy } from '@/hooks';
 import { useGetAccountDetails, useModifyAccount } from '@/hooks/useAccounts';
@@ -315,14 +314,7 @@ export const Overview: React.FC = () => {
   }
 
   return (
-    <Body
-      style={{
-        background:
-          'radial-gradient(circle at center, rgb(41, 34, 90) 0%, rgb(24, 22, 60) 70%, rgb(13, 13, 40) 100%)',
-      }}
-      header={true}
-      footer={true}
-    >
+    <div>
       <RenderHeaderExtraContentSection>
         <div>
           <div className="flex flex-row items-center justify-center space-x-6">
@@ -358,7 +350,6 @@ export const Overview: React.FC = () => {
           </div>
         </div>
       </RenderHeaderExtraContentSection>
-
       <div className="flex w-full flex-col text-gray-200">
         <GettingStarted
           completedSteps={{
@@ -392,15 +383,12 @@ export const Overview: React.FC = () => {
                 </p>
               </div>
             </div>
-            <div className="overflow-x-auto">
+            <div>
               <Table
                 tableClassName="bg-header border-0 [&_thead_tr]:bg-header [&_tbody_tr:nth-child(odd)]:bg-header-dark [&_tr_td]:text-layer0 [&__tr_td_div:first]:border-t-4 [&_td_div]:border-header-dark [&_th_div]:border-0"
-                contentClassName="px-0"
                 name="attack-surface"
                 status="success"
-                isTableView={false}
                 error={null}
-                skipNoData={true}
                 columns={[
                   {
                     label: 'Status',
@@ -841,7 +829,7 @@ export const Overview: React.FC = () => {
           />
         </Drawer>
       </div>
-    </Body>
+    </div>
   );
 };
 

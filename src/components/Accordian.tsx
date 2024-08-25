@@ -6,53 +6,47 @@ import { useStorage } from '@/utils/storage/useStorage.util';
 
 interface AccordianProps {
   title: ReactNode;
-  titlerightContainer?: ReactNode;
   children: ReactNode;
-  defaultOpen?: boolean;
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
+  defaultValue?: boolean;
+  value?: boolean;
+  onChange?: (open: boolean) => void;
   className?: string;
   contentClassName?: string;
-  fixed?: boolean;
-  icon?: ReactNode;
+  headerClassName?: string;
 }
 
 export function Accordian(props: AccordianProps) {
   const [open, setOpen] = useStorage(
-    { parentState: props.open, onParentStateChange: props.onOpenChange },
-    props.defaultOpen ?? true
+    { parentState: props.value, onParentStateChange: props.onChange },
+    props.defaultValue ?? true
   );
 
   return (
-    <div className={cn('bg-brand-lighter', props.className)}>
-      <div className="flex items-center">
-        <div
-          className={cn('flex gap-2 p-4', !props.fixed && 'cursor-pointer')}
-          onClick={
-            props.fixed
-              ? undefined
-              : () => {
-                  setOpen(!open);
-                }
-          }
-        >
-          {!props.fixed && (
-            <ChevronUpIcon
-              className={cn(
-                'size-4 stroke-[3px] text-default-dark transition-transform duration-150 select-none',
-                !open && 'rotate-180'
-              )}
-            />
+    <div
+      className={cn(
+        'bg-white border border-gray-300 p-2 rounded-sm',
+        props.className
+      )}
+    >
+      <div
+        className={cn(
+          'flex cursor-pointer items-center justify-between gap-2 py-1',
+          props.headerClassName
+        )}
+        onClick={() => {
+          setOpen(!open);
+        }}
+      >
+        <h6 className="truncate text-sm font-semibold">{props.title}</h6>
+        <ChevronUpIcon
+          className={cn(
+            'size-4 stroke-[3px] text-default-dark transition-transform duration-150 select-none',
+            !open && 'rotate-180'
           )}
-          {props.icon}
-          <h6 className="font-bold leading-none">{props.title}</h6>
-        </div>
-        <div className="ml-auto">{props.titlerightContainer}</div>
+        />
       </div>
       {open && (
-        <div className={cn('pl-10 pr-4 pb-4', props.contentClassName)}>
-          {props.children}
-        </div>
+        <div className={cn('', props.contentClassName)}>{props.children}</div>
       )}
     </div>
   );

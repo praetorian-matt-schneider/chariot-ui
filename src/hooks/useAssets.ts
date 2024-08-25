@@ -20,6 +20,7 @@ import {
 } from '@/types';
 import { useMutation } from '@/utils/api';
 import { useMergeStatus } from '@/utils/api';
+import { useStorage } from '@/utils/storage/useStorage.util';
 
 interface UpdateAssetProps {
   key: string;
@@ -219,12 +220,11 @@ export const useBulkAddAsset = () => {
   });
 };
 
-interface GetAssetProps {
-  filters: AssetFilters;
-}
-
-export function useGetAssets(props: GetAssetProps) {
-  const { filters } = props;
+export function useGetAssets() {
+  const [filters, setFilters] = useStorage<AssetFilters>(
+    { queryKey: 'assetFilters' },
+    { search: '', attributes: [], priorities: [], sources: [] }
+  );
 
   const [isFilteredDataFetching, setIsFilteredDataFetching] = useState(false);
 
@@ -380,5 +380,14 @@ export function useGetAssets(props: GetAssetProps) {
     }
   }, [JSON.stringify({ data }), filters.search, isFetching, hasNextPage]);
 
-  return { data, status, fetchNextPage, error, isFetchingNextPage, isFetching };
+  return {
+    data,
+    status,
+    fetchNextPage,
+    error,
+    isFetchingNextPage,
+    isFetching,
+    filters,
+    setFilters,
+  };
 }

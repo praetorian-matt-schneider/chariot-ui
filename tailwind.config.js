@@ -138,6 +138,9 @@ module.exports = {
       },
     }),
     extend: {
+      flexGrow: {
+        2: '2',
+      },
       fontFamily: {
         sans: ['Inter var', 'Inter', ...defaultTheme.fontFamily.sans],
         mono: ['IBM Plex Mono', ...defaultTheme.fontFamily.mono],

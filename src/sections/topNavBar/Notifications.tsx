@@ -2,11 +2,11 @@ import React, { useEffect } from 'react';
 import { ArrowPathRoundedSquareIcon } from '@heroicons/react/24/outline';
 
 import { Dropdown } from '@/components/Dropdown';
-import { formatAlertCount } from '@/components/MyInbox';
 import { useMy } from '@/hooks/useMy';
 import { JobStatus } from '@/types';
 import { cn } from '@/utils/classname';
 import { sToMs } from '@/utils/date.util';
+import { abbreviateNumber } from '@/utils/misc.util';
 import { getRoute } from '@/utils/route.util';
 import { StorageKey, useStorage } from '@/utils/storage/useStorage.util';
 
@@ -124,7 +124,7 @@ export const Notifications: React.FC<Props> = ({ onNotify, onClick }) => {
                 : 'w-5 h-5 -top-2 -right-1'
             )}
           >
-            {formatAlertCount(runningJobs)}
+            {abbreviateNumber(runningJobs)}
           </span>
         )}
       </span>

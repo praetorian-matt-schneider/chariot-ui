@@ -149,7 +149,6 @@ export const CollaboratingWith = () => {
     <>
       <div className="flex w-full flex-col">
         <Table
-          className="border-none p-0 shadow-none"
           name="collaborators"
           columns={columns}
           data={collaboratorsWithCount}
@@ -158,7 +157,6 @@ export const CollaboratingWith = () => {
           noData={{
             description: 'No collaborating organizations found.',
           }}
-          isTableView={false}
           error={null}
         />
       </div>

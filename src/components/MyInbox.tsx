@@ -5,15 +5,9 @@ import { Dropdown } from '@/components/Dropdown';
 import { useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
 import { cn } from '@/utils/classname';
 import { sToMs } from '@/utils/date.util';
+import { abbreviateNumber } from '@/utils/misc.util';
 import { getRoute } from '@/utils/route.util';
 import { StorageKey, useStorage } from '@/utils/storage/useStorage.util';
-
-export const formatAlertCount = (count: number) => {
-  if (count > 999) {
-    return (count / 1000).toFixed(1) + 'k';
-  }
-  return count;
-};
 
 const MyInbox: React.FC = () => {
   const { data: alerts = [], isPending } = useGetAccountAlerts({
@@ -81,7 +75,7 @@ const MyInbox: React.FC = () => {
                   : 'w-5 h-5 -top-2 -right-1'
               )}
             >
-              {formatAlertCount(totalAlerts)}
+              {abbreviateNumber(totalAlerts)}
             </span>
           )}
         </span>

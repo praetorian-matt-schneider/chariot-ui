@@ -384,12 +384,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
                 Parent Assets
               </h3>
               <Table
-                contentClassName="max-w-full"
                 tableClassName="border-0"
-                className={cn(
-                  'max-h-96',
-                  parentAssets.length === 0 && 'justify-center'
-                )}
                 name="parent assets"
                 columns={[
                   {
@@ -431,7 +426,6 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
                   title: 'This asset has no parent assets.',
                   styleType: 'text',
                 }}
-                isTableView={false}
               />
             </div>
 
@@ -442,12 +436,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
                 Child Assets
               </h3>
               <Table
-                contentClassName="max-w-full"
                 tableClassName="border-0"
-                className={cn(
-                  'max-h-96',
-                  childAssetsAttributes.length === 0 && 'justify-center'
-                )}
                 name="child assets"
                 columns={[
                   {
@@ -489,7 +478,6 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
                   title: 'This asset has no child assets.',
                   styleType: 'text',
                 }}
-                isTableView={false}
               />
             </div>
           </div>

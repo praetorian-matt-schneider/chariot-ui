@@ -104,7 +104,6 @@ export const Users: React.FC = () => {
   return (
     <div className="flex w-full flex-col items-start">
       <Table
-        className="border-none p-0 shadow-none"
         name="users"
         columns={columns}
         data={users}
@@ -114,7 +113,6 @@ export const Users: React.FC = () => {
         noData={{
           description: 'No authorized users found.',
         }}
-        isTableView={false}
       />
       <Button
         styleType="none"
