@@ -56,7 +56,7 @@ const MyInbox: React.FC = () => {
           type: 'divider' as const,
         },
         ...alerts.map(alert => ({
-          label: alert.label,
+          label: alert.name,
           labelSuffix: alert.count.toLocaleString(),
           className: 'flex items-center',
           to: `/app/alerts?query=${alert.query}`,

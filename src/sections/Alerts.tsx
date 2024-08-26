@@ -415,10 +415,10 @@ const Alerts: React.FC = () => {
               }}
             >
               <div className="flex flex-col space-y-1">
-                <p className="text-md select-none font-medium">{alert.label}</p>
+                <p className="text-md select-none font-medium">{alert.name}</p>
 
                 <span className="text-xs font-normal text-gray-500">
-                  {alert.count} {alert.label.split(' ')[0].toLowerCase()}
+                  {alert.count} {alert.name.split(' ')[0].toLowerCase()}
                 </span>
               </div>
             </div>

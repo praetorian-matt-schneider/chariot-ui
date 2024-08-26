@@ -5,7 +5,7 @@ import { UseExtendQueryOptions, useQuery } from '@/utils/api';
 
 export interface Alert {
   priority: string;
-  label: string;
+  name: string;
   count: number;
   query: string;
 }
