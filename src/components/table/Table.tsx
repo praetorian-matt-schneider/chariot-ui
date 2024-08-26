@@ -28,7 +28,7 @@ import { useScroll } from '@/hooks';
 import { useResize } from '@/hooks/useResize';
 import { RenderHeaderExtraContentSection } from '@/sections/AuthenticatedApp';
 import { cn } from '@/utils/classname';
-import { useGetStickyHeight } from '@/utils/misc.util';
+import { useSticky } from '@/utils/sticky.util';
 import { useStorage } from '@/utils/storage/useStorage.util';
 
 // eslint-disable-next-line complexity
@@ -56,7 +56,11 @@ export function Table<TData>(props: TableProps<TData>) {
     search: controlledSearch,
   } = props;
 
-  const { stickyTopHeight, ref: containerRef } = useGetStickyHeight(-16);
+  const { getSticky, useCreateSticky } = useSticky();
+
+  const stickyRef = useCreateSticky<HTMLTableSectionElement>({
+    id: 'table-header',
+  });
 
   const [expandedGroups, setExpandedGroups] = useState(
     groupBy?.map(group => group.label) || []
@@ -315,7 +319,7 @@ export function Table<TData>(props: TableProps<TData>) {
   }, []);
 
   return (
-    <div id="localBody" ref={containerRef}>
+    <div id="localBody">
       {(bodyHeader || parsedActions || parsedPrimaryAction) && (
         <RenderHeaderExtraContentSection>
           <div className=" flex flex-col justify-between gap-4 lg:flex-row">
@@ -411,10 +415,11 @@ export function Table<TData>(props: TableProps<TData>) {
           )}
         >
           <thead
+            ref={stickyRef}
             className={'sticky bg-layer0'}
             style={{
               zIndex: 1,
-              top: stickyTopHeight,
+              top: getSticky('1', '2Right'),
             }}
           >
             <tr className="relative">

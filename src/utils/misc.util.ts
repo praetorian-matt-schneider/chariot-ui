@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export function isArrayBufferEmpty(arrayBuffer: ArrayBuffer) {
   // Convert the ArrayBuffer to a Uint8Array
@@ -23,50 +23,16 @@ export const abbreviateNumber = (value: number) => {
   return shortValue + suffixes[suffixNum];
 };
 
-export function useGetStickyHeight(offset: number = 0) {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const [stickyTopHeight, setstickyTopHeight] = useState(0);
-
-  function getStickyElements() {
-    const allElements = Array.prototype.slice.call(
-      document.querySelectorAll('.sticky')
-    ) as Element[];
-    const topElemets = allElements.filter(function (element) {
-      return !containerRef.current?.contains(element);
-    });
-
-    return topElemets;
-  }
-
-  function getStickyElementsHeight() {
-    const stickyElements = getStickyElements();
-
-    const topHeight = stickyElements.reduce((acc, element) => {
-      return acc + element.clientHeight;
-    }, 0);
-
-    setstickyTopHeight(topHeight + offset);
-  }
+export function useGetScreenSize() {
+  const [screenSize, setScreenSize] = useState(window.innerWidth);
 
   useEffect(() => {
-    const stickElements = getStickyElements();
-
-    stickElements.forEach(element => {
-      const observer = new MutationObserver(getStickyElementsHeight);
-
-      observer.observe(element, {
-        attributes: true,
-        childList: true,
-        subtree: true,
-      });
-
-      window.addEventListener('resize', getStickyElementsHeight);
-    });
+    function setIsSmallScreenFn() {
+      setScreenSize(window.innerWidth);
+    }
+    window.addEventListener('resize', setIsSmallScreenFn);
+    setIsSmallScreenFn();
   }, []);
 
-  return {
-    ref: containerRef,
-    stickyTopHeight,
-  };
+  return screenSize;
 }

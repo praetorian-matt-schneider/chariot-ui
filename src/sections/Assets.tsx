@@ -1,5 +1,6 @@
-import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import React, { ReactNode, useMemo, useState } from 'react';
 import { ChevronDownIcon, PuzzlePieceIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon } from '@heroicons/react/24/solid';
 
 import { Accordian } from '@/components/Accordian';
 import { Button } from '@/components/Button';
@@ -16,10 +17,7 @@ import { getAssetStatusProperties } from '@/components/ui/AssetStatusChip';
 import { useGetAssets, useUpdateAsset } from '@/hooks/useAssets';
 import { useIntegration } from '@/hooks/useIntegration';
 import { AssetStatusWarning } from '@/sections/AssetStatusWarning';
-import {
-  HeaderPortalSections,
-  RenderHeaderExtraContentSection,
-} from '@/sections/AuthenticatedApp';
+import { RenderHeaderExtraContentSection } from '@/sections/AuthenticatedApp';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { parseKeys } from '@/sections/SearchByType';
 import { useGlobalState } from '@/state/global.state';
@@ -35,7 +33,8 @@ import {
   SeverityOpenCounts,
 } from '@/types';
 import { cn } from '@/utils/classname';
-import { abbreviateNumber } from '@/utils/misc.util';
+import { abbreviateNumber, useGetScreenSize } from '@/utils/misc.util';
+import { useSticky } from '@/utils/sticky.util';
 
 export function buildOpenRiskDataset(
   risks: Risk[]
@@ -61,7 +60,9 @@ export function buildOpenRiskDataset(
 }
 
 const Assets: React.FC = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const { getSticky, useCreateSticky } = useSticky();
+  const leftStickyRef = useCreateSticky<HTMLDivElement>({ id: '2Left' });
+  const rightStickyRef = useCreateSticky<HTMLDivElement>({ id: '2Right' });
 
   const {
     modal: {
@@ -90,7 +91,9 @@ const Assets: React.FC = () => {
   const [showAssetStatusWarning, setShowAssetStatusWarning] =
     useState<boolean>(false);
   const [assetStatus, setAssetStatus] = useState<AssetStatus | ''>('');
-  const [isSmallScreen, setIsSmallScreen] = useState<boolean>(false);
+
+  const screenSize = useGetScreenSize();
+  const isSmallScreen = screenSize < 730;
 
   const columns: Columns<AssetsWithRisk> = useMemo(() => {
     const selectedRowData = selectedRows
@@ -309,24 +312,8 @@ const Assets: React.FC = () => {
     };
   }
 
-  const headerHeight = document.getElementById(
-    HeaderPortalSections.EXTRA_CONTENT
-  )?.offsetHeight;
-
-  useEffect(() => {
-    function setIsSmallScreenFn() {
-      if (containerRef.current) {
-        const isContainerRefShort =
-          containerRef.current && containerRef.current?.clientWidth <= 700;
-        setIsSmallScreen(Boolean(isContainerRefShort));
-      }
-    }
-    setIsSmallScreenFn();
-    window.addEventListener('resize', setIsSmallScreenFn);
-  }, []);
-
   return (
-    <div className="flex w-full shadow-md" ref={containerRef}>
+    <div className="flex w-full shadow-md">
       <RenderHeaderExtraContentSection>
         <div className="flex flex-wrap justify-between gap-4">
           <PageCounts
@@ -358,17 +345,24 @@ const Assets: React.FC = () => {
         </div>
       </RenderHeaderExtraContentSection>
       {!isSmallScreen && (
-        <div className="w-[300px] shrink-0 ">
+        <div className="w-[300px] shrink-0 bg-gray-100">
           <div
-            className="z-10 flex flex-col gap-4 bg-gray-100 p-4"
+            ref={leftStickyRef}
+            className="sticky flex flex-col gap-4 bg-gray-100 p-4"
             style={{
-              position: 'sticky',
-              top: headerHeight,
+              top: getSticky('1'),
+              zIndex: 1,
             }}
           >
             <div className="flex items-center justify-between">
               <p className="text-lg font-bold">Assets</p>
-              <Button label="New Asset" styleType="primary" />
+              <Button
+                label="New Asset"
+                styleType="primary"
+                onClick={() => {
+                  setShowAddAsset(true);
+                }}
+              />
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium">Search</label>
@@ -380,9 +374,11 @@ const Assets: React.FC = () => {
       )}
       <div className="flex w-full flex-col bg-white">
         <div
-          className="sticky z-10 bg-white"
+          ref={rightStickyRef}
+          className="sticky border-l border-gray-300 bg-white"
           style={{
-            top: headerHeight,
+            top: getSticky('1'),
+            zIndex: 1,
           }}
         >
           Services are entry points on a network that attackers can target, and
@@ -405,6 +401,7 @@ const Assets: React.FC = () => {
 
             return renderActions(assets);
           }}
+          tableClassName="border-r-0 border-l border-gray-300"
           columns={columns}
           data={assets}
           error={assetsError}
@@ -470,12 +467,17 @@ function PageCounts(props: {
 }
 
 function CategoryFilter() {
-  const value: string[] = [];
-  const category: { label: string; options: string[] }[] = [
-    { label: 'New & Interesting', options: ['New', 'Interesting'] },
+  const value: string[] = ['new'];
+  const category: {
+    label: string;
+    options: { label: string; value: string }[];
+  }[] = [
     {
-      label: 'Ports',
-      options: ['80', '443', '8080', '22', '21', '25', '110', '143'],
+      label: 'New & Interesting',
+      options: [
+        { label: 'new', value: 'new' },
+        { label: 'interesting', value: 'interesting' },
+      ],
     },
   ];
 
@@ -491,12 +493,15 @@ function CategoryFilter() {
                   return (
                     <div
                       className={cn(
-                        'rounded-sm px-3 cursor-pointer',
+                        'flex items-center rounded-sm px-3 cursor-pointer text-sm font-semibold py-2',
                         index % 2 !== 0 ? 'bg-layer1' : ''
                       )}
                       key={index}
                     >
-                      {option}
+                      {option.label}
+                      {value.includes(option.value) && (
+                        <CheckCircleIcon className="ml-2 size-4 text-brand" />
+                      )}
                     </div>
                   );
                 })}

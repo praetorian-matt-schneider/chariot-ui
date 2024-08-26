@@ -1,6 +1,6 @@
 import React, { ReactNode, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { ShortcutsHelper } from '@/components/ui/Shortcuts';
 import { useMy } from '@/hooks';
@@ -17,7 +17,9 @@ import { UpgradeModal } from '@/sections/Upgrade';
 import { useAuth } from '@/state/auth';
 import { useBreadCrumbsContext } from '@/state/breadcrumbs';
 import { cn } from '@/utils/classname';
+import { useGetScreenSize } from '@/utils/misc.util';
 import { getRoute } from '@/utils/route.util';
+import { useSticky } from '@/utils/sticky.util';
 
 const offsetViewMargin = 16;
 interface AuthenticatedApp {
@@ -120,12 +122,20 @@ export const HeaderPortalSections = {
 };
 
 export function Header() {
-  const { breadcrumbs } = useBreadCrumbsContext();
+  const location = useLocation();
+  const { useCreateSticky } = useSticky();
+  const screenSize = useGetScreenSize();
 
   // TODO: FIXME - this is a hack to not show sticky header on table pages
-  const showSticky = ['assets', 'risks', 'jobs'].includes(
-    breadcrumbs[1]?.label?.toLowerCase()
-  );
+  const showSticky =
+    screenSize >= 730 &&
+    ['assets', 'risks', 'jobs'].includes(location.pathname.split('/')[2]);
+
+  const stickyRef = useCreateSticky<HTMLDivElement>({
+    id: '1',
+    offset: -16,
+    notSticky: !showSticky,
+  });
 
   return (
     <>
@@ -139,8 +149,9 @@ export function Header() {
         </div>
       </div>
       <div
-        className={cn('w-full bg-header pt-4', showSticky && 'sticky top-0')}
-        style={{ zIndex: 1 }}
+        ref={stickyRef}
+        className={cn('w-full bg-header pt-4', showSticky && 'sticky')}
+        style={{ zIndex: 1, top: 0 }}
       >
         <div
           id={HeaderPortalSections.EXTRA_CONTENT}
