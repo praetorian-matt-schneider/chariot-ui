@@ -128,6 +128,7 @@ export function Table<TData>(props: TableProps<TData>) {
     getScrollElement: () => parentRef,
     estimateSize: () => ROW_HEIGHT,
     overscan: 5,
+    scrollMargin: 100,
   });
 
   function toggleExpandedGroup(group?: string) {
@@ -141,6 +142,8 @@ export function Table<TData>(props: TableProps<TData>) {
       });
     }
   }
+
+  console.log('asd', virtualizer.options.scrollMargin);
 
   const items = virtualizer.getVirtualItems();
   const [before, after] =
@@ -419,7 +422,7 @@ export function Table<TData>(props: TableProps<TData>) {
             className={'sticky bg-layer0'}
             style={{
               zIndex: 1,
-              top: getSticky('1', '2Right'),
+              top: getSticky('1', '2R'),
             }}
           >
             <tr className="relative">

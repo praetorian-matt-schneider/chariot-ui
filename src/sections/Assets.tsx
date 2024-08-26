@@ -61,8 +61,8 @@ export function buildOpenRiskDataset(
 
 const Assets: React.FC = () => {
   const { getSticky, useCreateSticky } = useSticky();
-  const leftStickyRef = useCreateSticky<HTMLDivElement>({ id: '2Left' });
-  const rightStickyRef = useCreateSticky<HTMLDivElement>({ id: '2Right' });
+  const leftStickyRef = useCreateSticky<HTMLDivElement>({ id: '2L' });
+  const rightStickyRef = useCreateSticky<HTMLDivElement>({ id: '2R' });
 
   const {
     modal: {

@@ -91,7 +91,6 @@ export const StickyProvider: React.FC<{ children: React.ReactNode }> = ({
     [JSON.stringify(stickyElements)]
   );
 
-  console.log('stickyElements', stickyElements);
   return (
     <StickyContext.Provider value={{ useCreateSticky, getSticky }}>
       {children}
