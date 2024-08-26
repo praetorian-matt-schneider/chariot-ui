@@ -51,7 +51,7 @@ const Alerts: React.FC = () => {
     if (initialQuery) {
       setQuery(initialQuery);
     } else if (alerts && alerts.length > 0) {
-      setQuery(alerts[0].query);
+      setQuery(alerts[0].value);
     }
   }, [alerts, searchParams]);
 
@@ -404,14 +404,14 @@ const Alerts: React.FC = () => {
               key={index}
               className={cn(
                 'flex cursor-pointer items-start p-4 ',
-                query === alert.query
+                query === alert.value
                   ? 'bg-highlight/10 '
                   : ' hover:bg-gray-100'
               )}
               onClick={() => {
-                searchParams.set('query', alert.query);
+                searchParams.set('query', alert.value);
                 setSearchParams(searchParams);
-                handleCategoryClick(alert.query);
+                handleCategoryClick(alert.value);
               }}
             >
               <div className="flex flex-col space-y-1">

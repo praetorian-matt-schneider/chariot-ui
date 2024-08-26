@@ -59,7 +59,7 @@ const MyInbox: React.FC = () => {
           label: alert.name,
           labelSuffix: alert.count.toLocaleString(),
           className: 'flex items-center',
-          to: `/app/alerts?query=${alert.query}`,
+          to: `/app/alerts?query=${alert.value}`,
         })),
       ];
     }
