@@ -39,7 +39,7 @@ export const JobStatusLabel = {
 export enum RiskStatus {
   Triaged = 'T',
   Opened = 'O',
-  Remediated = 'C',
+  Remediated = 'R',
   MachineOpen = 'MO',
   MachineDeleted = 'MD',
 }
@@ -72,7 +72,7 @@ export const AssetStatusLabel: Record<AssetStatus, string> = {
 export const RiskStatusLabel: Record<RiskStatus, string> = {
   T: 'Pending Triage',
   O: 'Open',
-  C: 'Remediated',
+  R: 'Remediated',
   MO: 'Recommended Opened',
   MD: 'Recommended Deleted',
 };
