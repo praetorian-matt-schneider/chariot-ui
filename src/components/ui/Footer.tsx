@@ -32,7 +32,7 @@ const Footer = () => {
             </a>
             <div className="h-4 border-r border-gray-300" />
             <a
-              href="https://github.com/praetorian-inc/praetorian-cli"
+              href="https://github.com/praetorian-inc/chariot-client"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:underline"
