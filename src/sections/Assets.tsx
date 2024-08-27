@@ -27,6 +27,7 @@ import { useAddAlert, useRemoveAlert } from '@/hooks/useAlerts';
 import { PartialAsset, useGetAssets, useUpdateAsset } from '@/hooks/useAssets';
 import { useCounts } from '@/hooks/useCounts';
 import { useIntegration } from '@/hooks/useIntegration';
+import { useBulkReRunJob } from '@/hooks/useJobs';
 import { AssetStatusWarning } from '@/sections/AssetStatusWarning';
 import { RenderHeaderExtraContentSection } from '@/sections/AuthenticatedApp';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
@@ -125,6 +126,7 @@ const Assets: React.FC = () => {
 
   const { mutateAsync: addAlert } = useAddAlert();
   const { mutateAsync: removeAlert } = useRemoveAlert();
+  const { mutateAsync: bulkReRunJob } = useBulkReRunJob();
 
   const { getAssetDrawerLink } = getDrawerLink();
   const {
@@ -420,6 +422,16 @@ const Assets: React.FC = () => {
           { type: 'divider', label: 'Divider' },
           {
             label: 'Scan now',
+            onClick: () => {
+              bulkReRunJob(
+                assets.map(asset => {
+                  return {
+                    capability: 'nuclei',
+                    jobKey: `#asset#${asset.name}#${asset.dns}`,
+                  };
+                })
+              );
+            },
           },
         ],
       },
