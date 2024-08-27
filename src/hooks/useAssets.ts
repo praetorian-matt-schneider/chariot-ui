@@ -241,6 +241,9 @@ export function useGetAssets() {
     status: assetByNameStatus,
     error: assetSearchByNameError,
     isFetching: isFetchingAssetSearchByName,
+    fetchNextPage: assetSearchByNameFetchNextPage,
+    isFetchingNextPage: assetSearchByNameIsFetchingNextPage,
+    hasNextPage: assetSearchByNameHasNextPage,
   } = useGenericSearch(
     { query: `name:${debouncedSearch}` },
     { enabled: isSearched }
@@ -250,6 +253,9 @@ export function useGetAssets() {
     status: assetSearchByDnsStatus,
     error: assetSearchByDnsError,
     isFetching: isFetchingAssetSearchByDns,
+    fetchNextPage: assetSearchByDnsFetchNextPage,
+    isFetchingNextPage: assetSearchByDnsIsFetchingNextPage,
+    hasNextPage: assetSearchByDnsHasNextPage,
   } = useGenericSearch(
     { query: `dns:${debouncedSearch}` },
     { enabled: isSearched }
@@ -261,8 +267,8 @@ export function useGetAssets() {
     isFetching: isFetchingMyAssets,
     fetchNextPage: myAssetsFetchNextPage,
     isFetchingNextPage: myAssetsIsFetchingNextPage,
-    error: myAssetsError,
     hasNextPage: myAssetsHasNextPage,
+    error: myAssetsError,
   } = useMy(
     {
       resource: 'asset',
@@ -303,7 +309,7 @@ export function useGetAssets() {
         : [myAssetsStatus, riskStatus])
   );
   const isFetchingNextPage = debouncedSearch
-    ? false
+    ? assetSearchByNameIsFetchingNextPage || assetSearchByDnsIsFetchingNextPage
     : isAttributesFilter
       ? isFetchingAttributesNextPage
       : myAssetsIsFetchingNextPage;
@@ -313,7 +319,10 @@ export function useGetAssets() {
       ? attributesError || risksError
       : myAssetsError || risksError;
   const fetchNextPage = debouncedSearch
-    ? undefined
+    ? () => {
+        assetSearchByNameFetchNextPage();
+        assetSearchByDnsFetchNextPage();
+      }
     : isAttributesFilter
       ? attributesFetchNextpage
       : myAssetsFetchNextPage;
@@ -325,7 +334,7 @@ export function useGetAssets() {
       ? isFetchingAttributes || isFetchingRisks
       : isFetchingMyAssets || isFetchingRisks;
   const hasNextPage = debouncedSearch
-    ? false
+    ? assetSearchByNameHasNextPage || assetSearchByDnsHasNextPage
     : isAttributesFilter
       ? isAttributesHasNextPage
       : myAssetsHasNextPage;
