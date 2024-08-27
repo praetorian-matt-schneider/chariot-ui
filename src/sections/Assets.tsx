@@ -443,7 +443,7 @@ const Assets: React.FC = () => {
           value: filters.search,
           onChange: search => {
             setFilters(prevFilter => {
-              return { ...prevFilter, search };
+              return { ...prevFilter, search, attributes: [] };
             });
           },
         }}
@@ -452,7 +452,7 @@ const Assets: React.FC = () => {
           filterDescription: getFilterDescription(filters.attributes[0] || ''),
           onChange: attributes => {
             setFilters(prevFilter => {
-              return { ...prevFilter, attributes };
+              return { ...prevFilter, attributes, search: '' };
             });
           },
           category,
