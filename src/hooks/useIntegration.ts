@@ -7,11 +7,7 @@ import {
   Integrations,
   riskIntegrations,
 } from '@/sections/overview/Integrations';
-import { Account, Asset } from '@/types';
-
-export type GetStartedStatus = 'notConnected' | 'setup' | 'connected';
-
-type AccountWithType = Account & { type: string; displayName: string };
+import { Account, AccountWithType, Asset, GetStartedStatus } from '@/types';
 
 export const useIntegration = () => {
   const { data: accounts, status } = useMy(

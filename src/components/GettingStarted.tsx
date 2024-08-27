@@ -10,7 +10,8 @@ import {
 import { Button } from '@/components/Button';
 import { Tooltip } from '@/components/Tooltip';
 import { useModifyAccount } from '@/hooks';
-import { GetStartedStatus } from '@/hooks/useIntegration';
+import { Integrations } from '@/sections/overview/Integrations';
+import { GetStartedStatus, IntegrationData } from '@/types';
 import { cn } from '@/utils/classname';
 
 export const GettingStartedStep: React.FC<{
@@ -20,7 +21,26 @@ export const GettingStartedStep: React.FC<{
   focusedStep: boolean;
   Icon: ComponentType<React.SVGProps<SVGSVGElement>>;
   onClick: () => void;
-}> = ({ title, description, status, focusedStep, Icon, onClick }) => {
+  integrations?: IntegrationData[];
+}> = ({
+  title,
+  description,
+  status,
+  focusedStep,
+  Icon,
+  onClick,
+  integrations,
+}) => {
+  console.log('integrations', integrations);
+  // deduplicate integrations by id
+  const uniqueIntegrations =
+    integrations &&
+    integrations.reduce((acc, integration) => {
+      if (acc.some(accIntegration => accIntegration.id === integration.id)) {
+        return acc;
+      }
+      return [...acc, integration];
+    }, [] as IntegrationData[]);
   return (
     <div
       className="flex flex-1 cursor-pointer flex-col items-center rounded-lg border-2 border-dashed border-header-dark bg-header p-4 pt-0"
@@ -37,7 +57,28 @@ export const GettingStartedStep: React.FC<{
           )}
         >
           {status === 'connected' && (
-            <CheckCircleIcon className="size-8 text-green-500" />
+            <div className="flex flex-row items-center justify-center space-x-4">
+              {integrations ? (
+                uniqueIntegrations
+                  ?.filter(integration => integration.id in Integrations)
+                  .map(integration => {
+                    return (
+                      <img
+                        key={integration.id}
+                        src={
+                          Integrations[
+                            integration.id as keyof typeof Integrations
+                          ].logo
+                        }
+                        alt={integration.id}
+                        className="size-8 rounded-full bg-green-50 p-1"
+                      />
+                    );
+                  })
+              ) : (
+                <CheckCircleIcon className="size-8 text-green-500" />
+              )}
+            </div>
           )}
           {status === 'setup' && (
             <CheckCircleIcon className="size-8 text-yellow-500" />
@@ -64,12 +105,16 @@ export const GettingStarted: React.FC<{
     attackSurface: GetStartedStatus;
     riskNotifications: GetStartedStatus;
   };
+  attackSurface: IntegrationData[];
+  riskNotifications: IntegrationData[];
   onRootDomainClick: () => void;
   onAttackSurfaceClick: () => void;
   onRiskNotificationsClick: () => void;
   total: number;
   isFreemiumMaxed: boolean;
 }> = ({
+  attackSurface,
+  riskNotifications,
   completedSteps,
   onRootDomainClick,
   onAttackSurfaceClick,
@@ -77,12 +122,6 @@ export const GettingStarted: React.FC<{
   total,
   isFreemiumMaxed,
 }) => {
-  const allStepsCompleted = [
-    completedSteps.rootDomain,
-    completedSteps.attackSurface,
-    completedSteps.riskNotifications,
-  ].every(status => status === 'connected');
-
   const focusedStepIndex = [
     completedSteps.rootDomain,
     completedSteps.attackSurface,
@@ -131,14 +170,17 @@ export const GettingStarted: React.FC<{
                 focusedStep={focusedStepIndex === 1}
                 Icon={CloudIcon}
                 onClick={onAttackSurfaceClick}
+                integrations={attackSurface}
               />
               <GettingStartedStep
+                description="Configure notifications to stay informed about potential
+                        risks and vulnerabilities."
                 title="Set Risk Notifications"
-                description="Configure notifications to stay informed about potential risks and vulnerabilities."
                 status={completedSteps.riskNotifications}
                 focusedStep={focusedStepIndex === 2}
                 Icon={BellIcon}
                 onClick={onRiskNotificationsClick}
+                integrations={riskNotifications}
               />
             </div>
           </>

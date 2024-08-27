@@ -487,6 +487,23 @@ export interface ModuleMeta {
   Icon: JSX.Element;
   integrations: IntegrationMeta[];
 }
+export type GetStartedStatus = 'notConnected' | 'setup' | 'connected';
+
+export type AccountWithType = Account & { type: string; displayName: string };
+
+export interface IntegrationData {
+  status: string;
+  surface: string;
+  identifier: string;
+  discoveredAssets: number | string;
+  discoveredAssetsStatus: string;
+  actions: string;
+  connected: boolean;
+  id: string;
+  key: string;
+  account?: AccountWithType;
+  type: string;
+}
 
 export enum Integration {
   hook = 'hook',

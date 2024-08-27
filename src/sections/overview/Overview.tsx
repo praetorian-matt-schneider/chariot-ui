@@ -54,7 +54,13 @@ import {
 import SetupModal from '@/sections/SetupModal';
 import { useAuth } from '@/state/auth';
 import { useGlobalState } from '@/state/global.state';
-import { Account, AssetStatus, FREEMIUM_ASSETS_LIMIT, Plan } from '@/types';
+import {
+  Account,
+  AssetStatus,
+  FREEMIUM_ASSETS_LIMIT,
+  IntegrationData,
+  Plan,
+} from '@/types';
 import { JobStatus, JobStatusLabel } from '@/types';
 import { partition } from '@/utils/array.util';
 import { cn } from '@/utils/classname';
@@ -302,7 +308,7 @@ export const Overview: React.FC = () => {
   }
 
   const data = useMemo(() => {
-    const tableData = [
+    const tableData: IntegrationData[] = [
       {
         status: 'success',
         surface: 'Manually Added',
@@ -369,16 +375,19 @@ export const Overview: React.FC = () => {
       }
     );
 
-    const [riskNotification, rest] = partition(
+    const [riskNotifications, rest] = partition(
       tableData,
       row => row.type === 'riskNotification'
     );
 
-    return [
-      ...riskNotification.sort((a, b) => a.surface.localeCompare(b.surface)),
-      ...rest.sort((a, b) => a.surface.localeCompare(b.surface)),
-      ...waitlistedIntegrationsData,
-    ];
+    return {
+      tableData: [
+        ...rest.sort((a, b) => a.surface.localeCompare(b.surface)),
+        ...waitlistedIntegrationsData,
+      ],
+      riskNotifications: riskNotifications,
+      attackSurface: rest,
+    };
   }, [
     assetCount,
     assetCountStatus,
@@ -441,6 +450,8 @@ export const Overview: React.FC = () => {
             attackSurface: attackSurfaceStatus,
             riskNotifications: riskNotificationStatus,
           }}
+          riskNotifications={data.riskNotifications}
+          attackSurface={data.attackSurface}
           onRootDomainClick={() => setIsDomainDrawerOpen(true)}
           onAttackSurfaceClick={() => setIsAttackSurfaceDrawerOpen(true)}
           onRiskNotificationsClick={() =>
@@ -648,7 +659,7 @@ export const Overview: React.FC = () => {
                     ),
                   },
                 ]}
-                data={data}
+                data={data.tableData}
               />
             </div>
           </div>
