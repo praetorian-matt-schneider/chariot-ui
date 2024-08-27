@@ -262,7 +262,7 @@ export function useGetAssets() {
     fetchNextPage: myAssetsFetchNextPage,
     isFetchingNextPage: myAssetsIsFetchingNextPage,
     error: myAssetsError,
-    hasNextPage,
+    hasNextPage: myAssetsHasNextPage,
   } = useMy(
     {
       resource: 'asset',
@@ -284,6 +284,7 @@ export function useGetAssets() {
     isFetchingNextPage: isFetchingAttributesNextPage,
     error: attributesError,
     isFetching: isFetchingAttributes,
+    hasNextPage: isAttributesHasNextPage,
   } = useMy(
     {
       resource: 'attribute',
@@ -321,6 +322,11 @@ export function useGetAssets() {
     : isAttributesFilter
       ? isFetchingAttributes || isFetchingRisks
       : isFetchingMyAssets || isFetchingRisks;
+  const hasNextPage = debouncedSearch
+    ? false
+    : isAttributesFilter
+      ? isAttributesHasNextPage
+      : myAssetsHasNextPage;
 
   const status = isFilteredDataFetching ? 'pending' : apiStatus;
 
