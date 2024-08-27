@@ -119,6 +119,11 @@ export const RiskDropdown: React.FC<Props> = ({
       ...data,
       comment: status,
     }));
+
+    updateRisk({
+      selectedRows: selectedRowsData as Risk[],
+      comment: status,
+    });
     deleteRisk(updatedData);
   }
 

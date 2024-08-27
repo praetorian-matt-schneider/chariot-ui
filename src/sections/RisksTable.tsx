@@ -532,7 +532,10 @@ export function Risks() {
             };
           });
 
-          console.log('deleting', risksToDelete);
+          updateRisk({
+            selectedRows: risksToDelete,
+            comment: status,
+          });
           deleteRisk(risksToDelete);
           setSelectedRows([]);
         }}

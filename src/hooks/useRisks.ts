@@ -227,7 +227,7 @@ export function useDeleteRisk() {
   );
 
   return useMutation<unknown, Error, { key: string }[]>({
-    defaultErrorMessage: `Failed to delete risks`,
+    defaultErrorMessage: `Failed to close risks`,
     mutationFn: async selectedRows => {
       const promises = selectedRows.map(({ key }) => {
         return axios.delete(`/risk`, {
@@ -239,11 +239,10 @@ export function useDeleteRisk() {
         promises.map(p => p.catch(e => e)) // Catch errors to continue deleting
       );
 
-      console.log('constructed requests', promises);
       toast.promise(promise, {
-        loading: 'Deleting risks...',
-        success: 'Risks deleted',
-        error: 'Failed to delete risks',
+        loading: 'Closing risks...',
+        success: 'Risks Closed',
+        error: 'Failed to close risks',
       });
 
       const response = await promise;
