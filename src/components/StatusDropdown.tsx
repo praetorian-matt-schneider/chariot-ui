@@ -39,10 +39,12 @@ const StatusDropdown: React.FC<StatusDropdownProps> = ({
             label: 'Divider',
             type: 'divider',
           },
-          ...Object.keys(RiskStatusLabel).map(status => ({
-            label: RiskStatusLabel[status as RiskStatus],
-            value: status,
-          })),
+          ...Object.keys(RiskStatusLabel)
+            .filter(label => label !== 'R')
+            .map(status => ({
+              label: RiskStatusLabel[status as RiskStatus],
+              value: status,
+            })),
         ],
         onSelect: value => handleSelect(value as RiskStatus[]),
         value: statusFilter.length === 0 ? [''] : statusFilter,
