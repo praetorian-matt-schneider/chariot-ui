@@ -67,8 +67,8 @@ export const AssetStatusLabel: Record<AssetStatus, string> = {
   [AssetStatus.ActiveHigh]: 'Comprehensive Scan',
   [AssetStatus.Active]: 'Vulnerability Scan',
   [AssetStatus.ActiveLow]: 'Discovery Only',
-  [AssetStatus.Frozen]: 'Excluded',
-  [AssetStatus.Deleted]: 'Deleted',
+  [AssetStatus.Frozen]: 'Free scanning',
+  [AssetStatus.Deleted]: 'Delete asset',
 };
 
 export const RiskStatusLabel: Record<RiskStatus, string> = {
