@@ -1,38 +1,36 @@
-import { useEffect, useState } from 'react';
-
 import { Modal } from '@/components/Modal';
-import {
-  RiskClosedStatus,
-  RiskClosedStatusLongDesc,
-  RiskClosedStatusLongLabel,
-  RiskStatus,
-} from '@/types';
 
 interface ClosedStateModal {
   isOpen: boolean;
   onClose: () => void;
-  onStatusChange: (data: { status: RiskStatus; comment?: string }) => void;
+  onStatusChange: (data: { status: string }) => void;
 }
-
-const riskClosedStatusList = Object.values(RiskClosedStatus).map(
-  riskClosedStatus => {
-    return {
-      label: RiskClosedStatusLongLabel[riskClosedStatus],
-      desc: RiskClosedStatusLongDesc[riskClosedStatus],
-      value: riskClosedStatus,
-    };
-  }
-);
 
 export const ClosedStateModal = (props: ClosedStateModal) => {
   const { isOpen, onClose, onStatusChange } = props;
-  const [closingComment, setClosingComment] = useState('');
 
-  useEffect(() => {
-    return () => {
-      setClosingComment('');
-    };
-  }, [isOpen]);
+  const riskClosedStatusList = [
+    {
+      value: 'resolved',
+      label: 'Mark as Resolved',
+      desc: 'This risk has been addressed and resolved; no further action is required.',
+    },
+    {
+      value: 'rejected',
+      label: 'Reject the Risk',
+      desc: 'We acknowledge the presence of this risk and accept it, understanding the potential impact.',
+    },
+    {
+      value: 'false_positive',
+      label: 'False Positive',
+      desc: 'This risk is deemed to be a false positive or not valid, and no further action will be taken.',
+    },
+    {
+      value: 'out_of_scope',
+      label: 'Out of Scope',
+      desc: 'This risk is out of scope and will not be addressed or mitigated.',
+    },
+  ];
 
   return (
     <Modal title="Select Reason" open={isOpen} onClose={onClose}>
@@ -43,8 +41,7 @@ export const ClosedStateModal = (props: ClosedStateModal) => {
             className="flex cursor-pointer items-center rounded-lg bg-layer2 p-3 transition duration-150 ease-in-out hover:bg-gray-100"
             onClick={() => {
               onStatusChange({
-                status: riskClosedStatus.value as unknown as RiskStatus,
-                comment: closingComment,
+                status: riskClosedStatus.label,
               });
               onClose();
             }}

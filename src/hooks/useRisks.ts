@@ -7,6 +7,7 @@ import { getQueryKey } from '@/hooks/useQueryKeys';
 import { queryClient } from '@/queryclient';
 import { Risk, RiskStatus, RiskTemplate } from '@/types';
 import { useMutation } from '@/utils/api';
+import { getRiskSeverity, getRiskStatus } from '@/utils/riskStatus.util';
 
 export const useCreateRisk = () => {
   const axios = useAxios();
@@ -193,11 +194,13 @@ export function useBulkUpdateRisk() {
         const riskComposite = item.key.split('#');
         const finding = riskComposite[3];
         let newStatus = item.status;
+        const oldSeverity = getRiskSeverity(item.status);
+        const oldStatus = getRiskStatus(item.status);
         if (status) {
-          newStatus = `${status?.[0]}${newStatus?.[1]}${status?.[1] || ''}`;
+          newStatus = `${status}${oldSeverity}`;
         }
         if (severity) {
-          newStatus = `${newStatus[0]}${severity}${newStatus?.[2] || ''}`;
+          newStatus = `${oldStatus}${severity}`;
         }
         return {
           key: item.key,
@@ -210,6 +213,66 @@ export function useBulkUpdateRisk() {
   }
 
   return { handleUpdate, status };
+}
+
+export function useDeleteRisk() {
+  const axios = useAxios();
+  const { updateAllSubQueries } = useMy(
+    {
+      resource: 'risk',
+    },
+    {
+      enabled: false,
+    }
+  );
+
+  return useMutation<unknown, Error, { key: string }[]>({
+    defaultErrorMessage: `Failed to close risks`,
+    mutationFn: async selectedRows => {
+      const promises = selectedRows.map(({ key }) => {
+        return axios.delete(`/risk`, {
+          data: { key }, // Send the key as part of the request body
+        });
+      });
+
+      const promise = Promise.all(
+        promises.map(p => p.catch(e => e)) // Catch errors to continue deleting
+      );
+
+      toast.promise(promise, {
+        loading: 'Closing risks...',
+        success: 'Risks Closed',
+        error: 'Failed to close risks',
+      });
+
+      const response = await promise;
+      const validResults = response.filter(
+        result => !(result instanceof Error)
+      );
+
+      if (validResults.length > 0) {
+        updateAllSubQueries(previous => {
+          const updatedPages = previous.pages.map(page => {
+            return {
+              ...page,
+              data: page.data.filter(
+                risk => !selectedRows.some(row => row.key === risk.key)
+              ),
+            };
+          });
+
+          return { ...previous, pages: updatedPages };
+        });
+      }
+
+      if (validResults.length !== selectedRows.length) {
+        const firstError = response.find(result => result instanceof Error);
+        throw firstError;
+      }
+
+      return;
+    },
+  });
 }
 
 interface ReportRiskProps {

@@ -40,6 +40,7 @@ import {
   AssetStatusLabel,
   Risk,
   RiskSeverity,
+  RiskStatus,
   Severity,
   SeverityDef,
   SeverityOpenCounts,
@@ -49,6 +50,7 @@ import { cn } from '@/utils/classname';
 import { capitalize } from '@/utils/lodash.util';
 import { abbreviateNumber, useGetScreenSize } from '@/utils/misc.util';
 import { Regex } from '@/utils/regex.util';
+import { getRiskSeverity, getRiskStatus } from '@/utils/riskStatus.util';
 import { useSticky } from '@/utils/sticky.util';
 
 export function buildOpenRiskDataset(
@@ -56,11 +58,11 @@ export function buildOpenRiskDataset(
 ): Record<string, SeverityOpenCounts> {
   return risks.reduce(
     (acc, risk) => {
-      if (!risk.status.startsWith('O')) {
+      const status = getRiskStatus(risk.status);
+      const severity = getRiskSeverity(risk.status);
+      if (status !== RiskStatus.Opened) {
         return acc; // Skip this risk if is not in 'Open' status
       }
-
-      const severity = risk.status[1] as Severity;
 
       return {
         ...acc,

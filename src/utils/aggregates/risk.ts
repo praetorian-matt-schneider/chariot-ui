@@ -1,8 +1,9 @@
-import { Risk, RiskStatus, RiskStatusLabel } from '@/types';
+import { Risk, RiskStatusLabel } from '@/types';
 import {
   AggregateCollection,
   defineAggregate,
 } from '@/utils/aggregates/aggregate';
+import { getRiskStatus } from '@/utils/riskStatus.util';
 
 const getDateFromISO = (isoDate: string): string => {
   const date = new Date(isoDate);
@@ -13,21 +14,9 @@ const getDateFromISO = (isoDate: string): string => {
   See the following link for more information on how to add new charts:
   https://github.com/praetorian-inc/chariot-ui?tab=readme-ov-file#adding-new-charts
 */
-const riskStatus = (status: string): string => {
-  switch (status[0]) {
-    case 'M':
-      return RiskStatusLabel[RiskStatus.Machine];
-    case 'O':
-      return RiskStatusLabel[RiskStatus.Opened];
-    case 'C':
-      if (status[2] === 'R') return RiskStatusLabel[RiskStatus.Rejected];
-      if (status[2] === 'F') return RiskStatusLabel[RiskStatus.FalsePositive];
-      if (status[2] === 'S') return RiskStatusLabel[RiskStatus.Scope];
-      return RiskStatusLabel[RiskStatus.Resolved];
-    case 'T':
-    default:
-      return RiskStatusLabel[RiskStatus.Triaged];
-  }
+const riskStatus = (statusAndSeverity: string): string => {
+  const status = getRiskStatus(statusAndSeverity);
+  return RiskStatusLabel[status];
 };
 
 const riskSeverity = (status: string): string => {
