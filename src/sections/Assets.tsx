@@ -619,7 +619,9 @@ export function FancyTable<TData>(
             }}
           >
             <div className="flex items-center justify-between">
-              <p className="text-lg font-bold">{capitalize(tableProps.name)}</p>
+              <p className="text-3xl font-bold">
+                {capitalize(tableProps.name)}
+              </p>
               {addNew && (
                 <Button
                   label={`New ${capitalize(tableProps.name)}`}
