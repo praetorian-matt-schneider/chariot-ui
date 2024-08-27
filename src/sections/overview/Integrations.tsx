@@ -1083,6 +1083,10 @@ export const riskIntegrations = [
   Integrations.teams,
 ];
 
+export const riskIntegrationsKeys = riskIntegrations.map(
+  integration => integration.id
+) as string[];
+
 export const allIntegrations = [
   ...availableAttackSurfaceIntegrations,
   ...comingSoonAttackSurfaceIntegrations,

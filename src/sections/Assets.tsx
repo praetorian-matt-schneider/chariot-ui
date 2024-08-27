@@ -29,6 +29,10 @@ import { useIntegration } from '@/hooks/useIntegration';
 import { useBulkReRunJob } from '@/hooks/useJobs';
 import { AssetStatusWarning } from '@/sections/AssetStatusWarning';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
+import {
+  riskIntegrations,
+  riskIntegrationsKeys,
+} from '@/sections/overview/Integrations';
 import { parseKeys } from '@/sections/SearchByType';
 import { useGlobalState } from '@/state/global.state';
 import {
@@ -373,6 +377,7 @@ const Assets: React.FC = () => {
   return (
     <>
       <FancyTable
+        belowTitleContainer={<IntegratedRisksNotifications />}
         addNew={() => setShowAddAsset(true)}
         search={{
           value: filters.search,
@@ -592,9 +597,17 @@ export function FancyTable<TData>(
     addNew?: () => void;
     search?: { value: string; onChange: (value: string) => void };
     filter?: CategoryFilterProps;
+    belowTitleContainer?: ReactNode;
   }
 ) {
-  const { tableheader, addNew, search, filter, ...tableProps } = props;
+  const {
+    tableheader,
+    addNew,
+    search,
+    filter,
+    belowTitleContainer,
+    ...tableProps
+  } = props;
   const screenSize = useGetScreenSize();
   const isSmallScreen = screenSize < 730;
 
@@ -610,7 +623,7 @@ export function FancyTable<TData>(
           <div
             ref={leftStickyRef}
             className={cn(
-              'sticky flex flex-col gap-4 bg-gray-100 p-4',
+              'sticky flex flex-col gap-4 bg-gray-100 py-4',
               filter && 'pb-0'
             )}
             style={{
@@ -618,7 +631,7 @@ export function FancyTable<TData>(
               zIndex: 1,
             }}
           >
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between  px-4">
               <p className="text-3xl font-bold">
                 {capitalize(tableProps.name)}
               </p>
@@ -632,8 +645,9 @@ export function FancyTable<TData>(
                 />
               )}
             </div>
+            {belowTitleContainer}
             {search && (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 px-4">
                 <label
                   className="text-sm font-semibold"
                   htmlFor={`${tableProps.name}-search`}
@@ -658,7 +672,7 @@ export function FancyTable<TData>(
                 </div>
               </div>
             )}
-            {filter && <hr className="border-t-2 border-gray-300"></hr>}
+            {filter && <hr className="mx-4 border-t-2 border-gray-300"></hr>}
           </div>
           {filter && <CategoryFilter {...filter} />}
         </div>
@@ -734,4 +748,34 @@ function getFilterDescription(attribute: string) {
   const [, attributeName] = attribute.match(Regex.ATTIBUTE_KEY) || [];
 
   return filterDescription[attributeName];
+}
+
+function IntegratedRisksNotifications() {
+  const { data: accounts, status: accountsStatus } = useMy({
+    resource: 'account',
+  });
+
+  const integratedRisksLogos = useMemo(() => {
+    return accounts
+      .filter(account => {
+        return riskIntegrationsKeys.includes(account.member);
+      })
+      .map(account => {
+        return (
+          riskIntegrations.find(({ id }) => id === account.member)?.logo || ''
+        );
+      });
+  }, [JSON.stringify(accounts)]);
+
+  console.log('integratedRisks', integratedRisksLogos);
+
+  return (
+    <Loader isLoading={accountsStatus === 'pending'} className="h-8 w-full">
+      <div className="flex gap-2 bg-gray-200 px-4 py-2">
+        {integratedRisksLogos.map((logo, index) => {
+          return <img key={index} className="size-4" src={logo} />;
+        })}
+      </div>
+    </Loader>
+  );
 }
