@@ -161,7 +161,7 @@ const Assets: React.FC = () => {
           return (
             <div className="flex items-center gap-2 text-black">
               <p className="font-semibold">{asset.name}</p>
-              <p className="text-blueGray-600">{asset.dns}</p>
+              <p className="text-blueGray-500">{asset.dns}</p>
               {asset.riskSummary && (
                 <Tooltip
                   placement="top"
@@ -234,7 +234,7 @@ const Assets: React.FC = () => {
         ),
         id: 'updated',
         cell: 'date',
-        className: 'text-blueGray-600',
+        className: 'text-blueGray-500',
       },
     ];
   }, [JSON.stringify({ selectedRows, assets })]);
@@ -511,6 +511,7 @@ const Assets: React.FC = () => {
         }}
         filter={{
           value: filters.attributes,
+          filterDescription: getFilterDescription(filters.attributes[0] || ''),
           onChange: attributes => {
             setFilters(prevFilter => {
               return { ...prevFilter, attributes };
@@ -629,6 +630,7 @@ interface CategoryFilterProps {
     onAdd: (value: string) => void;
     onRemove: (value: string) => void;
   };
+  filterDescription?: ReactNode;
   value: string[];
   onChange: (value: string[]) => void;
   category: {
@@ -804,54 +806,71 @@ function FancyTable<TData>(
       <div className="flex w-full flex-col bg-white">
         <div
           ref={rightStickyRef}
-          className="sticky bg-white"
+          className="sticky flex items-center bg-white"
           style={{
             top: getSticky('1'),
             zIndex: 1,
           }}
         >
-          {filter?.value.map((attribute, index) => {
-            const [, attributeName, attributeValue] =
-              attribute.match(Regex.ATTIBUTE_KEY) || [];
+          {filter && (
+            <>
+              {filter.value.map((attribute, index) => {
+                const [, attributeName, attributeValue] =
+                  attribute.match(Regex.ATTIBUTE_KEY) || [];
 
-            return (
-              <div
-                key={index}
-                className="m-2 flex w-fit items-center rounded-sm border border-gray-300 bg-gray-100 p-2 pr-4"
-              >
-                {filter.alert && (
-                  <>
-                    {filter.alert.value.includes(attribute) ? (
-                      <BellSlashIcon
-                        className="mr-2 size-5 shrink-0 cursor-pointer stroke-[2px]"
-                        onClick={event => {
-                          event.stopPropagation();
-                          filter.alert?.onRemove(attribute);
-                        }}
-                      />
-                    ) : (
-                      <BellAlertIcon
-                        className="mr-2 size-5 shrink-0 cursor-pointer stroke-[2px] text-gray-400"
-                        onClick={event => {
-                          event.stopPropagation();
-                          filter.alert?.onAdd(attribute);
-                        }}
-                      />
+                return (
+                  <div
+                    key={index}
+                    className="m-2 flex w-fit items-center rounded-sm border border-gray-300 bg-gray-100 p-2 pr-4"
+                  >
+                    {filter.alert && (
+                      <>
+                        {filter.alert.value.includes(attribute) ? (
+                          <BellSlashIcon
+                            className="mr-2 size-5 shrink-0 cursor-pointer stroke-[2px]"
+                            onClick={event => {
+                              event.stopPropagation();
+                              filter.alert?.onRemove(attribute);
+                            }}
+                          />
+                        ) : (
+                          <BellAlertIcon
+                            className="mr-2 size-5 shrink-0 cursor-pointer stroke-[2px] text-gray-400"
+                            onClick={event => {
+                              event.stopPropagation();
+                              filter.alert?.onAdd(attribute);
+                            }}
+                          />
+                        )}
+                      </>
                     )}
-                  </>
-                )}
-                <p className="mr-1 text-base font-bold capitalize">
-                  {attributeName}:
-                </p>
-                <p className="text-sm font-semibold text-gray-500">
-                  {attributeValue}
-                </p>
+                    <p className="mr-1 text-base font-bold capitalize">
+                      {attributeName}:
+                    </p>
+                    <p className="text-sm font-semibold text-gray-500">
+                      {attributeValue}
+                    </p>
+                  </div>
+                );
+              })}
+              <div className="ml-2 text-sm font-medium text-gray-600">
+                {filter.filterDescription}
               </div>
-            );
-          })}
+            </>
+          )}
         </div>
         <Table {...tableProps} isTableView tableClassName="border-none" />
       </div>
     </div>
   );
+}
+
+const filterDesciption = {
+  port: 'Services are entry points on a network that attackers can target, and by scanning them, we identify potential risks that could be exploited.',
+} as Record<string, string>;
+
+function getFilterDescription(attribute: string) {
+  const [, attributeName] = attribute.match(Regex.ATTIBUTE_KEY) || [];
+
+  return filterDesciption[attributeName];
 }
