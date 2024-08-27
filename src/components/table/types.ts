@@ -36,8 +36,10 @@ export interface TableProps<TData> {
     filter: (data: TData) => boolean;
     icon?: ReactNode;
   }[];
+  tablePrefix?: ReactNode;
   skipHeader?: boolean;
   resize?: boolean;
+  tableTop?: number;
   search?: {
     value: string;
     onChange: (value: string) => void;

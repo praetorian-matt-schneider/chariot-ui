@@ -60,9 +60,11 @@ export function Table<TData>(props: TableProps<TData>) {
     loadingRowCount = 25,
     isTableView = true,
     primaryAction,
+    tablePrefix,
     skipHeader,
     resize = false,
     search: controlledSearch,
+    tableTop,
   } = props;
   const headerSectionHeight = document.getElementById(
     HeaderPortalSections.EXTRA_CONTENT
@@ -399,6 +401,7 @@ export function Table<TData>(props: TableProps<TData>) {
           </div>
         </RenderHeaderExtraContentSection>
       )}
+      {tablePrefix}
       {isTableView && (
         <RenderHeaderBreadcrumbSection>
           <Loader styleType="header" className="h-8 w-28" isLoading={isLoading}>
@@ -437,7 +440,9 @@ export function Table<TData>(props: TableProps<TData>) {
             className={'sticky bg-layer0'}
             style={{
               zIndex: 1,
-              top: isTableView && !skipHeader ? headerSectionHeight : 0,
+              top:
+                tableTop ||
+                (isTableView && !skipHeader ? headerSectionHeight : 0),
             }}
           >
             <tr className="relative">

@@ -1,11 +1,19 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
-import { ChevronDownIcon } from '@heroicons/react/20/solid';
-import { ArrowPathIcon } from '@heroicons/react/24/outline';
+import {
+  ArrowPathIcon,
+  ChevronDownIcon,
+  ExclamationTriangleIcon,
+  LockClosedIcon,
+  PauseCircleIcon,
+  PlayCircleIcon,
+} from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
 import { useDebounce } from 'use-debounce';
 
+import { Button } from '@/components/Button';
 import { Dropdown } from '@/components/Dropdown';
+import { Modal } from '@/components/Modal';
 import SourceDropdown from '@/components/SourceDropdown';
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
@@ -14,6 +22,10 @@ import { useMy } from '@/hooks';
 import { useCounts } from '@/hooks/useCounts';
 import { useFilter } from '@/hooks/useFilter';
 import { useReRunJob } from '@/hooks/useJobs';
+import {
+  HeaderPortalSections,
+  RenderHeaderExtraContentSection,
+} from '@/sections/AuthenticatedApp';
 import { Job, JobLabels, JobStatus } from '@/types';
 import { cn } from '@/utils/classname';
 
@@ -72,6 +84,50 @@ const Jobs: React.FC = () => {
     filterByGlobalSearch: true,
   });
   const { mutateAsync: reRunJob } = useReRunJob();
+  const [jobRunning, setJobRunning] = useState(false);
+  const JobIcon = jobRunning ? PauseCircleIcon : PlayCircleIcon;
+  const [showJobsConfirmModal, setShowJobsConfirmModal] = useState(false);
+
+  const failedReasons = useMemo(() => {
+    const failed = jobs.filter(job => job.status === JobStatus.Fail);
+    console.log({ failed });
+    const reasons = failed.reduce(
+      (acc, current) => {
+        if (current.comment) {
+          const splitComment = current.comment.split(':');
+          const comment = `${splitComment[0]}: ${splitComment[1]}`;
+          if (acc[comment]) {
+            acc[comment] = acc[comment] + 1;
+            return acc;
+          }
+          return {
+            ...acc,
+            [comment]: 1,
+          };
+        }
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+    return reasons;
+  }, [jobs]);
+
+  const failedReasonHeight = useMemo(
+    () => document.getElementById('failed-reasons')?.clientHeight ?? 0,
+    [failedReasons]
+  );
+  const failedReasonTop =
+    document.getElementById(HeaderPortalSections.EXTRA_CONTENT)?.offsetHeight ??
+    0;
+
+  console.log({
+    failedReasonHeight,
+    headerTop: failedReasonHeight + failedReasonTop,
+  });
+
+  console.log({
+    failedReasons,
+  });
 
   const [search, setSearch] = useState('');
   const [isFilteredDataFetching, setIsFilteredDataFetching] = useState(false);
@@ -210,7 +266,83 @@ const Jobs: React.FC = () => {
 
   return (
     <div className="flex w-full flex-col">
+      <RenderHeaderExtraContentSection>
+        <div className={'relative mb-4 flex justify-between gap-4  text-white'}>
+          <div className="flex items-center gap-2 rounded-sm bg-header-dark px-8 py-3">
+            <Tooltip
+              placement="left"
+              title={jobRunning ? 'Pause Jobs' : 'Run Jobs'}
+            >
+              <JobIcon
+                className="size-6 cursor-pointer text-white"
+                onClick={() => setShowJobsConfirmModal(true)}
+              />
+            </Tooltip>
+            <div className="text-xl">6 hours</div>
+          </div>
+          <div className="flex flex-1 justify-between bg-header-dark px-6 py-3">
+            {/* Todo Reuse PageCounts from Asset table here */}
+          </div>
+          <div className="flex items-center gap-2 bg-header-dark px-8 py-3">
+            <LockClosedIcon className="size-6 text-white" />
+            <div className="">
+              <div className="text-xl">Self Hosted</div>
+              <Button
+                className="p-0 text-xs text-white underline"
+                styleType="text"
+              >
+                Unlock
+              </Button>
+            </div>
+          </div>
+        </div>
+        <Modal
+          icon={<ExclamationTriangleIcon className="size-7 text-yellow-600" />}
+          title={jobRunning ? 'Pause Jobs' : 'Run Jobs'}
+          onClose={() => setShowJobsConfirmModal(false)}
+          className="px-8"
+          open={showJobsConfirmModal}
+          footer={{
+            text: 'Confirm',
+            disabled: status === 'pending',
+            onClick: () => {
+              setJobRunning(!jobRunning);
+              setShowJobsConfirmModal(false);
+            },
+          }}
+        >
+          Are you sure you want to {jobRunning ? 'pause' : 'run'} jobs now ?
+        </Modal>
+      </RenderHeaderExtraContentSection>
       <Table
+        tablePrefix={
+          failedReasons && Object.keys(failedReasons).length > 0 ? (
+            <div
+              id="failed-reasons"
+              className="sticky z-10"
+              style={{ top: failedReasonTop }}
+            >
+              <div className="relative flex w-full gap-4 rounded-sm border-2 border-dashed border-default bg-layer0 px-6 py-4">
+                <ExclamationTriangleIcon className="size-8 shrink-0 text-red-500" />
+                <div>
+                  <h2 className="text-lg font-semibold">Failed Reasons</h2>
+                  <div className="mt-4 space-y-2">
+                    {Object.entries(failedReasons).map(([reason, count]) => (
+                      <div key={reason} className="flex items-center gap-2">
+                        <span className="flex min-h-8 min-w-8 items-center justify-center rounded-full bg-red-500 px-2 py-1 text-sm text-white">
+                          {count}
+                        </span>
+                        <span className="text-default-light">{reason}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="h-4 w-full bg-layer1" />
+            </div>
+          ) : undefined
+        }
+        tableTop={failedReasonHeight + failedReasonTop}
         resize={true}
         filters={
           <div className="flex gap-4">
