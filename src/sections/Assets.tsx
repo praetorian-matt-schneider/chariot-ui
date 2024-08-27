@@ -5,7 +5,6 @@ import {
   ChevronDownIcon,
   MagnifyingGlassIcon,
   PuzzlePieceIcon,
-  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
 
@@ -252,7 +251,9 @@ const Assets: React.FC = () => {
 
         if (
           attributeName === 'source' ||
-          attributeName === 'CHARIOT__ROOT_DOMAIN'
+          attributeName === 'CHARIOT__ROOT_DOMAIN' ||
+          attributeName === 'new' ||
+          attributeName === 'purchased'
         ) {
           return acc;
         }
@@ -296,7 +297,7 @@ const Assets: React.FC = () => {
         ],
       },
       {
-        label: 'tld',
+        label: 'TLD',
         options: [
           {
             label: 'purchased',
@@ -307,14 +308,14 @@ const Assets: React.FC = () => {
       },
       ...Object.entries(nonDuplicateAttributes).map(([label, value]) => {
         return {
-          label: label,
+          label: capitalize(label),
           options: value,
         };
       }),
       ...(integratedAttackSurface.length > 0
         ? [
             {
-              label: 'surface',
+              label: 'Surface',
               options: integratedAttackSurface.map(surface => {
                 return {
                   label: surface,
@@ -564,7 +565,7 @@ export function CategoryFilter(props: CategoryFilterProps) {
               <li key={index}>
                 <Accordian
                   defaultValue={isOptionSelectedOnInit}
-                  title={capitalize(item.label)}
+                  title={item.label}
                   headerClassName="px-3"
                   contentClassName="max-h-52 overflow-auto"
                 >
@@ -584,7 +585,9 @@ export function CategoryFilter(props: CategoryFilterProps) {
                           }
                         }}
                       >
-                        <p className="">{option.label}</p>
+                        <p style={{ wordBreak: 'break-word' }}>
+                          {option.label}
+                        </p>
                         {value.includes(option.value) && (
                           <CheckCircleIcon className="size-4 shrink-0 text-brand" />
                         )}
@@ -757,7 +760,9 @@ export function FancyTable<TData>(
                   .replace(/#$/, '');
 
                 let labelToDisplay =
-                  attributeName === 'source' ? 'surface' : attributeName;
+                  attributeName === 'source'
+                    ? 'Surface'
+                    : capitalize(attributeName);
 
                 if (attribute === '#attribute#new#') {
                   valueToDisplay = 'new';
@@ -766,7 +771,7 @@ export function FancyTable<TData>(
 
                 if (attribute === '#attribute#purchased#') {
                   valueToDisplay = 'purchased';
-                  labelToDisplay = 'tld';
+                  labelToDisplay = 'TLD';
                 }
 
                 return (
@@ -777,20 +782,10 @@ export function FancyTable<TData>(
                     {filter.alert && (
                       <AlertIcon {...filter.alert} currentValue={attribute} />
                     )}
-                    <p className="text-base font-bold capitalize">
-                      {labelToDisplay}:
-                    </p>
+                    <p className="text-base font-bold">{labelToDisplay}:</p>
                     <p className="text-sm font-semibold text-gray-500">
                       {valueToDisplay}
                     </p>
-                    <XMarkIcon
-                      className="ml-1 size-5 shrink-0 cursor-pointer text-gray-500"
-                      onClick={() => {
-                        filter.onChange(
-                          filter.value.filter(v => v !== attribute)
-                        );
-                      }}
-                    />
                   </div>
                 );
               })}
