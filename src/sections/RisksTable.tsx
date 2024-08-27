@@ -30,7 +30,7 @@ import { useGetKev } from '@/hooks/kev';
 import { useFilter } from '@/hooks/useFilter';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useMy } from '@/hooks/useMy';
-import { useBulkUpdateRisk } from '@/hooks/useRisks';
+import { useBulkUpdateRisk, useDeleteRisk } from '@/hooks/useRisks';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { useGlobalState } from '@/state/global.state';
 import {
@@ -138,6 +138,7 @@ export function Risks() {
   const { getRiskDrawerLink } = getDrawerLink();
   const { handleUpdate: updateRisk, status: updateRiskStatus } =
     useBulkUpdateRisk();
+  const { mutate: deleteRisk } = useDeleteRisk();
 
   const {
     modal: { risk },
@@ -452,7 +453,7 @@ export function Risks() {
                 },
                 {
                   label: 'Closed',
-                  icon: getRiskStatusIcon(RiskStatus.Resolved),
+                  icon: getRiskStatusIcon(RiskStatus.Remediated),
                   onClick: () => {
                     setIsClosedSubStateModalOpen(true);
                   },
@@ -534,14 +535,18 @@ export function Risks() {
       <ClosedStateModal
         isOpen={isClosedSubStateModalOpen}
         onClose={() => setIsClosedSubStateModalOpen(false)}
-        onStatusChange={({ status, comment }) => {
-          updateRisk({
-            selectedRows: selectedRows
-              .map(i => sortedRisks[Number(i)])
-              .filter(Boolean),
-            status,
-            comment,
+        onStatusChange={({ status }) => {
+          const risksToDelete: Risk[] = selectedRows.map(i => {
+            const risk = sortedRisks[Number(i)];
+
+            return {
+              ...risk,
+              comment: status, // Set the comment to the status
+            };
           });
+
+          console.log('deleting', risksToDelete);
+          deleteRisk(risksToDelete);
           setSelectedRows([]);
         }}
       />

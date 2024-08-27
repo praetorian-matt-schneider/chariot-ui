@@ -10,16 +10,14 @@ import { cn } from '@/utils/classname';
 
 export const getRiskStatusIcon = (status: RiskStatus, className = 'size-5') => {
   switch (status) {
-    case RiskStatus.Machine:
+    case RiskStatus.MachineDeleted:
+    case RiskStatus.MachineOpen:
       return <Bot className={className} />;
     case RiskStatus.Triaged:
       return <AdjustmentsHorizontalIcon className={className} />;
     case RiskStatus.Opened:
       return <LockOpenIcon className={className} />;
-    case RiskStatus.Resolved:
-    case RiskStatus.Rejected:
-    case RiskStatus.FalsePositive:
-    case RiskStatus.Scope:
+    case RiskStatus.Remediated:
     default:
       return <LockClosedIcon className={cn('text-default-light', className)} />;
   }

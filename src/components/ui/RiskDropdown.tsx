@@ -13,7 +13,7 @@ import {
 import { Chip } from '@/components/Chip';
 import { Dropdown } from '@/components/Dropdown';
 import { ClosedStateModal } from '@/components/ui/ClosedStateModal';
-import { useBulkUpdateRisk } from '@/hooks/useRisks';
+import { useBulkUpdateRisk, useDeleteRisk } from '@/hooks/useRisks';
 import {
   Risk,
   RiskSeverity,
@@ -45,7 +45,7 @@ const riskStatusOptions = [
   },
   {
     label: 'Closed',
-    value: RiskStatus.Resolved,
+    value: RiskStatus.Remediated,
     icon: <LockClosedIcon className="size-4 stroke-2" />,
   },
 ];
@@ -89,6 +89,7 @@ export const RiskDropdown: React.FC<Props> = ({
     useState(false);
 
   const { handleUpdate: updateRisk } = useBulkUpdateRisk();
+  const { mutate: deleteRisk } = useDeleteRisk();
 
   const data =
     selectedRowsData && selectedRowsData.length > 1 ? selectedRowsData : [risk];
@@ -119,6 +120,14 @@ export const RiskDropdown: React.FC<Props> = ({
     });
   }
 
+  function handleDeleteRisk({ status }: { status: string }) {
+    const updatedData = data.map(data => ({
+      ...data,
+      comment: status,
+    }));
+    deleteRisk(updatedData);
+  }
+
   if (styleType === 'chip') {
     return type === 'status' ? (
       <Chip className={cn(generalChipClass, className)} style="default">
@@ -146,7 +155,7 @@ export const RiskDropdown: React.FC<Props> = ({
             items: riskStatusOptions,
             onClick: value => {
               if (value) {
-                if (value === RiskStatus.Resolved) {
+                if (value === RiskStatus.Remediated) {
                   setIsClosedSubStateModalOpen(true);
                 } else {
                   handleStatusChange({ status: value as RiskStatus });
@@ -167,7 +176,7 @@ export const RiskDropdown: React.FC<Props> = ({
         <ClosedStateModal
           isOpen={isClosedSubStateModalOpen}
           onClose={() => setIsClosedSubStateModalOpen(false)}
-          onStatusChange={handleStatusChange}
+          onStatusChange={handleDeleteRisk}
         />
       </>
     );

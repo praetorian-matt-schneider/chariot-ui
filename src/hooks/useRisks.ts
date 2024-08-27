@@ -212,6 +212,67 @@ export function useBulkUpdateRisk() {
   return { handleUpdate, status };
 }
 
+export function useDeleteRisk() {
+  const axios = useAxios();
+  const { updateAllSubQueries } = useMy(
+    {
+      resource: 'risk',
+    },
+    {
+      enabled: false,
+    }
+  );
+
+  return useMutation<unknown, Error, { key: string }[]>({
+    defaultErrorMessage: `Failed to delete risks`,
+    mutationFn: async selectedRows => {
+      const promises = selectedRows.map(({ key }) => {
+        return axios.delete(`/risk`, {
+          data: { key }, // Send the key as part of the request body
+        });
+      });
+
+      const promise = Promise.all(
+        promises.map(p => p.catch(e => e)) // Catch errors to continue deleting
+      );
+
+      console.log('constructed requests', promises);
+      toast.promise(promise, {
+        loading: 'Deleting risks...',
+        success: 'Risks deleted',
+        error: 'Failed to delete risks',
+      });
+
+      const response = await promise;
+      const validResults = response.filter(
+        result => !(result instanceof Error)
+      );
+
+      if (validResults.length > 0) {
+        updateAllSubQueries(previous => {
+          const updatedPages = previous.pages.map(page => {
+            return {
+              ...page,
+              data: page.data.filter(
+                risk => !selectedRows.some(row => row.key === risk.key)
+              ),
+            };
+          });
+
+          return { ...previous, pages: updatedPages };
+        });
+      }
+
+      if (validResults.length !== selectedRows.length) {
+        const firstError = response.find(result => result instanceof Error);
+        throw firstError;
+      }
+
+      return;
+    },
+  });
+}
+
 interface ReportRiskProps {
   name: string;
 }

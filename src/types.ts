@@ -39,11 +39,9 @@ export const JobStatusLabel = {
 export enum RiskStatus {
   Triaged = 'T',
   Opened = 'O',
-  Resolved = 'C',
-  FalsePositive = 'CF',
-  Rejected = 'CR',
-  Scope = 'CS',
-  Machine = 'M',
+  Remediated = 'C',
+  MachineOpen = 'MO',
+  MachineDeleted = 'MD',
 }
 
 export type RiskCombinedStatus = string;
@@ -74,36 +72,9 @@ export const AssetStatusLabel: Record<AssetStatus, string> = {
 export const RiskStatusLabel: Record<RiskStatus, string> = {
   T: 'Pending Triage',
   O: 'Open',
-  C: 'Resolved',
-  CR: 'Rejected',
-  CF: 'False Positive',
-  CS: 'Out of Scope',
-  M: 'Automatically Closed',
-};
-
-export enum RiskClosedStatus {
-  Resolved = RiskStatus.Resolved,
-  Rejected = RiskStatus.Rejected,
-  FalsePositive = RiskStatus.FalsePositive,
-  Scope = RiskStatus.Scope,
-}
-
-export const RiskClosedStatusLongLabel: Record<RiskClosedStatus, string> = {
-  [RiskStatus.Resolved]: 'Mark as Resolved',
-  [RiskStatus.Rejected]: 'Reject the Risk',
-  [RiskStatus.FalsePositive]: 'False Positive',
-  [RiskStatus.Scope]: 'Out of Scope',
-};
-
-export const RiskClosedStatusLongDesc: Record<RiskClosedStatus, string> = {
-  [RiskStatus.Resolved]:
-    'This risk has been addressed and resolved; no further action is required.',
-  [RiskStatus.Rejected]:
-    'We acknowledge the presence of this risk and accept it, understanding the potential impact.',
-  [RiskStatus.FalsePositive]:
-    'This risk is deemed to be a false positive or not valid, and no further action will be taken.',
-  [RiskStatus.Scope]:
-    'This risk is out of scope and will not be addressed or mitigated.',
+  C: 'Remediated',
+  MO: 'Recommended Opened',
+  MD: 'Recommended Deleted',
 };
 
 export const SeverityDef: Record<RiskSeverity, string> = {

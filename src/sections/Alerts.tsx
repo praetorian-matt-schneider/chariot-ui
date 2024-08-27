@@ -11,7 +11,7 @@ import { useUpdateAsset } from '@/hooks/useAssets';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
 import { useReRunJob } from '@/hooks/useJobs';
-import { useUpdateRisk } from '@/hooks/useRisks';
+import { useDeleteRisk, useUpdateRisk } from '@/hooks/useRisks';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import {
   Asset,
@@ -45,6 +45,7 @@ const Alerts: React.FC = () => {
   const { mutateAsync: updateAsset, status: updateAssetStatus } =
     useUpdateAsset();
   const { mutateAsync: updateRisk, status: updateRiskStatus } = useUpdateRisk();
+  const { mutate: deleteRisk } = useDeleteRisk();
 
   useEffect(() => {
     const initialQuery = searchParams.get('query');
@@ -95,7 +96,7 @@ const Alerts: React.FC = () => {
             </p>
           </>
         );
-      case RiskStatus.Machine:
+      case RiskStatus.MachineDeleted:
         return (
           <>
             <h1 className="text-xl font-bold text-gray-900">
@@ -243,7 +244,7 @@ const Alerts: React.FC = () => {
               </Tooltip>
             </>
           )}
-          {!isAsset(item) && item.status[0] === RiskStatus.Machine && (
+          {!isAsset(item) && item.status[0] === RiskStatus.MachineDeleted && (
             <>
               <Tooltip title="Mark as Closed">
                 <Button
@@ -484,11 +485,11 @@ const Alerts: React.FC = () => {
         onClose={() => setIsClosedSubStateModalOpen(false)}
         onStatusChange={({ status }) => {
           if (selectedItem) {
-            handleRiskChange(
-              selectedItem,
-              status,
-              selectedItem.status[1] as RiskSeverity
-            );
+            const newSelectedItem = {
+              ...selectedItem,
+              comment: status,
+            };
+            deleteRisk([newSelectedItem]);
             setSelectedItem(null);
           }
         }}
