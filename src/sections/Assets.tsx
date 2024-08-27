@@ -282,6 +282,37 @@ const Assets: React.FC = () => {
       );
     }).length;
   }, [JSON.stringify(accounts)]);
+  const parsedRisksCounts = useMemo(() => {
+    return Object.entries(riskCounts).reduce(
+      (acc, [status, count]) => {
+        console.log('status', status);
+
+        if (status[0] === 'O') {
+          acc.o += count;
+        }
+
+        if (status[1] === 'C') {
+          acc.c += count;
+        }
+
+        if (status[0] === 'T') {
+          acc.t += count;
+        }
+
+        if (status[0] === 'C' || status[0] === 'M') {
+          acc.r += count;
+        }
+
+        return acc;
+      },
+      {
+        o: 0,
+        c: 0,
+        r: 0,
+        t: 0,
+      }
+    );
+  }, [JSON.stringify(riskCounts)]);
 
   function updateStatus(assets: string[], status: AssetStatus) {
     setShowAssetStatusWarning(false);
@@ -421,14 +452,26 @@ const Assets: React.FC = () => {
           },
           {
             resources: [
-              { count: 15, label: 'Pending triage', status: riskCountsStatus },
               {
-                count: 19199,
+                count: parsedRisksCounts.t,
+                label: 'Pending triage',
+                status: riskCountsStatus,
+              },
+              {
+                count: parsedRisksCounts.c,
                 label: 'Critical risks',
                 status: riskCountsStatus,
               },
-              { count: 19199, label: 'Open risks', status: riskCountsStatus },
-              { count: 19199, label: 'Remediated', status: riskCountsStatus },
+              {
+                count: parsedRisksCounts.o,
+                label: 'Open risks',
+                status: riskCountsStatus,
+              },
+              {
+                count: parsedRisksCounts.r,
+                label: 'Remediated',
+                status: riskCountsStatus,
+              },
             ],
             icon: <RisksIcon />,
             className: 'grow',
