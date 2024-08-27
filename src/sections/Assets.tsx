@@ -695,12 +695,23 @@ export function FancyTable<TData>(
   );
 }
 
-const filterDesciption = {
-  port: 'Services are entry points on a network that attackers can target, and by scanning them, we identify potential risks that could be exploited.',
+const filterDescription = {
+  protocols:
+    'Services are network access points that can be scanned to reveal vulnerabilities or potential attack vectors.',
+  recentlyDiscovered:
+    'Recently discovered assets, providing insights into the latest additions to your environment.',
+  ports:
+    'Network ports that define communication endpoints, crucial for identifying potential entry points.',
+  tlds: 'Top-level domains that help categorize and manage assets based on their domain structure.',
+  surfaces:
+    'External platforms or systems that represent potential attack surfaces within your environment.',
+  cpes: 'Standardized identifiers for software or hardware configurations, essential for managing vulnerabilities.',
+  clouds:
+    'Cloud-based resources that form part of your cloud integrations, critical for cloud infrastructure management.',
 } as Record<string, string>;
 
 function getFilterDescription(attribute: string) {
   const [, attributeName] = attribute.match(Regex.ATTIBUTE_KEY) || [];
 
-  return filterDesciption[attributeName];
+  return filterDescription[attributeName];
 }
