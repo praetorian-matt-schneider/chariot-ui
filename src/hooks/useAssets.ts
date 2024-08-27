@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { useDebounce } from 'use-debounce';
 
-import { useAssetsWithAttributes } from '@/hooks/useAttribute';
 import { useAxios } from '@/hooks/useAxios';
 import { useCounts } from '@/hooks/useCounts';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
@@ -14,12 +13,13 @@ import {
   AssetFilters,
   AssetStatus,
   AssetStatusLabel,
-  AssetsWithRisk,
   Risk,
   RiskScanMessage,
+  SeverityOpenCounts,
 } from '@/types';
 import { useMutation } from '@/utils/api';
 import { useMergeStatus } from '@/utils/api';
+import { Regex } from '@/utils/regex.util';
 import { useStorage } from '@/utils/storage/useStorage.util';
 
 interface UpdateAssetProps {
@@ -220,16 +220,21 @@ export const useBulkAddAsset = () => {
   });
 };
 
+export type PartialAsset = Pick<Asset, 'name' | 'dns' | 'updated' | 'key'> & {
+  riskSummary?: SeverityOpenCounts;
+};
+
 export function useGetAssets() {
   const [filters, setFilters] = useStorage<AssetFilters>(
     { queryKey: 'assetFilters' },
-    { search: '', attributes: [], priorities: [], sources: [] }
+    { search: '', attributes: [] }
   );
 
   const [isFilteredDataFetching, setIsFilteredDataFetching] = useState(false);
 
   const [debouncedSearch] = useDebounce(filters.search, 500);
   const isSearched = Boolean(filters.search);
+  const isAttributesFilter = Boolean(filters.attributes[0]);
 
   const {
     data: assetSearchByName,
@@ -273,31 +278,53 @@ export function useGetAssets() {
   } = useMy({ resource: 'risk' });
 
   const {
-    data: assetsWithAttributesFilter,
-    status: assetsWithAttributesFilterStatus,
-  } = useAssetsWithAttributes(filters.attributes || []);
+    data: attributes,
+    status: attributesStatus,
+    fetchNextPage: attributesFetchNextpage,
+    isFetchingNextPage: isFetchingAttributesNextPage,
+    error: attributesError,
+    isFetching: isFetchingAttributes,
+  } = useMy(
+    {
+      resource: 'attribute',
+      query: filters.attributes[0].replace('#attribute', ''),
+    },
+    { enabled: isAttributesFilter }
+  );
 
   const apiStatus = useMergeStatus(
     ...(debouncedSearch
       ? [assetByNameStatus, assetSearchByDnsStatus, riskStatus]
-      : [myAssetsStatus, riskStatus])
+      : isAttributesFilter
+        ? [attributesStatus, riskStatus]
+        : [myAssetsStatus, riskStatus])
   );
   const isFetchingNextPage = debouncedSearch
     ? false
-    : myAssetsIsFetchingNextPage;
+    : isAttributesFilter
+      ? isFetchingAttributesNextPage
+      : myAssetsIsFetchingNextPage;
   const error = debouncedSearch
     ? assetSearchByNameError || assetSearchByDnsError || risksError
-    : myAssetsError || risksError;
-  const fetchNextPage = debouncedSearch ? undefined : myAssetsFetchNextPage;
+    : isAttributesFilter
+      ? attributesError || risksError
+      : myAssetsError || risksError;
+  const fetchNextPage = debouncedSearch
+    ? undefined
+    : isAttributesFilter
+      ? attributesFetchNextpage
+      : myAssetsFetchNextPage;
   const isFetching = debouncedSearch
     ? isFetchingAssetSearchByName ||
       isFetchingAssetSearchByDns ||
       isFetchingRisks
-    : isFetchingMyAssets || isFetchingRisks;
+    : isAttributesFilter
+      ? isFetchingAttributes || isFetchingRisks
+      : isFetchingMyAssets || isFetchingRisks;
 
   const status = isFilteredDataFetching ? 'pending' : apiStatus;
 
-  const assets: Asset[] = useMemo(
+  const assets: PartialAsset[] = useMemo(
     () =>
       debouncedSearch
         ? [
@@ -309,10 +336,28 @@ export function useGetAssets() {
             }
             return acc;
           }, [] as Asset[])
-        : myAssets,
+        : isAttributesFilter
+          ? attributes.map(attribute => {
+              const [, assetdns, assetname] =
+                attribute.source.match(Regex.ASSET_KEY) || [];
+
+              return {
+                key: attribute.source,
+                name: assetname,
+                dns: assetdns,
+                updated: attribute.updated,
+              };
+            })
+          : myAssets,
     [
       debouncedSearch,
-      JSON.stringify({ assetSearchByName, assetSearchByDns, myAssets }),
+      isAttributesFilter,
+      JSON.stringify({
+        assetSearchByName,
+        assetSearchByDns,
+        myAssets,
+        attributes,
+      }),
     ]
   );
 
@@ -322,32 +367,8 @@ export function useGetAssets() {
   );
 
   const data = useMemo(() => {
-    let filteredAssets = assets;
-
-    if (assetsWithAttributesFilter.length > 0) {
-      filteredAssets = assetsWithAttributesFilter
-        .map(key => assets.find(asset => asset.key === key))
-        .filter(Boolean) as Asset[];
-    }
-
-    if (filters.priorities.length > 0) {
-      filteredAssets = filteredAssets.filter(({ status }) => {
-        const parsedSource = status.startsWith('F')
-          ? AssetStatus.Frozen
-          : status;
-
-        return filters.priorities.includes(parsedSource);
-      });
-    }
-
-    if (filters.sources?.filter(Boolean).length > 0) {
-      filteredAssets = filteredAssets.filter(({ source }) =>
-        filters.sources.includes(source)
-      );
-    }
-
     // merge risk data with asset data
-    return filteredAssets.map(asset => {
+    return assets.map(asset => {
       const riskSummary = openRiskDataset[asset.dns];
 
       if (riskSummary) {
@@ -355,13 +376,12 @@ export function useGetAssets() {
       }
 
       return asset;
-    }) as AssetsWithRisk[];
+    }) as PartialAsset[];
   }, [
     JSON.stringify({
       assets,
       filters,
     }),
-    assetsWithAttributesFilterStatus,
   ]);
 
   useEffect(() => {

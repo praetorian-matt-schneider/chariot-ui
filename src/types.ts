@@ -386,6 +386,7 @@ export interface MyResource {
   job: Job[];
   attribute: Attribute[];
   file: MyFile[];
+  condition: Condition[];
 }
 
 export interface GenericResource {
@@ -396,6 +397,13 @@ export interface GenericResource {
   attributes: Attribute[];
   files: MyFile[];
   threats: Threat[];
+  conditions: Condition[];
+}
+
+export interface Condition {
+  name: string;
+  value: string;
+  key: string;
 }
 
 export interface Search {
@@ -566,8 +574,6 @@ export interface IntegrationMeta {
 
 export interface AssetFilters {
   attributes: string[];
-  priorities: AssetStatus[];
-  sources: string[];
   search: string;
 }
 

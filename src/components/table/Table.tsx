@@ -143,8 +143,6 @@ export function Table<TData>(props: TableProps<TData>) {
     }
   }
 
-  console.log('asd', virtualizer.options.scrollMargin);
-
   const items = virtualizer.getVirtualItems();
   const [before, after] =
     items.length > 0

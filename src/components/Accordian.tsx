@@ -30,7 +30,7 @@ export function Accordian(props: AccordianProps) {
     >
       <div
         className={cn(
-          'flex cursor-pointer items-center justify-between gap-2 py-1',
+          'flex cursor-pointer items-center justify-between gap-2 py-1 select-none',
           props.headerClassName
         )}
         onClick={() => {
