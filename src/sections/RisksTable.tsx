@@ -35,7 +35,6 @@ import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { useGlobalState } from '@/state/global.state';
 import {
   Risk,
-  RiskCombinedStatus,
   RiskSeverity,
   RiskStatus,
   RiskStatusLabel,
@@ -43,6 +42,7 @@ import {
 } from '@/types';
 import { useMergeStatus } from '@/utils/api';
 import { isKEVRisk } from '@/utils/risk.util';
+import { getRiskSeverity, getRiskStatus } from '@/utils/riskStatus.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
 import { generatePathWithSearch, useSearchParams } from '@/utils/url.util';
 
@@ -60,17 +60,6 @@ export const getFilterLabel = (
   );
   return filter.length === 0 ? `All ${label}` : labels.join(', ');
 };
-
-export function getStatus(status: RiskCombinedStatus): RiskStatus {
-  const baseStatus = status[0];
-  const subStatus = status.length > 1 ? status.slice(2) : '';
-
-  if (baseStatus === 'C' && subStatus) {
-    return `C${subStatus}` as RiskStatus;
-  }
-
-  return baseStatus as RiskStatus;
-}
 
 const getFilteredRisksByCISA = (
   risks: Risk[],
@@ -108,7 +97,7 @@ const getFilteredRisks = (
 
   if (trimmedStatusFilter.length > 0) {
     filteredRisks = filteredRisks.filter(risk =>
-      trimmedStatusFilter.filter(Boolean).includes(getStatus(risk.status))
+      trimmedStatusFilter.filter(Boolean).includes(getRiskStatus(risk.status))
     );
   }
 
@@ -259,9 +248,8 @@ export function Risks() {
         id: 'status',
         fixedWidth: 80,
         cell: (risk: Risk) => {
-          const riskStatusKey =
-            `${risk.status?.[0]}${risk.status?.[2] || ''}` as RiskStatus;
-          const riskSeverityKey = risk.status?.[1] as RiskSeverity;
+          const riskStatusKey = getRiskStatus(risk.status);
+          const riskSeverityKey = getRiskSeverity(risk.status);
 
           const statusIcon = getRiskStatusIcon(riskStatusKey);
           const severityIcon = getRiskSeverityIcon(riskSeverityKey);
@@ -295,8 +283,7 @@ export function Risks() {
         id: 'status',
         className: 'text-left',
         cell: (risk: Risk) => {
-          const riskStatusKey =
-            `${risk.status?.[0]}${risk.status?.[2] || ''}` as RiskStatus;
+          const riskStatusKey = getRiskStatus(risk.status);
           return <span>{RiskStatusLabel[riskStatusKey]}</span>;
         },
       },

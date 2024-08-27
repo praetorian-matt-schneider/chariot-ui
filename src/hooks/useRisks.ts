@@ -7,6 +7,7 @@ import { getQueryKey } from '@/hooks/useQueryKeys';
 import { queryClient } from '@/queryclient';
 import { Risk, RiskStatus, RiskTemplate } from '@/types';
 import { useMutation } from '@/utils/api';
+import { getRiskSeverity, getRiskStatus } from '@/utils/riskStatus.util';
 
 export const useCreateRisk = () => {
   const axios = useAxios();
@@ -193,11 +194,13 @@ export function useBulkUpdateRisk() {
         const riskComposite = item.key.split('#');
         const finding = riskComposite[3];
         let newStatus = item.status;
+        const oldSeverity = getRiskSeverity(item.status);
+        const oldStatus = getRiskStatus(item.status);
         if (status) {
-          newStatus = `${status?.[0]}${newStatus?.[1]}${status?.[1] || ''}`;
+          newStatus = `${status}${oldSeverity}`;
         }
         if (severity) {
-          newStatus = `${newStatus[0]}${severity}${newStatus?.[2] || ''}`;
+          newStatus = `${oldStatus}${severity}`;
         }
         return {
           key: item.key,

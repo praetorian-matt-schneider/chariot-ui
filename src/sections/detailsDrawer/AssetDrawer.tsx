@@ -30,6 +30,7 @@ import { cn } from '@/utils/classname';
 import { formatDate } from '@/utils/date.util';
 import { getSeverityClass } from '@/utils/getSeverityClass.util';
 import { Regex } from '@/utils/regex.util';
+import { getRiskStatus } from '@/utils/riskStatus.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
 import { useSearchParams } from '@/utils/url.util';
 
@@ -159,7 +160,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
     attributesStatus === 'pending';
 
   const openRisks = risks.filter(
-    ({ status }) => status?.[0] === RiskStatus.Opened
+    ({ status }) => getRiskStatus(status) === RiskStatus.Opened
   );
 
   const parentAssets = useMemo(() => {

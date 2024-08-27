@@ -24,9 +24,10 @@ import {
   AssetStatusLabel,
   AssetsWithRisk,
   Risk,
-  Severity,
+  RiskStatus,
   SeverityOpenCounts,
 } from '@/types';
+import { getRiskSeverity, getRiskStatus } from '@/utils/riskStatus.util';
 import { useStorage } from '@/utils/storage/useStorage.util';
 
 export function buildOpenRiskDataset(
@@ -34,11 +35,11 @@ export function buildOpenRiskDataset(
 ): Record<string, SeverityOpenCounts> {
   return risks.reduce(
     (acc, risk) => {
-      if (!risk.status.startsWith('O')) {
+      const status = getRiskStatus(risk.status);
+      const severity = getRiskSeverity(risk.status);
+      if (status !== RiskStatus.Opened) {
         return acc; // Skip this risk if is not in 'Open' status
       }
-
-      const severity = risk.status[1] as Severity;
 
       return {
         ...acc,

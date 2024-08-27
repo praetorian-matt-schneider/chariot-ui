@@ -25,6 +25,7 @@ import {
 } from '@/types';
 import { cn } from '@/utils/classname';
 import { formatDate } from '@/utils/date.util';
+import { getRiskSeverity, getRiskStatus } from '@/utils/riskStatus.util';
 
 const isAsset = (item: Asset | Risk): item is Asset => {
   return Object.values(AssetStatus).includes(item?.status as AssetStatus);
@@ -208,120 +209,123 @@ const Alerts: React.FC = () => {
               </Tooltip>
             </>
           )}
-          {!isAsset(item) && item.status[0] === RiskStatus.Triaged && (
-            <>
-              <Tooltip title="Mark as Open">
-                <Button
-                  styleType="primary"
-                  className="h-8"
-                  onClick={e => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleRiskChange(
-                      item,
-                      RiskStatus.Opened,
-                      item.status[1] as RiskSeverity
-                    );
-                  }}
-                  disabled={updateRiskStatus === 'pending'}
-                >
-                  Accept
-                </Button>
-              </Tooltip>
-              <Tooltip title="Mark as Closed">
-                <Button
-                  styleType="secondary"
-                  className="h-8"
-                  onClick={e => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleOpenModal(item);
-                  }}
-                  disabled={updateRiskStatus === 'pending'}
-                >
-                  Reject
-                </Button>
-              </Tooltip>
-            </>
-          )}
-          {!isAsset(item) && item.status[0] === RiskStatus.MachineDeleted && (
-            <>
-              <Tooltip title="Mark as Closed">
-                <Button
-                  styleType="primary"
-                  className="h-8"
-                  onClick={e => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleOpenModal(item);
-                  }}
-                  disabled={updateRiskStatus === 'pending'}
-                >
-                  Confirm
-                </Button>
-              </Tooltip>
-              <Tooltip title="Mark as Open">
-                <Button
-                  styleType="secondary"
-                  className="h-8"
-                  onClick={e => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleRiskChange(
-                      item,
-                      RiskStatus.Opened,
-                      item.status[1] as RiskSeverity
-                    );
-                  }}
-                  disabled={updateRiskStatus === 'pending'}
-                >
-                  Reopen
-                </Button>
-              </Tooltip>
-            </>
-          )}
-          {!isAsset(item) && item.status[0] === RiskStatus.Opened && (
-            <>
-              <Tooltip title="Rerun capability against this asset">
-                <Button
-                  styleType="primary"
-                  className="h-8"
-                  onClick={e => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    reRunJob({
-                      capability: item.source,
-                      jobKey: `#asset#${item.dns}`,
-                    });
-                  }}
-                  disabled={reRunJobStatus === 'pending'}
-                >
-                  Rescan
-                </Button>
-              </Tooltip>
-              <Tooltip title="Mark as Closed">
-                <Button
-                  styleType="secondary"
-                  className="h-8"
-                  onClick={e => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleOpenModal(item);
-                  }}
-                  disabled={updateRiskStatus === 'pending'}
-                >
-                  Close
-                </Button>
-              </Tooltip>
-            </>
-          )}
+          {!isAsset(item) &&
+            getRiskStatus(item.status) === RiskStatus.Triaged && (
+              <>
+                <Tooltip title="Mark as Open">
+                  <Button
+                    styleType="primary"
+                    className="h-8"
+                    onClick={e => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleRiskChange(
+                        item,
+                        RiskStatus.Opened,
+                        getRiskSeverity(item.status)
+                      );
+                    }}
+                    disabled={updateRiskStatus === 'pending'}
+                  >
+                    Accept
+                  </Button>
+                </Tooltip>
+                <Tooltip title="Mark as Closed">
+                  <Button
+                    styleType="secondary"
+                    className="h-8"
+                    onClick={e => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleOpenModal(item);
+                    }}
+                    disabled={updateRiskStatus === 'pending'}
+                  >
+                    Reject
+                  </Button>
+                </Tooltip>
+              </>
+            )}
+          {!isAsset(item) &&
+            getRiskStatus(item.status) === RiskStatus.MachineDeleted && (
+              <>
+                <Tooltip title="Mark as Closed">
+                  <Button
+                    styleType="primary"
+                    className="h-8"
+                    onClick={e => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleOpenModal(item);
+                    }}
+                    disabled={updateRiskStatus === 'pending'}
+                  >
+                    Confirm
+                  </Button>
+                </Tooltip>
+                <Tooltip title="Mark as Open">
+                  <Button
+                    styleType="secondary"
+                    className="h-8"
+                    onClick={e => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleRiskChange(
+                        item,
+                        RiskStatus.Opened,
+                        getRiskSeverity(item.status) as RiskSeverity
+                      );
+                    }}
+                    disabled={updateRiskStatus === 'pending'}
+                  >
+                    Reopen
+                  </Button>
+                </Tooltip>
+              </>
+            )}
+          {!isAsset(item) &&
+            getRiskStatus(item.status) === RiskStatus.Opened && (
+              <>
+                <Tooltip title="Rerun capability against this asset">
+                  <Button
+                    styleType="primary"
+                    className="h-8"
+                    onClick={e => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      reRunJob({
+                        capability: item.source,
+                        jobKey: `#asset#${item.dns}`,
+                      });
+                    }}
+                    disabled={reRunJobStatus === 'pending'}
+                  >
+                    Rescan
+                  </Button>
+                </Tooltip>
+                <Tooltip title="Mark as Closed">
+                  <Button
+                    styleType="secondary"
+                    className="h-8"
+                    onClick={e => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleOpenModal(item);
+                    }}
+                    disabled={updateRiskStatus === 'pending'}
+                  >
+                    Close
+                  </Button>
+                </Tooltip>
+              </>
+            )}
         </div>
         <div className="flex flex-1 items-center space-x-3 overflow-hidden">
           {!isAsset(item) && (
             <Tooltip
-              title={`${SeverityDef[item.status[1] as RiskSeverity]} Severity`}
+              title={`${SeverityDef[getRiskSeverity(item.status)]} Severity`}
             >
-              {getRiskSeverityIcon(item.status[1] as RiskSeverity)}
+              {getRiskSeverityIcon(getRiskSeverity(item.status))}
             </Tooltip>
           )}
           <div className="flex flex-1 items-center space-x-3 overflow-hidden">
@@ -357,7 +361,7 @@ const Alerts: React.FC = () => {
             <span className="rounded border border-red-400 px-2 py-1 text-xs font-medium text-red-500">
               {isAsset(item)
                 ? AssetStatusLabel[item.status as AssetStatus]
-                : RiskStatusLabel[item.status[0] as RiskStatus]}
+                : RiskStatusLabel[getRiskStatus(item.status)]}
             </span>
           </Tooltip>
         </div>
