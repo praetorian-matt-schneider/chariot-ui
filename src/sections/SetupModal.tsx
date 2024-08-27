@@ -32,7 +32,6 @@ const SetupModal: React.FC<{
   };
 
   const handleLinkIntegration = async () => {
-    console.log('handleLinkIntegration', selectedIntegration);
     if (selectedIntegration) {
       await unLink({
         username: selectedIntegration.member,

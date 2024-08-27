@@ -9,7 +9,7 @@ function Logout() {
     logout();
   }, []);
 
-  return <div></div>;
+  return <div className="fixed left-0 top-0 size-full bg-white"></div>;
 }
 
 export default Logout;

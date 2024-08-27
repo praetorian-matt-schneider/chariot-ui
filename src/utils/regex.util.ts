@@ -20,6 +20,8 @@ export const Regex = {
     NUMERIC_CHARACTERS: /\d/,
     SPECIAL_CHARACTERS: /[^\w\s]/,
   },
+  ATTIBUTE_KEY: /^#attribute#([^#]+)#(.*)/,
+  ASSET_KEY: /#asset#([^#]+)#([^#]+)/,
 };
 
 export const AllowedSeedRegex = new RegExp(

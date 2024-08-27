@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 
 import { useMy } from '@/hooks/useMy';
 import {
@@ -7,7 +7,7 @@ import {
   Integrations,
   riskIntegrations,
 } from '@/sections/overview/Integrations';
-import { Account, Asset } from '@/types';
+import { Account } from '@/types';
 
 export type GetStartedStatus = 'notConnected' | 'setup' | 'connected';
 
@@ -189,16 +189,7 @@ export const useIntegration = () => {
     };
   }, [JSON.stringify(accounts)]);
 
-  const isAssetIntegration = useCallback(
-    (asset: Asset) => {
-      return Boolean(
-        integrations.find(account => account.member === asset.dns)
-      );
-    },
-    [JSON.stringify(integrations)]
-  );
   return {
-    isAssetIntegration,
     status,
     data: {
       ...restProps,

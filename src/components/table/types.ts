@@ -8,26 +8,23 @@ import { NoDataProps } from '@/components/ui/NoData';
 export type CellAlignment = 'center' | 'left' | 'right';
 
 export interface TableProps<TData> {
-  className?: string;
-  contentClassName?: string;
   tableClassName?: string;
   name: string;
   columns: Columns<TData>;
   data: (TData & { children?: TData[] })[];
-  filters?: JSX.Element;
+  bodyHeader?: JSX.Element;
   selection?: {
     value?: string[];
     onChange?: (value: string[]) => void;
   };
   status: 'error' | 'success' | 'pending';
   error: Error | null;
-  skipNoData?: boolean;
   noData?: Partial<NoDataProps>;
   fetchNextPage?: () => void;
   isFetchingNextPage?: boolean;
   onRowClick?: (item: TData, rowIndex: number) => void;
   primaryAction?: (selectedRowsData: TData[]) => ButtonProps;
-  actions?: (selectedRowsData: TData[]) => TableActions;
+  bulkActions?: (selectedRowsData: TData[]) => TableActions;
   rowActions?: (rowData: TData) => TableActions;
   loadingRowCount?: number;
   isTableView?: boolean;
@@ -36,7 +33,6 @@ export interface TableProps<TData> {
     filter: (data: TData) => boolean;
     icon?: ReactNode;
   }[];
-  skipHeader?: boolean;
   resize?: boolean;
   search?: {
     value: string;
@@ -45,7 +41,7 @@ export interface TableProps<TData> {
 }
 
 export interface Column<TData> {
-  label: string;
+  label: ReactNode;
   id: keyof TData | '';
   cell?:
     | 'date'

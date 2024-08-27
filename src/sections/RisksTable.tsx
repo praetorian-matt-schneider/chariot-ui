@@ -20,7 +20,6 @@ import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
 import { getRiskStatusIcon } from '@/components/icons/RiskStatus.icon';
 import { MenuItemProps } from '@/components/Menu';
 import SeverityDropdown from '@/components/SeverityDropdown';
-import SourceDropdown from '@/components/SourceDropdown';
 import StatusDropdown from '@/components/StatusDropdown';
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
@@ -159,7 +158,7 @@ export function Risks() {
     'risk-intel',
     setSelectedRows
   );
-  const [sourcesFilter, setSourcesFilter] = useFilter<string[]>(
+  const [sourcesFilter] = useFilter<string[]>(
     [],
     'risk-sources',
     setSelectedRows
@@ -199,7 +198,6 @@ export function Risks() {
     hasNextPage,
   } = useMy({
     resource: 'risk',
-    filterByGlobalSearch: true,
   });
 
   useEffect(() => {
@@ -357,13 +355,14 @@ export function Risks() {
   return (
     <div className="flex w-full flex-col">
       <Table
+        isTableView
         name={'risks'}
         search={{
           value: search,
           onChange: handleSearchUpdate,
         }}
         resize={true}
-        filters={
+        bodyHeader={
           <div className="flex gap-4">
             <SeverityDropdown
               value={severityFilter}
@@ -403,13 +402,6 @@ export function Risks() {
                 multiSelect: true,
               }}
             />
-            <SourceDropdown
-              type="risk"
-              value={sourcesFilter}
-              onChange={selectedRows => {
-                setSourcesFilter(selectedRows);
-              }}
-            />
           </div>
         }
         primaryAction={() => {
@@ -422,7 +414,7 @@ export function Risks() {
             },
           };
         }}
-        actions={(selectedRows: Risk[]) => {
+        bulkActions={(selectedRows: Risk[]) => {
           return {
             menu: {
               items: [

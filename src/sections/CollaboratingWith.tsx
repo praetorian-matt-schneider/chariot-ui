@@ -33,9 +33,9 @@ export const CollaboratingWith = () => {
     return collaborators.map((collaborator): TableData => {
       const counts = { total: 0, low: 0, medium: 0, high: 0, critical: 0 };
 
-      if (collaborator?.counts?.status) {
-        Object.keys(collaborator.counts.status).forEach(key => {
-          const val = collaborator?.counts?.status![key] || 0;
+      if (collaborator?.counts) {
+        Object.keys(collaborator.counts).forEach(key => {
+          const val = collaborator?.counts?.[key] || 0;
 
           // Hide non-open status and info severity risks
           // These were deemed not important enough to show in the table
@@ -149,7 +149,6 @@ export const CollaboratingWith = () => {
     <>
       <div className="flex w-full flex-col">
         <Table
-          className="border-none p-0 shadow-none"
           name="collaborators"
           columns={columns}
           data={collaboratorsWithCount}
@@ -158,7 +157,6 @@ export const CollaboratingWith = () => {
           noData={{
             description: 'No collaborating organizations found.',
           }}
-          isTableView={false}
           error={null}
         />
       </div>

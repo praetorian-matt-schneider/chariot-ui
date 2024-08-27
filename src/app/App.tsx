@@ -10,6 +10,7 @@ import { BreadCrumbsProvider } from '@/state/breadcrumbs';
 import { GlobalStateProvider } from '@/state/global.state';
 import { SearchProvider } from '@/state/search';
 import { QueryClientProvider } from '@/utils/api';
+import { StickyProvider } from '@/utils/sticky.util';
 
 function AppComponent() {
   useInitAxiosInterceptors();
@@ -58,7 +59,9 @@ function AppProviders({ children }: { children: React.ReactNode }) {
     <GlobalStateProvider>
       <AuthProvider>
         <SearchProvider>
-          <BreadCrumbsProvider>{children}</BreadCrumbsProvider>
+          <StickyProvider>
+            <BreadCrumbsProvider>{children}</BreadCrumbsProvider>
+          </StickyProvider>
         </SearchProvider>
       </AuthProvider>
     </GlobalStateProvider>

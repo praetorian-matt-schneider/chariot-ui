@@ -28,7 +28,6 @@ import { PdfIcon } from '@/components/icons/Pdf.icon';
 import { Loader } from '@/components/Loader';
 import { Modal } from '@/components/Modal';
 import { Tooltip } from '@/components/Tooltip';
-import { Body } from '@/components/ui/Body';
 import { NoData } from '@/components/ui/NoData';
 import { useDownloadFile, useMy, useUploadFile } from '@/hooks';
 import { MyFile, ParsedFileTypes } from '@/types';
@@ -94,15 +93,13 @@ const Files: React.FC = () => {
   }
 
   return (
-    <Body className="border border-gray-200 pb-4">
-      <TreeLevel
-        currentFolder={currentFolder}
-        setCurrentFolder={folder => {
-          setCurrentFolder(folder);
-        }}
-        handleDownload={handleDownload}
-      />
-    </Body>
+    <TreeLevel
+      currentFolder={currentFolder}
+      setCurrentFolder={folder => {
+        setCurrentFolder(folder);
+      }}
+      handleDownload={handleDownload}
+    />
   );
 };
 

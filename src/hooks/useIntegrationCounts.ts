@@ -1,24 +1,26 @@
 // eslint-disable-next-line no-restricted-imports
-import { useQueries } from '@tanstack/react-query';
 import { AxiosInstance } from 'axios';
 
 import { useAxios } from '@/hooks/useAxios';
 import { Account, Statistics } from '@/types';
+import { useQueries } from '@/utils/api';
 
 const fetchIntegrationCounts = async (
   axios: AxiosInstance,
   integration: Account
 ) => {
   try {
-    const sourceKey = `#source##asset#${integration.member}#${integration.value}#asset`;
-    const { data } = (await axios.get('/my/count', {
+    const { data } = await axios.get<Statistics>('/my/count', {
       params: {
-        key: `#attribute${sourceKey}`,
+        key: `#attribute#source##asset#${integration.member}#${integration.value}`,
       },
-    })) as { data: Statistics };
+    });
 
     // Extract the asset count from the `attributes` field with the new key structure
-    const assetCount = data.attributes ? data.attributes[sourceKey] || 0 : 0;
+    const assetCount = Object.values(data).reduce(
+      (acc, value) => acc + value,
+      0
+    );
     return assetCount;
   } catch (error) {
     console.error(`Failed to fetch counts for ${integration.member}:`, error);
@@ -35,7 +37,10 @@ const useIntegrationCounts = (integrations: Account[]) => {
     enabled: !!integration.member,
   }));
 
-  const results = useQueries({ queries });
+  const results = useQueries({
+    // defaultErrorMessage: 'Failed to fetch integration counts',
+    queries,
+  });
 
   return results;
 };
