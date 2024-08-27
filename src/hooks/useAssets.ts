@@ -288,7 +288,9 @@ export function useGetAssets() {
   } = useMy(
     {
       resource: 'attribute',
-      query: filters.attributes[0].replace('#attribute', ''),
+      query: isAttributesFilter
+        ? filters.attributes[0].replace('#attribute', '')
+        : '',
     },
     { enabled: isAttributesFilter }
   );

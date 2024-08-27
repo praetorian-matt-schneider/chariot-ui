@@ -7,6 +7,7 @@ import {
   PuzzlePieceIcon,
 } from '@heroicons/react/24/outline';
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
+import { isToday, parseISO } from 'date-fns';
 
 import { Accordian } from '@/components/Accordian';
 import { Button } from '@/components/Button';
@@ -21,6 +22,7 @@ import { Table } from '@/components/table/Table';
 import { Columns, TableActions, TableProps } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
 import { useMy } from '@/hooks';
+import { useGetCollaborators } from '@/hooks/collaborators';
 import { useAddAlert, useRemoveAlert } from '@/hooks/useAlerts';
 import { PartialAsset, useGetAssets, useUpdateAsset } from '@/hooks/useAssets';
 import { useCounts } from '@/hooks/useCounts';
@@ -28,6 +30,7 @@ import { useIntegration } from '@/hooks/useIntegration';
 import { AssetStatusWarning } from '@/sections/AssetStatusWarning';
 import { RenderHeaderExtraContentSection } from '@/sections/AuthenticatedApp';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
+import { availableAttackSurfaceIntegrationsKeys } from '@/sections/overview/Integrations';
 import { parseKeys } from '@/sections/SearchByType';
 import { useGlobalState } from '@/state/global.state';
 import {
@@ -91,12 +94,34 @@ const Assets: React.FC = () => {
     setFilters,
   } = useGetAssets();
 
-  const { data: attributeCounts = {}, status: attributesStatus } = useCounts({
-    resource: 'attribute',
-    query: '#',
+  const {
+    data: riskCounts = {} as Record<string, number>,
+    status: riskCountsStatus,
+  } = useCounts({
+    resource: 'risk',
+    query: '',
   });
-
+  const {
+    data: assetCounts = {} as Record<string, number>,
+    status: assetCountsStaus,
+  } = useCounts({
+    resource: 'asset',
+    query: '',
+  });
+  const {
+    data: attributeCounts = {} as Record<string, number>,
+    status: attributesStatus,
+  } = useCounts({
+    resource: 'attribute',
+    query: '',
+  });
   const { data: alerts } = useMy({ resource: 'condition' });
+  const { data: jobs, status: jobsStatus } = useMy({ resource: 'job' });
+  const { data: accounts, status: accountsStatus } = useMy({
+    resource: 'account',
+  });
+  const { data: collaborators, status: collaboratorsStatus } =
+    useGetCollaborators();
 
   const { mutateAsync: addAlert } = useAddAlert();
   const { mutateAsync: removeAlert } = useRemoveAlert();
@@ -212,9 +237,7 @@ const Assets: React.FC = () => {
     ];
   }, [JSON.stringify({ selectedRows, assets })]);
   const category = useMemo(() => {
-    const nonDuplicateAttributes = Object.entries(
-      attributeCounts as Record<string, number>
-    ).reduce(
+    const nonDuplicateAttributes = Object.entries(attributeCounts).reduce(
       (acc, [attributeKey, value]) => {
         const [, attributeName, attributeValue] =
           attributeKey.match(Regex.ATTIBUTE_KEY) || [];
@@ -245,6 +268,20 @@ const Assets: React.FC = () => {
       };
     });
   }, [JSON.stringify(attributeCounts)]);
+  const todaysJob = useMemo(() => {
+    return jobs.filter(job => {
+      return isToday(parseISO(job.updated));
+    }).length;
+  }, [JSON.stringify(jobs)]);
+  const attackSurfaceCount = useMemo(() => {
+    return accounts.filter(account => {
+      return (
+        account.value !== 'setup' &&
+        account.value !== 'waitlisted' &&
+        availableAttackSurfaceIntegrationsKeys.includes(account.member)
+      );
+    }).length;
+  }, [JSON.stringify(accounts)]);
 
   function updateStatus(assets: string[], status: AssetStatus) {
     setShowAssetStatusWarning(false);
@@ -365,11 +402,48 @@ const Assets: React.FC = () => {
         counts={[
           {
             resources: [
-              { count: 15, label: 'Attack surfaces' },
-              { count: 19199, label: 'Assets monitored' },
+              {
+                count: attackSurfaceCount,
+                label: 'Attack surfaces',
+                status: accountsStatus,
+              },
+              {
+                count: Object.values(assetCounts).reduce(
+                  (acc, value) => acc + value,
+                  0
+                ),
+                label: 'Assets monitored',
+                status: assetCountsStaus,
+              },
             ],
             icon: <AssetsIcon />,
             className: 'grow',
+          },
+          {
+            resources: [
+              { count: 15, label: 'Pending triage', status: riskCountsStatus },
+              {
+                count: 19199,
+                label: 'Critical risks',
+                status: riskCountsStatus,
+              },
+              { count: 19199, label: 'Open risks', status: riskCountsStatus },
+              { count: 19199, label: 'Remediated', status: riskCountsStatus },
+            ],
+            icon: <RisksIcon />,
+            className: 'grow',
+          },
+          {
+            resources: [
+              { count: todaysJob, label: 'Jobs today', status: jobsStatus },
+              {
+                count: collaborators.length,
+                label: 'Users',
+                status: collaboratorsStatus,
+              },
+            ],
+            icon: <HorseIcon skipHover />,
+            className: 'grow-2',
           },
         ]}
         search={{
@@ -459,7 +533,7 @@ const Assets: React.FC = () => {
 export default Assets;
 
 interface PageCountsProps {
-  resources: { label: string; count: number }[];
+  resources: { label: string; count: number; status: QueryStatus }[];
   icon: ReactNode;
   className?: string;
 }
@@ -479,9 +553,14 @@ function PageCounts(props: PageCountsProps) {
             <div className="text-nowrap text-sm font-semibold">
               {resource.label}
             </div>
-            <div className="text-3xl font-bold">
-              {abbreviateNumber(resource.count)}
-            </div>
+            <Loader
+              className="my-2 h-5 w-1/2"
+              isLoading={resource.status === 'pending'}
+            >
+              <div className="text-3xl font-bold">
+                {abbreviateNumber(resource.count)}
+              </div>
+            </Loader>
           </div>
         );
       })}
