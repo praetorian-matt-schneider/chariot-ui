@@ -443,18 +443,14 @@ const Assets: React.FC = () => {
         search={{
           value: filters.search,
           onChange: search => {
-            setFilters(prevFilter => {
-              return { ...prevFilter, search, attributes: [] };
-            });
+            setFilters({ search, attributes: [] });
           },
         }}
         filter={{
           value: filters.attributes,
           filterDescription: getFilterDescription(filters.attributes[0] || ''),
           onChange: attributes => {
-            setFilters(prevFilter => {
-              return { ...prevFilter, attributes, search: '' };
-            });
+            setFilters({ attributes, search: '' });
           },
           category,
           status: useMergeStatus(accountsStatus, attributesStatus),
