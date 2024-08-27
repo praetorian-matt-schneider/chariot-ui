@@ -773,7 +773,7 @@ function IntegratedRisksNotifications() {
     <Loader isLoading={accountsStatus === 'pending'} className="h-8 w-full">
       <div className="flex gap-2 bg-gray-200 px-4 py-2">
         {integratedRisksLogos.map((logo, index) => {
-          return <img key={index} className="size-4" src={logo} />;
+          return <img key={index} className="size-5" src={logo} />;
         })}
       </div>
     </Loader>
