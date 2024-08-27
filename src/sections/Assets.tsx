@@ -5,6 +5,7 @@ import {
   ChevronDownIcon,
   MagnifyingGlassIcon,
   PuzzlePieceIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
 import { isToday, parseISO } from 'date-fns';
@@ -821,7 +822,7 @@ function FancyTable<TData>(
                 return (
                   <div
                     key={index}
-                    className="m-2 flex w-fit items-center rounded-sm border border-gray-300 bg-gray-100 p-2 pr-4"
+                    className="m-2 flex w-fit items-center rounded-sm border border-gray-300 bg-gray-100 p-2"
                   >
                     {filter.alert && (
                       <>
@@ -850,6 +851,14 @@ function FancyTable<TData>(
                     <p className="text-sm font-semibold text-gray-500">
                       {attributeValue}
                     </p>
+                    <XMarkIcon
+                      className="mt-.5 ml-1 size-5 cursor-pointer"
+                      onClick={() => {
+                        filter.onChange(
+                          filter.value.filter(v => v !== attribute)
+                        );
+                      }}
+                    />
                   </div>
                 );
               })}
