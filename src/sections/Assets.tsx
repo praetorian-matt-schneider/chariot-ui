@@ -30,6 +30,7 @@ import { useBulkReRunJob } from '@/hooks/useJobs';
 import { AssetStatusWarning } from '@/sections/AssetStatusWarning';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import {
+  availableAttackSurfaceIntegrationsKeys,
   riskIntegrations,
   riskIntegrationsKeys,
 } from '@/sections/overview/Integrations';
@@ -44,7 +45,7 @@ import {
   SeverityDef,
   SeverityOpenCounts,
 } from '@/types';
-import { QueryStatus } from '@/utils/api';
+import { QueryStatus, useMergeStatus } from '@/utils/api';
 import { cn } from '@/utils/classname';
 import { capitalize } from '@/utils/lodash.util';
 import { abbreviateNumber, useGetScreenSize } from '@/utils/misc.util';
@@ -104,6 +105,26 @@ const Assets: React.FC = () => {
     query: '',
   });
   const { data: alerts } = useMy({ resource: 'condition' });
+  const { data: accounts, status: accountsStatus } = useMy({
+    resource: 'account',
+  });
+
+  const integratedAttackSurface = useMemo(() => {
+    return [
+      ...new Set(
+        accounts
+          .filter(account => {
+            return (
+              availableAttackSurfaceIntegrationsKeys.includes(account.member) &&
+              !['waitlisted', 'setup'].includes(account.value || '')
+            );
+          })
+          .map(account => {
+            return account.member;
+          })
+      ),
+    ];
+  }, [JSON.stringify(accounts)]);
 
   const { mutateAsync: addAlert } = useAddAlert();
   const { mutateAsync: removeAlert } = useRemoveAlert();
@@ -127,7 +148,7 @@ const Assets: React.FC = () => {
 
     return [
       {
-        label: 'Select all assets',
+        label: '',
         id: 'name',
         to: item => getAssetDrawerLink(item),
         cell: asset => {
@@ -202,15 +223,17 @@ const Assets: React.FC = () => {
           <Tooltip
             title={selectedRows.length === 0 ? `No assets selected.` : ''}
           >
-            <Dropdown
-              className="absolute right-[-21px] top-3 -mr-10 h-4 text-sm font-bold text-black disabled:bg-white"
-              styleType="none"
-              endIcon={<ChevronDownIcon className="size-3 stroke-[4px]" />}
-              disabled={selectedRows.length === 0}
-              {...renderActions(selectedRowData)}
-            >
-              Bulk actions
-            </Dropdown>
+            <div className="h-4">
+              <Dropdown
+                className="absolute right-[-21px] top-2 -mr-10 h-4 text-sm font-bold text-black disabled:bg-white"
+                styleType="none"
+                endIcon={<ChevronDownIcon className="size-3 stroke-[4px]" />}
+                disabled={selectedRows.length === 0}
+                {...renderActions(selectedRowData)}
+              >
+                Bulk actions
+              </Dropdown>
+            </div>
           </Tooltip>
         ),
         id: 'updated',
@@ -225,32 +248,65 @@ const Assets: React.FC = () => {
         const [, attributeName, attributeValue] =
           attributeKey.match(Regex.ATTIBUTE_KEY) || [];
 
-        if (attributeName === 'source') {
+        const currentATTvalue = acc[attributeName] || [];
+
+        if (
+          attributeName === 'source' ||
+          attributeName === 'CHARIOT__ROOT_DOMAIN'
+        ) {
           return acc;
+        }
+
+        if (attributeName === 'cloud') {
+          const parsedAttValue =
+            attributeValue.match(/arn:aws:([^:]+)/)?.[0] || '';
+
+          if (!currentATTvalue.find(({ label }) => label === parsedAttValue)) {
+            currentATTvalue.push({
+              label: parsedAttValue,
+              count: value.toString(),
+              value: `#attribute#cloud#${parsedAttValue}`,
+            });
+          }
+        } else {
+          currentATTvalue.push({
+            label: attributeValue,
+            count: value.toString(),
+            value: `${attributeKey}#`,
+          });
         }
 
         return {
           ...acc,
-          [attributeName]: [
-            ...(acc[attributeName] || []),
-            {
-              label: attributeValue,
-              count: value.toString(),
-              value: attributeKey,
-            },
-          ],
+          [attributeName]: currentATTvalue,
         };
       },
       {} as Record<string, { label: string; count: string; value: string }[]>
     );
 
-    return Object.entries(nonDuplicateAttributes).map(([label, value]) => {
-      return {
-        label: label,
-        options: value,
-      };
-    });
-  }, [JSON.stringify(attributeCounts)]);
+    return [
+      ...Object.entries(nonDuplicateAttributes).map(([label, value]) => {
+        return {
+          label: label,
+          options: value,
+        };
+      }),
+      ...(integratedAttackSurface.length > 0
+        ? [
+            {
+              label: 'surface',
+              options: integratedAttackSurface.map(surface => {
+                return {
+                  label: surface,
+                  value: `#attribute#source##asset#${surface}`,
+                  count: '',
+                };
+              }),
+            },
+          ]
+        : []),
+    ];
+  }, [JSON.stringify({ attributeCounts, integratedAttackSurface })]);
 
   function updateStatus(assets: string[], status: AssetStatus) {
     setShowAssetStatusWarning(false);
@@ -377,7 +433,6 @@ const Assets: React.FC = () => {
   return (
     <>
       <FancyTable
-        belowTitleContainer={<IntegratedRisksNotifications />}
         addNew={() => setShowAddAsset(true)}
         search={{
           value: filters.search,
@@ -396,7 +451,7 @@ const Assets: React.FC = () => {
             });
           },
           category,
-          status: attributesStatus,
+          status: useMergeStatus(accountsStatus, attributesStatus),
           alert: {
             value: alerts.map(alert => alert.value),
             onAdd: async (attributeKey: string) => {
@@ -416,7 +471,7 @@ const Assets: React.FC = () => {
           },
         }}
         isTableView
-        name="assets"
+        name="asset"
         selection={{ value: selectedRows, onChange: setSelectedRows }}
         rowActions={(asset: PartialAsset) => {
           const assets = [asset];
@@ -440,14 +495,10 @@ const Assets: React.FC = () => {
         isFetchingNextPage={isFetchingNextPage}
         noData={{
           icon: <HorseIcon />,
-          title:
-            assets.length === 0
-              ? 'Discovering Assets...'
-              : 'No Matching Assets',
-          description:
-            assets.length === 0
-              ? 'We are currently scanning for assets. They will appear here as soon as they are discovered. Please check back shortly.'
-              : 'Try adjusting your filters or add new assets to see results.',
+          title: 'No Assets found',
+          description: filters.search
+            ? 'Add an asset now to get started'
+            : 'There is no assets found with this search, update the search or add new assets',
         }}
       />
       <AssetStatusWarning
@@ -692,6 +743,13 @@ export function FancyTable<TData>(
                 const [, attributeName, attributeValue] =
                   attribute.match(Regex.ATTIBUTE_KEY) || [];
 
+                const valueToDisplay = attributeValue
+                  .replace('#asset#', '')
+                  .replace(/#$/, '');
+
+                const labelToDisplay =
+                  attributeName === 'source' ? 'surface' : attributeName;
+
                 return (
                   <div
                     key={index}
@@ -701,10 +759,10 @@ export function FancyTable<TData>(
                       <AlertIcon {...filter.alert} currentValue={attribute} />
                     )}
                     <p className="text-base font-bold capitalize">
-                      {attributeName}:
+                      {labelToDisplay}:
                     </p>
                     <p className="text-sm font-semibold text-gray-500">
-                      {attributeValue}
+                      {valueToDisplay}
                     </p>
                     <XMarkIcon
                       className="ml-1 size-5 shrink-0 cursor-pointer text-gray-500"
@@ -723,24 +781,32 @@ export function FancyTable<TData>(
             </>
           )}
         </div>
-        <Table {...tableProps} isTableView tableClassName="border-none" />
+        <Table
+          {...tableProps}
+          selection={
+            tableProps.selection
+              ? { ...tableProps.selection, selectAll: false }
+              : undefined
+          }
+          isTableView
+          tableClassName="border-none"
+        />
       </div>
     </div>
   );
 }
 
 const filterDescription = {
-  protocols:
+  protocol:
     'Services are network access points that can be scanned to reveal vulnerabilities or potential attack vectors.',
   recentlyDiscovered:
     'Recently discovered assets, providing insights into the latest additions to your environment.',
-  ports:
-    'Network ports that define communication endpoints, crucial for identifying potential entry points.',
-  tlds: 'Top-level domains that help categorize and manage assets based on their domain structure.',
-  surfaces:
+  port: 'Network ports that define communication endpoints, crucial for identifying potential entry points.',
+  tld: 'Top-level domains that help categorize and manage assets based on their domain structure.',
+  source:
     'External platforms or systems that represent potential attack surfaces within your environment.',
-  cpes: 'Standardized identifiers for software or hardware configurations, essential for managing vulnerabilities.',
-  clouds:
+  cpe: 'Standardized identifiers for software or hardware configurations, essential for managing vulnerabilities.',
+  cloud:
     'Cloud-based resources that form part of your cloud integrations, critical for cloud infrastructure management.',
 } as Record<string, string>;
 
@@ -750,7 +816,7 @@ function getFilterDescription(attribute: string) {
   return filterDescription[attributeName];
 }
 
-function IntegratedRisksNotifications() {
+export function IntegratedRisksNotifications() {
   const { data: accounts, status: accountsStatus } = useMy({
     resource: 'account',
   });
@@ -766,8 +832,6 @@ function IntegratedRisksNotifications() {
         );
       });
   }, [JSON.stringify(accounts)]);
-
-  console.log('integratedRisks', integratedRisksLogos);
 
   return (
     <Loader isLoading={accountsStatus === 'pending'} className="h-8 w-full">

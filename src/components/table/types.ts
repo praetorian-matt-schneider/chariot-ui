@@ -16,6 +16,7 @@ export interface TableProps<TData> {
   selection?: {
     value?: string[];
     onChange?: (value: string[]) => void;
+    selectAll?: boolean;
   };
   status: 'error' | 'success' | 'pending';
   error: Error | null;

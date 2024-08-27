@@ -289,7 +289,7 @@ export function useGetAssets() {
     {
       resource: 'attribute',
       query: isAttributesFilter
-        ? `${filters.attributes[0].replace('#attribute', '')}#`
+        ? `${filters.attributes[0].replace('#attribute', '')}`
         : '',
     },
     { enabled: isAttributesFilter }

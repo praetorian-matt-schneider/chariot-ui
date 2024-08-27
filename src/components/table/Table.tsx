@@ -122,6 +122,7 @@ export function Table<TData>(props: TableProps<TData>) {
   const [lastSelectedRow, setLastSelectedRow] = useState<number>();
 
   const enableCheckbox = Boolean(selection);
+  const showSelectAllCheckbox = Boolean(selection?.selectAll ?? true);
   const isLoading = status === 'pending';
   const virtualizer = useVirtualizer({
     count: isLoading ? loadingRowCount : groupedData.length,
@@ -430,15 +431,17 @@ export function Table<TData>(props: TableProps<TData>) {
                   align="center"
                   storageKey={`${tableName}-checkbox`}
                 >
-                  <label className={'cursor-pointer'}>
-                    <input
-                      type="checkbox"
-                      onChange={handleSelectAll}
-                      className="hidden"
-                      checked={isAllRowSelected}
-                    />
-                    <TableCheckBoxIcon isChecked={isAllRowSelected} />
-                  </label>
+                  {showSelectAllCheckbox && (
+                    <label className={'cursor-pointer'}>
+                      <input
+                        type="checkbox"
+                        onChange={handleSelectAll}
+                        className="hidden"
+                        checked={isAllRowSelected}
+                      />
+                      <TableCheckBoxIcon isChecked={isAllRowSelected} />
+                    </label>
+                  )}
                 </Th>
               )}
               {columns.map((column, colIdx) => {
