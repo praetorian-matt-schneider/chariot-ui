@@ -227,7 +227,7 @@ export type PartialAsset = Pick<Asset, 'name' | 'dns' | 'updated' | 'key'> & {
 export function useGetAssets() {
   const [filters, setFilters] = useStorage<AssetFilters>(
     { queryKey: 'assetFilters' },
-    { search: '', attributes: [] }
+    { search: '', attributes: ['#attribute#new#'] }
   );
 
   const [isFilteredDataFetching, setIsFilteredDataFetching] = useState(false);

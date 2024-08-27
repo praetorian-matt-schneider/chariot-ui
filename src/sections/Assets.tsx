@@ -285,6 +285,26 @@ const Assets: React.FC = () => {
     );
 
     return [
+      {
+        label: 'Recently Discovered',
+        options: [
+          {
+            label: 'new',
+            value: '#attribute#new#',
+            count: '',
+          },
+        ],
+      },
+      {
+        label: 'tld',
+        options: [
+          {
+            label: 'purchased',
+            value: '#attribute#purchased#',
+            count: '',
+          },
+        ],
+      },
       ...Object.entries(nonDuplicateAttributes).map(([label, value]) => {
         return {
           label: label,
@@ -348,9 +368,6 @@ const Assets: React.FC = () => {
           {
             label: AssetStatusLabel[AssetStatus.ActiveHigh],
             icon: getAssetStatusIcon(AssetStatus.ActiveHigh),
-            // disabled: assets.every(
-            //   asset => asset.status === AssetStatus.ActiveHigh
-            // ),
             onClick: () => {
               setSelectedAssets(assets.map(asset => asset.key));
               setShowAssetStatusWarning(true);
@@ -360,9 +377,6 @@ const Assets: React.FC = () => {
           {
             label: AssetStatusLabel[AssetStatus.Active],
             icon: getAssetStatusIcon(AssetStatus.Active),
-            // disabled: assets.every(
-            //   asset => asset.status === AssetStatus.Active
-            // ),
             onClick: () => {
               updateStatus(
                 assets.map(asset => asset.key),
@@ -373,9 +387,6 @@ const Assets: React.FC = () => {
           {
             label: AssetStatusLabel[AssetStatus.ActiveLow],
             icon: getAssetStatusIcon(AssetStatus.ActiveLow),
-            // disabled: assets.every(
-            //   asset => asset.status === AssetStatus.ActiveLow
-            // ),
             onClick: () =>
               updateStatus(
                 assets.map(asset => asset.key),
@@ -390,9 +401,6 @@ const Assets: React.FC = () => {
           {
             label: AssetStatusLabel[AssetStatus.Frozen],
             icon: getAssetStatusIcon(AssetStatus.Frozen),
-            // disabled: assets.every(
-            //   asset => asset.status === AssetStatus.Frozen
-            // ),
             onClick: () => {
               setSelectedAssets(assets.map(asset => asset.key));
               setShowAssetStatusWarning(true);
@@ -402,9 +410,6 @@ const Assets: React.FC = () => {
           {
             label: AssetStatusLabel[AssetStatus.Deleted],
             icon: getAssetStatusIcon(AssetStatus.Deleted),
-            // disabled: assets.every(
-            //   asset => asset.status === AssetStatus.Deleted
-            // ),
             onClick: () => {
               setSelectedAssets(assets.map(asset => asset.key));
               setShowAssetStatusWarning(true);
@@ -551,10 +556,14 @@ export function CategoryFilter(props: CategoryFilterProps) {
       {status === 'success' && (
         <ul className="flex flex-col gap-3">
           {category.map((item, index) => {
+            const isOptionSelectedOnInit = Boolean(
+              item.options.find(option => value.includes(option.value))
+            );
+
             return (
               <li key={index}>
                 <Accordian
-                  defaultValue={false}
+                  defaultValue={isOptionSelectedOnInit}
                   title={capitalize(item.label)}
                   headerClassName="px-3"
                   contentClassName="max-h-52 overflow-auto"
@@ -743,12 +752,22 @@ export function FancyTable<TData>(
                 const [, attributeName, attributeValue] =
                   attribute.match(Regex.ATTIBUTE_KEY) || [];
 
-                const valueToDisplay = attributeValue
+                let valueToDisplay = attributeValue
                   .replace('#asset#', '')
                   .replace(/#$/, '');
 
-                const labelToDisplay =
+                let labelToDisplay =
                   attributeName === 'source' ? 'surface' : attributeName;
+
+                if (attribute === '#attribute#new#') {
+                  valueToDisplay = 'new';
+                  labelToDisplay = 'Recently Discovered';
+                }
+
+                if (attribute === '#attribute#purchased#') {
+                  valueToDisplay = 'purchased';
+                  labelToDisplay = 'tld';
+                }
 
                 return (
                   <div
