@@ -5,6 +5,7 @@ import {
   ChevronDownIcon,
   MagnifyingGlassIcon,
   PuzzlePieceIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
 
@@ -28,7 +29,6 @@ import { useIntegration } from '@/hooks/useIntegration';
 import { useBulkReRunJob } from '@/hooks/useJobs';
 import { AssetStatusWarning } from '@/sections/AssetStatusWarning';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
-import { PageCounts } from '@/sections/PageCounts';
 import { parseKeys } from '@/sections/SearchByType';
 import { useGlobalState } from '@/state/global.state';
 import {
@@ -137,7 +137,7 @@ const Assets: React.FC = () => {
 
           return (
             <div className="flex items-center gap-2 text-black">
-              <p className="font-semibold">{asset.name}</p>
+              <p className="font-semibold text-indigo-500">{asset.name}</p>
               <p className="text-blueGray-500">{asset.dns}</p>
               {asset.riskSummary && (
                 <Tooltip
@@ -199,7 +199,7 @@ const Assets: React.FC = () => {
             title={selectedRows.length === 0 ? `No assets selected.` : ''}
           >
             <Dropdown
-              className="absolute right-[-21px] top-3 -mr-10 h-4 text-sm font-bold text-black"
+              className="absolute right-[-21px] top-3 -mr-10 h-4 text-sm font-bold text-black disabled:bg-white"
               styleType="none"
               endIcon={<ChevronDownIcon className="size-3 stroke-[4px]" />}
               disabled={selectedRows.length === 0}
@@ -374,7 +374,6 @@ const Assets: React.FC = () => {
     <>
       <FancyTable
         addNew={() => setShowAddAsset(true)}
-        tableheader={<PageCounts />}
         search={{
           value: filters.search,
           onChange: search => {
@@ -395,17 +394,17 @@ const Assets: React.FC = () => {
           status: attributesStatus,
           alert: {
             value: alerts.map(alert => alert.value),
-            onAdd: (attributeKey: string) => {
+            onAdd: async (attributeKey: string) => {
               const [, attributeType, attributeValue] =
                 attributeKey.match(Regex.ATTIBUTE_KEY) || [];
 
-              addAlert({
+              await addAlert({
                 value: attributeKey,
                 name: `Assets with a ${attributeType} value of ${attributeValue} identified`,
               });
             },
-            onRemove: (value: string) => {
-              removeAlert({
+            onRemove: async (value: string) => {
+              await removeAlert({
                 key: `#condition#${value}`,
               });
             },
@@ -463,11 +462,7 @@ const Assets: React.FC = () => {
 export default Assets;
 
 interface CategoryFilterProps {
-  alert?: {
-    value: string[];
-    onAdd: (value: string) => void;
-    onRemove: (value: string) => void;
-  };
+  alert?: Omit<AlertIconProps, 'currentValue'>;
   filterDescription?: ReactNode;
   value: string[];
   onChange: (value: string[]) => void;
@@ -512,7 +507,7 @@ export function CategoryFilter(props: CategoryFilterProps) {
                     return (
                       <div
                         className={cn(
-                          'flex items-center rounded-sm px-3 cursor-pointer text-sm font-semibold py-2 gap-2',
+                          'flex items-center rounded-sm px-3 cursor-pointer text-sm font-medium py-2 gap-2',
                           index % 2 !== 0 ? 'bg-layer1' : ''
                         )}
                         key={index}
@@ -524,30 +519,12 @@ export function CategoryFilter(props: CategoryFilterProps) {
                           }
                         }}
                       >
-                        <p className="truncate">{option.label}</p>
+                        <p className="">{option.label}</p>
                         {value.includes(option.value) && (
                           <CheckCircleIcon className="size-4 shrink-0 text-brand" />
                         )}
                         {alert && (
-                          <>
-                            {alert.value.includes(option.value) ? (
-                              <BellSlashIcon
-                                className="ml-auto size-4 shrink-0 stroke-[2px]"
-                                onClick={event => {
-                                  event.stopPropagation();
-                                  alert.onRemove(option.value);
-                                }}
-                              />
-                            ) : (
-                              <BellAlertIcon
-                                className="ml-auto size-4 shrink-0 stroke-[2px] text-gray-400"
-                                onClick={event => {
-                                  event.stopPropagation();
-                                  alert.onAdd(option.value);
-                                }}
-                              />
-                            )}
-                          </>
+                          <AlertIcon {...alert} currentValue={option.value} />
                         )}
                       </div>
                     );
@@ -559,6 +536,53 @@ export function CategoryFilter(props: CategoryFilterProps) {
         </ul>
       )}
     </div>
+  );
+}
+
+interface AlertIconProps {
+  value: string[];
+  onAdd: (value: string) => Promise<void>;
+  onRemove: (value: string) => Promise<void>;
+  currentValue: string;
+}
+
+function AlertIcon(props: AlertIconProps) {
+  const [isLoading, setIsLoading] = useState(false);
+
+  return (
+    <Loader
+      className="ml-auto size-4 shrink-0 text-gray-400"
+      type="spinner"
+      isLoading={isLoading}
+    >
+      {props.value.includes(props.currentValue) ? (
+        <BellSlashIcon
+          className="ml-auto size-4 shrink-0 stroke-[2px]"
+          onClick={async event => {
+            event.stopPropagation();
+            setIsLoading(true);
+            try {
+              await props.onRemove(props.currentValue);
+            } finally {
+              setIsLoading(false);
+            }
+          }}
+        />
+      ) : (
+        <BellAlertIcon
+          className="ml-auto size-4 shrink-0 stroke-[2px] text-gray-400"
+          onClick={async event => {
+            event.stopPropagation();
+            setIsLoading(true);
+            try {
+              await props.onAdd(props.currentValue);
+            } finally {
+              setIsLoading(false);
+            }
+          }}
+        />
+      )}
+    </Loader>
   );
 }
 
@@ -585,7 +609,10 @@ export function FancyTable<TData>(
         <div className="w-[300px] shrink-0 bg-gray-100">
           <div
             ref={leftStickyRef}
-            className="sticky flex flex-col gap-4 bg-gray-100 p-4"
+            className={cn(
+              'sticky flex flex-col gap-4 bg-gray-100 p-4',
+              filter && 'pb-0'
+            )}
             style={{
               top: getSticky('1'),
               zIndex: 1,
@@ -629,6 +656,7 @@ export function FancyTable<TData>(
                 </div>
               </div>
             )}
+            {filter && <hr className="border-t-2 border-gray-300"></hr>}
           </div>
           {filter && <CategoryFilter {...filter} />}
         </div>
@@ -651,35 +679,25 @@ export function FancyTable<TData>(
                 return (
                   <div
                     key={index}
-                    className="m-2 flex w-fit items-center rounded-sm border border-gray-300 bg-gray-100 p-2 pr-4"
+                    className="m-2 flex w-fit items-center gap-1 rounded-sm border border-gray-300 bg-gray-100 p-2"
                   >
                     {filter.alert && (
-                      <>
-                        {filter.alert.value.includes(attribute) ? (
-                          <BellSlashIcon
-                            className="mr-2 size-5 shrink-0 cursor-pointer stroke-[2px]"
-                            onClick={event => {
-                              event.stopPropagation();
-                              filter.alert?.onRemove(attribute);
-                            }}
-                          />
-                        ) : (
-                          <BellAlertIcon
-                            className="mr-2 size-5 shrink-0 cursor-pointer stroke-[2px] text-gray-400"
-                            onClick={event => {
-                              event.stopPropagation();
-                              filter.alert?.onAdd(attribute);
-                            }}
-                          />
-                        )}
-                      </>
+                      <AlertIcon {...filter.alert} currentValue={attribute} />
                     )}
-                    <p className="mr-1 text-base font-bold capitalize">
+                    <p className="text-base font-bold capitalize">
                       {attributeName}:
                     </p>
                     <p className="text-sm font-semibold text-gray-500">
                       {attributeValue}
                     </p>
+                    <XMarkIcon
+                      className="ml-1 size-5 shrink-0 cursor-pointer text-gray-500"
+                      onClick={() => {
+                        filter.onChange(
+                          filter.value.filter(v => v !== attribute)
+                        );
+                      }}
+                    />
                   </div>
                 );
               })}

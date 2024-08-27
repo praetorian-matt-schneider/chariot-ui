@@ -539,7 +539,7 @@ export function Th(props: {
     <th
       {...restProps}
       className={cn(
-        'pl-2 pr-1 py-3 text-bold text-left text-sm font-bold relative text-nowrap',
+        'pl-2 pr-1 py-3 text-left text-sm font-semibold relative text-nowrap',
         props.align === 'center' && 'text-center pr-3',
         props.align === 'right' && 'text-right',
         props.className
