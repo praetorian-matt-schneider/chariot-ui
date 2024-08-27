@@ -571,6 +571,12 @@ export interface AssetFilters {
   search: string;
 }
 
+export interface JobFilters {
+  sources: string[];
+  status: string;
+  search: string;
+}
+
 export type Severity = 'I' | 'L' | 'M' | 'H' | 'C';
 export type SeverityOpenCounts = Partial<Record<Severity, Risk[]>>;
 

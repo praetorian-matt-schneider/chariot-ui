@@ -1,10 +1,12 @@
 import { Dispatch, SetStateAction } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { CircleArrowUp } from 'lucide-react';
 
 import { Button } from '@/components/Button';
 import { Loader } from '@/components/Loader';
 import { Plan } from '@/types';
 import { cn } from '@/utils/classname';
+import { getRoute } from '@/utils/route.util';
 
 export const AssetUsage: React.FC<{
   assetCountStatus: 'pending' | 'success' | 'error';
@@ -13,6 +15,7 @@ export const AssetUsage: React.FC<{
   currentPlan: Plan;
   setIsUpgradePlanOpen: Dispatch<SetStateAction<boolean>>;
 }> = ({ assetCountStatus, used, total, currentPlan, setIsUpgradePlanOpen }) => {
+  const navigate = useNavigate();
   const percentageUsed = Math.min((used / total) * 100, 100);
   const available = total - used;
   const isLoading = assetCountStatus === 'pending';
@@ -25,7 +28,9 @@ export const AssetUsage: React.FC<{
       <div
         className="flex min-w-[250px] flex-col items-center justify-center overflow-hidden rounded-sm bg-header-dark text-white shadow-md"
         onClick={() => {
-          currentPlan !== 'managed' && setIsUpgradePlanOpen(v => !v);
+          isFreemiumMaxed
+            ? setIsUpgradePlanOpen(v => !v)
+            : navigate(getRoute(['app', 'assets']));
         }}
         role={currentPlan !== 'managed' ? 'button' : undefined}
       >
@@ -78,8 +83,14 @@ export const AssetUsage: React.FC<{
                   Upgrade Plan
                 </Button>
               )}
-              {isFreemium && available > 0 && (
-                <CircleArrowUp className="absolute right-0 top-3 mr-2 size-6" />
+              {currentPlan !== 'managed' && (
+                <CircleArrowUp
+                  className="absolute right-0 top-3 mr-2 size-6"
+                  onClick={e => {
+                    e.stopPropagation();
+                    setIsUpgradePlanOpen(true);
+                  }}
+                />
               )}
             </div>
           </>

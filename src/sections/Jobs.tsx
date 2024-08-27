@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useLocation, useSearchParams } from 'react-router-dom';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
@@ -12,10 +11,10 @@ import { Columns } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
 import { useMy } from '@/hooks';
 import { useCounts } from '@/hooks/useCounts';
-import { useFilter } from '@/hooks/useFilter';
 import { useReRunJob } from '@/hooks/useJobs';
-import { Job, JobLabels, JobStatus } from '@/types';
+import { Job, JobFilters, JobLabels, JobStatus } from '@/types';
 import { cn } from '@/utils/classname';
+import { useStorage } from '@/utils/storage/useStorage.util';
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -52,8 +51,6 @@ export const getStatusText = (status: JobStatus) => {
 };
 
 const Jobs: React.FC = () => {
-  const location = useLocation();
-
   const { data: stats = {} } = useCounts({
     resource: 'job',
     filterByGlobalSearch: true,
@@ -69,23 +66,23 @@ const Jobs: React.FC = () => {
     hasNextPage,
   } = useMy({
     resource: 'job',
-    filterByGlobalSearch: true,
   });
   const { mutateAsync: reRunJob } = useReRunJob();
 
-  const [search, setSearch] = useState('');
   const [isFilteredDataFetching, setIsFilteredDataFetching] = useState(false);
-  const [filter, setFilter] = useFilter('', 'job-status');
-  const [sources, setSources] = useFilter<string[]>([], 'job-sources');
-  const [searchParams, setSearchParams] = useSearchParams();
 
-  const [debouncedSearch] = useDebounce(search, 500);
+  const [filters, setFilters] = useStorage<JobFilters>(
+    { queryKey: 'jobsFilters' },
+    { status: '', sources: [], search: '' }
+  );
+  const [debouncedSearch] = useDebounce(filters.search, 500);
 
   const filteredJobs: Job[] = useMemo(() => {
     let filteredJobs = jobs;
+    const { status, sources } = filters;
 
-    if (filter?.length > 0) {
-      filteredJobs = filteredJobs.filter(job => job.status === filter);
+    if (status) {
+      filteredJobs = filteredJobs.filter(job => job.status === status);
     }
 
     if (sources.filter(Boolean).length > 0) {
@@ -103,7 +100,7 @@ const Jobs: React.FC = () => {
     }
 
     return filteredJobs;
-  }, [filter, sources, debouncedSearch, JSON.stringify(jobs)]);
+  }, [filters, debouncedSearch, JSON.stringify(jobs)]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -111,11 +108,6 @@ const Jobs: React.FC = () => {
     }, 15_000);
     return () => clearInterval(interval);
   }, []);
-
-  useEffect(() => {
-    const newFilter = searchParams.get('status') || '';
-    setFilter(newFilter);
-  }, [location.search]);
 
   const designedDate = (date: string) => {
     const parts = date.split('@');
@@ -216,7 +208,11 @@ const Jobs: React.FC = () => {
           <div className="flex gap-4">
             <Dropdown
               styleType="header"
-              label={filter ? `${JobLabels[filter]} Jobs` : 'All Jobs'}
+              label={
+                filters.status
+                  ? `${JobLabels[filters.status]} Jobs`
+                  : 'All Jobs'
+              }
               endIcon={
                 <ChevronDownIcon className="size-3 stroke-[4px] text-header-dark" />
               }
@@ -240,21 +236,17 @@ const Jobs: React.FC = () => {
                   }),
                 ],
                 onClick: value => {
-                  if (value === '' || !value) {
-                    searchParams.delete('status');
-                  } else {
-                    searchParams.set('status', value ?? '');
-                  }
-                  setSearchParams(searchParams);
-                  setFilter(value || '');
+                  setFilters(prev => ({ ...prev, status: value || '' }));
                 },
-                value: filter,
+                value: filters.status,
               }}
             />
             <SourceDropdown
               type="job"
-              value={sources}
-              onChange={selectedRows => setSources(selectedRows)}
+              value={filters.sources}
+              onChange={sources => {
+                setFilters(prev => ({ ...prev, sources }));
+              }}
             />
           </div>
         }
@@ -266,8 +258,10 @@ const Jobs: React.FC = () => {
         isFetchingNextPage={isFetchingNextPage}
         fetchNextPage={fetchNextPage}
         search={{
-          value: search,
-          onChange: setSearch,
+          value: filters.search,
+          onChange: search => {
+            setFilters(prev => ({ ...prev, search }));
+          },
         }}
         noData={{
           title: 'No Jobs Found',

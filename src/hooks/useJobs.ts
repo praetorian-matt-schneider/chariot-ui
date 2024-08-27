@@ -87,9 +87,11 @@ export function useBulkReRunJob() {
   });
 }
 
+export type JobWithFailedCount = Job & { failedJobsCount: number };
+
 export const useJobsStatus = (
   attributeJobMap: Record<string, string>,
-  options?: UseExtendQueryOptions<Job>
+  options?: UseExtendQueryOptions<JobWithFailedCount>
 ) => {
   const axios = useAxios();
 
@@ -105,7 +107,19 @@ export const useJobsStatus = (
             },
           });
 
-          return res.data.jobs[0] as Job;
+          const allSuccessfulJobs = res.data.jobs.every(
+            (job: Job) => job.status === JobStatus.Pass
+          );
+          const failedJobs = res.data.jobs.filter(
+            (job: Job) => job.status === JobStatus.Fail
+          );
+
+          return allSuccessfulJobs
+            ? res.data.jobs[0]
+            : {
+                ...res.data.jobs[0],
+                failedJobsCount: failedJobs.length,
+              };
         },
       };
     }),
@@ -117,7 +131,7 @@ export const useJobsStatus = (
             [current]: results[index].data,
           }),
           {}
-        ) as Record<string, Job>,
+        ) as Record<string, JobWithFailedCount>,
         status: mergeStatus(...results.map(result => result.status)),
       };
     },

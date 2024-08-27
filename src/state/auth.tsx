@@ -72,7 +72,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         friend: '',
       };
     });
-    window.location.assign('/app/account');
+    window.location.assign('/app/overview');
   }
 
   async function resendEmail(username: string) {

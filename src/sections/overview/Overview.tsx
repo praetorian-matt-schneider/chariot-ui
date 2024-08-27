@@ -40,7 +40,7 @@ import {
 import { useCounts } from '@/hooks/useCounts';
 import { useIntegration } from '@/hooks/useIntegration';
 import useIntegrationCounts from '@/hooks/useIntegrationCounts';
-import { useJobsStatus } from '@/hooks/useJobs';
+import { JobWithFailedCount, useJobsStatus } from '@/hooks/useJobs';
 import { RenderHeaderExtraContentSection } from '@/sections/AuthenticatedApp';
 import {
   AttackSurfaceCard,
@@ -55,7 +55,7 @@ import SetupModal from '@/sections/SetupModal';
 import { useAuth } from '@/state/auth';
 import { useGlobalState } from '@/state/global.state';
 import { Account, AssetStatus, FREEMIUM_ASSETS_LIMIT, Plan } from '@/types';
-import { Job, JobStatus, JobStatusLabel } from '@/types';
+import { JobStatus, JobStatusLabel } from '@/types';
 import { partition } from '@/utils/array.util';
 import { cn } from '@/utils/classname';
 import { getRoute } from '@/utils/route.util';
@@ -85,17 +85,9 @@ const getStatusIcon = (status: string) => {
   }
 };
 
-interface JobI {
-  member: string;
-  status?: Job['status'];
-  comment?: string;
-  lastStatus?: Job['status'];
-}
-
-const getJobsStatus = (job?: JobI) => {
+const getJobsStatus = (job?: JobWithFailedCount) => {
   const status = job?.status;
   const comment = job?.comment;
-  const lastStatus = status === JobStatus.Running ? job?.lastStatus : '';
 
   const getStatus = () => {
     switch (status) {
@@ -122,9 +114,12 @@ const getJobsStatus = (job?: JobI) => {
       title={
         status ? (
           <div className="space-y-4">
-            <span>{`Job ${JobStatusLabel[status]}`}</span>
-            {comment && <div>{comment}</div>}
-            {lastStatus && <div>Last Status: {JobStatusLabel[lastStatus]}</div>}
+            <div>
+              {job.failedJobsCount
+                ? `${job.failedJobsCount} Failed Jobs`
+                : `Job ${JobStatusLabel[status]}`}
+            </div>
+            {comment && <div>{`Latest comment: ${comment}`}</div>}
           </div>
         ) : (
           ''
@@ -183,7 +178,7 @@ export const Overview: React.FC = () => {
   } = useIntegration();
 
   const integrationCounts = useIntegrationCounts(connectedIntegrations);
-  const { data: jobsData } = useJobsStatus(jobKeys);
+  const { data: jobs } = useJobsStatus(jobKeys);
   const {
     data: rootDomain,
     refetch,
@@ -192,6 +187,7 @@ export const Overview: React.FC = () => {
   const { data: assetCount, status: assetCountStatus } = useCounts({
     resource: 'asset',
   });
+
   const {
     data: accounts,
     status: accountsStatus,
@@ -223,18 +219,7 @@ export const Overview: React.FC = () => {
       integration => integration.key === disconnectIntegrationKey
     );
   }, [stringifiedConnectedIntegrations, disconnectIntegrationKey]);
-  const jobs: JobI[] = useMemo(() => {
-    return connectedIntegrations.map(integration => {
-      const job = jobsData[integration.member];
 
-      return {
-        member: integration.member,
-        status: job?.status,
-        comment: job?.comment,
-        lastStatus: job?.status,
-      };
-    });
-  }, [stringifiedConnectedIntegrations, JSON.stringify(jobsData)]);
   // Map the counts to each integration
   const counts = useMemo(() => {
     return integrationCounts.map((result, index) => ({
@@ -320,7 +305,7 @@ export const Overview: React.FC = () => {
     const tableData = [
       {
         status: 'success',
-        surface: 'Chariot',
+        surface: 'Manually Added',
         identifier: 'Provided',
         discoveredAssets: assetCount?.source?.provided || 0,
         discoveredAssetsStatus: assetCountStatus,
@@ -498,9 +483,34 @@ export const Overview: React.FC = () => {
                     fixedWidth: 150,
                     align: 'center',
                     cell: row => {
-                      return row.connected
-                        ? getJobsStatus(jobs.find(job => job.member === row.id))
-                        : getStatusIcon(row.status);
+                      const job = jobs[row.id];
+                      return row.connected ? (
+                        <Button
+                          styleType="text"
+                          className="hover:bg-transparent"
+                          onClick={() =>
+                            navigate(
+                              generatePathWithSearch({
+                                pathname: getRoute(['app', 'jobs']),
+                                appendSearch: [
+                                  [
+                                    'jobsFilters',
+                                    JSON.stringify({
+                                      search: row.id,
+                                      status: job?.status ?? undefined,
+                                      sources: [],
+                                    }),
+                                  ],
+                                ],
+                              })
+                            )
+                          }
+                        >
+                          {getJobsStatus(job)}
+                        </Button>
+                      ) : (
+                        getStatusIcon(row.status)
+                      );
                     },
                   },
                   {
@@ -511,6 +521,7 @@ export const Overview: React.FC = () => {
                   {
                     label: 'Identifier',
                     id: 'identifier',
+                    fixedWidth: 300,
                     cell: row => (
                       <div
                         className={

@@ -163,15 +163,13 @@ export const useIntegration = () => {
       }
     );
 
-    const updatedJobKeys = connectedIntegrations
-      .map(integration => integration.member)
-      .reduce(
-        (acc, member) => {
-          acc[member] = member;
-          return acc;
-        },
-        {} as Record<string, string>
-      );
+    const updatedJobKeys = connectedIntegrations.reduce(
+      (acc, integration) => {
+        acc[integration.member] = `${integration.member}#${integration.value}`;
+        return acc;
+      },
+      {} as Record<string, string>
+    );
 
     return {
       integrationsWithoutHook,
