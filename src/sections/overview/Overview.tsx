@@ -386,13 +386,12 @@ export const Overview: React.FC = () => {
       }
     );
 
-    const [riskNotification, rest] = partition(
+    const [, rest] = partition(
       tableData,
       row => row.type === 'riskNotification'
     );
 
     return [
-      ...riskNotification.sort((a, b) => a.surface.localeCompare(b.surface)),
       ...rest.sort((a, b) => a.surface.localeCompare(b.surface)),
       ...waitlistedIntegrationsData,
     ];
@@ -412,12 +411,11 @@ export const Overview: React.FC = () => {
           <div className="flex flex-row items-center justify-center space-x-6">
             <div className="flex w-full flex-row justify-between">
               <div>
-                <p className="text-2xl font-bold text-white">My Chariot</p>
                 <Loader
                   styleType="header"
                   isLoading={accountsStatus === 'pending'}
                 >
-                  <p className="text-sm font-normal text-gray-400">
+                  <p className="text-2xl font-bold text-white">
                     {displayName}&apos;s Organization
                   </p>
                 </Loader>

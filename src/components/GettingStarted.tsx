@@ -77,12 +77,6 @@ export const GettingStarted: React.FC<{
   total,
   isFreemiumMaxed,
 }) => {
-  const allStepsCompleted = [
-    completedSteps.rootDomain,
-    completedSteps.attackSurface,
-    completedSteps.riskNotifications,
-  ].every(status => status === 'connected');
-
   const focusedStepIndex = [
     completedSteps.rootDomain,
     completedSteps.attackSurface,
