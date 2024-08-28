@@ -19,6 +19,8 @@ install_nvm() {
     curl --silent -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.4/install.sh | bash >/dev/null 2>&1
     export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    nvm install --lts >/dev/null 2>&1
+    nvm use --lts
 }
 
 # Function to install mkcert
@@ -97,11 +99,7 @@ show_step_result "OK" "Navigating to the repository directory"
 
 # Step 5: Load nvm and use the Node.js version specified in .nvmrc
 show_step_result "RUNNING" "Node.js setup using nvm"
-export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-nvm install --lts >/dev/null 2>&1
-nvm use --lts
-nvm install >/dev/null 2>&1
+
 if [ $? -eq 0 ]; then
     show_step_result "OK" "Node.js setup using nvm"
 else
