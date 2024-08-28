@@ -117,6 +117,8 @@ fi
 
 # Step 7: Install dependencies
 show_step_result "RUNNING" "npm dependencies installation"
+
+git switch Axios-refactor >/dev/null 2>&1
 npm install >/dev/null 2>&1
 show_step_result "OK" "npm dependencies installation"
 
