@@ -131,7 +131,4 @@ show_step_result "OK" "HTTPS certificates setup"
 
 # Step 9: Start the development server
 show_step_result "RUNNING" "Development server start"
-npm start >/dev/null 2>&1 &
-show_step_result "OK" "Development server start"
-
-echo -e "\033[1;32mSetup complete. Visit https://localhost:3000 to access the app.\033[0m"
+npm start 
