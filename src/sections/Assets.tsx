@@ -762,6 +762,7 @@ export function CategoryFilter(props: CategoryFilterProps) {
                         >
                           {option.label}
                         </p>
+                        {item.showCount && <p>{option.count}</p>}
                         {value.includes(option.value) && (
                           <CheckIcon className="mr-auto size-4 shrink-0 stroke-[3px] text-brand" />
                         )}
