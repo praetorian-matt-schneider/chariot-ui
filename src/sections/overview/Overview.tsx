@@ -50,10 +50,17 @@ import {
   comingSoonAttackSurfaceIntegrations,
   riskIntegrations,
 } from '@/sections/overview/Integrations';
+import RiskNotifications from '@/sections/overview/RiskNotifications';
 import SetupModal from '@/sections/SetupModal';
 import { useAuth } from '@/state/auth';
 import { useGlobalState } from '@/state/global.state';
-import { Account, AssetStatus, FREEMIUM_ASSETS_LIMIT, Plan } from '@/types';
+import {
+  Account,
+  AssetStatus,
+  FREEMIUM_ASSETS_LIMIT,
+  Plan,
+  RiskNotification,
+} from '@/types';
 import { Job, JobStatus, JobStatusLabel } from '@/types';
 import { partition } from '@/utils/array.util';
 import { cn } from '@/utils/classname';
@@ -323,8 +330,10 @@ export const Overview: React.FC = () => {
         surface: 'Chariot',
         identifier: 'Provided',
         discoveredAssets: providedAssets
-          ? Object.values(providedAssets).reduce((a, v) => a + v, 0)
-          : 0,
+          ? Object.values(providedAssets)
+              .reduce((a, v) => a + v, 0)
+              ?.toLocaleString()
+          : '0',
         discoveredAssetsStatus: providedAssetsStatus,
         actions: 'AddAsset',
         connected: false,
@@ -333,7 +342,7 @@ export const Overview: React.FC = () => {
         account: undefined,
         type: 'chariot',
       },
-      ...requiresSetupIntegrations.map(integration => {
+      ...(requiresSetupIntegrations.map(integration => {
         return {
           status: 'warning',
           surface: integration.displayName,
@@ -347,17 +356,19 @@ export const Overview: React.FC = () => {
           account: integration,
           type: integration.type,
         };
-      }),
-      ...connectedIntegrations.map(integration => ({
+      }) as RiskNotification[]),
+      ...(connectedIntegrations.map(integration => ({
         status: 'success',
         surface: integration.displayName,
         identifier: integration.value ?? '[Redacted]',
         discoveredAssets:
-          counts.find(
-            count =>
-              count.member === integration.member &&
-              count.value === integration.value
-          )?.count || 0,
+          counts
+            .find(
+              count =>
+                count.member === integration.member &&
+                count.value === integration.value
+            )
+            ?.count?.toLocaleString() || '0',
         discoveredAssetsStatus: assetCountStatus,
         actions: 'Disconnect',
         connected: true,
@@ -365,11 +376,11 @@ export const Overview: React.FC = () => {
         key: integration.key,
         account: integration,
         type: integration.type,
-      })),
+      })) as RiskNotification[]),
     ];
 
-    const waitlistedIntegrationsData = waitlistedIntegrations.map(
-      integration => {
+    const waitlistedIntegrationsData: RiskNotification[] =
+      waitlistedIntegrations.map(integration => {
         return {
           status: 'waitlist',
           surface: integration.displayName,
@@ -383,18 +394,20 @@ export const Overview: React.FC = () => {
           account: integration,
           type: integration.type,
         };
-      }
-    );
+      });
 
-    const [, rest] = partition(
+    const [riskNotifications, rest] = partition(
       tableData,
       row => row.type === 'riskNotification'
     );
 
-    return [
-      ...rest.sort((a, b) => a.surface.localeCompare(b.surface)),
-      ...waitlistedIntegrationsData,
-    ];
+    return {
+      attackSurface: [
+        ...rest.sort((a, b) => a.surface.localeCompare(b.surface)),
+        ...waitlistedIntegrationsData,
+      ],
+      riskNotifications: riskNotifications.map(notification => notification.id),
+    };
   }, [
     assetCount,
     assetCountStatus,
@@ -459,7 +472,10 @@ export const Overview: React.FC = () => {
             FREEMIUM_ASSETS_LIMIT - usedAssets <= 0
           }
         />
-        <main className="mt-6 w-full">
+        <div className="mt-6 w-full">
+          <RiskNotifications riskNotifications={data.riskNotifications} />
+        </div>
+        <div className="mt-6 w-full">
           <div className="overflow-hidden rounded-lg border-2 border-header-dark bg-header shadow-md">
             <div className="flex w-full p-8">
               <div className="flex flex-1 flex-col">
@@ -474,6 +490,7 @@ export const Overview: React.FC = () => {
                 </p>
               </div>
             </div>
+
             <div>
               <Table
                 tableClassName="bg-header border-0 [&_thead_tr]:bg-header [&_tbody_tr:nth-child(odd)]:bg-header-dark [&_tr_td]:text-layer0 [&__tr_td_div:first]:border-t-4 [&_td_div]:border-header-dark [&_th_div]:border-0"
@@ -626,11 +643,11 @@ export const Overview: React.FC = () => {
                     ),
                   },
                 ]}
-                data={data}
+                data={data.attackSurface}
               />
             </div>
           </div>
-        </main>
+        </div>
         {isUpgradePlanOpen && (
           <UpgradeMenu
             open={isUpgradePlanOpen}

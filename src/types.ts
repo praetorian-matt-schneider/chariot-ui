@@ -136,6 +136,22 @@ export const ResourceLabels: Record<string, string> = {
 
 export type Plan = 'managed' | 'unmanaged' | 'freemium';
 
+export type AccountWithType = Account & { type: string; displayName: string };
+
+export interface RiskNotification {
+  status: string;
+  surface: string;
+  identifier: string;
+  discoveredAssets: string | number;
+  discoveredAssetsStatus: 'error' | 'pending' | 'success';
+  actions: string;
+  connected: boolean;
+  id: string;
+  key: string;
+  account: AccountWithType;
+  type: string;
+}
+
 interface AccountTemplate {
   username: string;
   key: string;
