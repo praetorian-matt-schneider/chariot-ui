@@ -4,7 +4,6 @@ import {
   ArrowPathIcon,
   ExclamationTriangleIcon as ExclamationTriangleIconOutline,
   MagnifyingGlassIcon,
-  PencilSquareIcon,
   PlusCircleIcon,
   XCircleIcon,
   XMarkIcon,
@@ -30,7 +29,7 @@ import { Tooltip } from '@/components/Tooltip';
 import { Body } from '@/components/ui/Body';
 import UpgradeMenu from '@/components/UpgradeMenu';
 import { useMy } from '@/hooks';
-import { useGetAccountDetails, useModifyAccount } from '@/hooks/useAccounts';
+import { useModifyAccount } from '@/hooks/useAccounts';
 import { useCreateAsset } from '@/hooks/useAssets';
 import {
   useBulkDeleteAttributes,
@@ -132,7 +131,7 @@ const getJobsStatus = (job?: JobWithFailedCount) => {
 };
 
 export const Overview: React.FC = () => {
-  const { me, friend } = useAuth();
+  const { friend } = useAuth();
   const navigate = useNavigate();
 
   const [isAttackSurfaceDrawerOpen, setIsAttackSurfaceDrawerOpen] = useStorage(
@@ -179,18 +178,14 @@ export const Overview: React.FC = () => {
 
   const integrationCounts = useIntegrationCounts(connectedIntegrations);
   const { data: jobs } = useJobsStatus(jobKeys);
-  const {
-    data: rootDomain,
-    refetch,
-    status: rootDomainStatus,
-  } = useGetRootDomain();
+  const { data: rootDomain, refetch } = useGetRootDomain();
   const { data: assetCount, status: assetCountStatus } = useCounts({
     resource: 'asset',
   });
 
   const {
     data: accounts,
-    status: accountsStatus,
+
     invalidate: invalidateAccounts,
   } = useMy({
     resource: 'account',
@@ -210,9 +205,7 @@ export const Overview: React.FC = () => {
   const stringifiedConnectedIntegrations = JSON.stringify(
     connectedIntegrations
   );
-  const domainToDiplay = rootDomain?.value ?? (friend || me).split('@')[1];
   const currentPlan = getCurrentPlan({ accounts, friend });
-  const displayName = useGetAccountDetails(accounts).name || friend || me;
 
   const disconnectIntegration = useMemo(() => {
     return [...connectedIntegrations, ...requiresSetupIntegrations].find(
@@ -398,38 +391,14 @@ export const Overview: React.FC = () => {
       footer={true}
     >
       <RenderHeaderExtraContentSection>
-        <div>
-          <div className="flex flex-row items-center justify-center space-x-6">
-            <div className="flex w-full flex-row justify-between">
-              <div>
-                <p className="text-2xl font-bold text-white">My Chariot</p>
-                <Loader
-                  styleType="header"
-                  isLoading={accountsStatus === 'pending'}
-                >
-                  <p className="text-sm font-normal text-gray-400">
-                    {displayName}&apos;s Organization
-                  </p>
-                </Loader>
-                <button
-                  onClick={() => setIsDomainDrawerOpen(true)}
-                  className=" flex flex-row items-center justify-center space-x-1 text-center text-sm text-white underline"
-                >
-                  <Loader isLoading={rootDomainStatus === 'pending'}>
-                    {domainToDiplay}
-                  </Loader>
-                  <PencilSquareIcon className="ml-1 inline size-5 text-layer0" />{' '}
-                </button>
-              </div>
-              <AssetUsage
-                currentPlan={currentPlan}
-                used={usedAssets}
-                assetCountStatus={assetCountStatus}
-                total={FREEMIUM_ASSETS_LIMIT}
-                setIsUpgradePlanOpen={setIsUpgradePlanOpen}
-              />
-            </div>
-          </div>
+        <div className="flex w-full flex-row justify-end">
+          <AssetUsage
+            currentPlan={currentPlan}
+            used={usedAssets}
+            assetCountStatus={assetCountStatus}
+            total={FREEMIUM_ASSETS_LIMIT}
+            setIsUpgradePlanOpen={setIsUpgradePlanOpen}
+          />
         </div>
       </RenderHeaderExtraContentSection>
 
@@ -480,7 +449,7 @@ export const Overview: React.FC = () => {
                   {
                     label: 'Status',
                     id: 'status',
-                    fixedWidth: 150,
+                    fixedWidth: 100,
                     align: 'center',
                     cell: row => {
                       const job = jobs[row.id];
@@ -517,11 +486,12 @@ export const Overview: React.FC = () => {
                     label: 'Surface',
                     id: 'surface',
                     className: 'font-bold',
+                    fixedWidth: 250,
                   },
                   {
                     label: 'Identifier',
                     id: 'identifier',
-                    fixedWidth: 300,
+
                     cell: row => (
                       <div
                         className={
@@ -537,6 +507,7 @@ export const Overview: React.FC = () => {
                   {
                     label: 'Description',
                     id: 'discoveredAssets',
+                    fixedWidth: 150,
                     cell: row => (
                       <div className={'flex gap-2 text-gray-500'}>
                         <Loader
@@ -588,6 +559,7 @@ export const Overview: React.FC = () => {
                     label: 'Actions',
                     id: 'actions',
                     align: 'center',
+                    fixedWidth: 200,
                     cell: row => (
                       <div className="flex flex-row items-center justify-center">
                         {row.actions === 'AddAsset' && (
