@@ -99,8 +99,9 @@ show_step_result "OK" "Navigating to the repository directory"
 show_step_result "RUNNING" "Node.js setup using nvm"
 export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+nvm install --lts >/dev/null 2>&1
+nvm use --lts
 nvm install >/dev/null 2>&1
-nvm use >/dev/null 2>&1
 if [ $? -eq 0 ]; then
     show_step_result "OK" "Node.js setup using nvm"
 else
