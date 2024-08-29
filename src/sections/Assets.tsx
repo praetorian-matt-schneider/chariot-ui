@@ -104,14 +104,11 @@ const Assets: React.FC = () => {
     filters,
     setFilters,
   } = useGetAssets();
-
   const {
     data: attributeCounts = {} as Record<string, number>,
-    status: attributesStatus,
-  } = useCounts({
-    resource: 'attribute',
-    query: '',
-  });
+    status: attributeCountsStatus,
+  } = useCombineAttributesCount();
+
   const { data: alerts, status: alertsStatus } = useMy({
     resource: 'condition',
   });
@@ -344,7 +341,12 @@ const Assets: React.FC = () => {
         };
       }),
     ];
-  }, [JSON.stringify({ attributeCounts, integratedAttackSurface })]);
+  }, [
+    JSON.stringify({
+      attributeCounts,
+      integratedAttackSurface,
+    }),
+  ]);
 
   function updateStatus(assets: string[], status: AssetStatus) {
     setShowAssetStatusWarning(false);
@@ -489,7 +491,7 @@ const Assets: React.FC = () => {
             setFilters({ attributes, search: '' });
           },
           category,
-          status: useMergeStatus(accountsStatus, attributesStatus),
+          status: useMergeStatus(accountsStatus, attributeCountsStatus),
           alert: {
             value: alerts.map(alert => alert.value),
             onAdd: async (attributeKey: string) => {
@@ -942,3 +944,40 @@ export function IntegratedRisksNotifications() {
     </Loader>
   );
 }
+
+export const useCombineAttributesCount = () => {
+  const {
+    data: attributeCountsCloud = {} as Record<string, number>,
+    status: attributesStatusCloud,
+  } = useCounts({
+    resource: 'attribute',
+    query: '#cloud#',
+  });
+  const {
+    data: attributeCountsPort = {} as Record<string, number>,
+    status: attributesStatusPort,
+  } = useCounts({
+    resource: 'attribute',
+    query: '#port#',
+  });
+  const {
+    data: attributeCountsProtocol = {} as Record<string, number>,
+    status: attributesStatusProtocol,
+  } = useCounts({
+    resource: 'attribute',
+    query: '#protocol#',
+  });
+
+  return {
+    data: {
+      ...attributeCountsCloud,
+      ...attributeCountsPort,
+      ...attributeCountsProtocol,
+    },
+    status: useMergeStatus(
+      attributesStatusCloud,
+      attributesStatusPort,
+      attributesStatusProtocol
+    ),
+  };
+};
