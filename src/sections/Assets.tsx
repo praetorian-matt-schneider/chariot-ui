@@ -477,7 +477,7 @@ const Assets: React.FC = () => {
         </div>
       </RenderHeaderExtraContentSection>
       <FancyTable
-        addNew={() => setShowAddAsset(true)}
+        addNew={{ onClick: () => setShowAddAsset(true) }}
         search={{
           value: filters.search,
           onChange: search => {
@@ -560,27 +560,39 @@ interface CategoryFilterProps {
   value: string[];
   onChange: (value: string[]) => void;
   category: {
+    showCount?: boolean;
     label: string;
     options: { label: string; value: string; count: string }[];
   }[];
   status: QueryStatus;
   className?: string;
+  hideHeader?: boolean;
 }
 
 export function CategoryFilter(props: CategoryFilterProps) {
-  const { value = [], category, status, onChange, className, alert } = props;
+  const {
+    value = [],
+    category,
+    status,
+    onChange,
+    className,
+    alert,
+    hideHeader,
+  } = props;
 
   return (
     <div className={cn('flex flex-col gap-1 p-4', className)}>
-      <h1 className="flex items-center space-x-1 text-sm font-semibold">
-        Configure Alerts
-        <Tooltip
-          title="Click the notification bell to get notified whenever a new asset with this attribute is detected."
-          placement="top"
-        >
-          <QuestionMarkCircleIcon className="size-4 stroke-[2px] text-gray-400" />
-        </Tooltip>
-      </h1>
+      {hideHeader ? null : (
+        <h1 className="flex items-center space-x-1 text-sm font-semibold">
+          Configure Alerts
+          <Tooltip
+            title="Click the notification bell to get notified whenever a new asset with this attribute is detected."
+            placement="top"
+          >
+            <QuestionMarkCircleIcon className="size-4 stroke-[2px] text-gray-400" />
+          </Tooltip>
+        </h1>
+      )}
       {status === 'pending' &&
         Array(2)
           .fill(0)
@@ -635,12 +647,16 @@ export function CategoryFilter(props: CategoryFilterProps) {
                           }
                         }}
                       >
-                        <p style={{ wordBreak: 'break-word' }}>
+                        <p
+                          className="flex-1"
+                          style={{ wordBreak: 'break-word' }}
+                        >
                           {option.label}
                         </p>
                         {value.includes(option.value) && (
                           <CheckIcon className="mr-auto size-4 shrink-0 stroke-[3px] text-brand" />
                         )}
+                        {item.showCount && <p>{option.count}</p>}
                         {alert && (
                           <AlertIcon {...alert} currentValue={option.value} />
                         )}
@@ -722,10 +738,16 @@ function AlertIcon(props: AlertIconProps) {
 export function FancyTable<TData>(
   props: TableProps<TData> & {
     tableheader?: ReactNode;
-    addNew?: () => void;
+    addNew?: {
+      label?: ReactNode;
+      onClick: () => void;
+      isLoading?: boolean;
+    };
     search?: { value: string; onChange: (value: string) => void };
     filter?: CategoryFilterProps;
+    otherFilters?: ReactNode;
     belowTitleContainer?: ReactNode;
+    tableHeader?: ReactNode;
   }
 ) {
   const {
@@ -734,6 +756,8 @@ export function FancyTable<TData>(
     search,
     filter,
     belowTitleContainer,
+    otherFilters,
+    tableHeader,
     ...tableProps
   } = props;
   const screenSize = useGetScreenSize();
@@ -778,12 +802,14 @@ export function FancyTable<TData>(
               </p>
               {addNew && (
                 <Button
-                  label={`New ${capitalize(tableProps.name)}`}
                   styleType="primary"
+                  isLoading={addNew.isLoading}
                   onClick={() => {
-                    addNew();
+                    addNew.onClick();
                   }}
-                />
+                >
+                  {addNew.label || `New ${capitalize(tableProps.name)}`}
+                </Button>
               )}
             </div>
             {belowTitleContainer}
@@ -814,9 +840,11 @@ export function FancyTable<TData>(
                 </div>
               </div>
             )}
-            {filter && <hr className="mx-4 border-t-2 border-gray-300"></hr>}
+            {(filter || otherFilters) && (
+              <hr className="mx-4 border-t-2 border-gray-300"></hr>
+            )}
           </div>
-          {filter && (
+          {(filter || otherFilters) && (
             <div
               className="sticky overflow-auto border-r border-default"
               style={{
@@ -825,7 +853,8 @@ export function FancyTable<TData>(
                 height: `calc( 100vh - ${headerHeight + LHeaderHeight + 16}px)`,
               }}
             >
-              <CategoryFilter {...filter} />
+              {filter && <CategoryFilter {...filter} />}
+              {otherFilters}
             </div>
           )}
         </div>
@@ -839,7 +868,11 @@ export function FancyTable<TData>(
             zIndex: 1,
           }}
         >
-          {filter && filter.value?.length > 0 ? (
+          {tableHeader}
+
+          {filter &&
+            filter.value?.length > 0 &&
+            !tableHeader &&
             filter.value.map((attribute, index) => {
               const [, attributeName = '', attributeValue = ''] =
                 attribute.match(Regex.ATTIBUTE_KEY) || [];
@@ -884,8 +917,9 @@ export function FancyTable<TData>(
                   )}
                 </div>
               );
-            })
-          ) : (
+            })}
+
+          {filter && filter.value?.length === 0 && !tableHeader && (
             <div className="text-blueGray-500flex w-full items-start justify-between">
               <div>
                 <div className="flex items-center gap-2">
@@ -893,7 +927,7 @@ export function FancyTable<TData>(
                   <p className="text-lg font-semibold text-gray-500">
                     {props.search && props.search?.value?.length > 0
                       ? props.search?.value
-                      : 'All Assets'}
+                      : `All ${capitalize(tableProps.name)}`}
                   </p>
                 </div>
               </div>

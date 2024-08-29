@@ -4,6 +4,8 @@ import { InputsT } from '@/components/form/Inputs';
 
 export const FREEMIUM_ASSETS_LIMIT = 999;
 
+export const FROZEN_ACCOUNT = 'frozen';
+
 export enum RiskScanMessage {
   Stop = 'Risk scanning will stop.',
   Start = 'Risk scanning will start automatically.',
@@ -546,8 +548,9 @@ export interface AssetFilters {
 
 export interface JobFilters {
   sources: string[];
-  status: string;
+  status: string[];
   search: string;
+  failedReason: string[];
 }
 
 export type Severity = 'I' | 'L' | 'M' | 'H' | 'C';

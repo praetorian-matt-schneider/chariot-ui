@@ -52,7 +52,13 @@ import {
 import SetupModal from '@/sections/SetupModal';
 import { useAuth } from '@/state/auth';
 import { useGlobalState } from '@/state/global.state';
-import { Account, AssetStatus, FREEMIUM_ASSETS_LIMIT, Plan } from '@/types';
+import {
+  Account,
+  AssetStatus,
+  FREEMIUM_ASSETS_LIMIT,
+  Job,
+  Plan,
+} from '@/types';
 import { JobStatus, JobStatusLabel } from '@/types';
 import { partition } from '@/utils/array.util';
 import { cn } from '@/utils/classname';
@@ -83,28 +89,38 @@ const getStatusIcon = (status: string) => {
   }
 };
 
+export const getJobStatusIcon = (
+  status?: Job['status'],
+  className?: string
+) => {
+  switch (status) {
+    case JobStatus.Fail:
+      return <XCircleIcon className={cn('size-7 text-[#F87171]', className)} />;
+    case JobStatus.Running:
+      return <ArrowPathIcon className={cn('size-7 animate-spin', className)} />;
+    case JobStatus.Queued:
+      return (
+        <div
+          className={cn(
+            'flex size-7 items-center justify-center rounded-full bg-gray-300',
+            className
+          )}
+        >
+          <Hourglass className="size-4 text-[#2D3748]" />
+        </div>
+      );
+    default:
+      return (
+        <CheckCircleIcon
+          className={cn('size-8 text-center text-[#10B981]', className)}
+        />
+      );
+  }
+};
+
 const getJobsStatus = (job?: JobWithFailedCount) => {
   const status = job?.status;
   const comment = job?.comment;
-
-  const getStatus = () => {
-    switch (status) {
-      case JobStatus.Fail:
-        return <XCircleIcon className="size-7 text-[#F87171]" />;
-      case JobStatus.Running:
-        return <ArrowPathIcon className="size-7 animate-spin" />;
-      case JobStatus.Queued:
-        return (
-          <div className="flex size-7 items-center justify-center rounded-full bg-gray-600">
-            <Hourglass className="size-4 text-[#2D3748]" />
-          </div>
-        );
-      default:
-        return (
-          <CheckCircleIcon className="size-8 text-center text-[#10B981]" />
-        );
-    }
-  };
 
   return (
     <Tooltip
@@ -124,7 +140,7 @@ const getJobsStatus = (job?: JobWithFailedCount) => {
         )
       }
     >
-      {getStatus()}
+      {getJobStatusIcon(status)}
     </Tooltip>
   );
 };
