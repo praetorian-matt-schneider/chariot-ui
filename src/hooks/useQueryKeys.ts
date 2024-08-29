@@ -1,4 +1,5 @@
 import { GetFilesProps } from '@/hooks/useFiles';
+import { useAuth } from '@/state/auth';
 import { MyResourceKey, UniqueQueryKeys } from '@/types';
 
 export const getQueryKey = {
@@ -26,3 +27,18 @@ export const getQueryKey = {
   ],
   getKev: () => [UniqueQueryKeys.KEV],
 };
+
+export function useGetUserKey(
+  key: ReadonlyArray<unknown> = [],
+  doNotImpersonate?: boolean
+) {
+  const { friend } = useAuth();
+
+  if (!doNotImpersonate && friend) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return [...key, friend] as any;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return [...key] as any;
+}

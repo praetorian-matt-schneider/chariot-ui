@@ -1,5 +1,3 @@
-// eslint-disable-next-line no-restricted-imports
-import { useQueries, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import { useAxios } from '@/hooks/useAxios';
@@ -8,7 +6,7 @@ import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useMy } from '@/hooks/useMy';
 import { getQueryKey } from '@/hooks/useQueryKeys';
 import { Attribute } from '@/types';
-import { mergeStatus, useMutation } from '@/utils/api';
+import { mergeStatus, useMutation, useQueries, useQuery } from '@/utils/api';
 
 interface CreateAttribute {
   key: string;
@@ -20,6 +18,7 @@ interface CreateAttribute {
 export const useGetRootDomain = () => {
   const axios = useAxios();
   return useQuery({
+    defaultErrorMessage: 'Failed to fetch root domain',
     queryKey: getQueryKey.getMy('attribute', 'CHARIOT__ROOT_DOMAIN'),
     queryFn: async () => {
       const res = await axios.get('/my', {
@@ -216,6 +215,7 @@ export const useBulkDeleteAttributes = (props?: { showToast?: boolean }) => {
 export const useAssetsWithAttributes = (attributes: string[]) => {
   const axios = useAxios();
   return useQueries({
+    // defaultErrorMessage: 'Failed to fetch assets with attributes',
     queries: attributes
       .filter(x => Boolean(x))
       .map(attribute => {

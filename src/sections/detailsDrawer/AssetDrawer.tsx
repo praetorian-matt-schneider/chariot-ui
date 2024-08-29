@@ -30,6 +30,7 @@ import { cn } from '@/utils/classname';
 import { formatDate } from '@/utils/date.util';
 import { getSeverityClass } from '@/utils/getSeverityClass.util';
 import { Regex } from '@/utils/regex.util';
+import { getRiskStatus } from '@/utils/riskStatus.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
 import { useSearchParams } from '@/utils/url.util';
 
@@ -159,7 +160,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
     attributesStatus === 'pending';
 
   const openRisks = risks.filter(
-    ({ status }) => status?.[0] === RiskStatus.Opened
+    ({ status }) => getRiskStatus(status) === RiskStatus.Opened
   );
 
   const parentAssets = useMemo(() => {
@@ -384,12 +385,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
                 Parent Assets
               </h3>
               <Table
-                contentClassName="max-w-full"
                 tableClassName="border-0"
-                className={cn(
-                  'max-h-96',
-                  parentAssets.length === 0 && 'justify-center'
-                )}
                 name="parent assets"
                 columns={[
                   {
@@ -431,7 +427,6 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
                   title: 'This asset has no parent assets.',
                   styleType: 'text',
                 }}
-                isTableView={false}
               />
             </div>
 
@@ -442,12 +437,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
                 Child Assets
               </h3>
               <Table
-                contentClassName="max-w-full"
                 tableClassName="border-0"
-                className={cn(
-                  'max-h-96',
-                  childAssetsAttributes.length === 0 && 'justify-center'
-                )}
                 name="child assets"
                 columns={[
                   {
@@ -489,7 +479,6 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
                   title: 'This asset has no child assets.',
                   styleType: 'text',
                 }}
-                isTableView={false}
               />
             </div>
           </div>

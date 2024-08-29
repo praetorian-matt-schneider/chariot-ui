@@ -127,18 +127,6 @@ export const AccountDropdown: React.FC = () => {
             to: getRoute(['app', 'widgets']),
           },
           {
-            label: 'Report',
-            labelSuffix: (
-              <div className="mr-auto flex h-auto items-center">
-                <p className="h-fit rounded-[4px] border border-header px-1 text-xs font-medium capitalize">
-                  Beta
-                </p>
-              </div>
-            ),
-            icon: <DocumentTextIcon />,
-            to: getRoute(['app', 'report']),
-          },
-          {
             label: 'Divider',
             type: 'divider',
           },

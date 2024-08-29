@@ -5,7 +5,6 @@ import { format } from 'date-fns';
 import { useDebounce } from 'use-debounce';
 
 import { Dropdown } from '@/components/Dropdown';
-import SourceDropdown from '@/components/SourceDropdown';
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
@@ -53,7 +52,6 @@ export const getStatusText = (status: JobStatus) => {
 const Jobs: React.FC = () => {
   const { data: stats = {} } = useCounts({
     resource: 'job',
-    filterByGlobalSearch: true,
   });
   const {
     data: jobs = [],
@@ -100,7 +98,27 @@ const Jobs: React.FC = () => {
     }
 
     return filteredJobs;
-  }, [filters, debouncedSearch, JSON.stringify(jobs)]);
+  }, [debouncedSearch, JSON.stringify({ jobs, filters })]);
+
+  const jobStats = useMemo(() => {
+    return Object.entries(stats).reduce(
+      (acc, [key, value]) => {
+        Object.values(JobStatus).forEach(jobKey => {
+          if (key.endsWith(jobKey)) {
+            acc[jobKey] = (acc[jobKey] || 0) + value;
+          }
+        });
+
+        return acc;
+      },
+      {
+        JF: 0,
+        JP: 0,
+        JQ: 0,
+        JR: 0,
+      } as Record<JobStatus, number>
+    );
+  }, [JSON.stringify(stats)]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -204,7 +222,7 @@ const Jobs: React.FC = () => {
     <div className="flex w-full flex-col">
       <Table
         resize={true}
-        filters={
+        bodyHeader={
           <div className="flex gap-4">
             <Dropdown
               styleType="header"
@@ -220,17 +238,20 @@ const Jobs: React.FC = () => {
                 items: [
                   {
                     label: 'All Jobs',
-                    labelSuffix: jobs.length?.toLocaleString(),
+                    labelSuffix: Object.values(jobStats).reduce(
+                      (acc, stat) => acc + stat,
+                      0
+                    ),
                     value: '',
                   },
                   {
                     label: 'Divider',
                     type: 'divider',
                   },
-                  ...Object.entries(JobLabels).map(([key, label]) => {
+                  ...Object.values(JobStatus).map(key => {
                     return {
-                      label,
-                      labelSuffix: stats.status?.[key]?.toLocaleString() || 0,
+                      label: JobLabels[key],
+                      labelSuffix: jobStats[key]?.toLocaleString() || 0,
                       value: key,
                     };
                   }),
@@ -241,17 +262,10 @@ const Jobs: React.FC = () => {
                 value: filters.status,
               }}
             />
-            <SourceDropdown
-              type="job"
-              value={filters.sources}
-              onChange={sources => {
-                setFilters(prev => ({ ...prev, sources }));
-              }}
-            />
           </div>
         }
         columns={columns}
-        data={filteredJobs}
+        data={filteredJobs.slice(0, 5)}
         error={error}
         status={isFilteredDataFetching ? 'pending' : status}
         name="jobs"

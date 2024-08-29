@@ -15,7 +15,11 @@ import {
 } from '@tanstack/react-query';
 
 export type { QueryStatus } from '@tanstack/react-query';
-export { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+export {
+  QueryClient,
+  QueryClientProvider,
+  useQueries,
+} from '@tanstack/react-query';
 
 import { queryClient } from '@/queryclient';
 import { JobStatus } from '@/types';

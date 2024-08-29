@@ -20,7 +20,6 @@ import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
 import { getRiskStatusIcon } from '@/components/icons/RiskStatus.icon';
 import { MenuItemProps } from '@/components/Menu';
 import SeverityDropdown from '@/components/SeverityDropdown';
-import SourceDropdown from '@/components/SourceDropdown';
 import StatusDropdown from '@/components/StatusDropdown';
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
@@ -30,12 +29,11 @@ import { useGetKev } from '@/hooks/kev';
 import { useFilter } from '@/hooks/useFilter';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useMy } from '@/hooks/useMy';
-import { useBulkUpdateRisk } from '@/hooks/useRisks';
+import { useBulkUpdateRisk, useDeleteRisk } from '@/hooks/useRisks';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { useGlobalState } from '@/state/global.state';
 import {
   Risk,
-  RiskCombinedStatus,
   RiskSeverity,
   RiskStatus,
   RiskStatusLabel,
@@ -43,6 +41,7 @@ import {
 } from '@/types';
 import { useMergeStatus } from '@/utils/api';
 import { isKEVRisk } from '@/utils/risk.util';
+import { getRiskSeverity, getRiskStatus } from '@/utils/riskStatus.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
 import { generatePathWithSearch, useSearchParams } from '@/utils/url.util';
 
@@ -60,17 +59,6 @@ export const getFilterLabel = (
   );
   return filter.length === 0 ? `All ${label}` : labels.join(', ');
 };
-
-export function getStatus(status: RiskCombinedStatus): RiskStatus {
-  const baseStatus = status[0];
-  const subStatus = status.length > 1 ? status.slice(2) : '';
-
-  if (baseStatus === 'C' && subStatus) {
-    return `C${subStatus}` as RiskStatus;
-  }
-
-  return baseStatus as RiskStatus;
-}
 
 const getFilteredRisksByCISA = (
   risks: Risk[],
@@ -108,7 +96,7 @@ const getFilteredRisks = (
 
   if (trimmedStatusFilter.length > 0) {
     filteredRisks = filteredRisks.filter(risk =>
-      trimmedStatusFilter.filter(Boolean).includes(getStatus(risk.status))
+      trimmedStatusFilter.filter(Boolean).includes(getRiskStatus(risk.status))
     );
   }
 
@@ -138,6 +126,7 @@ export function Risks() {
   const { getRiskDrawerLink } = getDrawerLink();
   const { handleUpdate: updateRisk, status: updateRiskStatus } =
     useBulkUpdateRisk();
+  const { mutate: deleteRisk } = useDeleteRisk();
 
   const {
     modal: { risk },
@@ -159,7 +148,7 @@ export function Risks() {
     'risk-intel',
     setSelectedRows
   );
-  const [sourcesFilter, setSourcesFilter] = useFilter<string[]>(
+  const [sourcesFilter] = useFilter<string[]>(
     [],
     'risk-sources',
     setSelectedRows
@@ -199,7 +188,6 @@ export function Risks() {
     hasNextPage,
   } = useMy({
     resource: 'risk',
-    filterByGlobalSearch: true,
   });
 
   useEffect(() => {
@@ -258,9 +246,8 @@ export function Risks() {
         id: 'status',
         fixedWidth: 80,
         cell: (risk: Risk) => {
-          const riskStatusKey =
-            `${risk.status?.[0]}${risk.status?.[2] || ''}` as RiskStatus;
-          const riskSeverityKey = risk.status?.[1] as RiskSeverity;
+          const riskStatusKey = getRiskStatus(risk.status);
+          const riskSeverityKey = getRiskSeverity(risk.status);
 
           const statusIcon = getRiskStatusIcon(riskStatusKey);
           const severityIcon = getRiskSeverityIcon(riskSeverityKey);
@@ -294,8 +281,7 @@ export function Risks() {
         id: 'status',
         className: 'text-left',
         cell: (risk: Risk) => {
-          const riskStatusKey =
-            `${risk.status?.[0]}${risk.status?.[2] || ''}` as RiskStatus;
+          const riskStatusKey = getRiskStatus(risk.status);
           return <span>{RiskStatusLabel[riskStatusKey]}</span>;
         },
       },
@@ -357,13 +343,14 @@ export function Risks() {
   return (
     <div className="flex w-full flex-col">
       <Table
+        isTableView
         name={'risks'}
         search={{
           value: search,
           onChange: handleSearchUpdate,
         }}
         resize={true}
-        filters={
+        bodyHeader={
           <div className="flex gap-4">
             <SeverityDropdown
               value={severityFilter}
@@ -403,13 +390,6 @@ export function Risks() {
                 multiSelect: true,
               }}
             />
-            <SourceDropdown
-              type="risk"
-              value={sourcesFilter}
-              onChange={selectedRows => {
-                setSourcesFilter(selectedRows);
-              }}
-            />
           </div>
         }
         primaryAction={() => {
@@ -422,7 +402,7 @@ export function Risks() {
             },
           };
         }}
-        actions={(selectedRows: Risk[]) => {
+        bulkActions={(selectedRows: Risk[]) => {
           return {
             menu: {
               items: [
@@ -452,7 +432,7 @@ export function Risks() {
                 },
                 {
                   label: 'Closed',
-                  icon: getRiskStatusIcon(RiskStatus.Resolved),
+                  icon: getRiskStatusIcon(RiskStatus.Remediated),
                   onClick: () => {
                     setIsClosedSubStateModalOpen(true);
                   },
@@ -534,14 +514,21 @@ export function Risks() {
       <ClosedStateModal
         isOpen={isClosedSubStateModalOpen}
         onClose={() => setIsClosedSubStateModalOpen(false)}
-        onStatusChange={({ status, comment }) => {
-          updateRisk({
-            selectedRows: selectedRows
-              .map(i => sortedRisks[Number(i)])
-              .filter(Boolean),
-            status,
-            comment,
+        onStatusChange={({ status }) => {
+          const risksToDelete: Risk[] = selectedRows.map(i => {
+            const risk = sortedRisks[Number(i)];
+
+            return {
+              ...risk,
+              comment: status, // Set the comment to the status
+            };
           });
+
+          updateRisk({
+            selectedRows: risksToDelete,
+            comment: status,
+          });
+          deleteRisk(risksToDelete);
           setSelectedRows([]);
         }}
       />

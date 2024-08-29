@@ -1028,6 +1028,11 @@ export const availableAttackSurfaceIntegrations = [
   Integrations.cloudflare,
 ];
 
+export const availableAttackSurfaceIntegrationsKeys =
+  availableAttackSurfaceIntegrations.map(
+    integration => integration.id
+  ) as string[];
+
 // Begin "coming soon" integrations
 export const comingSoonAttackSurfaceIntegrations = [
   Integrations.godaddy,
@@ -1077,6 +1082,10 @@ export const riskIntegrations = [
   Integrations.zulip,
   Integrations.teams,
 ];
+
+export const riskIntegrationsKeys = riskIntegrations.map(
+  integration => integration.id
+) as string[];
 
 export const allIntegrations = [
   ...availableAttackSurfaceIntegrations,

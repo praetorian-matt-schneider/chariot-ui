@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useDebounce } from 'use-debounce';
 
-import { useAssetsWithAttributes } from '@/hooks/useAttribute';
 import { useAxios } from '@/hooks/useAxios';
 import { useCounts } from '@/hooks/useCounts';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
@@ -14,12 +14,15 @@ import {
   AssetFilters,
   AssetStatus,
   AssetStatusLabel,
-  AssetsWithRisk,
   Risk,
   RiskScanMessage,
+  SeverityOpenCounts,
 } from '@/types';
 import { useMutation } from '@/utils/api';
 import { useMergeStatus } from '@/utils/api';
+import { safeExecute } from '@/utils/function.util';
+import { isEqual } from '@/utils/lodash.util';
+import { Regex } from '@/utils/regex.util';
 
 interface UpdateAssetProps {
   key: string;
@@ -219,23 +222,51 @@ export const useBulkAddAsset = () => {
   });
 };
 
-interface GetAssetProps {
-  filters: AssetFilters;
-}
+export type PartialAsset = Pick<Asset, 'name' | 'dns' | 'updated' | 'key'> & {
+  riskSummary?: SeverityOpenCounts;
+};
 
-export function useGetAssets(props: GetAssetProps) {
-  const { filters } = props;
+const defaultFilters: AssetFilters = {
+  search: '',
+  attributes: ['#attribute#new#'],
+};
+
+// eslint-disable-next-line complexity
+export function useGetAssets() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const searchValue = searchParams.get('assetFilters');
+
+  const filters = searchValue
+    ? safeExecute<AssetFilters>(() => JSON.parse(searchValue), defaultFilters)
+    : defaultFilters;
+  const setFilters = (filters: AssetFilters) => {
+    setSearchParams(prevParam => {
+      if (isEqual(filters, defaultFilters)) {
+        prevParam.delete('assetFilters');
+      } else {
+        prevParam.set('assetFilters', JSON.stringify(filters));
+      }
+
+      return prevParam;
+    });
+  };
 
   const [isFilteredDataFetching, setIsFilteredDataFetching] = useState(false);
 
   const [debouncedSearch] = useDebounce(filters.search, 500);
   const isSearched = Boolean(filters.search);
+  const isProvidedFilter = filters.attributes[0] === 'source:provided';
+  const isAttributesFilter =
+    !isProvidedFilter && Boolean(filters.attributes[0]);
 
   const {
     data: assetSearchByName,
     status: assetByNameStatus,
     error: assetSearchByNameError,
     isFetching: isFetchingAssetSearchByName,
+    fetchNextPage: assetSearchByNameFetchNextPage,
+    isFetchingNextPage: assetSearchByNameIsFetchingNextPage,
+    hasNextPage: assetSearchByNameHasNextPage,
   } = useGenericSearch(
     { query: `name:${debouncedSearch}` },
     { enabled: isSearched }
@@ -245,9 +276,24 @@ export function useGetAssets(props: GetAssetProps) {
     status: assetSearchByDnsStatus,
     error: assetSearchByDnsError,
     isFetching: isFetchingAssetSearchByDns,
+    fetchNextPage: assetSearchByDnsFetchNextPage,
+    isFetchingNextPage: assetSearchByDnsIsFetchingNextPage,
+    hasNextPage: assetSearchByDnsHasNextPage,
   } = useGenericSearch(
     { query: `dns:${debouncedSearch}` },
     { enabled: isSearched }
+  );
+  const {
+    data: assetsProvided,
+    status: assetProvidedStatus,
+    error: assetProvidedError,
+    isFetching: isFetchingAssetProvided,
+    fetchNextPage: assetProvidedFetchNextPage,
+    isFetchingNextPage: assetProvidedIsFetchingNextPage,
+    hasNextPage: assetProvidedHasNextPage,
+  } = useGenericSearch(
+    { query: `source:provided` },
+    { enabled: isProvidedFilter }
   );
 
   const {
@@ -256,12 +302,11 @@ export function useGetAssets(props: GetAssetProps) {
     isFetching: isFetchingMyAssets,
     fetchNextPage: myAssetsFetchNextPage,
     isFetchingNextPage: myAssetsIsFetchingNextPage,
+    hasNextPage: myAssetsHasNextPage,
     error: myAssetsError,
-    hasNextPage,
   } = useMy(
     {
       resource: 'asset',
-      filterByGlobalSearch: true,
     },
     { enabled: !isSearched }
   );
@@ -274,31 +319,77 @@ export function useGetAssets(props: GetAssetProps) {
   } = useMy({ resource: 'risk' });
 
   const {
-    data: assetsWithAttributesFilter,
-    status: assetsWithAttributesFilterStatus,
-  } = useAssetsWithAttributes(filters.attributes || []);
+    data: attributes,
+    status: attributesStatus,
+    fetchNextPage: attributesFetchNextpage,
+    isFetchingNextPage: isFetchingAttributesNextPage,
+    error: attributesError,
+    isFetching: isFetchingAttributes,
+    hasNextPage: isAttributesHasNextPage,
+  } = useMy(
+    {
+      resource: 'attribute',
+      query: isAttributesFilter
+        ? `${filters.attributes[0].replace('#attribute', '')}`
+        : '',
+    },
+    { enabled: isAttributesFilter }
+  );
 
   const apiStatus = useMergeStatus(
     ...(debouncedSearch
       ? [assetByNameStatus, assetSearchByDnsStatus, riskStatus]
-      : [myAssetsStatus, riskStatus])
+      : isAttributesFilter
+        ? [attributesStatus, riskStatus]
+        : isProvidedFilter
+          ? [assetProvidedStatus, riskStatus]
+          : [myAssetsStatus, riskStatus])
   );
   const isFetchingNextPage = debouncedSearch
-    ? false
-    : myAssetsIsFetchingNextPage;
+    ? assetSearchByNameIsFetchingNextPage || assetSearchByDnsIsFetchingNextPage
+    : isAttributesFilter
+      ? isFetchingAttributesNextPage
+      : isProvidedFilter
+        ? assetProvidedIsFetchingNextPage
+        : myAssetsIsFetchingNextPage;
+
   const error = debouncedSearch
     ? assetSearchByNameError || assetSearchByDnsError || risksError
-    : myAssetsError || risksError;
-  const fetchNextPage = debouncedSearch ? undefined : myAssetsFetchNextPage;
+    : isAttributesFilter
+      ? attributesError || risksError
+      : isProvidedFilter
+        ? assetProvidedError || risksError
+        : myAssetsError || risksError;
+  const fetchNextPage = debouncedSearch
+    ? () => {
+        assetSearchByNameFetchNextPage();
+        assetSearchByDnsFetchNextPage();
+      }
+    : isAttributesFilter
+      ? attributesFetchNextpage
+      : isProvidedFilter
+        ? assetProvidedFetchNextPage
+        : myAssetsFetchNextPage;
   const isFetching = debouncedSearch
     ? isFetchingAssetSearchByName ||
       isFetchingAssetSearchByDns ||
       isFetchingRisks
-    : isFetchingMyAssets || isFetchingRisks;
+    : isAttributesFilter
+      ? isFetchingAttributes || isFetchingRisks
+      : isProvidedFilter
+        ? isFetchingAssetProvided || isFetchingRisks
+        : isFetchingMyAssets || isFetchingRisks;
+  const hasNextPage = debouncedSearch
+    ? assetSearchByNameHasNextPage || assetSearchByDnsHasNextPage
+    : isAttributesFilter
+      ? isAttributesHasNextPage
+      : isProvidedFilter
+        ? assetProvidedHasNextPage
+        : myAssetsHasNextPage;
 
   const status = isFilteredDataFetching ? 'pending' : apiStatus;
 
-  const assets: Asset[] = useMemo(
+  const assets: PartialAsset[] = useMemo(
     () =>
       debouncedSearch
         ? [
@@ -310,10 +401,39 @@ export function useGetAssets(props: GetAssetProps) {
             }
             return acc;
           }, [] as Asset[])
-        : myAssets,
+        : isAttributesFilter
+          ? attributes.map(attribute => {
+              const [, assetdns, assetname] =
+                attribute.source.match(Regex.ASSET_KEY) || [];
+
+              return {
+                key: attribute.source,
+                name: assetname,
+                dns: assetdns,
+                updated: attribute.updated,
+              };
+            })
+          : isProvidedFilter
+            ? (assetsProvided?.assets ?? [])?.map(asset => {
+                return {
+                  key: asset.key,
+                  name: asset.name,
+                  dns: asset.dns,
+                  updated: asset.updated,
+                };
+              })
+            : myAssets,
     [
       debouncedSearch,
-      JSON.stringify({ assetSearchByName, assetSearchByDns, myAssets }),
+      isAttributesFilter,
+      isProvidedFilter,
+      JSON.stringify({
+        assetSearchByName,
+        assetSearchByDns,
+        myAssets,
+        attributes,
+        assetsProvided,
+      }),
     ]
   );
 
@@ -323,32 +443,8 @@ export function useGetAssets(props: GetAssetProps) {
   );
 
   const data = useMemo(() => {
-    let filteredAssets = assets;
-
-    if (assetsWithAttributesFilter.length > 0) {
-      filteredAssets = assetsWithAttributesFilter
-        .map(key => assets.find(asset => asset.key === key))
-        .filter(Boolean) as Asset[];
-    }
-
-    if (filters.priorities.length > 0) {
-      filteredAssets = filteredAssets.filter(({ status }) => {
-        const parsedSource = status.startsWith('F')
-          ? AssetStatus.Frozen
-          : status;
-
-        return filters.priorities.includes(parsedSource);
-      });
-    }
-
-    if (filters.sources?.filter(Boolean).length > 0) {
-      filteredAssets = filteredAssets.filter(({ source }) =>
-        filters.sources.includes(source)
-      );
-    }
-
     // merge risk data with asset data
-    return filteredAssets.map(asset => {
+    return assets.map(asset => {
       const riskSummary = openRiskDataset[asset.dns];
 
       if (riskSummary) {
@@ -356,13 +452,13 @@ export function useGetAssets(props: GetAssetProps) {
       }
 
       return asset;
-    }) as AssetsWithRisk[];
+    }) as PartialAsset[];
   }, [
     JSON.stringify({
       assets,
+      assetsProvided,
       filters,
     }),
-    assetsWithAttributesFilterStatus,
   ]);
 
   useEffect(() => {
@@ -381,5 +477,14 @@ export function useGetAssets(props: GetAssetProps) {
     }
   }, [JSON.stringify({ data }), filters.search, isFetching, hasNextPage]);
 
-  return { data, status, fetchNextPage, error, isFetchingNextPage, isFetching };
+  return {
+    data,
+    status,
+    fetchNextPage,
+    error,
+    isFetchingNextPage,
+    isFetching,
+    filters,
+    setFilters,
+  };
 }

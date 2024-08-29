@@ -92,7 +92,7 @@ export const GettingStarted: React.FC<{
   const { mutate: upgrade, status: upgradeStatus } = useModifyAccount('link');
 
   return (
-    <div className="flex justify-center space-x-6">
+    <div className="flex justify-center space-x-6" style={{ zIndex: 1 }}>
       <div className="w-full rounded-sm">
         {isFreemiumMaxed && (
           <div className="m-auto flex w-full flex-col items-center rounded-lg border-2 border-dashed border-header-dark bg-header p-8 text-center">

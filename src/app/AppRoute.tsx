@@ -14,7 +14,6 @@ import Intelligence from '@/sections/Intelligence';
 import Jobs from '@/sections/Jobs';
 import Logout from '@/sections/Logout';
 import { Overview } from '@/sections/overview/Overview';
-import { Report } from '@/sections/report/Report';
 import { Risks } from '@/sections/RisksTable';
 import { ForgotPassword, Login, Signup } from '@/sections/signup';
 import { LoginSSO } from '@/sections/signup/LoginSSO';
@@ -94,7 +93,9 @@ const appRoutes = {
     element: (
       <CheckAuth>
         <AuthenticatedApp>
-          <Outlet />
+          <Body>
+            <Outlet />
+          </Body>
         </AuthenticatedApp>
       </CheckAuth>
     ),
@@ -103,19 +104,11 @@ const appRoutes = {
       title: 'logout',
     },
     widgets: {
-      element: (
-        <Body>
-          <Intelligence />
-        </Body>
-      ),
+      element: <Intelligence />,
       title: 'Widgets',
     },
     alerts: {
-      element: (
-        <Body>
-          <Alerts />
-        </Body>
-      ),
+      element: <Alerts />,
       title: 'Alerts',
     },
     assets: {
@@ -131,11 +124,7 @@ const appRoutes = {
       title: 'Jobs',
     },
     account: {
-      element: (
-        <Body>
-          <Account />
-        </Body>
-      ),
+      element: <Account />,
       title: 'Organization Settings',
     },
     files: {
@@ -144,14 +133,6 @@ const appRoutes = {
     },
     overview: {
       element: <Overview />,
-      title: 'Overview',
-    },
-    report: {
-      element: (
-        <Body>
-          <Report />
-        </Body>
-      ),
       title: 'Overview',
     },
     '*': <Navigate to="/app/overview" replace />,

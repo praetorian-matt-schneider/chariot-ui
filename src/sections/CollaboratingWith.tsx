@@ -8,6 +8,8 @@ import { Columns } from '@/components/table/types';
 import { useGetCollaborators } from '@/hooks/collaborators';
 import useRiskDetails from '@/hooks/useRiskDetails';
 import { useAuth } from '@/state/auth';
+import { RiskSeverity, RiskStatus } from '@/types';
+import { getRiskSeverity, getRiskStatus } from '@/utils/riskStatus.util';
 
 interface TableData {
   displayName: string;
@@ -33,29 +35,32 @@ export const CollaboratingWith = () => {
     return collaborators.map((collaborator): TableData => {
       const counts = { total: 0, low: 0, medium: 0, high: 0, critical: 0 };
 
-      if (collaborator?.counts?.status) {
-        Object.keys(collaborator.counts.status).forEach(key => {
-          const val = collaborator?.counts?.status![key] || 0;
+      if (collaborator?.counts) {
+        Object.keys(collaborator.counts).forEach(key => {
+          const val = collaborator?.counts?.[key] || 0;
 
           // Hide non-open status and info severity risks
           // These were deemed not important enough to show in the table
-          if (key[0] !== 'O' || key[1] === 'I') return;
+          const status = getRiskStatus(key);
+          const severity = getRiskSeverity(key);
+          if (status !== RiskStatus.Opened || severity === RiskSeverity.Info)
+            return;
 
           if (key.length === 2) {
             counts.total += val;
           }
 
-          switch (key[1]) {
-            case 'L':
+          switch (severity) {
+            case RiskSeverity.Low:
               counts.low += val;
               break;
-            case 'M':
+            case RiskSeverity.Medium:
               counts.medium += val;
               break;
-            case 'H':
+            case RiskSeverity.High:
               counts.high += val;
               break;
-            case 'C':
+            case RiskSeverity.Critical:
               counts.critical += val;
               break;
           }
@@ -149,7 +154,6 @@ export const CollaboratingWith = () => {
     <>
       <div className="flex w-full flex-col">
         <Table
-          className="border-none p-0 shadow-none"
           name="collaborators"
           columns={columns}
           data={collaboratorsWithCount}
@@ -158,7 +162,6 @@ export const CollaboratingWith = () => {
           noData={{
             description: 'No collaborating organizations found.',
           }}
-          isTableView={false}
           error={null}
         />
       </div>

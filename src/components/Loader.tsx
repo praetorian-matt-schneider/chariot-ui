@@ -33,10 +33,14 @@ export const Loader: React.FC<Props> = ({
         <div
           role="status"
           className="flex size-full items-center justify-center"
+          onClick={e => e.stopPropagation()}
         >
           <svg
             aria-hidden="true"
-            className={cn('size-8 animate-spin fill-gray-600 text-gray-200')}
+            className={cn(
+              'size-8 animate-spin fill-gray-600 text-gray-200',
+              className
+            )}
             viewBox="0 0 100 101"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
