@@ -7,7 +7,6 @@ import {
 } from '@heroicons/react/24/outline';
 import { useDebounce } from 'use-debounce';
 
-import { Button } from '@/components/Button';
 import { HorseIcon } from '@/components/icons/Horse.icon';
 import { Modal } from '@/components/Modal';
 import { Columns } from '@/components/table/types';
@@ -189,12 +188,9 @@ const Jobs: React.FC = () => {
       cell: (job: Job) => {
         return (
           <div className="flex items-center gap-2">
-            <Button
-              className="border border-default px-2 py-1"
-              startIcon={getJobStatusIcon(job.status, 'size-6')}
-            >
-              {job.source}
-            </Button>
+            {getJobStatusIcon(job.status, 'size-6')}
+            {job.source}
+
             <span className="text-brand">{job.name}</span>
             <ArrowLongRightIcon className="size-4 text-default-light" />
             <span>{job.dns}</span>
