@@ -202,7 +202,7 @@ const TreeLevel: React.FC<TreeLevelProps> = ({
   };
 
   return (
-    <div className="rounded-sm bg-layer0 shadow-sm">
+    <div className="relative z-10 rounded-sm bg-layer0 shadow-sm">
       {childFolders && childFolders.length > 0 && (
         <div className="flex flex-row flex-wrap space-x-6">
           {childFolders.map(folder => (
