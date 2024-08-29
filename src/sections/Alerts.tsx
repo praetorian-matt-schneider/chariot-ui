@@ -38,10 +38,16 @@ const Alerts: React.FC = () => {
   const [selectedItem, setSelectedItem] = useState<Asset | Risk | null>(null);
 
   const { mutateAsync: reRunJob, status: reRunJobStatus } = useReRunJob();
-  const { data: alerts, refetch: refetchAlerts } = useGetAccountAlerts();
+  const { data: alertsWithAttributes, refetch: refetchAlerts } =
+    useGetAccountAlerts();
   const { getRiskDrawerLink, getAssetDrawerLink } = getDrawerLink();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  // Filter the alerts to only show the ones that are not attributes
+  // This is temporary change till the time we have a proper way to handle attributes
+  const alerts = alertsWithAttributes?.filter(
+    ({ value }) => !value.startsWith('#attribute#')
+  );
 
   const { mutateAsync: updateAsset, status: updateAssetStatus } =
     useUpdateAsset();
@@ -370,7 +376,15 @@ const Alerts: React.FC = () => {
     );
   };
 
-  const items = useMemo(() => data?.assets || data?.risks || [], [data]);
+  const items = useMemo(() => {
+    if (data?.assets && data?.assets.length > 0) {
+      return data.assets;
+    }
+    if (data?.risks && data?.risks.length > 0) {
+      return data.risks;
+    }
+    return [];
+  }, [data]);
   const totalAlerts = alerts?.reduce((acc, alert) => acc + alert.count, 0);
 
   const parentRef = useRef<HTMLDivElement>(null);
