@@ -536,7 +536,7 @@ const Assets: React.FC = () => {
           title: 'No Assets found',
           description: filters.search
             ? 'Add an asset now to get started'
-            : 'There is no assets found with this search, update the search or add new assets',
+            : 'No assets found with this filter',
         }}
       />
       <AssetStatusWarning
