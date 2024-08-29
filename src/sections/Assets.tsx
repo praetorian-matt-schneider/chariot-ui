@@ -151,6 +151,10 @@ const Assets: React.FC = () => {
     useState<boolean>(false);
   const [assetStatus, setAssetStatus] = useState<AssetStatus | ''>('');
 
+  useEffect(() => {
+    setSelectedRows([]);
+  }, [JSON.stringify(filters)]);
+
   const columns: Columns<PartialAsset> = useMemo(() => {
     const selectedRowData = selectedRows
       .map(i => assets[Number(i)])
