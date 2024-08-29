@@ -1,6 +1,5 @@
 import {
   ArrowRightStartOnRectangleIcon,
-  ChartBarSquareIcon,
   DocumentTextIcon,
   UserIcon,
 } from '@heroicons/react/24/outline';
@@ -120,11 +119,6 @@ export const AccountDropdown: React.FC = () => {
             label: 'Documents',
             icon: <DocumentTextIcon />,
             to: getRoute(['app', 'files']),
-          },
-          {
-            label: 'Widgets',
-            icon: <ChartBarSquareIcon />,
-            to: getRoute(['app', 'widgets']),
           },
           {
             label: 'Divider',

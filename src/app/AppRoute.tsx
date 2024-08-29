@@ -10,7 +10,6 @@ import { AuthenticatedApp } from '@/sections/AuthenticatedApp';
 import AWSMarketplace from '@/sections/AWSMarketplace';
 import Files from '@/sections/Files';
 import Hello from '@/sections/Hello';
-import Intelligence from '@/sections/Intelligence';
 import Jobs from '@/sections/Jobs';
 import Logout from '@/sections/Logout';
 import { Overview } from '@/sections/overview/Overview';
@@ -102,10 +101,6 @@ const appRoutes = {
     logout: {
       element: <Logout />,
       title: 'logout',
-    },
-    widgets: {
-      element: <Intelligence />,
-      title: 'Widgets',
     },
     alerts: {
       element: <Alerts />,
