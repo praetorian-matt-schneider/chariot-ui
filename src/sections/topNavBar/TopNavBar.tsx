@@ -15,7 +15,7 @@ export const TopNavBar: React.FC = () => {
   const isCurrentPage = (page: string) => currentPage === page;
   const linkSize = 'w-15 md:w-20';
 
-  const links = ['overview', 'assets', 'risks'];
+  const links = ['overview', 'assets', 'risks', 'risks-beta'];
   return (
     <div>
       <div className="flex flex-col items-center justify-between py-3 md:flex-row">
@@ -31,7 +31,7 @@ export const TopNavBar: React.FC = () => {
                   key={link}
                   to={getRoute([
                     'app',
-                    link as 'overview' | 'assets' | 'risks',
+                    link as 'overview' | 'assets' | 'risks' | 'risks-beta',
                   ])}
                   className={`${linkSize} mt-1 border-b-2 pb-1 text-sm font-medium capitalize transition-colors 
                   hover:text-gray-100 ${

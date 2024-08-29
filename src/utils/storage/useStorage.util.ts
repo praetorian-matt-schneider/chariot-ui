@@ -21,6 +21,7 @@ export enum StorageKey {
   AWS_MARKETPLACE_CONFIG = 'awsMarketplaceConfig',
   AWS_MARKETPLACE_CONFIG_VERIFY_LINKING = 'awsMarketplaceConfigVerifyLinking',
   CONFIRM_LINK_AWS = 'confirmLinkAWS',
+  RISK_FILTERS = 'riskFilters',
 }
 
 interface UseStorageOptions<S> {

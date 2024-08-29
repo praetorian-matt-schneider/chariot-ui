@@ -1,6 +1,6 @@
 import { To } from 'react-router-dom';
 
-import { Asset, Risk } from '@/types';
+import { Asset, Attribute, Risk } from '@/types';
 import { StorageKey } from '@/utils/storage/useStorage.util';
 import { generatePathWithSearch } from '@/utils/url.util';
 
@@ -14,6 +14,11 @@ export function getDrawerLink() {
             `#asset#${asset.dns}#${asset.name}`,
           ],
         ],
+      });
+    },
+    getAttributeDrawerLink: (attribute: Pick<Attribute, 'source'>): To => {
+      return generatePathWithSearch({
+        appendSearch: [[StorageKey.DRAWER_COMPOSITE_KEY, attribute.source]],
       });
     },
     getRiskDrawerLink: (risk: Pick<Risk, 'dns' | 'name'>): To => {
