@@ -7,6 +7,7 @@ import {
   ExclamationCircleIcon,
   InformationCircleIcon,
   MagnifyingGlassIcon,
+  QuestionMarkCircleIcon,
 } from '@heroicons/react/24/outline';
 import { notUndefined, useVirtualizer } from '@tanstack/react-virtual';
 import { Slash } from 'lucide-react';
@@ -39,7 +40,6 @@ export function Table<TData>(props: TableProps<TData>) {
     columns,
     data: rawData,
     selection,
-    noData,
     status,
     error,
     name: tableName,
@@ -378,15 +378,7 @@ export function Table<TData>(props: TableProps<TData>) {
           icon={<ExclamationCircleIcon className={`size-20 text-red-400`} />}
         />
       )}
-      {isEmpty && (
-        <NoData
-          title={noData?.title || `No ${tableName} found`}
-          description={noData?.description}
-          icon={noData?.icon}
-          styleType={noData?.styleType}
-        />
-      )}
-      {isLoadingOrHaveData && (
+      {(isLoadingOrHaveData || isEmpty) && (
         <table
           className={cn(
             'w-full relative border-default border border-t-0 bg-layer0 table-fixed',
@@ -451,6 +443,34 @@ export function Table<TData>(props: TableProps<TData>) {
             </tr>
           </thead>
           <tbody>
+            {isEmpty && (
+              <tr>
+                <td
+                  colSpan={columnsLength}
+                  className="relative w-full py-8 text-center"
+                >
+                  <div className="flex flex-col items-center justify-center">
+                    <QuestionMarkCircleIcon className="mb-4 size-16 text-gray-400" />
+                    <p className="text-2xl font-bold">
+                      Your search returned no results.
+                    </p>
+                    <div className="text-md mt-4 text-gray-400">
+                      <div className="mt-1 flex items-center justify-center">
+                        <div className="mr-2 size-2 rounded-full bg-gray-400"></div>
+                        <p>Try adjusting your filters.</p>
+                      </div>
+                      <div className="mt-1 flex items-center justify-center">
+                        <div className="mr-2 size-2 rounded-full bg-gray-400"></div>
+                        <p>
+                          Check your search term for misspellings or add new{' '}
+                          {tableName}s.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            )}
             {before > 0 && (
               <tr>
                 <td colSpan={columnsLength} style={{ height: before }} />

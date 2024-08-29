@@ -19,7 +19,6 @@ import { Dropdown } from '@/components/Dropdown';
 import { InputText } from '@/components/form/InputText';
 import { RisksIcon } from '@/components/icons';
 import { getAssetStatusIcon } from '@/components/icons/AssetStatus.icon';
-import { HorseIcon } from '@/components/icons/Horse.icon';
 import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
 import { Loader } from '@/components/Loader';
 import { Table } from '@/components/table/Table';
@@ -534,7 +533,6 @@ const Assets: React.FC = () => {
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={isFetchingNextPage}
         noData={{
-          icon: <HorseIcon />,
           title: 'No Assets found',
           description: filters.search
             ? 'Add an asset now to get started'
