@@ -298,28 +298,6 @@ export function Table<TData>(props: TableProps<TData>) {
     };
   }, [JSON.stringify({ selectedRows, rawData }), bulkActions]);
 
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      const searchInput = document.getElementById('search') as HTMLInputElement;
-
-      if (event.key === '/') {
-        if (document.activeElement !== searchInput) {
-          event.preventDefault(); // Prevent the default browser action if input is not focused
-          if (searchInput) {
-            searchInput.focus();
-            searchInput.select(); // Optionally select the text in the input
-          }
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, []);
-
   return (
     <div id="localBody">
       {(bodyHeader || parsedActions || parsedPrimaryAction) && (
