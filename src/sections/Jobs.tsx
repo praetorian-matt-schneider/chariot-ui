@@ -9,6 +9,7 @@ import { useDebounce } from 'use-debounce';
 
 import { HorseIcon } from '@/components/icons/Horse.icon';
 import { Modal } from '@/components/Modal';
+import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
 import { useModifyAccount, useMy } from '@/hooks';
@@ -398,22 +399,25 @@ const Jobs: React.FC = () => {
             ) : null}
           </>
         }
-        isTableView
         name="jobs"
-        tableClassName="border-r-0 border-l border-gray-300"
-        columns={columns}
-        data={filteredJobs}
-        error={error}
-        status={dataStatus}
-        fetchNextPage={fetchNextPage}
-        isFetchingNextPage={isFetchingNextPage}
-        noData={{
-          icon: <HorseIcon />,
-          title: 'No Jobs found',
-          description:
-            'There are no job found with this search, update the search',
-        }}
-      />
+      >
+        <Table
+          name="jobs"
+          tableClassName="border-none"
+          columns={columns}
+          data={filteredJobs}
+          error={error}
+          status={dataStatus}
+          fetchNextPage={fetchNextPage}
+          isFetchingNextPage={isFetchingNextPage}
+          noData={{
+            icon: <HorseIcon />,
+            title: 'No Jobs found',
+            description:
+              'There are no job found with this search, update the search',
+          }}
+        />
+      </FancyTable>
     </div>
   );
 };

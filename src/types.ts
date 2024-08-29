@@ -555,6 +555,12 @@ export interface JobFilters {
   failedReason: string[];
 }
 
+export interface RiskFilters {
+  alert: string;
+  search: string;
+  attribute: string;
+}
+
 export type Severity = 'I' | 'L' | 'M' | 'H' | 'C';
 export type SeverityOpenCounts = Partial<Record<Severity, Risk[]>>;
 
