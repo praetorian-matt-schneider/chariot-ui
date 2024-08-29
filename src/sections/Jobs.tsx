@@ -144,7 +144,7 @@ const Jobs: React.FC = () => {
       });
     }
 
-    if (filters.failedReason.length > 0) {
+    if (filters.failedReason?.length > 0) {
       filteredJobs = filteredJobs.filter(job => {
         const comment = getFailedComment(job);
         return comment ? filters.failedReason.includes(comment) : false;
@@ -311,7 +311,7 @@ const Jobs: React.FC = () => {
                   </p>
                 </div>
               )}
-              {filters.failedReason.length > 0 && (
+              {filters.failedReason?.length > 0 && (
                 <div className="flex items-center gap-2">
                   <p className="text-lg font-bold">Failed Reason:</p>
                   <p className="text-base font-semibold text-gray-500">
