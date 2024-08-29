@@ -191,7 +191,7 @@ const Jobs: React.FC = () => {
             {getJobStatusIcon(job.status, 'size-6')}
             {job.source}
 
-            <span className="text-brand">{job.name}</span>
+            <span>{job.name}</span>
             <ArrowLongRightIcon className="size-4 text-default-light" />
             <span>{job.dns}</span>
           </div>
