@@ -292,11 +292,11 @@ const Assets: React.FC = () => {
           [attributeName]: currentATTvalue,
         };
 
-        // If the attribute is 'port', sort by count
+        // If the attribute is 'port', sort by numeric port value
         if (attributeName === 'port') {
           updatedAttributes[attributeName] = updatedAttributes[
             attributeName
-          ].sort((a, b) => parseInt(b.count) - parseInt(a.count));
+          ].sort((a, b) => parseInt(a.label) - parseInt(b.label));
         }
 
         return updatedAttributes;
