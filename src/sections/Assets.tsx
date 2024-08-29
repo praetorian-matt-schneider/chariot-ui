@@ -470,7 +470,7 @@ const Assets: React.FC = () => {
               <BellIcon className="size-10 animate-bounce text-white" />
             )}
           </Loader>
-          <h1 className="text-3xl font-bold text-white">Protect Your Assets</h1>
+          <h1 className="text-3xl font-bold text-white">Set exposure alerts</h1>
           <p className="max-w-[700px] text-sm text-gray-500">
             Subscribe to changes in your attack surface and get notified when
             new assets are discovered
