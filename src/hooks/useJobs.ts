@@ -103,7 +103,7 @@ export const useJobsStatus = (
         queryFn: async () => {
           const res = await axios.get(`/my`, {
             params: {
-              key: `#job#${jobKey}#`,
+              key: jobKey,
             },
           });
 
