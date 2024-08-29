@@ -265,7 +265,7 @@ const Jobs: React.FC = () => {
           </div>
         }
         columns={columns}
-        data={filteredJobs.slice(0, 5)}
+        data={filteredJobs}
         error={error}
         status={isFilteredDataFetching ? 'pending' : status}
         name="jobs"
