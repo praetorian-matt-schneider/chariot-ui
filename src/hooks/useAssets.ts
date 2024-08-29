@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useDebounce } from 'use-debounce';
 
@@ -20,9 +19,8 @@ import {
 } from '@/types';
 import { useMutation } from '@/utils/api';
 import { useMergeStatus } from '@/utils/api';
-import { safeExecute } from '@/utils/function.util';
-import { isEqual } from '@/utils/lodash.util';
 import { Regex } from '@/utils/regex.util';
+import { useQueryFilters } from '@/utils/storage/useQueryParams.util';
 
 interface UpdateAssetProps {
   key: string;
@@ -233,23 +231,10 @@ const defaultFilters: AssetFilters = {
 
 // eslint-disable-next-line complexity
 export function useGetAssets() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const searchValue = searchParams.get('assetFilters');
-
-  const filters = searchValue
-    ? safeExecute<AssetFilters>(() => JSON.parse(searchValue), defaultFilters)
-    : defaultFilters;
-  const setFilters = (filters: AssetFilters) => {
-    setSearchParams(prevParam => {
-      if (isEqual(filters, defaultFilters)) {
-        prevParam.delete('assetFilters');
-      } else {
-        prevParam.set('assetFilters', JSON.stringify(filters));
-      }
-
-      return prevParam;
-    });
-  };
+  const [filters, setFilters] = useQueryFilters<AssetFilters>({
+    key: 'assetFilters',
+    defaultFilters,
+  });
 
   const [isFilteredDataFetching, setIsFilteredDataFetching] = useState(false);
 

@@ -9,6 +9,7 @@ import { sToMs } from '@/utils/date.util';
 import { abbreviateNumber } from '@/utils/misc.util';
 import { getRoute } from '@/utils/route.util';
 import { StorageKey, useStorage } from '@/utils/storage/useStorage.util';
+import { generatePathWithSearch } from '@/utils/url.util';
 
 interface Props {
   onNotify?: (showNotification: boolean) => void;
@@ -46,6 +47,22 @@ export const Notifications: React.FC<Props> = ({ onNotify, onClick }) => {
     }
   }, [isPending, runningJobs, prevRunningJobs]);
 
+  function getJobPath(status: JobStatus) {
+    return generatePathWithSearch({
+      pathname: getRoute(['app', 'jobs']),
+      appendSearch: [
+        [
+          'jobsFilters',
+          JSON.stringify({
+            status,
+            sources: [],
+            search: '',
+          }),
+        ],
+      ],
+    });
+  }
+
   return (
     <Dropdown
       className="h-7 border-r border-dashed border-gray-700 p-2"
@@ -74,25 +91,25 @@ export const Notifications: React.FC<Props> = ({ onNotify, onClick }) => {
             label: 'Running',
             labelSuffix: runningJobs?.toLocaleString(),
             className: 'flex items-center',
-            to: `/app/jobs?status=${JobStatus.Running}`,
+            to: getJobPath(JobStatus.Running),
           },
           {
             className: 'flex items-center',
             label: 'Queued',
             labelSuffix: queuedJobs?.toLocaleString(),
-            to: `/app/jobs?status=${JobStatus.Queued}`,
+            to: getJobPath(JobStatus.Queued),
           },
           {
             label: 'Failed',
             labelSuffix: failedJobs?.toLocaleString(),
             className: 'flex items-center',
-            to: `/app/jobs?status=${JobStatus.Fail}`,
+            to: getJobPath(JobStatus.Fail),
           },
           {
             className: 'flex items-center',
             label: 'Completed',
             labelSuffix: completedJobs?.toLocaleString(),
-            to: `/app/jobs?status=${JobStatus.Pass}`,
+            to: getJobPath(JobStatus.Pass),
           },
         ],
       }}

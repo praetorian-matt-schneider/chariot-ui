@@ -13,7 +13,7 @@ import { useCounts } from '@/hooks/useCounts';
 import { useReRunJob } from '@/hooks/useJobs';
 import { Job, JobFilters, JobLabels, JobStatus } from '@/types';
 import { cn } from '@/utils/classname';
-import { useStorage } from '@/utils/storage/useStorage.util';
+import { useQueryFilters } from '@/utils/storage/useQueryParams.util';
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -69,10 +69,11 @@ const Jobs: React.FC = () => {
 
   const [isFilteredDataFetching, setIsFilteredDataFetching] = useState(false);
 
-  const [filters, setFilters] = useStorage<JobFilters>(
-    { queryKey: 'jobsFilters' },
-    { status: '', sources: [], search: '' }
-  );
+  const [filters, setFilters] = useQueryFilters<JobFilters>({
+    key: 'jobsFilters',
+    defaultFilters: { status: '', sources: [], search: '' },
+  });
+
   const [debouncedSearch] = useDebounce(filters.search, 500);
 
   const filteredJobs: Job[] = useMemo(() => {
@@ -257,7 +258,11 @@ const Jobs: React.FC = () => {
                   }),
                 ],
                 onClick: value => {
-                  setFilters(prev => ({ ...prev, status: value || '' }));
+                  setFilters({
+                    status: value || '',
+                    sources: [],
+                    search: filters.search,
+                  });
                 },
                 value: filters.status,
               }}
@@ -274,7 +279,7 @@ const Jobs: React.FC = () => {
         search={{
           value: filters.search,
           onChange: search => {
-            setFilters(prev => ({ ...prev, search }));
+            setFilters({ status: filters.status, sources: [], search });
           },
         }}
         noData={{
