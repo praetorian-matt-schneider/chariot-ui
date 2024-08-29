@@ -447,26 +447,13 @@ export function Table<TData>(props: TableProps<TData>) {
               <tr>
                 <td
                   colSpan={columnsLength}
-                  className="relative w-full py-8 text-center"
+                  className="relative size-full text-center"
                 >
-                  <div className="flex flex-col items-center justify-center">
+                  <div className="mt-12 flex flex-col items-center justify-center">
                     <QuestionMarkCircleIcon className="mb-4 size-16 text-gray-400" />
                     <p className="text-2xl font-bold">
                       Your search returned no results.
                     </p>
-                    <div className="text-md mt-4 text-gray-400">
-                      <div className="mt-1 flex items-center justify-center">
-                        <div className="mr-2 size-2 rounded-full bg-gray-400"></div>
-                        <p>Try adjusting your filters.</p>
-                      </div>
-                      <div className="mt-1 flex items-center justify-center">
-                        <div className="mr-2 size-2 rounded-full bg-gray-400"></div>
-                        <p>
-                          Check your search term for misspellings or add new{' '}
-                          {tableName}s.
-                        </p>
-                      </div>
-                    </div>
                   </div>
                 </td>
               </tr>
