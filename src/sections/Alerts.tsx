@@ -507,10 +507,6 @@ const Alerts: React.FC = () => {
               ...selectedItem,
               comment: status,
             };
-            updateRisk({
-              ...selectedItem,
-              comment: status,
-            });
             deleteRisk([newSelectedItem]);
             setSelectedItem(null);
           }

@@ -524,10 +524,6 @@ export function Risks() {
             };
           });
 
-          updateRisk({
-            selectedRows: risksToDelete,
-            comment: status,
-          });
           deleteRisk(risksToDelete);
           setSelectedRows([]);
         }}
