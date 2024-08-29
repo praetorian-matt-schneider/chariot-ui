@@ -14,7 +14,7 @@ export const Paper = forwardRef(function Paper(
       {...props}
       ref={ref}
       className={cn(
-        'size-full overflow-x-auto rounded-[2px] bg-layer0 px-6 border-default border',
+        'relative z-10 overflow-x-auto rounded-[2px] bg-layer0 px-6 border-default border',
         props.className
       )}
     />
