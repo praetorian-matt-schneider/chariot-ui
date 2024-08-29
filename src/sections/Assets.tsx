@@ -829,7 +829,11 @@ export function FancyTable<TData>(
                     }}
                     name={`${tableProps.name}-search`}
                     className="pl-8"
-                    placeholder={`Go to ${tableProps.name}s`}
+                    placeholder={
+                      tableProps.name === 'jobs'
+                        ? 'Go to source'
+                        : `Go to ${tableProps.name}s`
+                    }
                   />
                   <label
                     className="cursor-pointer"

@@ -189,11 +189,14 @@ const Jobs: React.FC = () => {
         return (
           <div className="flex items-center gap-2">
             {getJobStatusIcon(job.status, 'size-6')}
-            {job.source}
-
-            <span>{job.name}</span>
+            {job.source} <span className="text-gray-500">(job)</span>
+            <span>
+              {job.name} <span className="text-gray-500">(source)</span>
+            </span>
             <ArrowLongRightIcon className="size-4 text-default-light" />
-            <span>{job.dns}</span>
+            <span>
+              {job.dns} <span className="text-gray-500">(target)</span>
+            </span>
           </div>
         );
       },
