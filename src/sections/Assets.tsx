@@ -287,10 +287,19 @@ const Assets: React.FC = () => {
           });
         }
 
-        return {
+        const updatedAttributes = {
           ...acc,
           [attributeName]: currentATTvalue,
         };
+
+        // If the attribute is 'port', sort by count
+        if (attributeName === 'port') {
+          updatedAttributes[attributeName] = updatedAttributes[
+            attributeName
+          ].sort((a, b) => parseInt(b.count) - parseInt(a.count));
+        }
+
+        return updatedAttributes;
       },
       {} as Record<string, { label: string; count: string; value: string }[]>
     );
