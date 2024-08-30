@@ -688,19 +688,7 @@ export function CategoryFilter(props: CategoryFilterProps) {
           </Tooltip>
         </h1>
       )}
-      {status === 'pending' &&
-        Array(2)
-          .fill(0)
-          .map((_, index) => {
-            return (
-              <Loader
-                className="my-1 h-5 w-full"
-                key={index}
-                isLoading
-              ></Loader>
-            );
-          })}
-      {status === 'success' && (
+      {category.length > 0 && (
         <ul className="flex flex-col gap-3">
           {category.map((item, index) => {
             const isOptionSelectedOnInit = Boolean(
@@ -764,6 +752,18 @@ export function CategoryFilter(props: CategoryFilterProps) {
           })}
         </ul>
       )}
+      {status === 'pending' &&
+        Array(Math.max(5 - category.length, 1))
+          .fill(0)
+          .map((_, index) => {
+            return (
+              <Loader
+                className="my-1 h-5 w-full"
+                key={index}
+                isLoading
+              ></Loader>
+            );
+          })}
     </div>
   );
 }

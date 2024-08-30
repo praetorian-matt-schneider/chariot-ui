@@ -21,7 +21,6 @@ import { Button } from '@/components/Button';
 import { Drawer } from '@/components/Drawer';
 import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
 import { Loader } from '@/components/Loader';
-import { AssetStatusDropdown } from '@/components/ui/AssetPriorityDropdown';
 import { useMy } from '@/hooks';
 import { PartialAsset } from '@/hooks/useAssets';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
@@ -200,7 +199,6 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
               <div className="max-w-1/2 flex flex-col gap-2">
                 <h1 className="text-2xl font-bold">{asset.name}</h1>
                 <div className="flex flex-wrap gap-2">
-                  <AssetStatusDropdown asset={asset} />
                   <Button
                     styleType="secondary"
                     className="text-nowrap px-3 py-2"
