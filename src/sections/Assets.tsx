@@ -459,7 +459,7 @@ const Assets: React.FC = () => {
 
               await addAlert({
                 value: attributeKey,
-                name: `Assets with a ${attributeType} value of ${attributeValue} identified`,
+                name: `Assets with ${attributeType}:${attributeValue.endsWith('#') ? attributeValue.slice(0, -1) : attributeValue} identified`,
               });
             },
             onRemove: async (value: string) => {
@@ -706,6 +706,7 @@ function AlertIcon(props: AlertIconProps) {
 
 export function FancyTable(
   props: PropsWithChildren & {
+    className?: string;
     tableheader?: ReactNode;
     addNew?: {
       label?: ReactNode;
@@ -721,6 +722,7 @@ export function FancyTable(
   }
 ) {
   const {
+    className,
     tableheader,
     addNew,
     search,
@@ -830,14 +832,16 @@ export function FancyTable(
       <div className="flex w-full flex-col bg-white">
         <div
           ref={rightStickyRef}
-          className="sticky flex min-h-14 items-center bg-white px-4"
+          className={cn(
+            'sticky flex min-h-14 items-center bg-white px-4',
+            className
+          )}
           style={{
             top: headerHeight,
             zIndex: 1,
           }}
         >
           {tableHeader}
-
           {filter &&
             filter.value?.length > 0 &&
             !tableHeader &&

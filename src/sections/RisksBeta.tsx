@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { BellIcon } from '@heroicons/react/24/solid';
 
 import { Loader } from '@/components/Loader';
 import { useMy } from '@/hooks';
-import { useCounts } from '@/hooks/useCounts';
+import { useBulkCounts } from '@/hooks/useCounts';
 import { useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
 import { Alerts } from '@/sections/Alerts';
 import { CategoryFilter, FancyTable } from '@/sections/Assets';
@@ -23,7 +23,7 @@ const RisksBeta: React.FC = () => {
     {
       search: '',
       alert: '',
-      attribute: '',
+      exposureRisk: '',
     }
   );
   //   Security alert options, count
@@ -41,45 +41,57 @@ const RisksBeta: React.FC = () => {
   const {
     data: attributesCount,
     status: attributesCountStatus,
-    refetch: refetchAttributesCount,
-  } = useCounts({
-    resource: 'attribute',
-  });
+    invalidate: refetchAttributesCount,
+  } = useBulkCounts(
+    conditions.map(({ value }) => ({
+      resource: 'attribute',
+      query: value.split('#attribute')[1],
+    }))
+  );
 
-  const alertsOptions =
-    alerts?.map(alert => ({
-      label: alert.name,
-      value: alert.value,
-      count: alert.count.toLocaleString(),
-    })) || [];
+  const alertsOptions = useMemo(
+    () =>
+      (alerts || [])
+        .map(alert => ({
+          label: alert.name,
+          value: alert.value,
+          count: alert.count.toLocaleString(),
+        }))
+        .filter(({ value }) => !value.startsWith('#attribute')),
+    [JSON.stringify({ alerts })]
+  );
 
-  const attributeOptions =
-    conditions?.map(({ value }) => ({
-      label: value,
-      value,
-      count: (
-        (attributesCountStatus === 'success' &&
-          attributesCount &&
-          attributesCount[value.slice(0, -1)]) ||
-        0
-      ).toLocaleString(),
-    })) || [];
+  const exposureRiskOptions = useMemo(
+    () =>
+      conditions?.map(({ name, value }) => ({
+        label: name,
+        value: `name:${name}#`,
+        count: (
+          attributesCount[value.endsWith('#') ? value.slice(0, -1) : value] || 0
+        ).toLocaleString(),
+      })) || [],
+    [JSON.stringify({ attributesCount, conditions })]
+  );
 
+  // Add default filter if none is selected
   useEffect(() => {
-    if (
-      !filters.search &&
-      !filters.alert &&
-      !filters.attribute &&
-      alerts &&
-      alerts.length
-    ) {
-      setFilters({
-        search: '',
-        alert: alerts[0].value,
-        attribute: '',
-      });
+    if (!filters.search && !filters.alert && !filters.exposureRisk) {
+      if (alerts && alerts.length > 0) {
+        setFilters({
+          search: '',
+          alert: alerts[0].value,
+          exposureRisk: '',
+        });
+      }
+      if (exposureRiskOptions && exposureRiskOptions.length > 0) {
+        setFilters({
+          search: '',
+          alert: '',
+          exposureRisk: exposureRiskOptions[0].value,
+        });
+      }
     }
-  }, [JSON.stringify({ alerts, filters })]);
+  }, [JSON.stringify({ alerts, filters, exposureRiskOptions })]);
 
   function refetch() {
     refetchConditions();
@@ -106,52 +118,58 @@ const RisksBeta: React.FC = () => {
         search={{
           value: filters.search,
           onChange: search => {
-            setFilters({ search, alert: '', attribute: '' });
+            setFilters({ search, alert: '', exposureRisk: '' });
           },
         }}
+        className="h-0 min-h-0"
         name="risk"
         otherFilters={
           <>
-            <CategoryFilter
-              value={filters.alert ? [filters.alert] : []}
-              hideHeader={true}
-              onChange={alerts => {
-                setFilters({
-                  ...filters,
-                  search: '',
-                  attribute: '',
-                  alert: alerts[0],
-                });
-              }}
-              category={[
-                {
-                  label: 'Security Alerts',
-                  options: alertsOptions,
-                  showCount: true,
-                },
-              ]}
-              status={alertsStatus}
-            />
-            <CategoryFilter
-              value={filters.attribute ? [filters.attribute] : []}
-              hideHeader={true}
-              onChange={attributes => {
-                setFilters({
-                  ...filters,
-                  search: '',
-                  alert: '',
-                  attribute: attributes[0],
-                });
-              }}
-              category={[
-                {
-                  label: 'Exposure Risks',
-                  options: attributeOptions,
-                  showCount: true,
-                },
-              ]}
-              status={conditionsStatus}
-            />
+            {alertsOptions.length > 0 && (
+              <CategoryFilter
+                value={filters.alert ? [filters.alert] : []}
+                hideHeader={true}
+                onChange={alerts => {
+                  setFilters({
+                    ...filters,
+                    search: '',
+                    exposureRisk: '',
+                    alert: alerts[0],
+                  });
+                }}
+                category={[
+                  {
+                    label: 'Security Alerts',
+                    options: alertsOptions,
+                    showCount: true,
+                  },
+                ]}
+                status={alertsStatus}
+              />
+            )}
+            {exposureRiskOptions.length > 0 && (
+              <CategoryFilter
+                value={filters.exposureRisk ? [filters.exposureRisk] : []}
+                hideHeader={true}
+                onChange={attributes => {
+                  setFilters({
+                    ...filters,
+                    search: '',
+                    alert: '',
+                    exposureRisk: attributes[0],
+                  });
+                }}
+                category={[
+                  {
+                    label: 'Exposure Risks',
+                    options: exposureRiskOptions,
+                    showCount:
+                      attributesCountStatus === 'pending' ? false : true,
+                  },
+                ]}
+                status={conditionsStatus}
+              />
+            )}
           </>
         }
       >
@@ -171,9 +189,9 @@ const RisksBeta: React.FC = () => {
             refetch={refetch}
           />
         )}
-        {filters.attribute && (
+        {filters.exposureRisk && (
           <Alerts
-            query={filters.attribute}
+            query={filters.exposureRisk}
             setQuery={() => {}}
             hideFilters={true}
             refetch={refetch}
