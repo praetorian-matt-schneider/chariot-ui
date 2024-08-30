@@ -120,7 +120,6 @@ export const getJobStatusIcon = (
 
 const getJobsStatus = (job?: JobWithFailedCount) => {
   const status = job?.status;
-  const comment = job?.comment;
 
   return (
     <Tooltip
@@ -133,14 +132,14 @@ const getJobsStatus = (job?: JobWithFailedCount) => {
                 ? `${job.failedJobsCount} Failed Jobs`
                 : `Job ${JobStatusLabel[status]}`}
             </div>
-            {comment && <div>{`Latest comment: ${comment}`}</div>}
+            {job.failedJobsCount > 0 && <p>Click to view details</p>}
           </div>
         ) : (
           ''
         )
       }
     >
-      {getJobStatusIcon(status)}
+      {getJobStatusIcon(job?.failedJobsCount ? JobStatus.Fail : status)}
     </Tooltip>
   );
 };
@@ -472,8 +471,10 @@ export const Overview: React.FC = () => {
                                   [
                                     'jobsFilters',
                                     JSON.stringify({
-                                      search: row.id,
-                                      status: job?.status ?? undefined,
+                                      search: `#${row.id}`,
+                                      status: job.failedJobsCount
+                                        ? JobStatus.Fail
+                                        : job.status,
                                       sources: [],
                                     }),
                                   ],

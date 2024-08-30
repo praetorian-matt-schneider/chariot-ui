@@ -10,6 +10,7 @@ import { useDebounce } from 'use-debounce';
 import { HorseIcon } from '@/components/icons/Horse.icon';
 import { Modal } from '@/components/Modal';
 import { Columns } from '@/components/table/types';
+import { Tooltip } from '@/components/Tooltip';
 import { useModifyAccount, useMy } from '@/hooks';
 import { useCounts } from '@/hooks/useCounts';
 import { useReRunJob } from '@/hooks/useJobs';
@@ -24,7 +25,7 @@ import {
   JobStatusLabel,
 } from '@/types';
 import { cn } from '@/utils/classname';
-import { useStorage } from '@/utils/storage/useStorage.util';
+import { useQueryFilters } from '@/utils/storage/useQueryParams.util';
 
 export const getStatusColor = (status: JobStatus) => {
   switch (status) {
@@ -64,8 +65,14 @@ const getFailedComment = (job: Job) => {
 };
 
 const Jobs: React.FC = () => {
+  const [filters, setFilters] = useQueryFilters<JobFilters>({
+    key: 'jobsFilters',
+    defaultFilters: { status: '', sources: [], search: '', failedReason: [] },
+  });
+  const query = filters.search.startsWith('#') ? filters.search : undefined;
   const { data: stats = {} } = useCounts({
     resource: 'job',
+    query,
   });
   const {
     data: jobs = [],
@@ -78,6 +85,7 @@ const Jobs: React.FC = () => {
     hasNextPage,
   } = useMy({
     resource: 'job',
+    query,
   });
   const { data: accounts, status: accountStatus } = useMy({
     resource: 'account',
@@ -93,10 +101,6 @@ const Jobs: React.FC = () => {
     accounts.find(account => account.member === FROZEN_ACCOUNT)
   );
 
-  const [filters, setFilters] = useStorage<JobFilters>(
-    { queryKey: 'jobsFilters' },
-    { status: [], sources: [], search: '', failedReason: [] }
-  );
   const [debouncedSearch] = useDebounce(filters.search, 500);
 
   const failedJobStats = useMemo(() => {
@@ -126,8 +130,8 @@ const Jobs: React.FC = () => {
     let filteredJobs = jobs;
     const { status, sources } = filters;
 
-    if (status && status.length > 0) {
-      filteredJobs = filteredJobs.filter(job => status.includes(job.status));
+    if (status) {
+      filteredJobs = filteredJobs.filter(job => job.status === status);
     }
 
     if (sources.filter(Boolean).length > 0) {
@@ -144,7 +148,7 @@ const Jobs: React.FC = () => {
       });
     }
 
-    if (filters.failedReason?.length > 0) {
+    if (filters.failedReason?.length > 0 && !query) {
       filteredJobs = filteredJobs.filter(job => {
         const comment = getFailedComment(job);
         return comment ? filters.failedReason.includes(comment) : false;
@@ -152,7 +156,7 @@ const Jobs: React.FC = () => {
     }
 
     return filteredJobs;
-  }, [debouncedSearch, JSON.stringify({ jobs, filters })]);
+  }, [debouncedSearch, query, JSON.stringify({ jobs, filters })]);
 
   const jobStats = useMemo(() => {
     return Object.entries(stats).reduce(
@@ -187,17 +191,24 @@ const Jobs: React.FC = () => {
       id: 'status',
       cell: (job: Job) => {
         return (
-          <div className="flex items-center gap-2">
-            {getJobStatusIcon(job.status, 'size-6')}
-            {job.source} <span className="text-gray-500">(job)</span>
-            <span>
-              {job.name} <span className="text-gray-500">(source)</span>
-            </span>
-            <ArrowLongRightIcon className="size-4 text-default-light" />
-            <span>
-              {job.dns} <span className="text-gray-500">(target)</span>
-            </span>
-          </div>
+          <Tooltip title={job.comment || ''}>
+            <div
+              className={cn(
+                'flex items-center gap-2',
+                job.comment && 'cursor-pointer'
+              )}
+            >
+              {getJobStatusIcon(job.status, 'size-6')}
+              {job.source} <span className="text-gray-500">(job)</span>
+              <span>
+                {job.name} <span className="text-gray-500">(source)</span>
+              </span>
+              <ArrowLongRightIcon className="size-4 text-default-light" />
+              <span>
+                {job.dns} <span className="text-gray-500">(target)</span>
+              </span>
+            </div>
+          </Tooltip>
         );
       },
     },
@@ -291,7 +302,7 @@ const Jobs: React.FC = () => {
         search={{
           value: filters.search,
           onChange: search => {
-            setFilters(prevFilters => ({ ...prevFilters, search }));
+            setFilters({ ...filters, search });
           },
         }}
         tableHeader={
@@ -307,7 +318,7 @@ const Jobs: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <p className="text-lg font-bold">Status:</p>
                   <p className="text-base font-semibold text-gray-500">
-                    {JobStatusLabel[filters.status[0] as JobStatus]}
+                    {JobStatusLabel[filters.status as JobStatus]}
                   </p>
                 </div>
               )}
@@ -326,13 +337,10 @@ const Jobs: React.FC = () => {
           <>
             <CategoryFilter
               hideHeader={true}
-              value={filters.status}
+              value={filters.status ? [filters.status] : []}
               status={dataStatus}
-              onChange={status => {
-                setFilters(prevFilters => ({
-                  ...prevFilters,
-                  status,
-                }));
+              onChange={statuses => {
+                setFilters({ ...filters, status: statuses[0] });
               }}
               category={[
                 {
@@ -353,11 +361,8 @@ const Jobs: React.FC = () => {
                 hideHeader={true}
                 value={filters.failedReason}
                 status={dataStatus}
-                onChange={reason => {
-                  setFilters(prevFilters => ({
-                    ...prevFilters,
-                    failedReason: reason,
-                  }));
+                onChange={failedReason => {
+                  setFilters({ ...filters, failedReason });
                 }}
                 category={[
                   {

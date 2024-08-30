@@ -548,7 +548,7 @@ export interface AssetFilters {
 
 export interface JobFilters {
   sources: string[];
-  status: string[];
+  status: string;
   search: string;
   failedReason: string[];
 }
