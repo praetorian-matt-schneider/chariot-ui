@@ -377,6 +377,7 @@ export interface Condition {
   name: string;
   value: string;
   key: string;
+  count: number;
 }
 
 export interface Search {

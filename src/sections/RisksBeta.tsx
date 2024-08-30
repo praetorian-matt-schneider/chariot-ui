@@ -62,17 +62,20 @@ const RisksBeta: React.FC = () => {
     [JSON.stringify({ alerts })]
   );
 
-  const exposureRiskOptions = useMemo(
-    () =>
-      conditions?.map(({ name, value }) => ({
+  const exposureRiskOptions = useMemo(() => {
+    const conditionsWithCount = (conditions || []).filter(
+      ({ count }) => count > 0
+    );
+    return (
+      conditionsWithCount.map(({ name, value }) => ({
         label: name,
         value,
         count: (
           attributesCount[value.endsWith('#') ? value.slice(0, -1) : value] || 0
         ).toLocaleString(),
-      })) || [],
-    [JSON.stringify({ attributesCount, conditions })]
-  );
+      })) || []
+    );
+  }, [JSON.stringify({ attributesCount, conditions })]);
 
   // Add default filter if none is selected
   useEffect(() => {
