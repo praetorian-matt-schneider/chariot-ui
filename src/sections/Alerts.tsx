@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { ChevronRightIcon, Inbox, PlusIcon, ShieldCheck } from 'lucide-react';
+import { Inbox, PlusIcon, ShieldCheck } from 'lucide-react';
 
 import { Button } from '@/components/Button';
 import { Input } from '@/components/form/Input';
-import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
+import { getSeverityButton } from '@/components/icons/RiskSeverity.icon';
 import { Loader } from '@/components/Loader';
 import { Tooltip } from '@/components/Tooltip';
 import { ClosedStateModal } from '@/components/ui/ClosedStateModal';
@@ -19,13 +19,11 @@ import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import {
   Asset,
   AssetStatus,
-  AssetStatusLabel,
   Attribute,
   Condition,
   Risk,
   RiskSeverity,
   RiskStatus,
-  RiskStatusLabel,
   SeverityDef,
 } from '@/types';
 import { cn } from '@/utils/classname';
@@ -239,6 +237,56 @@ export const Alerts: React.FC<Props> = ({
           link && navigate(link);
         }}
       >
+        <div className="flex flex-1 items-center space-x-3 overflow-hidden">
+          {isRisk && item.status !== RiskStatus.ExposedRisks && (
+            <Tooltip
+              title={`${SeverityDef[getRiskSeverity(item.status)]} Severity`}
+            >
+              {getSeverityButton(getRiskSeverity(item.status))}
+            </Tooltip>
+          )}
+          {(isAsset || isRisk) && (
+            <div className="flex flex-1 items-center space-x-3 overflow-hidden">
+              <div className="flex w-full flex-col overflow-hidden">
+                <Tooltip title={item.name ?? (isAsset ? item.dns : item.key)}>
+                  <span className="truncate text-base font-semibold text-brand hover:text-brand-dark">
+                    {item.name}
+                  </span>
+                </Tooltip>
+                <span className="text-sm text-gray-500">{item.dns}</span>
+              </div>
+            </div>
+          )}
+        </div>
+        {(isAsset || isRisk) && (
+          <span className="text-xs text-gray-500">
+            {item.created !== item.updated ? (
+              <Tooltip title={`Created ${formatDate(item.created)}`}>
+                Updated {formatDate(item.updated)}
+              </Tooltip>
+            ) : (
+              <span>
+                {isAsset
+                  ? item.source === 'provided'
+                    ? 'Added'
+                    : 'Discovered'
+                  : 'Identified'}{' '}
+                {formatDate(item.created)}
+              </span>
+            )}
+          </span>
+        )}
+
+        {/* {(isAsset || isRisk) && (
+          <div className="flex items-center space-x-2">
+            <Tooltip title="Status">
+              <span className="rounded border border-red-400 px-2 py-1 text-xs font-medium text-red-500">
+                {isAsset && AssetStatusLabel[item.status as AssetStatus]}
+                {isRisk && RiskStatusLabel[getRiskStatus(item.status)]}
+              </span>
+            </Tooltip>
+          </div>
+        )} */}
         <div className="flex space-x-2">
           {isAsset && item.status === AssetStatus.ActiveLow && (
             <>
@@ -416,54 +464,6 @@ export const Alerts: React.FC<Props> = ({
             </>
           )}
         </div>
-        <div className="flex flex-1 items-center space-x-3 overflow-hidden">
-          {isRisk && (
-            <Tooltip
-              title={`${SeverityDef[getRiskSeverity(item.status)]} Severity`}
-            >
-              {getRiskSeverityIcon(getRiskSeverity(item.status))}
-            </Tooltip>
-          )}
-          {(isAsset || isRisk) && (
-            <div className="flex flex-1 items-center space-x-3 overflow-hidden">
-              <div className="flex w-full flex-col overflow-hidden">
-                <Tooltip title={item.name ?? (isAsset ? item.dns : item.key)}>
-                  <span className="truncate text-lg font-semibold text-gray-800 hover:text-gray-900">
-                    {item.name ?? (isAsset ? item.dns : item.key)}
-                  </span>
-                </Tooltip>
-                <span className="text-xs text-gray-500">
-                  {item.created !== item.updated ? (
-                    <Tooltip title={`Created ${formatDate(item.created)}`}>
-                      Updated {formatDate(item.updated)}
-                    </Tooltip>
-                  ) : (
-                    <span>
-                      {isAsset
-                        ? item.source === 'provided'
-                          ? 'Added'
-                          : 'Discovered'
-                        : 'Identified'}{' '}
-                      {formatDate(item.created)}
-                    </span>
-                  )}
-                </span>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {(isAsset || isRisk) && (
-          <div className="flex items-center space-x-2">
-            <Tooltip title="Status">
-              <span className="rounded border border-red-400 px-2 py-1 text-xs font-medium text-red-500">
-                {isAsset && AssetStatusLabel[item.status as AssetStatus]}
-                {isRisk && RiskStatusLabel[getRiskStatus(item.status)]}
-              </span>
-            </Tooltip>
-          </div>
-        )}
-        <ChevronRightIcon className="ml-auto size-5 text-gray-500" />
       </div>
     );
   };
