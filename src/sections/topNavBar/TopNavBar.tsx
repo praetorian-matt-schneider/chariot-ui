@@ -15,7 +15,7 @@ export const TopNavBar: React.FC = () => {
   const isCurrentPage = (page: string) => currentPage === page;
   const linkSize = 'w-15 md:w-20';
 
-  const links = ['overview', 'assets', 'risks', 'risks-beta'];
+  const links = ['overview', 'assets'];
   return (
     <div>
       <div className="flex flex-col items-center justify-between py-3 md:flex-row">
@@ -31,7 +31,7 @@ export const TopNavBar: React.FC = () => {
                   key={link}
                   to={getRoute([
                     'app',
-                    link as 'overview' | 'assets' | 'risks' | 'risks-beta',
+                    link as 'overview' | 'assets' | 'risks',
                   ])}
                   className={`${linkSize} mt-1 border-b-2 pb-1 text-sm font-medium capitalize transition-colors 
                   hover:text-gray-100 ${
@@ -43,6 +43,13 @@ export const TopNavBar: React.FC = () => {
                   {link}
                 </Link>
               ))}
+              <MyInbox
+                className={
+                  isCurrentPage('risks')
+                    ? 'border-layer0 hover:border-layer0'
+                    : 'border-transparent hover:border-header'
+                }
+              />
             </nav>
 
             <div className="ml-auto flex items-center md:space-x-4">
@@ -52,7 +59,7 @@ export const TopNavBar: React.FC = () => {
                 }}
                 onClick={() => setShowNotification(false)}
               />
-              <MyInbox />
+
               <AccountDropdown />
             </div>
           </div>

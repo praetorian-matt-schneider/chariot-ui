@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import { Inbox } from 'lucide-react';
 
 import { Dropdown } from '@/components/Dropdown';
 import { useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
@@ -8,11 +7,15 @@ import { sToMs } from '@/utils/date.util';
 import { abbreviateNumber } from '@/utils/misc.util';
 import { getRoute } from '@/utils/route.util';
 import { StorageKey, useStorage } from '@/utils/storage/useStorage.util';
+import { generatePathWithSearch } from '@/utils/url.util';
 
-const MyInbox: React.FC = () => {
-  const { data: alerts = [], isPending } = useGetAccountAlerts({
+const MyInbox: React.FC<{ className?: string }> = ({ className }) => {
+  const { data: alertsWithAttribute = [], isPending } = useGetAccountAlerts({
     refetchInterval: sToMs(30),
   });
+  const alerts = alertsWithAttribute.filter(
+    ({ value }) => !value.startsWith('#attribute')
+  );
 
   const [prevAlertCount, setPrevAlertCount] = useStorage<undefined | number>(
     { key: StorageKey.ALERT_COUNT },
@@ -40,10 +43,10 @@ const MyInbox: React.FC = () => {
     } else {
       return [
         {
-          label: 'All Alerts',
+          label: 'All Risks',
           labelSuffix: totalAlerts.toLocaleString(),
           className: 'flex items-center',
-          to: getRoute(['app', 'alerts']),
+          to: getRoute(['app', 'risks']),
         },
         {
           label: 'Divider',
@@ -53,7 +56,19 @@ const MyInbox: React.FC = () => {
           label: alert.name,
           labelSuffix: alert.count.toLocaleString(),
           className: 'flex items-center',
-          to: `/app/alerts?query=${alert.value}`,
+          to: generatePathWithSearch({
+            pathname: getRoute(['app', 'risks']),
+            appendSearch: [
+              [
+                'riskFilters',
+                JSON.stringify({
+                  search: '',
+                  alert: alert.value,
+                  exposureRisk: '',
+                }),
+              ],
+            ],
+          }),
         })),
       ];
     }
@@ -61,10 +76,9 @@ const MyInbox: React.FC = () => {
 
   return (
     <Dropdown
-      className="h-7 border-r border-dashed border-gray-700 p-2"
+      className={cn('h-7 relative')}
       startIcon={
-        <span className="relative inline-flex items-center space-x-2">
-          <Inbox className="mr-1 size-6 stroke-1 text-white" />
+        <span className="inline-flex items-center space-x-2">
           {totalAlerts > 0 && (
             <span
               role="label"
@@ -84,7 +98,16 @@ const MyInbox: React.FC = () => {
       menu={{
         items: getMenuItems(),
       }}
-    />
+    >
+      <span
+        className={cn(
+          `mt-1 border-b-2 pb-1 text-sm font-medium capitalize transition-colors hover:text-gray-100`,
+          className
+        )}
+      >
+        Risks
+      </span>
+    </Dropdown>
   );
 };
 
