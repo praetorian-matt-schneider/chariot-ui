@@ -520,6 +520,22 @@ const Alerts: React.FC = () => {
 
 export default Alerts;
 
+const spinnerStyle = {
+  width: '20px',
+  height: '20px',
+  border: '2px solid #f3f3f3',
+  borderTop: '2px solid #3498db',
+  borderRadius: '50%',
+  animation: 'spin 1s linear infinite',
+};
+
+const spinnerKeyframes = `
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+
 const AlertButton = ({
   attributeKey,
   alerts,
@@ -536,8 +552,10 @@ const AlertButton = ({
   label: string;
 }) => {
   const isAlerting = alerts.some(alert => alert.value === attributeKey);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const handleToggle = async () => {
+    setIsUpdating(true);
     if (isAlerting) {
       await removeAlert({
         key: `#condition#${attributeKey}`,
@@ -549,6 +567,7 @@ const AlertButton = ({
       });
     }
     refetch();
+    setIsUpdating(false);
   };
 
   return (
@@ -564,7 +583,19 @@ const AlertButton = ({
           checked={isAlerting}
           readOnly
         />
-        <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-brand peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-brand dark:border-gray-600 dark:bg-gray-700"></div>
+        <div className="relative h-6 w-11 rounded-full  bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-brand peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-brand dark:border-gray-600 dark:bg-gray-700">
+          {isUpdating && (
+            <div
+              style={spinnerStyle}
+              className={cn(
+                ' z-20 absolute top-[2px]',
+                isAlerting ? 'right-[2px]' : 'left-[2px]'
+              )}
+            >
+              <style>{spinnerKeyframes}</style>
+            </div>
+          )}
+        </div>
       </div>
     </label>
   );
@@ -605,7 +636,7 @@ export const AlertCategory = ({
   };
 
   return (
-    <div className="flex flex-col">
+    <div className="border-default-dark flex w-full flex-col border border-dashed p-4">
       <div className="flex items-center justify-center">{icon}</div>
       <p className="mb-2 text-center text-2xl font-bold">{title}</p>
       <Input

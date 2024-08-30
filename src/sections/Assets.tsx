@@ -502,7 +502,7 @@ const Assets: React.FC = () => {
         }
       >
         <div className="mx-12 mt-6 pb-10">
-          <div className="flex w-full flex-row justify-between ">
+          <div className="flex w-full flex-row justify-between gap-x-10">
             <AlertCategory
               title="Recently Discovered"
               icon={<img src="/icons/new.svg" className="size-20" />}
