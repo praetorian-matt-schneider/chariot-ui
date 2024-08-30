@@ -502,6 +502,9 @@ const Assets: React.FC = () => {
         }
       >
         <div className="mx-12 mt-6 pb-10">
+          <h1 className="mb-4 text-4xl font-extrabold">
+            Customize Your Exposure Alerts
+          </h1>
           <div className="flex w-full flex-row justify-between gap-x-10">
             <AlertCategory
               title="Recently Discovered"
