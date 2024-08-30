@@ -13,6 +13,7 @@ import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
 import { useReRunJob } from '@/hooks/useJobs';
 import { useDeleteRisk, useUpdateRisk } from '@/hooks/useRisks';
+import { AlertIcon } from '@/sections/Assets';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import {
   Asset,
@@ -48,6 +49,7 @@ interface Props {
   setQuery: (query: string) => void;
   hideFilters?: boolean;
   refetch?: () => void;
+  unsubscribeAlert?: string;
 }
 
 export const Alerts: React.FC<Props> = ({
@@ -55,6 +57,7 @@ export const Alerts: React.FC<Props> = ({
   setQuery,
   hideFilters,
   refetch,
+  unsubscribeAlert,
 }: Props) => {
   const [isClosedSubStateModalOpen, setIsClosedSubStateModalOpen] =
     useState(false);
@@ -171,7 +174,7 @@ export const Alerts: React.FC<Props> = ({
         return (
           <>
             <h1 className="text-xl font-bold text-gray-900">
-              These are all your risks with matching attributes
+              These are all your exposure risks
             </h1>
             <p className="mt-4 text-sm text-gray-700">
               <span className="font-semibold">Recommended Action:</span> Open or
@@ -391,7 +394,7 @@ export const Alerts: React.FC<Props> = ({
                   }}
                   disabled={updateRiskStatus === 'pending'}
                 >
-                  Confirm
+                  Mark as Open
                 </Button>
               </Tooltip>
               <Tooltip title="Mark as Closed">
@@ -579,7 +582,20 @@ export const Alerts: React.FC<Props> = ({
         )}
         {query && (
           <div className="flex h-full flex-col">
-            <div className="p-4">{getAlertDescription(query)}</div>
+            <div className="p-4">
+              <div className="flex items-center justify-between">
+                <div>{getAlertDescription(query)}</div>
+                {unsubscribeAlert && (
+                  <AlertIcon
+                    value={[unsubscribeAlert]}
+                    currentValue={unsubscribeAlert}
+                    styleType="button"
+                    onAdd={handleRefetch}
+                    onRemove={handleRefetch}
+                  />
+                )}
+              </div>
+            </div>
             <div ref={parentRef} className="flex-1 overflow-auto">
               {dataStatus === 'pending' && (
                 <>

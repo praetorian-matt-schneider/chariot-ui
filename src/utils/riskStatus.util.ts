@@ -1,9 +1,14 @@
 import { RiskSeverity, RiskStatus } from '@/types';
 
 export const getRiskStatus = (status: string) => {
-  return status.length > 1
-    ? (status.slice(0, -1) as RiskStatus)
-    : (status as RiskStatus);
+  // TODO : Confirm the logic
+  return [
+    RiskStatus.MachineOpen,
+    RiskStatus.MachineDeleted,
+    RiskStatus.ExposedRisks,
+  ].includes(status as RiskStatus)
+    ? (status as RiskStatus)
+    : (status.slice(0, -1) as RiskStatus);
 };
 
 export const getRiskSeverity = (status: string) => {
