@@ -54,18 +54,16 @@ export const getSeverityButton = (severity: RiskSeverity) => {
   };
 
   return (
-    <div className="min-w-[90px]">
-      <div
-        className={cn(
-          'border p-1 flex gap-2 items-center text-sm w-fit',
-          textColor[severity] || textColor[RiskSeverity.Info],
-          borderColor[severity] || borderColor[RiskSeverity.Info],
-          bgColor[severity] || bgColor[RiskSeverity.Info]
-        )}
-      >
-        {getRiskSeverityIcon(severity, 'size-4')}
-        <span>{SeverityDef[severity]}</span>
-      </div>
+    <div
+      className={cn(
+        'border rounded-sm p-1 pr-2 flex gap-2 items-center text-sm w-fit',
+        textColor[severity] || textColor[RiskSeverity.Info],
+        borderColor[severity] || borderColor[RiskSeverity.Info],
+        bgColor[severity] || bgColor[RiskSeverity.Info]
+      )}
+    >
+      {getRiskSeverityIcon(severity, 'size-4')}
+      <span>{SeverityDef[severity]}</span>
     </div>
   );
 };
