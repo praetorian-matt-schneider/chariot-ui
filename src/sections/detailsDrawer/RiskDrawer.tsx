@@ -342,7 +342,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
             <Tabs
               tabs={[
                 {
-                  label: 'POE',
+                  label: 'Proof of Exploits',
                   id: 'poe',
                   tabClassName: 'bg-transparent',
                   Content: () => <POE risk={risk} />,
