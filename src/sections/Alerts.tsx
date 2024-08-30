@@ -1,20 +1,19 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLongRightIcon } from '@heroicons/react/24/outline';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { ChevronRightIcon, Inbox, PlusIcon, ShieldCheck } from 'lucide-react';
 
 import { Button } from '@/components/Button';
 import { Input } from '@/components/form/Input';
 import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
+import { Loader } from '@/components/Loader';
 import { Tooltip } from '@/components/Tooltip';
 import { ClosedStateModal } from '@/components/ui/ClosedStateModal';
 import { useUpdateAsset } from '@/hooks/useAssets';
-import { useBulkDeleteAttributes } from '@/hooks/useAttribute';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
 import { useReRunJob } from '@/hooks/useJobs';
-import { useCreateRisk, useDeleteRisk, useUpdateRisk } from '@/hooks/useRisks';
+import { useDeleteRisk, useUpdateRisk } from '@/hooks/useRisks';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import {
   Asset,
@@ -30,7 +29,6 @@ import {
 } from '@/types';
 import { cn } from '@/utils/classname';
 import { formatDate } from '@/utils/date.util';
-import { Regex } from '@/utils/regex.util';
 import { getRiskSeverity, getRiskStatus } from '@/utils/riskStatus.util';
 
 type AlertType = Asset | Risk | Attribute;
@@ -40,9 +38,6 @@ const isAssetFn = (item: AlertType): item is Asset =>
 
 const isRiskFn = (item: AlertType): item is Risk =>
   item.key.startsWith('#risk#');
-
-const isAttributeFn = (item: AlertType): item is Attribute =>
-  item.key.startsWith('#attribute#');
 
 const AlertsWrapper: React.FC = () => {
   const [query, setQuery] = useState<string | null>(null);
@@ -68,27 +63,24 @@ export const Alerts: React.FC<Props> = ({
   const [selectedItem, setSelectedItem] = useState<Risk | null>(null);
 
   const { mutateAsync: reRunJob, status: reRunJobStatus } = useReRunJob();
-  const { data: alertsWithAttributes, refetch: refetchAlerts } =
+  const { data: alertsWithUpdatedQueries, refetch: refetchAlerts } =
     useGetAccountAlerts();
-  const { getRiskDrawerLink, getAttributeDrawerLink, getAssetDrawerLink } =
-    getDrawerLink();
+  const { getRiskDrawerLink, getAssetDrawerLink } = getDrawerLink();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  // Filter the alerts to only show the ones that are not attributes
-  // This is temporary change till the time we have a proper way to handle attributes
-  const alerts = alertsWithAttributes?.filter(
-    ({ value }) => !value.startsWith('#attribute#')
-  );
+
+  // TODO - Refactor this on BE instead
+  const alerts = (alertsWithUpdatedQueries || []).map(alert => ({
+    ...alert,
+    value: alert.value.startsWith('#attribute')
+      ? `name:${alert.name}`
+      : alert.value,
+  }));
 
   const { mutateAsync: updateAsset, status: updateAssetStatus } =
     useUpdateAsset();
   const { mutateAsync: updateRisk, status: updateRiskStatus } = useUpdateRisk();
-  const { mutate: deleteRisk } = useDeleteRisk();
-
-  // Attribute [Create Risk]: Delete attribute and create risk
-  const { mutateAsync: deleteAttribute, status: deleteAttributeStatus } =
-    useBulkDeleteAttributes();
-  const { mutateAsync: addRisk, status: addRiskStatus } = useCreateRisk();
+  const { mutateAsync: deleteRisk } = useDeleteRisk();
 
   useEffect(() => {
     const initialQuery = searchParams.get('query');
@@ -103,7 +95,11 @@ export const Alerts: React.FC<Props> = ({
     setQuery(query);
   };
 
-  const { data, refetch: refetchData } = useGenericSearch(
+  const {
+    data,
+    refetch: refetchData,
+    status: dataStatus,
+  } = useGenericSearch(
     {
       query: query ?? '',
     },
@@ -122,6 +118,7 @@ export const Alerts: React.FC<Props> = ({
     const statusCode = query.split(':')[1] as AssetStatus | RiskStatus;
     switch (statusCode) {
       case RiskStatus.Opened:
+      case RiskStatus.MachineOpen:
         return (
           <>
             <h1 className="text-xl font-bold text-gray-900">
@@ -176,11 +173,11 @@ export const Alerts: React.FC<Props> = ({
         return (
           <>
             <h1 className="text-xl font-bold text-gray-900">
-              These are all your assets with matching attributes
+              These are all your risks with matching attributes
             </h1>
             <p className="mt-4 text-sm text-gray-700">
-              <span className="font-semibold">Recommended Action:</span> Create
-              a risk for the attribute or reject it if it is invalid.
+              <span className="font-semibold">Recommended Action:</span> Open or
+              close the risk as needed.
             </p>
           </>
         );
@@ -199,12 +196,12 @@ export const Alerts: React.FC<Props> = ({
   function handleRiskChange(
     risk: Risk,
     status: RiskStatus,
-    severity: RiskSeverity
+    severity?: RiskSeverity
   ) {
     updateRisk({
       key: risk.key,
       name: risk.name,
-      status: `${status}${severity}`,
+      status: `${status}${severity ? severity : ''}`,
       showSnackbar: true,
       comment: risk.comment,
     }).then(() => {
@@ -220,18 +217,12 @@ export const Alerts: React.FC<Props> = ({
   const renderItemDetails = (item: AlertType) => {
     const isAsset = isAssetFn(item);
     const isRisk = isRiskFn(item);
-    const isAttribute = isAttributeFn(item);
-
-    const [, assetdns, assetname] =
-      (isAttribute && item.key.match(Regex.ASSET_KEY)) || [];
 
     const handleViewLink = () => {
       if (isAsset) {
         return getAssetDrawerLink(item as Asset);
       } else if (isRisk) {
         return getRiskDrawerLink(item as Risk);
-      } else if (isAttribute) {
-        return getAttributeDrawerLink(item as Attribute);
       }
     };
 
@@ -351,23 +342,58 @@ export const Alerts: React.FC<Props> = ({
                 </Tooltip>
               </>
             )}
-          {isRisk && getRiskStatus(item.status) === RiskStatus.Opened && (
+          {isRisk &&
+            (getRiskStatus(item.status) === RiskStatus.Opened ||
+              item.status === RiskStatus.MachineOpen) && (
+              <>
+                <Tooltip title="Rerun capability against this asset">
+                  <Button
+                    styleType="primary"
+                    className="h-8"
+                    onClick={e => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      reRunJob({
+                        capability: item.source,
+                        jobKey: `#asset#${item.dns}`,
+                      });
+                    }}
+                    disabled={reRunJobStatus === 'pending'}
+                  >
+                    Rescan
+                  </Button>
+                </Tooltip>
+                <Tooltip title="Mark as Closed">
+                  <Button
+                    styleType="secondary"
+                    className="h-8"
+                    onClick={e => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleOpenModal(item);
+                    }}
+                    disabled={updateRiskStatus === 'pending'}
+                  >
+                    Close
+                  </Button>
+                </Tooltip>
+              </>
+            )}
+          {/* Exposure Risks */}
+          {isRisk && getRiskStatus(item.status) === RiskStatus.ExposedRisks && (
             <>
-              <Tooltip title="Rerun capability against this asset">
+              <Tooltip title="Mark as Open">
                 <Button
                   styleType="primary"
                   className="h-8"
                   onClick={e => {
                     e.preventDefault();
                     e.stopPropagation();
-                    reRunJob({
-                      capability: item.source,
-                      jobKey: `#asset#${item.dns}`,
-                    });
+                    handleRiskChange(item, RiskStatus.MachineOpen);
                   }}
-                  disabled={reRunJobStatus === 'pending'}
+                  disabled={updateRiskStatus === 'pending'}
                 >
-                  Rescan
+                  Confirm
                 </Button>
               </Tooltip>
               <Tooltip title="Mark as Closed">
@@ -377,50 +403,9 @@ export const Alerts: React.FC<Props> = ({
                   onClick={e => {
                     e.preventDefault();
                     e.stopPropagation();
-                    handleOpenModal(item);
+                    handleOpenModal({ ...item, comment: 'Rejected Exposure' });
                   }}
                   disabled={updateRiskStatus === 'pending'}
-                >
-                  Close
-                </Button>
-              </Tooltip>
-            </>
-          )}
-          {isAttribute && (
-            <>
-              <Tooltip title="Create a manual risk">
-                <Button
-                  className="h-8"
-                  styleType="primary"
-                  isLoading={[addRiskStatus, deleteAttributeStatus].includes(
-                    'pending'
-                  )}
-                  onClick={async e => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    await addRisk({
-                      key: `#asset#${assetdns}#${assetname}`,
-                      name: `${assetname} is not a valid ${item.name}`,
-                      status: `${RiskStatus.Triaged}${RiskSeverity.Low}`,
-                      comment: '',
-                    });
-                    await deleteAttribute([item]);
-                    handleRefetch();
-                  }}
-                >
-                  Create Risk
-                </Button>
-              </Tooltip>
-              <Tooltip title="Reject">
-                <Button
-                  isLoading={[addRiskStatus, deleteAttributeStatus].includes(
-                    'pending'
-                  )}
-                  className="h-8"
-                  onClick={e => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }}
                 >
                   Reject
                 </Button>
@@ -463,22 +448,6 @@ export const Alerts: React.FC<Props> = ({
               </div>
             </div>
           )}
-          {isAttribute && (
-            <div className="flex flex-1 items-center space-x-3 overflow-hidden">
-              <div className="flex w-full flex-col overflow-hidden">
-                <Tooltip title={item.key}>
-                  <span className="flex items-center gap-2 truncate text-lg font-semibold text-gray-800 hover:text-gray-900">
-                    <span>{assetname}</span>
-                    <ArrowLongRightIcon className="size-5 text-gray-500" />
-                    <span>{assetdns}</span>
-                  </span>
-                </Tooltip>
-                <span className="text-xs text-gray-500">
-                  Updated {formatDate(item.updated)}
-                </span>
-              </div>
-            </div>
-          )}
         </div>
 
         {(isAsset || isRisk) && (
@@ -504,7 +473,14 @@ export const Alerts: React.FC<Props> = ({
       return data?.attributes;
     }
     if (data?.risks && data?.risks.length > 0) {
-      return data?.risks;
+      // Exposed Risks
+      if (query?.startsWith('name:')) {
+        return (data?.risks || []).filter(
+          risk => (risk as Risk).status === RiskStatus.ExposedRisks
+        );
+      } else {
+        return data?.risks;
+      }
     }
     return [];
   }, [data]);
@@ -607,24 +583,37 @@ export const Alerts: React.FC<Props> = ({
           <div className="flex h-full flex-col">
             <div className="p-4">{getAlertDescription(query)}</div>
             <div ref={parentRef} className="flex-1 overflow-auto">
-              <div
-                className="relative"
-                style={{
-                  height: `${virtualizer.getTotalSize()}px`,
-                }}
-              >
-                {virtualizer.getVirtualItems().map(virtualItem => (
-                  <div
-                    key={virtualItem.key}
-                    className="absolute left-0 top-0 w-full"
-                    style={{
-                      transform: `translateY(${virtualItem.start}px)`,
-                    }}
-                  >
-                    {renderItemDetails(items[virtualItem.index])}
-                  </div>
-                ))}
-              </div>
+              {dataStatus === 'pending' && (
+                <>
+                  {[...Array(5).keys()].map(index => (
+                    <Loader
+                      key={index}
+                      className="mb-2 h-[77px] w-full"
+                      isLoading={true}
+                    />
+                  ))}
+                </>
+              )}
+              {dataStatus !== 'pending' && (
+                <div
+                  className="relative"
+                  style={{
+                    height: `${virtualizer.getTotalSize()}px`,
+                  }}
+                >
+                  {virtualizer.getVirtualItems().map(virtualItem => (
+                    <div
+                      key={virtualItem.key}
+                      className="absolute left-0 top-0 w-full"
+                      style={{
+                        transform: `translateY(${virtualItem.start}px)`,
+                      }}
+                    >
+                      {renderItemDetails(items[virtualItem.index])}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -636,9 +625,9 @@ export const Alerts: React.FC<Props> = ({
           if (selectedItem) {
             const newSelectedItem = {
               ...selectedItem,
-              comment: status,
+              comment: selectedItem.comment || status,
             };
-            deleteRisk([newSelectedItem]);
+            deleteRisk([newSelectedItem]).then(handleRefetch);
             setSelectedItem(null);
           }
         }}

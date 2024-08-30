@@ -10,13 +10,9 @@ import { getRoute } from '@/utils/route.util';
 import { StorageKey, useStorage } from '@/utils/storage/useStorage.util';
 
 const MyInbox: React.FC = () => {
-  const { data: alertsWithAttributes = [], isPending } = useGetAccountAlerts({
+  const { data: alerts = [], isPending } = useGetAccountAlerts({
     refetchInterval: sToMs(30),
   });
-  // This is temporary change till the time we have a proper way to handle attributes
-  const alerts = alertsWithAttributes?.filter(
-    ({ value }) => !value.startsWith('#attribute#')
-  );
 
   const [prevAlertCount, setPrevAlertCount] = useStorage<undefined | number>(
     { key: StorageKey.ALERT_COUNT },

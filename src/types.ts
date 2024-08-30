@@ -46,6 +46,7 @@ export enum RiskStatus {
   Remediated = 'R',
   MachineOpen = 'MO',
   MachineDeleted = 'MD',
+  ExposedRisks = 'E',
 }
 
 export type RiskCombinedStatus = string;
@@ -79,6 +80,7 @@ export const RiskStatusLabel: Record<RiskStatus, string> = {
   R: 'Remediated',
   MO: 'Recommended Opened',
   MD: 'Recommended Deleted',
+  E: 'Exposed Risks',
 };
 
 export const SeverityDef: Record<RiskSeverity, string> = {
@@ -559,7 +561,7 @@ export interface JobFilters {
 export interface RiskFilters {
   alert: string;
   search: string;
-  attribute: string;
+  exposureRisk: string;
 }
 
 export type Severity = 'I' | 'L' | 'M' | 'H' | 'C';
