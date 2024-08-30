@@ -1,4 +1,11 @@
-import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  PropsWithChildren,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   ArrowPathIcon,
@@ -82,7 +89,11 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
   const { mutateAsync: updateFile, status: updateFileStatus } = useUploadFile();
   const { mutateAsync: reportRisk, status: reportRiskStatus } = useReportRisk();
 
-  const { data: risks = [], status: riskStatus } = useMy(
+  const {
+    data: risks = [],
+    status: riskStatus,
+    refetch: refetchRisk,
+  } = useMy(
     {
       resource: 'risk',
       query: compositeKey,
@@ -185,6 +196,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
       name: risk.name,
       status: risk.status,
     });
+    refetchRisk();
   }
 
   const assetsOnRisk = useMemo(
@@ -206,19 +218,31 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     [attributesGenericSearch?.attributes]
   );
 
+  const width = document.body.clientWidth;
+
   return (
     <Drawer
       open={open}
       onClose={() => removeSearchParams(StorageKey.DRAWER_COMPOSITE_KEY)}
       onBack={() => navigate(-1)}
-      className={cn('w-full rounded-t-lg pb-0 shadow-lg', severityClass)}
+      className={'w-full rounded-t-lg pb-0 shadow-lg'}
     >
       <Loader isLoading={isInitialLoading} type="spinner">
         <div className="flex size-full">
-          <div className="shrink-0 basis-1/4">
-            <History history={history} />
+          <div className="shrink-0 basis-1/4" style={{ width: width / 4 }}>
+            <History history={history}>
+              <Comment
+                comment={risk.comment}
+                isLoading={isRiskFetching}
+                onSave={handleUpdateComment}
+              />
+            </History>
           </div>
-          <div className="h-full flex-1 border-x border-gray-300 px-9 py-5">
+
+          <div
+            className="h-full flex-1 border-x border-gray-300 px-9 py-5"
+            style={{ width: width / 2 }}
+          >
             <div className="mb-8 flex items-start justify-between gap-4">
               <div className="min-w-1/2 flex flex-col gap-2">
                 <div className="flex items-center gap-4">
@@ -371,7 +395,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                           }}
                         />
                       ) : (
-                        <div className="flex size-full flex-1 flex-col items-center justify-center text-center text-default">
+                        <div className="my-8 flex size-full flex-1 flex-col items-center justify-center text-center text-default">
                           <UnionIcon className="mt-8 size-16 text-default-light" />
                           <p className="mt-7 text-lg font-bold">
                             Generate Description & Remediation
@@ -408,24 +432,6 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                     </Loader>
                   ),
                 },
-                {
-                  label: 'Comment',
-                  id: 'comment',
-                  tabClassName: 'bg-transparent',
-                  Content: () => (
-                    <div
-                      className={cn(
-                        'transition-all rounded-lg hover:shadow-md my-8 p-4 cursor-pointer'
-                      )}
-                    >
-                      <Comment
-                        comment={risk.comment}
-                        isLoading={isRiskFetching}
-                        onSave={handleUpdateComment}
-                      />
-                    </div>
-                  ),
-                },
               ]}
               defaultValue={'poe'}
               value={selectedTab}
@@ -434,7 +440,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
             />
           </div>
 
-          <div className="shrink-0 basis-1/4">
+          <div className="shrink-0 basis-1/4" style={{ width: width / 4 }}>
             <AffectedAssets assets={assetsOnRisk} />
           </div>
         </div>
@@ -443,13 +449,17 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
   );
 }
 
-const History: React.FC<{ history: EntityHistory[] }> = ({ history = [] }) => {
+const History: React.FC<PropsWithChildren & { history: EntityHistory[] }> = ({
+  children,
+  history = [],
+}) => {
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <h1 className="border-b border-gray-300 px-9 py-5 text-2xl font-bold">
         History
       </h1>
       <div className="size-full overflow-auto px-4">
+        {children}
         <Timeline
           items={[
             ...(history
@@ -484,18 +494,24 @@ const POE: React.FC<{ risk: Risk }> = ({ risk }) => {
   });
 
   const proofOfExploit = useMemo(() => {
-    return getDescription(file);
+    const proofDescription = getDescription(file);
+
+    const { Request, Response } = proofDescription;
+    return {
+      Request,
+      Response,
+    };
   }, [file]);
 
   return (
     <Loader className="my-8 h-96" isLoading={fileStatus === 'pending'}>
       {!proofOfExploit && <NoData title="No Proof of exploit found." />}
-      <div className="relative my-8">
+      <div className="relative my-8 overflow-auto">
         {Object.entries(proofOfExploit).map(([key, value]) => (
           <div className="mb-8" key={key}>
             <h3 className="text-lg font-bold">{key}</h3>
             <code className="prose whitespace-pre-wrap text-xs">
-              {value as ReactNode}
+              {(value as ReactNode) || 'Not Found'}
             </code>
           </div>
         ))}

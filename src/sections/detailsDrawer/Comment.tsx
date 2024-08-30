@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { PencilSquareIcon } from '@heroicons/react/24/outline';
 
 import { Button } from '@/components/Button';
 import { Type } from '@/components/form/Input';
 import { InputText } from '@/components/form/InputText';
+import { cn } from '@/utils/classname';
 
 interface Props {
   comment: string;
@@ -13,7 +13,7 @@ interface Props {
 }
 
 export const Comment: React.FC<Props> = ({ comment, onSave }: Props) => {
-  const [isEditing, setIsEditing] = useState(false);
+  const isEditing = true;
   const [value, setValue] = useState(comment);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -27,7 +27,7 @@ export const Comment: React.FC<Props> = ({ comment, onSave }: Props) => {
     setIsSaving(true);
     try {
       onSave && (await onSave(value));
-      setIsEditing(false);
+      setValue('');
     } catch (e) {
       console.error(e);
     } finally {
@@ -36,40 +36,23 @@ export const Comment: React.FC<Props> = ({ comment, onSave }: Props) => {
   };
 
   return (
-    <>
-      {!isEditing && (
-        <div onClick={() => setIsEditing(true)}>
-          {comment ? (
-            <p className="whitespace-pre-wrap break-words text-default">
-              {comment}
-            </p>
-          ) : (
-            <span className="italic text-gray-400">No comment provided.</span>
-          )}
-          <Button className="mt-2 pl-0 font-bold" styleType="none">
-            Edit <PencilSquareIcon className="size-5" />
-          </Button>
-        </div>
+    <div
+      className={cn(
+        'transition-all rounded-sm mt-4 bg-gray-100 p-4 cursor-pointer'
       )}
-      {isEditing && (
-        <>
-          <InputText
-            type={Type.TEXT_AREA}
-            name="message"
-            value={value}
-            onChange={e => setValue(e.target.value)}
-            placeholder="Write your thoughts here..."
-          />
-          <div className="mt-2 flex justify-end space-x-2">
-            <Button onClick={() => setIsEditing(false)} disabled={isSaving}>
-              Cancel
-            </Button>
-            <Button onClick={handleSave} disabled={isSaving}>
-              {isSaving ? 'Saving...' : 'Save'}
-            </Button>
-          </div>
-        </>
-      )}
-    </>
+    >
+      <InputText
+        type={Type.TEXT_AREA}
+        name="message"
+        value={value}
+        onChange={e => setValue(e.target.value)}
+        placeholder="Write your thoughts here..."
+      />
+      <div className="mt-2 flex justify-end space-x-2">
+        <Button onClick={handleSave} disabled={isSaving}>
+          {isSaving ? 'Saving...' : 'Save'}
+        </Button>
+      </div>
+    </div>
   );
 };
