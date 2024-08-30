@@ -1014,6 +1014,11 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     logo: '/icons/wiz.png',
     name: 'Wiz',
   },
+  digitalocean: {
+    id: Integration.digitalocean,
+    logo: '/icons/digitalocean.svg',
+    name: 'DigitalOcean',
+  },
 };
 
 export const availableAttackSurfaceIntegrations = [
@@ -1071,6 +1076,7 @@ export const comingSoonAttackSurfaceIntegrations = [
   Integrations.akamai,
   Integrations.datadog,
   Integrations.wiz,
+  Integrations.digitalocean,
 ];
 
 export const riskIntegrations = [
