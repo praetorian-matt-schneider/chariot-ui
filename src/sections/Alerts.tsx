@@ -636,7 +636,7 @@ export const AlertCategory = ({
   };
 
   return (
-    <div className="border-default-dark flex w-full flex-col border border-dashed p-4">
+    <div className="border-default-dark flex w-full flex-col border border-dashed bg-white p-4">
       <div className="flex items-center justify-center">{icon}</div>
       <p className="mb-2 text-center text-2xl font-bold">{title}</p>
       <Input
