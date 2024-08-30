@@ -106,7 +106,7 @@ const RisksBeta: React.FC = () => {
       const alertName = (alerts || []).find(
         alert => alert.value === filters.exposureRisk
       )?.name;
-      return `name:${alertName}#`;
+      return `name:${alertName}`;
     }
     return '';
   }, [filters.exposureRisk, JSON.stringify({ alerts })]);

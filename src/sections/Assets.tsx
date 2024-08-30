@@ -650,7 +650,7 @@ export function AlertIcon(props: AlertIconProps) {
 
       await addAlert({
         value: attributeKey,
-        name: `Assets with ${attributeType}:${attributeValue.endsWith('#') ? attributeValue.slice(0, -1) : attributeValue} identified`,
+        name: `${attributeType}-${attributeValue.endsWith('#') ? attributeValue.slice(0, -1) : attributeValue}-exposure`,
       });
 
       props.onAdd && props.onAdd();
