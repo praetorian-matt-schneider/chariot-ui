@@ -22,6 +22,7 @@
     "aws-amplify": "^6.4.2",
     "axios": "^1.6.7",
     "config-ini-parser": "^1.6.1",
+    "cron-parser": "^4.9.0",
     "crypto-js": "^4.2.0",
     "date-fns": "^3.3.1",
     "dompurify": "^3.1.6",

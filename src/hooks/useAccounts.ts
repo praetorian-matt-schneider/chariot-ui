@@ -95,15 +95,25 @@ export const useModifyAccount = (
         invalidateAccount();
         invalidateAsset();
 
-        // Show success snackbar
-        toast.success(`${capitalize(snackbarTitle)} ${snackbarAction}`, {
-          description:
-            username === 'hook'
-              ? action === 'link'
-                ? 'Webhook URL copied to clipboard.'
-                : 'Webhook URL was destroyed.'
-              : `Your ${snackbarTitle} has been successfully ${snackbarAction}.`,
-        });
+        if (action === 'link' && username === 'frozen') {
+          toast.success('Jobs Frozen', {
+            description: 'All the automated jobs have been paused.',
+          });
+        } else if (action === 'unlink' && username === 'frozen') {
+          toast.success('Jobs Resumed', {
+            description: 'All the automated jobs have been resumed.',
+          });
+        } else {
+          // Show success snackbar
+          toast.success(`${capitalize(snackbarTitle)} ${snackbarAction}`, {
+            description:
+              username === 'hook'
+                ? action === 'link'
+                  ? 'Webhook URL copied to clipboard.'
+                  : 'Webhook URL was destroyed.'
+                : `Your ${snackbarTitle} has been successfully ${snackbarAction}.`,
+          });
+        }
       }
     },
   });

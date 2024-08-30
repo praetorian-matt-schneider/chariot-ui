@@ -21,10 +21,12 @@ import {
   Job,
   JobFilters,
   JobLabels,
+  JOBS_CRON,
   JobStatus,
   JobStatusLabel,
 } from '@/types';
 import { cn } from '@/utils/classname';
+import { getCronRelativeTime, mToMs } from '@/utils/date.util';
 import { useQueryFilters } from '@/utils/storage/useQueryParams.util';
 
 export const getStatusColor = (status: JobStatus) => {
@@ -94,8 +96,20 @@ const Jobs: React.FC = () => {
   const { mutate: resume, status: resumeStatus } = useModifyAccount('link');
   const { mutate: pause, status: pauseStatus } = useModifyAccount('unlink');
 
+  const [nextRun, setNextRun] = useState<{ hours: number; minutes: number }>(
+    getCronRelativeTime(JOBS_CRON)
+  );
   const [isFilteredDataFetching, setIsFilteredDataFetching] = useState(false);
   const [showUpdateJobStatus, setShowUpdateJobStatus] = useState(false);
+
+  // Update the next run time every 1 minute
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNextRun(getCronRelativeTime(JOBS_CRON));
+    }, mToMs(1));
+
+    return () => clearInterval(interval);
+  }, []);
 
   const isFrozen = Boolean(
     accounts.find(account => account.member === FROZEN_ACCOUNT)
@@ -331,6 +345,9 @@ const Jobs: React.FC = () => {
                 </div>
               )}
             </div>
+            {nextRun && (
+              <h1 className="text-lg font-bold">{`Next run in ${nextRun.hours} hours ${nextRun.minutes ? `and ${nextRun.minutes} minutes` : ''}`}</h1>
+            )}
           </div>
         }
         otherFilters={

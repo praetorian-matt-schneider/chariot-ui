@@ -1,5 +1,7 @@
+import cronParser from 'cron-parser';
 import {
   addDays as addDaysDateFns,
+  differenceInMinutes,
   format,
   formatDistanceToNow,
   parseISO,
@@ -97,4 +99,25 @@ export function subtractDays(date: Date, days: number) {
 
 export function addDays(date: Date, days: number) {
   return addDaysDateFns(date, days);
+}
+
+export function formatRelative(date: number) {
+  const now = Date.now();
+  const minuteDiff = differenceInMinutes(date, now);
+  const hours = Math.floor(minuteDiff / 60);
+  const minutes = minuteDiff % 60;
+
+  return { hours, minutes };
+}
+
+export function getCronTimeStamp(cron: string = '') {
+  const interval = cronParser.parseExpression(cron);
+  const ts = interval.next().getTime();
+
+  return ts;
+}
+
+export function getCronRelativeTime(cron: string = '') {
+  const ts = getCronTimeStamp(cron);
+  return formatRelative(ts);
 }

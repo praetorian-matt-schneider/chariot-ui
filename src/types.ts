@@ -6,6 +6,8 @@ export const FREEMIUM_ASSETS_LIMIT = 999;
 
 export const FROZEN_ACCOUNT = 'frozen';
 
+export const JOBS_CRON = '0 2 ? * 1-6';
+
 export enum RiskScanMessage {
   Stop = 'Risk scanning will stop.',
   Start = 'Risk scanning will start automatically.',
