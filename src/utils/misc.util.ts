@@ -29,11 +29,11 @@ export function useGetScreenSize() {
   const [screenSize, setScreenSize] = useState(window.innerWidth);
 
   useEffect(() => {
-    function setIsSmallScreenFn() {
+    function setScreenSizeFn() {
       setScreenSize(window.innerWidth);
     }
-    window.addEventListener('resize', setIsSmallScreenFn);
-    setIsSmallScreenFn();
+    window.addEventListener('resize', setScreenSizeFn);
+    setScreenSizeFn();
   }, []);
 
   return screenSize;

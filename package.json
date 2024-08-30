@@ -18,6 +18,7 @@
     "@types/amplify": "^1.1.28",
     "@uiw/react-markdown-preview": "^5.1.2",
     "@uiw/react-md-editor": "^4.0.4",
+    "@xyflow/react": "^12.2.0",
     "aws-amplify": "^6.4.2",
     "axios": "^1.6.7",
     "config-ini-parser": "^1.6.1",

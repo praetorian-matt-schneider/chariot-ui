@@ -17,7 +17,7 @@ interface Props {
   className?: string;
   footer?: ReactNode;
   footerClassname?: string;
-  header?: ReactNode;
+  contentClassName?: string;
   skipBack?: boolean;
 }
 
@@ -30,7 +30,7 @@ export function Drawer({
   className,
   footer,
   footerClassname,
-  header,
+  contentClassName,
   skipBack,
 }: Props) {
   const ref = useRef<HTMLDivElement>(null);
@@ -112,8 +112,8 @@ export function Drawer({
                 )}
                 onClick={event => event.stopPropagation()}
                 style={{
-                  height: '95%',
-                  maxHeight: '95%',
+                  height: 'calc(100% - 40px)',
+                  maxHeight: 'calc(100% - 40px)',
                 }}
                 ref={ref}
               >
@@ -133,9 +133,13 @@ export function Drawer({
                 >
                   Close <XMarkIcon className="mr-2 size-10" />
                 </div>
-
-                <div className="mt-4 h-full overflow-auto text-default">
-                  <div>{children}</div>
+                <div
+                  className={cn(
+                    'h-full overflow-auto text-default',
+                    contentClassName
+                  )}
+                >
+                  {children}
                 </div>
                 {footer && (
                   <div

@@ -11,7 +11,6 @@ export const Regex = {
   CVE_ID: /CVE-\d{4}-\d{4,7}/,
   AWS_REGION_REGEX: /.*execute-api.(.*).amazonaws/,
   IMAGE: /.*\.(jpg|jpeg|png|gif|bmp)$/,
-  ASSET,
   CONTAINS_ASSET: new RegExp(`.*(${ASSET.source})`),
   PASSWORD: {
     CHARACTERS_LENGTH: /(?=.{16,})/,

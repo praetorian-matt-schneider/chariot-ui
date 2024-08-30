@@ -1,5 +1,6 @@
 import { BrowserRouter } from 'react-router-dom';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { ReactFlowProvider } from '@xyflow/react';
 import { Toaster } from 'sonner';
 
 import { AppRoutes } from '@/app/AppRoute';
@@ -47,7 +48,7 @@ function ThirdPartyProviders({ children }: { children: React.ReactNode }) {
           />
         )}
         <Toaster richColors position="bottom-right" />
-        {children}
+        <ReactFlowProvider>{children}</ReactFlowProvider>
       </QueryClientProvider>
     </BrowserRouter>
   );

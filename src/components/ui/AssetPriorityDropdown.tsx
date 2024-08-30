@@ -41,7 +41,7 @@ export const AssetStatusDropdown = (props: Props) => {
   return (
     <Tooltip title="Change Status">
       <Dropdown
-        className={`min-w-52 justify-between rounded-md bg-white pr-2`}
+        className={`min-w-52 justify-between text-nowrap px-3 py-2`}
         menu={{
           items: options,
           onClick: value => {
@@ -50,6 +50,7 @@ export const AssetStatusDropdown = (props: Props) => {
             }
           },
         }}
+        styleType="secondary"
         disabled={updateAssetStatus === 'pending'}
         startIcon={options.find(option => option.value === status)?.icon}
         endIcon={<ChevronDownIcon className="mr-1 size-3 text-default" />}

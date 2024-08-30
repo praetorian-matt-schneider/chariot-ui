@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { ChevronDownIcon, PlusIcon } from '@heroicons/react/24/outline';
 
 import { Button } from '@/components/Button';
 import { Inputs } from '@/components/form/Inputs';
@@ -37,10 +36,8 @@ export const AddAttribute = (props: Props) => {
         open={open}
         setOpen={setOpen}
         styleType="none"
-        className="relative flex items-center text-nowrap rounded-md bg-white py-5"
-        endIcon={<ChevronDownIcon className="ml-auto size-3 text-default" />}
-        startIcon={<PlusIcon className="size-5 text-default" />}
-        label="Add Attribute"
+        className="relative p-0 text-sm font-semibold text-indigo-500"
+        label="Add new attribute"
         style={{ zIndex: 1 }}
       >
         <div className="w-[360px]">

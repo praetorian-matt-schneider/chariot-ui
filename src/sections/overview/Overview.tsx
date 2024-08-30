@@ -684,7 +684,6 @@ export const Overview: React.FC = () => {
           onClose={closeAttackSurfaceDrawer}
           onBack={closeAttackSurfaceDrawer}
           className={cn('w-full rounded-t-sm shadow-lg p-0 bg-zinc-100')}
-          header={''}
           skipBack={true}
           footer={
             selectedAttackSurfaceIntegrations.length > 0 && (
@@ -774,7 +773,6 @@ export const Overview: React.FC = () => {
           onClose={closeRiskNotificationDrawer}
           onBack={closeRiskNotificationDrawer}
           className={cn('w-full rounded-t-sm shadow-lg pb-0 bg-zinc-100')}
-          header={''}
           footerClassname=""
           skipBack={true}
           footer={
@@ -852,7 +850,6 @@ export const Overview: React.FC = () => {
           onClose={() => setIsDomainDrawerOpen(false)}
           onBack={() => setIsDomainDrawerOpen(false)}
           className={cn('w-full rounded-t-sm shadow-lg pb-0 bg-zinc-100')}
-          header={''}
           footerClassname=""
           skipBack={true}
           footer={

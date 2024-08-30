@@ -54,7 +54,7 @@ import {
 import { QueryStatus, useMergeStatus } from '@/utils/api';
 import { cn } from '@/utils/classname';
 import { capitalize } from '@/utils/lodash.util';
-import { abbreviateNumber, useGetScreenSize } from '@/utils/misc.util';
+import { useGetScreenSize } from '@/utils/misc.util';
 import { Regex } from '@/utils/regex.util';
 import { getRiskSeverity, getRiskStatus } from '@/utils/riskStatus.util';
 import { useSticky } from '@/utils/sticky.util';
@@ -165,58 +165,12 @@ const Assets: React.FC = () => {
           const integration = integrations.find(
             account => account.member === asset.dns
           );
-          const totalRisk = Object.values(asset.riskSummary || {}).reduce(
-            (acc, items) => acc + items.length,
-            0
-          );
 
           return (
             <div className="flex items-center gap-2 text-black">
               <p className="font-semibold text-indigo-500">{asset.name}</p>
               <p className="text-blueGray-500">{asset.dns}</p>
-              {asset.riskSummary && (
-                <Tooltip
-                  placement="top"
-                  title={
-                    <div className="flex flex-col gap-2">
-                      {Object.entries(asset.riskSummary).map(
-                        (riskSeverity, index) => {
-                          const severity = riskSeverity[0] as Severity;
-                          const noOfRisks = riskSeverity[1].length;
-
-                          const severityIcon = getRiskSeverityIcon(
-                            severity as RiskSeverity,
-                            'size-5 text-white'
-                          );
-
-                          return (
-                            <div key={index} className="flex items-center ">
-                              {severityIcon}
-                              <div className="pl-2 pr-1">{noOfRisks}</div>
-                              {SeverityDef[severity]}
-                            </div>
-                          );
-                        }
-                      )}
-                    </div>
-                  }
-                >
-                  <div className="relative flex size-10 items-center">
-                    <RisksIcon className="h-6" />
-                    <span
-                      role="label"
-                      className={cn(
-                        'text-white bg-red-500 rounded-full absolute flex justify-center items-center text-xs text-center font-semibold transition duration-150 ease-in-out',
-                        totalRisk > 99
-                          ? 'w-7 h-5 top-0 right-0'
-                          : 'w-5 h-5 top-0 right-2'
-                      )}
-                    >
-                      {abbreviateNumber(totalRisk)}
-                    </span>
-                  </div>
-                </Tooltip>
-              )}
+              <RiskSummary riskSummary={asset.riskSummary} />
               {integration && (
                 <Tooltip title="Integration">
                   <PuzzlePieceIcon className="size-5" />
@@ -761,7 +715,7 @@ export function FancyTable<TData>(
     ...tableProps
   } = props;
   const screenSize = useGetScreenSize();
-  const isSmallScreen = screenSize < 730;
+  const isSmallScreen = screenSize < 768;
 
   const { getSticky, useCreateSticky } = useSticky();
   const leftStickyRef = useCreateSticky<HTMLDivElement>({ id: '2L' });
@@ -1017,3 +971,47 @@ export const useCombineAttributesCount = () => {
     ),
   };
 };
+
+export function RiskSummary(asset: {
+  riskSummary: PartialAsset['riskSummary'];
+}) {
+  if (!asset.riskSummary) {
+    return null;
+  }
+
+  const totalRisk = Object.values(asset.riskSummary || {}).reduce(
+    (acc, items) => acc + items.length,
+    0
+  );
+
+  return (
+    <Tooltip
+      placement="top"
+      title={
+        <div className="flex flex-col gap-2">
+          {Object.entries(asset.riskSummary).map((riskSeverity, index) => {
+            const severity = riskSeverity[0] as Severity;
+            const noOfRisks = riskSeverity[1].length;
+
+            const severityIcon = getRiskSeverityIcon(
+              severity as RiskSeverity,
+              'size-5 text-white'
+            );
+
+            return (
+              <div key={index} className="flex items-center ">
+                {severityIcon}
+                <div className="pl-2 pr-1">{noOfRisks}</div>
+                {SeverityDef[severity]}
+              </div>
+            );
+          })}
+        </div>
+      }
+    >
+      <div className="mr-1">
+        <RisksIcon className="h-3 text-red-500" />
+      </div>
+    </Tooltip>
+  );
+}
