@@ -5,17 +5,19 @@ import {
   CheckIcon,
   ChevronDownIcon,
   MagnifyingGlassIcon,
-  PuzzlePieceIcon,
 } from '@heroicons/react/24/outline';
 import {
   BellIcon,
   CheckCircleIcon,
+  PuzzlePieceIcon,
   QuestionMarkCircleIcon,
 } from '@heroicons/react/24/solid';
 
 import { Accordian } from '@/components/Accordian';
 import { Button } from '@/components/Button';
+import { Drawer } from '@/components/Drawer';
 import { Dropdown } from '@/components/Dropdown';
+import { Input } from '@/components/form/Input';
 import { InputText } from '@/components/form/InputText';
 import { RisksIcon } from '@/components/icons';
 import { getAssetStatusIcon } from '@/components/icons/AssetStatus.icon';
@@ -30,6 +32,7 @@ import { PartialAsset, useGetAssets, useUpdateAsset } from '@/hooks/useAssets';
 import { useCounts } from '@/hooks/useCounts';
 import { useIntegration } from '@/hooks/useIntegration';
 import { useBulkReRunJob } from '@/hooks/useJobs';
+import { AlertCategory } from '@/sections/Alerts';
 import { AssetStatusWarning } from '@/sections/AssetStatusWarning';
 import { RenderHeaderExtraContentSection } from '@/sections/AuthenticatedApp';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
@@ -108,7 +111,11 @@ const Assets: React.FC = () => {
     status: attributeCountsStatus,
   } = useCombineAttributesCount();
 
-  const { data: alerts, status: alertsStatus } = useMy({
+  const {
+    data: alerts,
+    status: alertsStatus,
+    refetch,
+  } = useMy({
     resource: 'condition',
   });
   const { data: accounts, status: accountsStatus } = useMy({
@@ -412,10 +419,34 @@ const Assets: React.FC = () => {
     return alerts.some(alert => alert.key.match(Regex.CUSTOM_ALERT_KEY));
   }, [alerts]);
 
+  const [search, setSearch] = useState<string>('');
+  const [isCTAOpen, setIsCTAOpen] = useState<boolean>(false);
+  const [selectedConditions] = useState([]);
+
+  const closeCTADrawer = () => {
+    setIsCTAOpen(false);
+  };
+  const ports = Object.keys(attributeCounts).filter(key =>
+    key.match('#attribute#port#')
+  );
+  const protocols = Object.keys(attributeCounts).filter(key =>
+    key.match('#attribute#protocol#')
+  );
+  const clouds = Object.keys(attributeCounts).filter(key =>
+    key.match('#attribute#cloud#')
+  );
+  const surfaces = Object.keys(attributeCounts).filter(key =>
+    key.match('#attribute#source##asset#')
+  );
+
   return (
     <>
       <RenderHeaderExtraContentSection>
-        <div className="m-auto flex w-full flex-col items-center rounded-lg border-2 border-dashed border-header-dark bg-header p-8 text-center">
+        <div
+          role="button"
+          onClick={() => setIsCTAOpen(true)}
+          className="m-auto flex w-full cursor-pointer flex-col items-center rounded-lg border-2 border-dashed border-header-dark bg-header p-8 text-center"
+        >
           <Loader className="w-8" isLoading={alertsStatus === 'pending'}>
             {hasCustomAttributes ? (
               <CheckCircleIcon className="size-10 text-green-400" />
@@ -430,6 +461,116 @@ const Assets: React.FC = () => {
           </p>
         </div>
       </RenderHeaderExtraContentSection>
+      <Drawer
+        open={isCTAOpen}
+        onClose={closeCTADrawer}
+        onBack={closeCTADrawer}
+        className={cn('w-full rounded-t-sm shadow-lg p-0 bg-zinc-100')}
+        skipBack={true}
+        footer={
+          selectedConditions.length > 0 && (
+            <Button
+              styleType="primary"
+              className="mx-20 mb-10 h-20 w-full text-xl font-bold"
+              onClick={async () => {
+                // add integration   accounts
+                // const promises = selectedAttackSurfaceIntegrations
+                //   .map((integration: string) => {
+
+                //     return link({
+                //       username: integration,
+                //       value: isWaitlisted ? 'waitlisted' : 'setup',
+                //       config: {},
+                //     });
+                //   })
+                //   .map(promise => promise.catch(error => error));
+
+                // const response = await Promise.all(promises);
+
+                // const validResults = response.filter(
+                //   result => !(result instanceof Error)
+                // );
+
+                // if (validResults.length > 0) {
+                //   invalidateAccounts();
+                // }
+
+                closeCTADrawer();
+              }}
+            >
+              Add Conditions ({selectedConditions.length} selected)
+            </Button>
+          )
+        }
+      >
+        <div className="mx-12 pb-10">
+          <div className="mb-4 flex flex-col items-center justify-between md:flex-row">
+            <h1 className=" text-4xl font-extrabold">
+              What are you interested in?
+            </h1>
+            <Input
+              name="search"
+              startIcon={<MagnifyingGlassIcon className="size-6" />}
+              placeholder="Search conditions..."
+              className="mt-2 w-[400px] rounded-sm bg-gray-200 p-4 text-lg"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+          </div>
+          <div className="flex w-full flex-row justify-between ">
+            <AlertCategory
+              title="Recently Discovered"
+              icon={<img src="/icons/new.svg" className="size-20" />}
+              items={['#attribute#new#']}
+              alerts={alerts}
+              refetch={refetch}
+              addAlert={addAlert}
+              removeAlert={removeAlert}
+              attributeExtractor={item => item.split('#')[3]}
+            />
+            <AlertCategory
+              title="Port"
+              icon={<img src="/icons/port.svg" className="size-20" />}
+              items={ports.filter(item => item.includes(search))}
+              alerts={alerts}
+              refetch={refetch}
+              addAlert={addAlert}
+              removeAlert={removeAlert}
+              attributeExtractor={item => item.split('#')[3]}
+            />
+            <AlertCategory
+              title="Protocol"
+              icon={<img src="/icons/shake.svg" className="size-20" />}
+              items={protocols.filter(item => item.includes(search))}
+              alerts={alerts}
+              refetch={refetch}
+              addAlert={addAlert}
+              removeAlert={removeAlert}
+              attributeExtractor={item => item.split('#')[3]}
+            />
+            <AlertCategory
+              title="Cloud"
+              icon={<img src="/icons/lambda.svg" className="size-20" />}
+              items={clouds.filter(item => item.includes(search))}
+              alerts={alerts}
+              refetch={refetch}
+              addAlert={addAlert}
+              removeAlert={removeAlert}
+              attributeExtractor={item => item.split('#')[3]}
+            />
+            <AlertCategory
+              title="Surface"
+              icon={<PuzzlePieceIcon className="size-20" />}
+              items={surfaces.filter(item => item.includes(search))}
+              alerts={alerts}
+              refetch={refetch}
+              addAlert={addAlert}
+              removeAlert={removeAlert}
+              attributeExtractor={item => item.split('#')[4]}
+            />
+          </div>
+        </div>
+      </Drawer>
       <FancyTable
         addNew={{ onClick: () => setShowAddAsset(true) }}
         search={{
@@ -846,7 +987,7 @@ export function FancyTable<TData>(
 
               if (attribute === '#attribute#new#') {
                 valueToDisplay = 'Last 24 hours';
-                labelToDisplay = 'Recently Discovered';
+                labelToDisplay = 'New';
               }
 
               if (attribute === 'source:provided') {
@@ -978,11 +1119,6 @@ export function RiskSummary(asset: {
   if (!asset.riskSummary) {
     return null;
   }
-
-  const totalRisk = Object.values(asset.riskSummary || {}).reduce(
-    (acc, items) => acc + items.length,
-    0
-  );
 
   return (
     <Tooltip

@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { ChevronRightIcon, Inbox, ShieldCheck } from 'lucide-react';
+import { ChevronRightIcon, Inbox, PlusIcon, ShieldCheck } from 'lucide-react';
 
 import { Button } from '@/components/Button';
+import { Input } from '@/components/form/Input';
 import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
 import { Tooltip } from '@/components/Tooltip';
 import { ClosedStateModal } from '@/components/ui/ClosedStateModal';
@@ -17,6 +18,7 @@ import {
   Asset,
   AssetStatus,
   AssetStatusLabel,
+  Condition,
   Risk,
   RiskSeverity,
   RiskStatus,
@@ -517,3 +519,133 @@ const Alerts: React.FC = () => {
 };
 
 export default Alerts;
+
+const AlertButton = ({
+  attributeKey,
+  alerts,
+  refetch,
+  addAlert,
+  removeAlert,
+  label,
+}: {
+  attributeKey: string;
+  alerts: Condition[];
+  refetch: () => void;
+  addAlert: (alert: Pick<Condition, 'value' | 'name'>) => void;
+  removeAlert: (alert: Pick<Condition, 'key'>) => void;
+  label: string;
+}) => {
+  const isAlerting = alerts.some(alert => alert.value === attributeKey);
+
+  const handleToggle = async () => {
+    if (isAlerting) {
+      await removeAlert({
+        key: `#condition#${attributeKey}`,
+      });
+    } else {
+      await addAlert({
+        value: attributeKey,
+        name: `Assets with ${label} identified`,
+      });
+    }
+    refetch();
+  };
+
+  return (
+    <label
+      className="space-between flex w-full cursor-pointer items-center justify-between p-2 font-semibold"
+      onClick={handleToggle}
+    >
+      <p>{label}</p>
+      <div className="relative inline-flex cursor-pointer items-center">
+        <input
+          type="checkbox"
+          className="peer sr-only"
+          checked={isAlerting}
+          readOnly
+        />
+        <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-brand peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-brand dark:border-gray-600 dark:bg-gray-700"></div>
+      </div>
+    </label>
+  );
+};
+
+export const AlertCategory = ({
+  title,
+  icon,
+  items,
+  alerts,
+  refetch,
+  addAlert,
+  removeAlert,
+  attributeExtractor,
+}: {
+  title: string;
+  icon: JSX.Element;
+  items: string[];
+  alerts: Condition[];
+  refetch: () => void;
+  addAlert: (alert: Pick<Condition, 'value' | 'name'>) => void;
+  removeAlert: (alert: Pick<Condition, 'key'>) => void;
+  attributeExtractor: (item: string) => string;
+}) => {
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredItems = items.filter(item =>
+    attributeExtractor(item).toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleNewAlert = () => {
+    setSearchTerm('');
+    addAlert({
+      value: `#attribute#${title?.toLowerCase()}#${searchTerm}`,
+      name: `Assets with ${searchTerm} identified`,
+    });
+    refetch();
+  };
+
+  return (
+    <div className="flex flex-col">
+      <div className="flex items-center justify-center">{icon}</div>
+      <p className="text-center text-2xl font-bold">{title}</p>
+      <Input
+        name={`${title.toLowerCase()}Search`}
+        placeholder={`Search ${title.toLowerCase()}...`}
+        className="mb-4 w-full rounded-sm bg-gray-200 p-2 text-lg"
+        value={searchTerm}
+        onChange={e => setSearchTerm(e.target.value)}
+      />
+      {searchTerm && filteredItems.length === 0 && (
+        <button
+          onClick={handleNewAlert}
+          className="flex w-full items-center justify-between rounded-lg border border-dashed border-brand p-3 text-brand transition-colors hover:bg-brand hover:text-white"
+        >
+          <p className="font-semibold">{searchTerm}</p>
+          <PlusIcon className="size-5" />
+        </button>
+      )}
+      {filteredItems.map(attributeKey => (
+        <AlertButton
+          key={attributeKey}
+          attributeKey={attributeKey}
+          alerts={alerts}
+          refetch={refetch}
+          addAlert={addAlert}
+          removeAlert={removeAlert}
+          label={
+            attributeKey === '#attribute#new#'
+              ? 'Last 24 hours'
+              : attributeExtractor(attributeKey)?.length > 0
+                ? attributeExtractor(attributeKey)
+                : attributeKey
+          }
+        />
+      ))}
+      {filteredItems.length === 0 && (
+        <p className="text-sm italic text-gray-500">
+          No {title.toLowerCase()}s found
+        </p>
+      )}
+    </div>
+  );
+};
