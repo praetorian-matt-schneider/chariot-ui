@@ -69,7 +69,7 @@ const RisksBeta: React.FC = () => {
           value: alert.value,
           count: alert.count.toLocaleString(),
         }))
-        .filter(({ value }) => !value.startsWith('#attribute')),
+        .filter(({ value }) => !value.startsWith('#attribute')), // Filtered out attributes as they'll be shown in the exposure risks
     [JSON.stringify({ alerts })]
   );
 
