@@ -7,7 +7,6 @@ import { BellIcon } from '@heroicons/react/24/solid';
 
 import { Loader } from '@/components/Loader';
 import { useMy } from '@/hooks';
-import { useBulkCounts } from '@/hooks/useCounts';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
 import { Alerts } from '@/sections/Alerts';
@@ -49,17 +48,6 @@ const RisksBeta: React.FC = () => {
   } = useMy({
     resource: 'condition',
   });
-  //   Exposure risks counts
-  const {
-    data: attributesCount,
-    status: attributesCountStatus,
-    invalidate: refetchAttributesCount,
-  } = useBulkCounts(
-    conditions.map(({ value }) => ({
-      resource: 'attribute',
-      query: value.split('#attribute')[1],
-    }))
-  );
 
   const alertsOptions = useMemo(
     () =>
@@ -74,19 +62,17 @@ const RisksBeta: React.FC = () => {
   );
 
   const exposureRiskOptions = useMemo(() => {
-    const conditionsWithCount = (conditions || []).filter(
-      ({ count }) => count > 0
-    );
+    // const conditionsWithCount = (conditions || []).filter(
+    //   ({ count }) => count > 0
+    // );
     return (
-      conditionsWithCount.map(({ name, value }) => ({
+      conditions.map(({ count, name, value }) => ({
         label: name,
         value,
-        count: (
-          attributesCount[value.endsWith('#') ? value.slice(0, -1) : value] || 0
-        ).toLocaleString(),
+        count: (count || 0).toLocaleString(),
       })) || []
     );
-  }, [JSON.stringify({ attributesCount, conditions })]);
+  }, [JSON.stringify({ conditions })]);
 
   // Add default filter if none is selected
   useEffect(() => {
@@ -111,7 +97,6 @@ const RisksBeta: React.FC = () => {
 
   function refetch() {
     refetchConditions();
-    refetchAttributesCount();
     setFilters({ search: '', alert: '', exposureRisk: '' });
   }
 
@@ -194,8 +179,7 @@ const RisksBeta: React.FC = () => {
                   {
                     label: 'Exposure Risks',
                     options: exposureRiskOptions,
-                    showCount:
-                      attributesCountStatus === 'pending' ? false : true,
+                    showCount: true,
                   },
                 ]}
                 alert={{
