@@ -2,26 +2,24 @@ import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   ArrowPathIcon,
-  DocumentTextIcon,
+  ArrowsPointingOutIcon,
+  DocumentDuplicateIcon,
   PencilSquareIcon,
 } from '@heroicons/react/24/outline';
-import {
-  ClipboardCheck,
-  HistoryIcon,
-  MessageSquare,
-  NotepadText,
-} from 'lucide-react';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/Button';
 import { Drawer } from '@/components/Drawer';
-import { AssetsIcon, RisksIcon } from '@/components/icons';
+import { RisksIcon } from '@/components/icons';
 import { UnionIcon } from '@/components/icons/Union.icon';
 import { Loader } from '@/components/Loader';
 import { MarkdownEditor } from '@/components/markdown/MarkdownEditor';
 import { MarkdownPreview } from '@/components/markdown/MarkdownPreview';
 import { Modal } from '@/components/Modal';
+import { Tabs } from '@/components/Tab';
 import { Timeline } from '@/components/Timeline';
 import { Tooltip } from '@/components/Tooltip';
+import { NoData } from '@/components/ui/NoData';
 import { RiskDropdown } from '@/components/ui/RiskDropdown';
 import { useMy } from '@/hooks';
 import { useGetKev } from '@/hooks/kev';
@@ -29,7 +27,6 @@ import { useGetFile, useUploadFile } from '@/hooks/useFiles';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useBulkReRunJob, useJobsStatus } from '@/hooks/useJobs';
 import { useReportRisk, useUpdateRisk } from '@/hooks/useRisks';
-import { AddAttribute } from '@/sections/detailsDrawer/AddAttribute';
 import { Comment } from '@/sections/detailsDrawer/Comment';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { getStatusColor } from '@/sections/Jobs';
@@ -42,11 +39,11 @@ import {
 } from '@/types';
 import { mergeJobStatus } from '@/utils/api';
 import { cn } from '@/utils/classname';
+import { copyToClipboard } from '@/utils/copyToClipboard.util';
 import { formatDate } from '@/utils/date.util';
 import { sToMs } from '@/utils/date.util';
 import { getSeverityClass } from '@/utils/getSeverityClass.util';
-import { Regex } from '@/utils/regex.util';
-import { isManualORPRrovidedRisk } from '@/utils/risk.util';
+import { getDescription, isManualORPRrovidedRisk } from '@/utils/risk.util';
 import { StorageKey, useStorage } from '@/utils/storage/useStorage.util';
 import { generatePathWithSearch, useSearchParams } from '@/utils/url.util';
 
@@ -62,8 +59,8 @@ const isScannable = (attribute: Attribute) =>
 
 export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
   const navigate = useNavigate();
+  const [selectedTab, setSelectedTab] = useState('poe');
   const { removeSearchParams } = useSearchParams();
-  const { getAssetDrawerLink } = getDrawerLink();
   const [riskJobsMap, setRiskJobsMap] = useStorage<
     Record<string, Record<string, string>>
   >(
@@ -136,6 +133,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
       sourceKeys.includes(key)
     )
   );
+
   const { data: jobsData = {}, status: allAssetJobsStatus } = useJobsStatus(
     attributeJobMap,
     {
@@ -208,497 +206,410 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     [attributesGenericSearch?.attributes]
   );
 
-  const discovered = (
-    <>
-      <Tooltip title="First Seen">
-        <p className="text-sm font-normal text-gray-500">
-          {formatDate(risk.created)}
-        </p>
-      </Tooltip>
-      <p className="text-sm font-normal text-gray-500">-</p>
-      <Tooltip title="Last Seen">
-        <p className="text-sm font-normal text-gray-500">
-          {formatDate(risk.updated)}
-        </p>
-      </Tooltip>
-    </>
-  );
-
   return (
     <Drawer
       open={open}
       onClose={() => removeSearchParams(StorageKey.DRAWER_COMPOSITE_KEY)}
       onBack={() => navigate(-1)}
-      className={cn(
-        'w-full rounded-t-lg bg-zinc-100 pb-0 shadow-lg',
-        severityClass
-      )}
+      className={cn('w-full rounded-t-lg pb-0 shadow-lg', severityClass)}
     >
       <Loader isLoading={isInitialLoading} type="spinner">
-        <div className="flex h-full flex-col gap-2 px-8 pt-0">
-          <div className="grid grid-cols-2 gap-4">
-            {/* Description & Remediation */}
-            <div
-              className={cn(
-                'bg-white flex flex-col  p-8 transition-all rounded-lg hover:shadow-md'
-              )}
-            >
-              <div className="mb-4 flex flex-row items-start space-x-1">
-                <ClipboardCheck className="mt-1 size-12 text-gray-800" />
-                <h3
-                  className={cn(
-                    'text-2xl font-semibold tracking-wide text-gray-900'
+        <div className="flex size-full">
+          <div className="shrink-0 basis-1/4">
+            <History history={history} />
+          </div>
+          <div className="h-full flex-1 border-x border-gray-300 px-9 py-5">
+            <div className="mb-8 flex items-start justify-between gap-4">
+              <div className="min-w-1/2 flex flex-col gap-2">
+                <div className="flex items-center gap-4">
+                  <h1 className="text-2xl font-bold"> {risk.name}</h1>
+                  {knownExploitedThreats.includes(risk.name) && (
+                    <span className="text-red-500">
+                      [Known Exploited Threat]
+                    </span>
                   )}
-                >
-                  <div className="flex flex-col justify-start text-left">
-                    <p className="text-2xl font-semibold text-gray-900">
-                      {risk.name}{' '}
-                      {knownExploitedThreats.includes(risk.name) && (
-                        <span className="text-red-500">
-                          [Known Exploited Threat]
-                        </span>
-                      )}
-                    </p>
-                    <p
-                      className="ml-1 flex w-full flex-wrap gap-2 overflow-hidden  text-sm font-normal text-gray-500"
-                      style={{ wordBreak: 'break-word' }}
-                    >
-                      via {risk.source} on {risk.dns}
-                      <div className="border-l border-gray-400"></div>
-                      {discovered}
-                    </p>
-                  </div>
-                </h3>
-              </div>
-              <Loader
-                isLoading={
-                  isDefinitionsFileFetching || reportRiskStatus === 'pending'
-                }
-                className="h-6"
-              >
-                <Modal
-                  size="6xl"
-                  open={isEditingMarkdown}
-                  onClose={() => setIsEditingMarkdown(false)}
-                  title="Description & Remediation"
-                  footer={{
-                    text: 'Save',
-                    isLoading: updateFileStatus === 'pending',
-                    onClick: async () => {
-                      await updateFile({
-                        ignoreSnackbar: true,
-                        name: `definitions/${name}`,
-                        content: markdownValue,
-                      });
-                      setIsEditingMarkdown(false);
-                    },
-                  }}
-                >
-                  <div className="h-[60vh]">
-                    <MarkdownEditor
-                      value={markdownValue}
-                      onChange={value => setMarkdownValue(value || '')}
-                      filePathPrefix="definitions/files"
-                    />
-                  </div>
-                </Modal>
-                {definitionsFile ? (
-                  <MarkdownPreview
-                    source={definitionsFileValue}
-                    style={{
-                      padding: '0.75rem',
-                      wordBreak: 'break-word',
-                      minHeight: '20px',
-                    }}
-                  />
-                ) : (
-                  <div className="flex w-full flex-1 flex-col items-center justify-center text-center text-default">
-                    <UnionIcon className="mt-8 size-16 text-default-light" />
-                    <p className="mt-7 text-lg font-bold">
-                      Generate Description & Remediation
-                    </p>
-                    <p className="mt-2">
-                      Add a Description & Remediation to this Risk
-                      <br />
-                      {`using Praetorian's Machine Learning.`}
-                    </p>
-                    <Button
-                      className="mt-10"
-                      startIcon={
-                        <UnionIcon className="size-3 text-brand-light" />
-                      }
-                      styleType="primary"
-                      onClick={() => reportRisk({ name })}
-                    >
-                      Generate Now
-                    </Button>
-                  </div>
-                )}
-                <Button
-                  styleType="none"
-                  className="mr-auto mt-4 pl-0 font-bold"
-                  endIcon={<PencilSquareIcon className="size-5" />}
-                  onClick={event => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    setIsEditingMarkdown(true);
-                  }}
-                >
-                  Edit
-                </Button>
-              </Loader>
-            </div>
-
-            <div className="flex flex-col gap-4">
-              {/* Actions Section */}
-              <div className="flex flex-row justify-end space-x-3">
-                <Tooltip placement="top" title="Change risk status">
-                  <RiskDropdown
-                    type="status"
-                    risk={risk}
-                    className="h-14 rounded-md border-none bg-white text-default"
-                  />
-                </Tooltip>
-                <Tooltip placement="top" title="Change risk severity">
-                  <RiskDropdown
-                    type="severity"
-                    risk={risk}
-                    className={cn(
-                      'transition-all h-15 rounded-md border-none',
-                      severityClass,
-                      'brightness-90'
-                    )}
-                  />
-                </Tooltip>
-                <Tooltip placement="top" title="View proof of exploit">
-                  <Button
-                    className="h-15 text-nowrap rounded-md border-none bg-white"
-                    startIcon={<DocumentTextIcon className="size-5" />}
-                    onClick={() => {
-                      navigate(
-                        generatePathWithSearch({
-                          appendSearch: [[StorageKey.POE, `${dns}/${name}`]],
-                        })
-                      );
-                    }}
-                  >
-                    Proof of Exploit
-                  </Button>
-                </Tooltip>
-
-                <Tooltip
-                  placement="top"
-                  title={
-                    isInitialLoading
-                      ? ''
-                      : risk.source && !isManualORPRrovidedRisk(risk)
-                        ? isJobsRunning
-                          ? 'Scanning in progress'
-                          : sourceKeys.length === 0
-                            ? 'On-demand scanning is only available for risk which have a source attribute'
-                            : 'Revalidate the risk'
-                        : 'On-demand scanning is only available for automated risk discovery.'
-                  }
-                >
-                  <Button
-                    className="h-15 text-nowrap rounded-md border-none bg-white"
-                    startIcon={<ArrowPathIcon className="size-5" />}
-                    disabled={
-                      isInitialLoading ||
-                      sourceKeys.length === 0 ||
-                      isManualORPRrovidedRisk(risk) ||
-                      Boolean(isJobsRunning)
-                    }
-                    isLoading={
-                      reRunJobStatus === 'pending' ||
-                      allAssetJobsStatus === 'pending'
-                    }
-                    onClick={async () => {
-                      const [response] = await bulkReRunJobs(
-                        sourceKeys.map(jobKey => ({
-                          capability: risk.source,
-                          jobKey,
-                          config: {
-                            test: risk.name,
-                          },
-                        }))
-                      );
-                      setRiskJobsMap(riskJobsMap => ({
-                        ...riskJobsMap,
-                        [risk.key]: sourceKeys.reduce(
-                          (acc, current, index) => ({
-                            ...acc,
-                            [current]: response[index].key,
-                          }),
-                          {}
-                        ),
-                      }));
-                    }}
-                  >
-                    Scan Now
-                  </Button>
-                </Tooltip>
-              </div>
-
-              {/* Attributes Section */}
-              <div
-                className={cn(
-                  ' bg-white p-8 pb-2 transition-all rounded-lg hover:shadow-md'
-                )}
-              >
-                <div className="flex flex-row items-center space-x-1">
-                  <NotepadText className="size-6 text-gray-800" />
-                  <h3 className="text-2xl font-semibold tracking-wide text-gray-900">
-                    Attributes
-                  </h3>
-                  <AddAttribute className="ml-auto" resourceKey={risk.key} />
                   <JobStatusBadge
                     status={jobsStatus}
                     lastScan={formatDate(lastScan)}
                   />
                 </div>
 
-                <div className="space-y-4">
-                  {attributesGenericSearch?.attributes?.length === 0 ||
-                  !attributesGenericSearch?.attributes ? (
-                    <div className="text-center text-gray-500">
-                      <p>No attributes added to this risk yet.</p>
-                    </div>
-                  ) : (
-                    <table className="min-w-full table-auto">
-                      <thead>
-                        <tr>
-                          <th className="p-2 text-left text-sm font-medium text-gray-600">
-                            Name
-                          </th>
-                          <th className="p-2 text-left text-sm font-medium text-gray-600">
-                            Value
-                          </th>
-                          <th className="p-2 text-left text-sm font-medium text-gray-600">
-                            Last Updated
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {attributesGenericSearch?.attributes?.map(data => {
-                          const job = isScannable(data)
-                            ? jobsData[data.value]
-                            : undefined;
-                          const status = job?.status;
-                          const lastScan = job?.updated
-                            ? formatDate(job.updated)
-                            : '';
-
-                          const [, assetLink] =
-                            data.value.match(Regex.CONTAINS_ASSET) || [];
-
-                          return (
-                            <tr
-                              key={data.name}
-                              className="hover: border-b border-gray-200 bg-white"
-                            >
-                              <td className="p-2 text-sm font-medium text-gray-800">
-                                {data.name}
-                              </td>
-                              <td className=" break-all p-2 text-sm text-gray-500">
-                                <span className="flex justify-between">
-                                  <span className="">
-                                    {assetLink ? (
-                                      data.value
-                                    ) : data.value.startsWith('http') ? (
-                                      <a
-                                        href={data.value}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="text-blue-500 hover:underline"
-                                      >
-                                        {data.value}
-                                      </a>
-                                    ) : (
-                                      data.value
-                                    )}
-                                  </span>
-                                  {isScannable(data) && (
-                                    <Tooltip
-                                      title={
-                                        status
-                                          ? getJobStatusText({
-                                              status,
-                                              lastScan,
-                                            })
-                                          : ''
-                                      }
-                                    >
-                                      <ArrowPathIcon
-                                        className={cn(
-                                          'size-5 cursor-pointer',
-                                          status &&
-                                            ![
-                                              JobStatus.Pass,
-                                              JobStatus.Fail,
-                                            ].includes(status) &&
-                                            'animate-spin cursor-not-allowed'
-                                        )}
-                                        onClick={
-                                          status !== JobStatus.Running
-                                            ? async () => {
-                                                const [response] =
-                                                  await bulkReRunJobs([
-                                                    {
-                                                      capability: risk.source,
-                                                      jobKey: data.value,
-                                                      config: {
-                                                        test: risk.name,
-                                                      },
-                                                    },
-                                                  ]);
-                                                setRiskJobsMap(riskJobsMap => ({
-                                                  ...riskJobsMap,
-                                                  [risk.key]: {
-                                                    ...riskJobsMap[risk.key],
-                                                    [data.value]:
-                                                      response[0].key,
-                                                  },
-                                                }));
-                                              }
-                                            : () => {}
-                                        }
-                                      />
-                                    </Tooltip>
-                                  )}
-                                </span>
-                              </td>
-                              <td className="p-2 text-sm text-gray-500">
-                                {formatDate(data.updated)}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  )}
+                {/* Actions Section */}
+                <div className="flex flex-row gap-3">
+                  <Tooltip placement="top" title="Change risk severity">
+                    <RiskDropdown
+                      type="severity"
+                      risk={risk}
+                      className={cn(
+                        'transition-all h-8 text-xs',
+                        severityClass,
+                        'brightness-90'
+                      )}
+                    />
+                  </Tooltip>
+                  <Tooltip placement="top" title="Change risk status">
+                    <RiskDropdown
+                      type="status"
+                      risk={risk}
+                      className="h-8 border-gray-400 text-xs"
+                    />
+                  </Tooltip>
+                  <Tooltip
+                    placement="top"
+                    title={
+                      isInitialLoading
+                        ? ''
+                        : risk.source && !isManualORPRrovidedRisk(risk)
+                          ? isJobsRunning
+                            ? 'Scanning in progress'
+                            : sourceKeys.length === 0
+                              ? 'On-demand scanning is only available for risk which have a source attribute'
+                              : 'Revalidate the risk'
+                          : 'On-demand scanning is only available for automated risk discovery.'
+                    }
+                  >
+                    <Button
+                      className="h-8 text-nowrap border border-gray-400 text-xs"
+                      startIcon={<ArrowPathIcon className="size-4" />}
+                      disabled={
+                        isInitialLoading ||
+                        sourceKeys.length === 0 ||
+                        isManualORPRrovidedRisk(risk) ||
+                        Boolean(isJobsRunning)
+                      }
+                      isLoading={
+                        reRunJobStatus === 'pending' ||
+                        allAssetJobsStatus === 'pending'
+                      }
+                      onClick={async () => {
+                        const [response] = await bulkReRunJobs(
+                          sourceKeys.map(jobKey => ({
+                            capability: risk.source,
+                            jobKey,
+                            config: {
+                              test: risk.name,
+                            },
+                          }))
+                        );
+                        setRiskJobsMap(riskJobsMap => ({
+                          ...riskJobsMap,
+                          [risk.key]: sourceKeys.reduce(
+                            (acc, current, index) =>
+                              response[index]?.key
+                                ? {
+                                    ...acc,
+                                    [current]: response[index].key,
+                                  }
+                                : acc,
+                            {}
+                          ),
+                        }));
+                      }}
+                    >
+                      Scan Now
+                    </Button>
+                  </Tooltip>
                 </div>
               </div>
-              <div className="w-full">
-                {/* Assets Section */}
-                <div
-                  className={cn(
-                    'bg-white p-8 transition-all rounded-lg hover:shadow-md'
-                  )}
-                >
-                  <div className="mb-4 flex flex-row items-center space-x-1">
-                    <AssetsIcon className="size-6 text-gray-800" />
-                    <h3 className="text-2xl font-semibold text-gray-900">
-                      Assets
-                    </h3>
-                  </div>
-                  {assetsOnRisk?.length === 0 ? (
-                    <div className="text-center text-gray-500">
-                      <p>No assets found.</p>
-                    </div>
-                  ) : (
-                    <table className="min-w-full table-auto text-default">
-                      <thead>
-                        <tr>
-                          <th className="w-28 p-2 text-left text-sm font-medium text-gray-600">
-                            Name
-                          </th>
-                          <th className="p-2 text-left text-sm font-medium text-gray-600">
-                            DNS
-                          </th>
-                          <th className="p-2 text-left text-sm font-medium text-gray-600">
-                            Last Updated
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {assetsOnRisk?.map(asset => {
-                          return (
-                            <tr
-                              key={asset.key}
-                              className="hover: border-b border-gray-200 bg-white"
-                            >
-                              <td className="p-2 text-sm text-blue-500">
-                                <Link
-                                  to={getAssetDrawerLink({
-                                    dns: asset.dns,
-                                    name: asset.name,
-                                  })}
-                                  className="hover:underline"
-                                >
-                                  {asset.name}
-                                </Link>
-                              </td>
-                              <td className="p-2 text-sm">{asset.dns}</td>
-                              <td className="p-2 text-sm">
-                                {formatDate(asset.updated)}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  )}
-                </div>
-              </div>
-              {/* Comment Section */}
-              <div
-                className={cn(
-                  'bg-white p-8 transition-all rounded-lg hover:shadow-md'
-                )}
-              >
-                <div className="mb-4 flex flex-row items-center space-x-1">
-                  <MessageSquare className="size-6 text-gray-800" />
-                  <h3 className="text-2xl font-semibold tracking-wide text-gray-900">
-                    Comments
-                  </h3>
-                </div>
-                <Comment
-                  comment={risk.comment}
-                  isLoading={isRiskFetching}
-                  onSave={handleUpdateComment}
-                />
-              </div>
+              <RiskDetails className="min-w-1/2" risk={risk} />
             </div>
+
+            {/* POE and Description */}
+            <Tabs
+              tabs={[
+                {
+                  label: 'POE',
+                  id: 'poe',
+                  tabClassName: 'bg-transparent',
+                  Content: () => <POE risk={risk} />,
+                },
+                {
+                  label: 'Description & Remediation',
+                  id: 'description',
+                  tabClassName: 'bg-transparent',
+                  Content: () => (
+                    <Loader
+                      isLoading={
+                        isDefinitionsFileFetching ||
+                        reportRiskStatus === 'pending'
+                      }
+                      className="h-6 bg-layer0"
+                    >
+                      <Modal
+                        size="6xl"
+                        open={isEditingMarkdown}
+                        onClose={() => setIsEditingMarkdown(false)}
+                        title="Description & Remediation"
+                        footer={{
+                          text: 'Save',
+                          isLoading: updateFileStatus === 'pending',
+                          onClick: async () => {
+                            await updateFile({
+                              ignoreSnackbar: true,
+                              name: `definitions/${name}`,
+                              content: markdownValue,
+                            });
+                            setIsEditingMarkdown(false);
+                          },
+                        }}
+                      >
+                        <div className="h-[60vh]">
+                          <MarkdownEditor
+                            value={markdownValue}
+                            onChange={value => setMarkdownValue(value || '')}
+                            filePathPrefix="definitions/files"
+                          />
+                        </div>
+                      </Modal>
+                      {definitionsFile ? (
+                        <MarkdownPreview
+                          source={definitionsFileValue}
+                          style={{
+                            padding: '0.75rem',
+                            wordBreak: 'break-word',
+                            minHeight: '20px',
+                          }}
+                        />
+                      ) : (
+                        <div className="flex size-full flex-1 flex-col items-center justify-center text-center text-default">
+                          <UnionIcon className="mt-8 size-16 text-default-light" />
+                          <p className="mt-7 text-lg font-bold">
+                            Generate Description & Remediation
+                          </p>
+                          <p className="mt-2">
+                            Add a Description & Remediation to this Risk
+                            <br />
+                            {`using Praetorian's Machine Learning.`}
+                          </p>
+                          <Button
+                            className="mt-10"
+                            startIcon={
+                              <UnionIcon className="size-3 text-brand-light" />
+                            }
+                            styleType="primary"
+                            onClick={() => reportRisk({ name })}
+                          >
+                            Generate Now
+                          </Button>
+                        </div>
+                      )}
+                      <Button
+                        styleType="none"
+                        className="mr-auto mt-4 pl-0 font-bold"
+                        endIcon={<PencilSquareIcon className="size-5" />}
+                        onClick={event => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          setIsEditingMarkdown(true);
+                        }}
+                      >
+                        Edit
+                      </Button>
+                    </Loader>
+                  ),
+                },
+                {
+                  label: 'Comment',
+                  id: 'comment',
+                  tabClassName: 'bg-transparent',
+                  Content: () => (
+                    <div
+                      className={cn(
+                        'transition-all rounded-lg hover:shadow-md my-8 p-4 cursor-pointer'
+                      )}
+                    >
+                      <Comment
+                        comment={risk.comment}
+                        isLoading={isRiskFetching}
+                        onSave={handleUpdateComment}
+                      />
+                    </div>
+                  ),
+                },
+              ]}
+              defaultValue={'poe'}
+              value={selectedTab}
+              onChange={setSelectedTab}
+              styleType="horizontal"
+            />
           </div>
 
-          {/* History Section */}
-          <div
-            className={cn(
-              'bg-white p-8 mb-8 transition-all rounded-lg hover:shadow-md'
-            )}
-          >
-            <div className="mb-4 flex flex-row items-center space-x-1">
-              <HistoryIcon className="size-6 text-gray-800" />
-              <h3 className="text-2xl font-semibold text-gray-900">History</h3>
-            </div>
-            <Timeline
-              items={[
-                ...(history
-                  ?.map((item, itemIndex) => {
-                    const { title, updated } = getHistoryDiff(
-                      item,
-                      itemIndex === 0
-                    );
-                    return {
-                      title,
-                      description: updated,
-                      className: 'text-default',
-                      icon:
-                        itemIndex === 0 ? (
-                          <RisksIcon className="stroke-1" />
-                        ) : undefined,
-                    };
-                  })
-                  .reverse() || []),
-              ]}
-            />
+          <div className="shrink-0 basis-1/4">
+            <AffectedAssets assets={assetsOnRisk} />
           </div>
         </div>
       </Loader>
     </Drawer>
   );
 }
+
+const History: React.FC<{ history: EntityHistory[] }> = ({ history = [] }) => {
+  return (
+    <div className="flex h-full flex-col overflow-hidden">
+      <h1 className="border-b border-gray-300 px-9 py-5 text-2xl font-bold">
+        History
+      </h1>
+      <div className="size-full overflow-auto px-4">
+        <Timeline
+          items={[
+            ...(history
+              ?.map((item, itemIndex) => {
+                const { title, updated } = getHistoryDiff(
+                  item,
+                  itemIndex === 0
+                );
+                return {
+                  title,
+                  description: updated,
+                  className: 'text-default',
+                  icon:
+                    itemIndex === 0 ? (
+                      <RisksIcon className="stroke-1" />
+                    ) : undefined,
+                };
+              })
+              .reverse() || []),
+          ]}
+        />
+      </div>
+    </div>
+  );
+};
+
+const POE: React.FC<{ risk: Risk }> = ({ risk }) => {
+  const navigate = useNavigate();
+  const poe = `${risk.dns}/${risk.name}`;
+  const { data: file, status: fileStatus } = useGetFile({
+    name: `proofs/${poe}`,
+  });
+
+  const proofOfExploit = useMemo(() => {
+    return getDescription(file);
+  }, [file]);
+
+  return (
+    <Loader className="my-8 h-96" isLoading={fileStatus === 'pending'}>
+      {!proofOfExploit && <NoData title="No Proof of exploit found." />}
+      <div className="relative my-8">
+        {Object.entries(proofOfExploit).map(([key, value]) => (
+          <div className="mb-8" key={key}>
+            <h3 className="text-lg font-bold">{key}</h3>
+            <code className="prose whitespace-pre-wrap text-xs">
+              {value as ReactNode}
+            </code>
+          </div>
+        ))}
+        {/* Icons */}
+        <div className="absolute right-0 top-0 flex gap-2">
+          <Tooltip placement="bottom" title="Copy proof of exploit">
+            <DocumentDuplicateIcon
+              className="size-6 cursor-pointer"
+              onClick={() => {
+                copyToClipboard(JSON.stringify(proofOfExploit));
+                toast('Proof of Exploit copied to clipboard.');
+              }}
+            />
+          </Tooltip>
+          <Tooltip placement="bottom" title="View proof of exploit">
+            <ArrowsPointingOutIcon
+              className="size-6 cursor-pointer"
+              onClick={() => {
+                navigate(
+                  generatePathWithSearch({
+                    appendSearch: [[StorageKey.POE, `${poe}`]],
+                  })
+                );
+              }}
+            />
+          </Tooltip>
+        </div>
+      </div>
+    </Loader>
+  );
+};
+
+const AffectedAssets: React.FC<{
+  assets: {
+    key: string;
+    dns: string;
+    name: string;
+    updated: string;
+  }[];
+}> = ({ assets }) => {
+  const { getAssetDrawerLink } = getDrawerLink();
+
+  return (
+    <div className="flex h-full flex-col overflow-hidden">
+      <h1 className="border-b border-gray-300 px-9 py-5 text-2xl font-bold">
+        Affected Assets
+      </h1>
+      <div className="size-full overflow-auto">
+        {assets?.length === 0 && (
+          <div className="text-center text-gray-500">
+            <p>No assets found.</p>
+          </div>
+        )}
+        {assets.length > 0 &&
+          [...assets, ...assets, ...assets].map(asset => (
+            <div
+              className="flex flex-col items-start justify-between gap-4 border-b border-gray-300 p-4 md:flex-row"
+              key={asset.key}
+            >
+              <div>
+                <Link
+                  to={getAssetDrawerLink({
+                    dns: asset.dns,
+                    name: asset.name,
+                  })}
+                  className="hover:underline"
+                >
+                  <h2 className="text-brand">{asset.name}</h2>
+                </Link>
+                <p
+                  className="text-sm text-gray-500"
+                  style={{ wordBreak: 'break-word' }}
+                >
+                  {asset.dns}
+                </p>
+              </div>
+              <span className="text-sm text-gray-500">
+                {formatDate(asset.updated)}
+              </span>
+            </div>
+          ))}
+      </div>
+    </div>
+  );
+};
+
+const RiskDetails = ({
+  risk,
+  className,
+}: {
+  risk: Risk;
+  className?: string;
+}) => {
+  return (
+    <div className={cn('flex flex-col gap-2', className)}>
+      <div className="flex items-center text-slate-600">
+        DNS:
+        <p className="ml-1 break-words font-bold text-slate-950">{risk.dns}</p>
+      </div>
+      <div className="flex items-center text-nowrap text-slate-600">
+        Last Seen:
+        <p className="ml-1 font-bold text-slate-950">
+          {formatDate(risk.updated)}
+        </p>
+      </div>
+      <div className="flex items-center text-nowrap text-slate-600">
+        First Seen:
+        <p className="ml-1 font-bold text-slate-950">
+          {formatDate(risk.created)}
+        </p>
+      </div>
+    </div>
+  );
+};
 
 const JobStatusBadge = ({
   status,

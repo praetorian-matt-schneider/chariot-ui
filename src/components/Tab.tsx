@@ -94,7 +94,7 @@ export function Tabs<ID = string>(props: TabsProps<ID>) {
       )}
       <div
         className={cn(
-          'w-full px-4 overflow-auto h-ful',
+          'w-full px-4 overflow-auto h-full',
           props?.contentWrapperClassName
         )}
       >

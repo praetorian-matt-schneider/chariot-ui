@@ -38,7 +38,7 @@ export const Comment: React.FC<Props> = ({ comment, onSave }: Props) => {
   return (
     <>
       {!isEditing && (
-        <>
+        <div onClick={() => setIsEditing(true)}>
           {comment ? (
             <p className="whitespace-pre-wrap break-words text-default">
               {comment}
@@ -46,14 +46,10 @@ export const Comment: React.FC<Props> = ({ comment, onSave }: Props) => {
           ) : (
             <span className="italic text-gray-400">No comment provided.</span>
           )}
-          <Button
-            className="mt-2 pl-0 font-bold"
-            styleType="none"
-            onClick={() => setIsEditing(true)}
-          >
+          <Button className="mt-2 pl-0 font-bold" styleType="none">
             Edit <PencilSquareIcon className="size-5" />
           </Button>
-        </>
+        </div>
       )}
       {isEditing && (
         <>
