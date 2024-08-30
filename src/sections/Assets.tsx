@@ -149,8 +149,6 @@ const Assets: React.FC = () => {
     ];
   }, [JSON.stringify(accounts)]);
 
-  const { mutateAsync: addAlert } = useAddAlert();
-  const { mutateAsync: removeAlert } = useRemoveAlert();
   const { mutateAsync: bulkReRunJob } = useBulkReRunJob();
 
   const { getAssetDrawerLink } = getDrawerLink();
@@ -620,20 +618,6 @@ const Assets: React.FC = () => {
           status: useMergeStatus(accountsStatus, attributeCountsStatus),
           alert: {
             value: alerts.map(alert => alert.value),
-            onAdd: async (attributeKey: string) => {
-              const [, attributeType = '', attributeValue = ''] =
-                attributeKey.match(Regex.ATTIBUTE_KEY) || [];
-
-              await addAlert({
-                value: attributeKey,
-                name: `Assets with ${attributeType}:${attributeValue.endsWith('#') ? attributeValue.slice(0, -1) : attributeValue} identified`,
-              });
-            },
-            onRemove: async (value: string) => {
-              await removeAlert({
-                key: `#condition#${value}`,
-              });
-            },
           },
         }}
         name="asset"
@@ -811,25 +795,44 @@ export function CategoryFilter(props: CategoryFilterProps) {
 
 interface AlertIconProps {
   value: string[];
-  onAdd: (value: string) => Promise<void>;
-  onRemove: (value: string) => Promise<void>;
+  onAdd?: () => void; // callback
+  onRemove?: () => void; // callback
   currentValue: string;
   styleType?: 'filter' | 'button';
 }
 
-function AlertIcon(props: AlertIconProps) {
+export function AlertIcon(props: AlertIconProps) {
   const [isLoading, setIsLoading] = useState(false);
   const isSubscribed = props.value.includes(props.currentValue);
   const Icon = isSubscribed ? BellSlashIcon : BellAlertIcon;
+  const { mutateAsync: addAlert } = useAddAlert();
+  const { mutateAsync: removeAlert } = useRemoveAlert();
 
-  async function handleClick() {
+  async function handleAdd() {
+    try {
+      const attributeKey = props.currentValue;
+      setIsLoading(true);
+      const [, attributeType = '', attributeValue = ''] =
+        attributeKey.match(Regex.ATTIBUTE_KEY) || [];
+
+      await addAlert({
+        value: attributeKey,
+        name: `Assets with ${attributeType}:${attributeValue.endsWith('#') ? attributeValue.slice(0, -1) : attributeValue} identified`,
+      });
+
+      props.onAdd && props.onAdd();
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function handleRemove() {
     try {
       setIsLoading(true);
-      if (isSubscribed) {
-        await props.onRemove(props.currentValue);
-      } else {
-        await props.onAdd(props.currentValue);
-      }
+      await removeAlert({
+        key: `#condition#${props.currentValue}`,
+      });
+      props.onRemove && props.onRemove();
     } finally {
       setIsLoading(false);
     }
@@ -843,7 +846,7 @@ function AlertIcon(props: AlertIconProps) {
         startIcon={
           <Icon className="size-6 shrink-0 rounded-full stroke-[2px] p-1" />
         }
-        onClick={handleClick}
+        onClick={isSubscribed ? handleRemove : handleAdd}
       >
         {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
       </Button>
@@ -863,7 +866,7 @@ function AlertIcon(props: AlertIconProps) {
               'ml-auto size-4 shrink-0 stroke-[2px]',
               !isSubscribed && 'text-gray-400'
             )}
-            onClick={handleClick}
+            onClick={isSubscribed ? handleRemove : handleAdd}
           />
         </Tooltip>
       </Loader>

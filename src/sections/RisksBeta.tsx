@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo } from 'react';
+import { QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
 import { BellIcon } from '@heroicons/react/24/solid';
 
 import { Loader } from '@/components/Loader';
@@ -10,7 +11,7 @@ import { CategoryFilter, FancyTable } from '@/sections/Assets';
 import { RenderHeaderExtraContentSection } from '@/sections/AuthenticatedApp';
 import { useGlobalState } from '@/state/global.state';
 import { RiskFilters } from '@/types';
-import { useStorage } from '@/utils/storage/useStorage.util';
+import { useQueryFilters } from '@/utils/storage/useQueryParams.util';
 
 const RisksBeta: React.FC = () => {
   const {
@@ -18,14 +19,14 @@ const RisksBeta: React.FC = () => {
       risk: { onOpenChange: onOpenRiskChange },
     },
   } = useGlobalState();
-  const [filters, setFilters] = useStorage<RiskFilters>(
-    { queryKey: 'riskFilters' },
-    {
+  const [filters, setFilters] = useQueryFilters<RiskFilters>({
+    key: 'riskFilters',
+    defaultFilters: {
       search: '',
       alert: '',
       exposureRisk: '',
-    }
-  );
+    },
+  });
   //   Security alert options, count
   const { data: alerts, status: alertsStatus } = useGetAccountAlerts();
 
@@ -65,7 +66,7 @@ const RisksBeta: React.FC = () => {
     () =>
       conditions?.map(({ name, value }) => ({
         label: name,
-        value: `name:${name}#`,
+        value,
         count: (
           attributesCount[value.endsWith('#') ? value.slice(0, -1) : value] || 0
         ).toLocaleString(),
@@ -76,13 +77,14 @@ const RisksBeta: React.FC = () => {
   // Add default filter if none is selected
   useEffect(() => {
     if (!filters.search && !filters.alert && !filters.exposureRisk) {
-      if (alerts && alerts.length > 0) {
+      if (alertsOptions && alertsOptions.length > 0) {
         setFilters({
           search: '',
-          alert: alerts[0].value,
+          alert: alertsOptions[0].value,
           exposureRisk: '',
         });
       }
+
       if (exposureRiskOptions && exposureRiskOptions.length > 0) {
         setFilters({
           search: '',
@@ -91,12 +93,25 @@ const RisksBeta: React.FC = () => {
         });
       }
     }
-  }, [JSON.stringify({ alerts, filters, exposureRiskOptions })]);
+  }, [JSON.stringify({ alertsOptions, filters, exposureRiskOptions })]);
 
   function refetch() {
     refetchConditions();
     refetchAttributesCount();
+    setFilters({ search: '', alert: '', exposureRisk: '' });
   }
+
+  const exposureRiskQuery = useMemo(() => {
+    if (filters.exposureRisk) {
+      const alertName = (alerts || []).find(
+        alert => alert.value === filters.exposureRisk
+      )?.name;
+      return `name:${alertName}#`;
+    }
+    return '';
+  }, [filters.exposureRisk, JSON.stringify({ alerts })]);
+
+  const query = filters.search || filters.alert || exposureRiskQuery || '';
 
   return (
     <>
@@ -167,35 +182,31 @@ const RisksBeta: React.FC = () => {
                       attributesCountStatus === 'pending' ? false : true,
                   },
                 ]}
+                alert={{
+                  value: (conditions || []).map(condition => condition.value),
+                }}
                 status={conditionsStatus}
               />
             )}
           </>
         }
       >
-        {filters.search && (
+        {query && (
           <Alerts
-            query={filters.search}
+            query={query}
             setQuery={() => {}}
             hideFilters={true}
             refetch={refetch}
+            unsubscribeAlert={filters.exposureRisk}
           />
         )}
-        {filters.alert && (
-          <Alerts
-            query={filters.alert}
-            setQuery={() => {}}
-            hideFilters={true}
-            refetch={refetch}
-          />
-        )}
-        {filters.exposureRisk && (
-          <Alerts
-            query={filters.exposureRisk}
-            setQuery={() => {}}
-            hideFilters={true}
-            refetch={refetch}
-          />
+        {!query && (
+          <div className="mt-12 flex flex-col items-center justify-center">
+            <QuestionMarkCircleIcon className="mb-4 size-16 text-gray-400" />
+            <p className="text-2xl font-bold">
+              Your search returned no results.
+            </p>
+          </div>
         )}
       </FancyTable>
     </>
