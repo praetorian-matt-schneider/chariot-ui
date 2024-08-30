@@ -1,32 +1,40 @@
 import { useMemo, useState } from 'react';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon } from '@heroicons/react/24/solid';
 import { ArrowUpRight, CheckCircle, LoaderCircle } from 'lucide-react';
 
-import { Input } from '@/components/form/Input';
 import { Inputs, Values } from '@/components/form/Inputs';
 import { AssetsIcon } from '@/components/icons';
 import { Modal } from '@/components/Modal';
 import { useCreateAsset } from '@/hooks/useAssets';
 import { useUpgrade } from '@/hooks/useUpgrade';
 import { useGlobalState } from '@/state/global.state';
-import { Asset, AssetStatus, AssetStatusLabel } from '@/types';
+import { AssetStatus } from '@/types';
 import { cn } from '@/utils/classname';
+
+// Regex patterns for asset types
+const assetTypePatterns = {
+  IPAddress: /^(\d{1,3}\.){3}\d{1,3}$/,
+  CIDRRange: /^(\d{1,3}\.){3}\d{1,3}\/\d{1,2}$/,
+  GitHubOrg: /^https:\/\/github\.com\/[\w-]+$/,
+  Domain: /^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/,
+};
+
+// Labels for asset types
+const assetLabels: { [key: string]: string } = {
+  IPAddress: 'IP Address',
+  CIDRRange: 'CIDR Range',
+  GitHubOrg: 'GitHub Organization',
+  Domain: 'Domain Name',
+};
 
 const AddAssetExamples = () => (
   <div className="mt-4 rounded-md bg-gray-100 p-3 text-sm text-gray-600">
-    <p className="mb-2 font-medium text-gray-800">Example asset:</p>
+    <p className="mb-2 font-medium text-gray-800">What is an asset?</p>
     <p>
-      <span className="font-semibold">acme.com</span>: Domain name
-    </p>
-    <p>
-      <span className="font-semibold">8.8.8.8</span>: IP Addresses
-    </p>
-    <p>
-      <span className="font-semibold">8.8.8.0/24</span>: CIDR Ranges
-    </p>
-    <p>
-      <span className="font-semibold">https://github.com/acme-corp</span>:
-      GitHub Org
+      Chariot defines an asset as anything that can transport data. You may be
+      asked to provide ownership of an asset before adding it to your attack
+      surface.
     </p>
   </div>
 );
@@ -50,17 +58,31 @@ export function AddAsset() {
     return failureReason && String(failureReason)?.includes('License');
   }, [failureReason]);
 
+  const assetType = useMemo(() => {
+    const assetName = String(formData.asset || '');
+
+    for (const [key, pattern] of Object.entries(assetTypePatterns)) {
+      if (pattern.test(assetName)) return key;
+    }
+
+    return null;
+  }, [formData.asset]) as keyof typeof assetTypePatterns;
+
+  const isAddButtonDisabled = useMemo(() => !assetType, [assetType]);
+
   function onClose() {
     onOpenChange(false);
   }
 
   async function handleAddAsset() {
-    await createAsset({
-      name: String(formData.asset),
-      status: formData.status as Asset['status'],
-    });
+    if (assetType) {
+      await createAsset({
+        name: String(formData.asset),
+        status: AssetStatus.Active,
+      });
 
-    onClose();
+      onClose();
+    }
   }
 
   return (
@@ -73,6 +95,7 @@ export function AddAsset() {
         isLoading: creatingAsset === 'pending',
         text: 'Add',
         onClick: handleAddAsset,
+        disabled: isAddButtonDisabled,
       }}
       size="lg"
       closeOnOutsideClick={false}
@@ -87,40 +110,37 @@ export function AddAsset() {
             {
               label: 'Asset',
               value: '',
-              placeholder: 'acme.com',
+              placeholder: 'e.g., 192.168.1.1',
               name: 'asset',
-              required: true,
-              className: 'h-10 w-full p-3 rounded-md border border-gray-300',
-            },
-            {
-              label: 'Status',
-              value: AssetStatus.Active,
-              type: Input.Type.SELECT,
-              placeholder: 'Select Status',
-              name: 'status',
-              options: [
-                {
-                  label: AssetStatusLabel[AssetStatus.ActiveHigh],
-                  value: AssetStatus.ActiveHigh,
-                },
-                {
-                  label: AssetStatusLabel[AssetStatus.Active],
-                  value: AssetStatus.Active,
-                },
-                {
-                  label: AssetStatusLabel[AssetStatus.ActiveLow],
-                  value: AssetStatus.ActiveLow,
-                },
-                {
-                  label: AssetStatusLabel[AssetStatus.Frozen],
-                  value: AssetStatus.Frozen,
-                },
-              ],
               required: true,
               className: 'h-10 w-full p-3 rounded-md border border-gray-300',
             },
           ]}
         />
+        <div className="mt-4">
+          <h3 className="mb-2 text-sm font-medium text-gray-800">Asset Type</h3>
+          <div className="grid grid-cols-2 gap-4">
+            {Object.keys(assetTypePatterns).map(type => (
+              <div
+                key={type}
+                className={cn(
+                  'flex items-center px-4 py-2 rounded-md border',
+                  assetType === type
+                    ? 'bg-green-100 border-green-400'
+                    : 'bg-gray-100 border-gray-300'
+                )}
+              >
+                <CheckCircleIcon
+                  className={cn(
+                    'size-5 mr-2',
+                    assetType === type ? 'text-green-500' : 'text-gray-300'
+                  )}
+                />
+                <p className="text-sm">{assetLabels[type]}</p>
+              </div>
+            ))}
+          </div>
+        </div>
         {!licenseHit && <AddAssetExamples />}
         {licenseHit && (
           <div
