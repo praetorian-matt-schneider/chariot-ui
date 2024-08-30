@@ -17,7 +17,6 @@ import { Accordian } from '@/components/Accordian';
 import { Button } from '@/components/Button';
 import { Drawer } from '@/components/Drawer';
 import { Dropdown } from '@/components/Dropdown';
-import { Input } from '@/components/form/Input';
 import { InputText } from '@/components/form/InputText';
 import { RisksIcon } from '@/components/icons';
 import { getAssetStatusIcon } from '@/components/icons/AssetStatus.icon';
@@ -419,7 +418,6 @@ const Assets: React.FC = () => {
     return alerts.some(alert => alert.key.match(Regex.CUSTOM_ALERT_KEY));
   }, [alerts]);
 
-  const [search, setSearch] = useState<string>('');
   const [isCTAOpen, setIsCTAOpen] = useState<boolean>(false);
   const [selectedConditions] = useState([]);
 
@@ -503,20 +501,7 @@ const Assets: React.FC = () => {
           )
         }
       >
-        <div className="mx-12 pb-10">
-          <div className="mb-4 flex flex-col items-center justify-between md:flex-row">
-            <h1 className=" text-4xl font-extrabold">
-              What are you interested in?
-            </h1>
-            <Input
-              name="search"
-              startIcon={<MagnifyingGlassIcon className="size-6" />}
-              placeholder="Search conditions..."
-              className="mt-2 w-[400px] rounded-sm bg-gray-200 p-4 text-lg"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-            />
-          </div>
+        <div className="mx-12 mt-2 pb-10">
           <div className="flex w-full flex-row justify-between ">
             <AlertCategory
               title="Recently Discovered"
@@ -531,7 +516,7 @@ const Assets: React.FC = () => {
             <AlertCategory
               title="Port"
               icon={<img src="/icons/port.svg" className="size-20" />}
-              items={ports.filter(item => item.includes(search))}
+              items={ports}
               alerts={alerts}
               refetch={refetch}
               addAlert={addAlert}
@@ -541,7 +526,7 @@ const Assets: React.FC = () => {
             <AlertCategory
               title="Protocol"
               icon={<img src="/icons/shake.svg" className="size-20" />}
-              items={protocols.filter(item => item.includes(search))}
+              items={protocols}
               alerts={alerts}
               refetch={refetch}
               addAlert={addAlert}
@@ -551,7 +536,7 @@ const Assets: React.FC = () => {
             <AlertCategory
               title="Cloud"
               icon={<img src="/icons/lambda.svg" className="size-20" />}
-              items={clouds.filter(item => item.includes(search))}
+              items={clouds}
               alerts={alerts}
               refetch={refetch}
               addAlert={addAlert}
@@ -561,7 +546,7 @@ const Assets: React.FC = () => {
             <AlertCategory
               title="Surface"
               icon={<PuzzlePieceIcon className="size-20" />}
-              items={surfaces.filter(item => item.includes(search))}
+              items={surfaces}
               alerts={alerts}
               refetch={refetch}
               addAlert={addAlert}
