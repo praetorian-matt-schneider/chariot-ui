@@ -7,13 +7,7 @@ import {
   useState,
 } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import {
-  ArrowPathIcon,
-  ArrowsPointingOutIcon,
-  DocumentDuplicateIcon,
-  PencilSquareIcon,
-} from '@heroicons/react/24/outline';
-import { toast } from 'sonner';
+import { ArrowPathIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
 
 import { Button } from '@/components/Button';
 import { Drawer } from '@/components/Drawer';
@@ -26,7 +20,6 @@ import { Modal } from '@/components/Modal';
 import { Tabs } from '@/components/Tab';
 import { Timeline } from '@/components/Timeline';
 import { Tooltip } from '@/components/Tooltip';
-import { NoData } from '@/components/ui/NoData';
 import { RiskDropdown } from '@/components/ui/RiskDropdown';
 import { useMy } from '@/hooks';
 import { useGetKev } from '@/hooks/kev';
@@ -46,13 +39,12 @@ import {
 } from '@/types';
 import { mergeJobStatus } from '@/utils/api';
 import { cn } from '@/utils/classname';
-import { copyToClipboard } from '@/utils/copyToClipboard.util';
 import { formatDate } from '@/utils/date.util';
 import { sToMs } from '@/utils/date.util';
 import { getSeverityClass } from '@/utils/getSeverityClass.util';
 import { getDescription, isManualORPRrovidedRisk } from '@/utils/risk.util';
 import { StorageKey, useStorage } from '@/utils/storage/useStorage.util';
-import { generatePathWithSearch, useSearchParams } from '@/utils/url.util';
+import { useSearchParams } from '@/utils/url.util';
 
 interface RiskDrawerProps {
   open: boolean;
@@ -244,9 +236,14 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
             style={{ width: width / 2 }}
           >
             <div className="mb-8 flex items-start justify-between gap-4">
-              <div className="min-w-1/2 flex flex-col gap-2">
+              <div className="flex w-2/3 flex-col gap-2">
                 <div className="flex items-center gap-4">
-                  <h1 className="text-2xl font-bold"> {risk.name}</h1>
+                  <h1
+                    className="text-2xl font-bold"
+                    style={{ wordBreak: 'break-word' }}
+                  >
+                    {risk.name}
+                  </h1>
                   {knownExploitedThreats.includes(risk.name) && (
                     <span className="text-red-500">
                       [Known Exploited Threat]
@@ -335,7 +332,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                   </Tooltip>
                 </div>
               </div>
-              <RiskDetails className="min-w-1/2" risk={risk} />
+              <RiskDetails className="w-1/3" risk={risk} />
             </div>
 
             {/* POE and Description */}
@@ -487,7 +484,6 @@ const History: React.FC<PropsWithChildren & { history: EntityHistory[] }> = ({
 };
 
 const POE: React.FC<{ risk: Risk }> = ({ risk }) => {
-  const navigate = useNavigate();
   const poe = `${risk.dns}/${risk.name}`;
   const { data: file, status: fileStatus } = useGetFile({
     name: `proofs/${poe}`,
@@ -497,49 +493,33 @@ const POE: React.FC<{ risk: Risk }> = ({ risk }) => {
     const proofDescription = getDescription(file);
 
     const { Request, Response } = proofDescription;
-    return {
-      Request,
-      Response,
-    };
+    return Request || Response
+      ? {
+          Request,
+          Response,
+        }
+      : null;
   }, [file]);
 
   return (
     <Loader className="my-8 h-96" isLoading={fileStatus === 'pending'}>
-      {!proofOfExploit && <NoData title="No Proof of exploit found." />}
-      <div className="relative my-8 overflow-auto">
-        {Object.entries(proofOfExploit).map(([key, value]) => (
-          <div className="mb-8" key={key}>
-            <h3 className="text-lg font-bold">{key}</h3>
-            <code className="prose whitespace-pre-wrap text-xs">
-              {(value as ReactNode) || 'Not Found'}
-            </code>
-          </div>
-        ))}
-        {/* Icons */}
-        <div className="absolute right-0 top-0 flex gap-2">
-          <Tooltip placement="bottom" title="Copy proof of exploit">
-            <DocumentDuplicateIcon
-              className="size-6 cursor-pointer"
-              onClick={() => {
-                copyToClipboard(JSON.stringify(proofOfExploit));
-                toast('Proof of Exploit copied to clipboard.');
-              }}
-            />
-          </Tooltip>
-          <Tooltip placement="bottom" title="View proof of exploit">
-            <ArrowsPointingOutIcon
-              className="size-6 cursor-pointer"
-              onClick={() => {
-                navigate(
-                  generatePathWithSearch({
-                    appendSearch: [[StorageKey.POE, `${poe}`]],
-                  })
-                );
-              }}
-            />
-          </Tooltip>
+      {!proofOfExploit && (
+        <div className="mt-12">
+          <p className="text-lg font-bold">No Proof of Exploit found.</p>
         </div>
-      </div>
+      )}
+      {proofOfExploit && (
+        <div className="relative my-8 overflow-auto">
+          {Object.entries(proofOfExploit).map(([key, value]) => (
+            <div className="mb-8" key={key}>
+              <h3 className="text-lg font-bold">{key}</h3>
+              <code className="prose whitespace-pre-wrap text-xs">
+                {(value as ReactNode) || 'Not Found'}
+              </code>
+            </div>
+          ))}
+        </div>
+      )}
     </Loader>
   );
 };
