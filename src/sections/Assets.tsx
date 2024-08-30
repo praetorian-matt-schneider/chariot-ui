@@ -501,7 +501,7 @@ const Assets: React.FC = () => {
           )
         }
       >
-        <div className="mx-12 mt-2 pb-10">
+        <div className="mx-12 mt-6 pb-10">
           <div className="flex w-full flex-row justify-between ">
             <AlertCategory
               title="Recently Discovered"

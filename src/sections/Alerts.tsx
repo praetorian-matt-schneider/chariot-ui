@@ -607,7 +607,7 @@ export const AlertCategory = ({
   return (
     <div className="flex flex-col">
       <div className="flex items-center justify-center">{icon}</div>
-      <p className="text-center text-2xl font-bold">{title}</p>
+      <p className="mb-2 text-center text-2xl font-bold">{title}</p>
       <Input
         name={`${title.toLowerCase()}Search`}
         placeholder={`Search ${title.toLowerCase()}...`}
@@ -615,15 +615,7 @@ export const AlertCategory = ({
         value={searchTerm}
         onChange={e => setSearchTerm(e.target.value)}
       />
-      {searchTerm && filteredItems.length === 0 && (
-        <button
-          onClick={handleNewAlert}
-          className="flex w-full items-center justify-between rounded-lg border border-dashed border-brand p-3 text-brand transition-colors hover:bg-brand hover:text-white"
-        >
-          <p className="font-semibold">{searchTerm}</p>
-          <PlusIcon className="size-5" />
-        </button>
-      )}
+
       {filteredItems.map(attributeKey => (
         <AlertButton
           key={attributeKey}
@@ -641,6 +633,15 @@ export const AlertCategory = ({
           }
         />
       ))}
+      {searchTerm && (
+        <button
+          onClick={handleNewAlert}
+          className="mb-2 flex w-full items-center justify-between rounded-lg border border-dashed border-brand p-3 text-brand transition-colors hover:bg-brand hover:text-white"
+        >
+          <p className="font-semibold">{searchTerm}</p>
+          <PlusIcon className="size-5" />
+        </button>
+      )}
       {filteredItems.length === 0 && (
         <p className="text-sm italic text-gray-500">
           No {title.toLowerCase()}s found
