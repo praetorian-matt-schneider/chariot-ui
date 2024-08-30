@@ -545,12 +545,12 @@ const AffectedAssets: React.FC<{
       </h1>
       <div className="size-full overflow-auto">
         {assets?.length === 0 && (
-          <div className="text-center text-gray-500">
+          <div className="p-4 text-center text-gray-500">
             <p>No assets found.</p>
           </div>
         )}
         {assets.length > 0 &&
-          [...assets, ...assets, ...assets].map(asset => (
+          assets.map(asset => (
             <div
               className="flex flex-col items-start justify-between gap-4 border-b border-gray-300 p-4 md:flex-row"
               key={asset.key}
