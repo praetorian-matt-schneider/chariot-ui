@@ -1,10 +1,14 @@
 import React, { useEffect, useMemo } from 'react';
-import { QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
+import {
+  CheckCircleIcon,
+  QuestionMarkCircleIcon,
+} from '@heroicons/react/24/outline';
 import { BellIcon } from '@heroicons/react/24/solid';
 
 import { Loader } from '@/components/Loader';
 import { useMy } from '@/hooks';
 import { useBulkCounts } from '@/hooks/useCounts';
+import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
 import { Alerts } from '@/sections/Alerts';
 import { CategoryFilter, FancyTable } from '@/sections/Assets';
@@ -27,6 +31,13 @@ const RisksBeta: React.FC = () => {
       exposureRisk: '',
     },
   });
+
+  // Check for remediated risks to update the CTA
+  const { data: risksGeneric, status: risksStatus } = useGenericSearch({
+    query: 'status:R',
+  });
+  const hasRemediatedRisk = (risksGeneric?.risks || [])?.length > 0;
+
   //   Security alert options, count
   const { data: alerts, status: alertsStatus } = useGetAccountAlerts();
 
@@ -120,12 +131,14 @@ const RisksBeta: React.FC = () => {
     <>
       <RenderHeaderExtraContentSection>
         <div className="m-auto flex w-full flex-col items-center rounded-lg border-2 border-dashed border-header-dark bg-header p-8 text-center">
-          <Loader className="w-8" isLoading={conditionsStatus === 'pending'}>
-            <BellIcon className="size-10 animate-bounce text-white" />
+          <Loader className="w-8" isLoading={risksStatus === 'pending'}>
+            {hasRemediatedRisk ? (
+              <CheckCircleIcon className="size-10 text-green-400" />
+            ) : (
+              <BellIcon className="size-10 animate-bounce text-white" />
+            )}
           </Loader>
-          <h1 className="text-3xl font-bold text-white">
-            Resolve a Risk Today
-          </h1>
+          <h1 className="text-3xl font-bold text-white">Remediate a Risk</h1>
           <p className="max-w-[700px] text-sm text-gray-500">
             Keep your environment secure by addressing risks regularly.
           </p>
