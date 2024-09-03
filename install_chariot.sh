@@ -47,11 +47,11 @@ show_step_result() {
     local status=$1
     local step=$2
     if [ "$status" == "OK" ]; then
-        echo -e "\033[1;32m[ OK ]\033[0m $step"
+        echo -ne "\033[1;32m[ OK ]\033[0m $step\033[K\r"
     elif [ "$status" == "SKIP" ]; then
-        echo -e "\033[1;33m[ SKIP ]\033[0m $step"
+        echo -ne "\033[1;33m[ SKIP ]\033[0m $step\033[K\r"
     elif [ "$status" == "RUNNING" ]; then
-        echo -ne "\033[1;34m[ RUNNING ]\033[0m $step...\r"
+        echo -ne "\033[1;34m[ RUNNING ]\033[0m $step...\033[K\r"
     else
         echo -e "\033[1;31m[FAILED]\033[0m $step"
         exit 1
@@ -118,6 +118,7 @@ fi
 # Step 7: Switch to the next-release branch
 show_step_result "RUNNING" "Switching to the next-release branch"
 git checkout next-release >/dev/null 2>&1
+git pull origin next-release >/dev/null 2>&1
 show_step_result "OK" "Switching to the next-release branch"
 
 # Step 8: Install dependencies
