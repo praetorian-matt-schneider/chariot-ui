@@ -24,7 +24,6 @@ import {
   Risk,
   RiskSeverity,
   RiskStatus,
-  SeverityDef,
 } from '@/types';
 import { cn } from '@/utils/classname';
 import { formatDate } from '@/utils/date.util';
@@ -238,13 +237,7 @@ export const Alerts: React.FC<Props> = ({
         }}
       >
         <div className="flex flex-1 items-center space-x-3 overflow-hidden">
-          {isRisk && item.status !== RiskStatus.ExposedRisks && (
-            <Tooltip
-              title={`${SeverityDef[getRiskSeverity(item.status)]} Severity`}
-            >
-              {getSeverityButton(getRiskSeverity(item.status))}
-            </Tooltip>
-          )}
+          {isRisk && getSeverityButton(getRiskSeverity(item.status))}
           {(isAsset || isRisk) && (
             <div className="flex flex-1 items-center space-x-3 overflow-hidden">
               <div className="flex w-full flex-col overflow-hidden">
