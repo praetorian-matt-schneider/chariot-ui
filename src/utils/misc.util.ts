@@ -36,5 +36,31 @@ export function useGetScreenSize() {
     setScreenSizeFn();
   }, []);
 
-  return screenSize;
+  const size =
+    screenSize < BREAKPOINTS.sm
+      ? 'sm'
+      : screenSize < BREAKPOINTS.md
+        ? 'md'
+        : screenSize < BREAKPOINTS.lg
+          ? 'lg'
+          : screenSize < BREAKPOINTS.xl
+            ? 'xl'
+            : '2xl';
+
+  return {
+    maxSm: screenSize < BREAKPOINTS.sm,
+    maxMd: screenSize < BREAKPOINTS.md,
+    maxLg: screenSize < BREAKPOINTS.lg,
+    maxXl: screenSize < BREAKPOINTS.xl,
+    max2xl: screenSize >= BREAKPOINTS['2xl'],
+    size,
+  };
 }
+
+export const BREAKPOINTS = {
+  sm: 640,
+  md: 768,
+  lg: 1024,
+  xl: 1280,
+  '2xl': 1536,
+};

@@ -128,7 +128,7 @@ export function Header() {
 
   // TODO: FIXME - this is a hack to not show sticky header on table pages
   const showSticky =
-    screenSize >= 730 &&
+    !screenSize.maxMd &&
     ['assets', 'risks', 'jobs'].includes(location.pathname.split('/')[2]);
 
   const stickyRef = useCreateSticky<HTMLDivElement>({

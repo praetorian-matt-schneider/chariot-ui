@@ -4,15 +4,15 @@ const Footer = () => {
   return (
     <div className="w-full">
       <div className="m-auto w-full max-w-screen-xl">
-        <footer className="flex w-full items-center justify-between gap-2 p-4 text-xs text-gray-400">
-          <div className="w-1/3">
+        <footer className="flex w-full items-center justify-between gap-4 overflow-x-auto text-nowrap p-4 text-xs text-gray-400">
+          <div>
             Copyright &copy; {new Date().getFullYear()}. All Rights Reserved.
           </div>
-          <div className="center flex w-1/3 items-center justify-center">
+          <div className="center flex items-center justify-center max-md:hidden">
             <LogoIcon className="mr-2 mt-1 size-5" />
             <span className="text-lg font-bold leading-8">praetorian</span>
           </div>
-          <div className="flex w-1/3 space-x-4 font-semibold">
+          <div className="flex items-center gap-2 font-semibold">
             <a
               href="https://www.praetorian.com/terms-of-service/"
               target="_blank"

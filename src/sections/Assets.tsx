@@ -4,6 +4,7 @@ import {
   BellSlashIcon,
   CheckIcon,
   ChevronDownIcon,
+  FunnelIcon,
   MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
 import {
@@ -15,6 +16,7 @@ import {
 
 import { Accordian } from '@/components/Accordian';
 import { Button } from '@/components/Button';
+import { ConditionalRender } from '@/components/ConditionalRender';
 import { Drawer } from '@/components/Drawer';
 import { Dropdown } from '@/components/Dropdown';
 import { InputText } from '@/components/form/InputText';
@@ -228,11 +230,21 @@ const Assets: React.FC = () => {
           const parsedAttValue =
             attributeValue.match(/arn:aws:([^:]+)/)?.[0] || '';
 
-          if (!currentATTvalue.find(({ label }) => label === parsedAttValue)) {
+          if (parsedAttValue) {
+            if (
+              !currentATTvalue.find(({ label }) => label === parsedAttValue)
+            ) {
+              currentATTvalue.push({
+                label: parsedAttValue,
+                count: value.toString(),
+                value: `#attribute#cloud#${parsedAttValue}`,
+              });
+            }
+          } else {
             currentATTvalue.push({
-              label: parsedAttValue,
+              label: attributeValue,
               count: value.toString(),
-              value: `#attribute#cloud#${parsedAttValue}`,
+              value: `${attributeKey}#`,
             });
           }
         } else {
@@ -820,7 +832,6 @@ function AlertIcon(props: AlertIconProps) {
 
 export function FancyTable<TData>(
   props: TableProps<TData> & {
-    tableheader?: ReactNode;
     addNew?: {
       label?: ReactNode;
       onClick: () => void;
@@ -834,7 +845,6 @@ export function FancyTable<TData>(
   }
 ) {
   const {
-    tableheader,
     addNew,
     search,
     filter,
@@ -843,8 +853,9 @@ export function FancyTable<TData>(
     tableHeader,
     ...tableProps
   } = props;
-  const screenSize = useGetScreenSize();
-  const isSmallScreen = screenSize < 768;
+  const { maxMd } = useGetScreenSize();
+
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
   const { getSticky, useCreateSticky } = useSticky();
   const leftStickyRef = useCreateSticky<HTMLDivElement>({ id: '2L' });
@@ -861,12 +872,26 @@ export function FancyTable<TData>(
   }, [JSON.stringify(filter?.value)]);
 
   return (
-    <div className="flex w-full flex-1 shadow-md">
-      {tableheader}
-      {!isSmallScreen && (
+    <div className="relative flex w-full flex-1 shadow-md">
+      <ConditionalRender
+        condition={maxMd}
+        conditionalWrapper={children => (
+          <Drawer
+            onBack={() => {}}
+            open={isFiltersOpen}
+            onClose={() => {
+              setIsFiltersOpen(false);
+            }}
+          >
+            {children}
+          </Drawer>
+        )}
+      >
         <div
-          className="w-[300px] shrink-0 bg-gray-100"
-          style={{ position: 'relative' }}
+          className={cn(
+            'shrink-0 bg-gray-100 relative',
+            maxMd ? 'w-full' : 'w-[300px]'
+          )}
         >
           <div
             ref={leftStickyRef}
@@ -879,16 +904,18 @@ export function FancyTable<TData>(
               zIndex: 1,
             }}
           >
-            <div className="flex items-center justify-between  px-4">
+            <div className="flex items-center  px-4">
               <p className="text-3xl font-bold">
                 {capitalize(tableProps.name)}
               </p>
               {addNew && (
                 <Button
+                  className="ml-auto"
                   styleType="primary"
                   isLoading={addNew.isLoading}
                   onClick={() => {
                     addNew.onClick();
+                    setIsFiltersOpen(false);
                   }}
                 >
                   {addNew.label || `New ${capitalize(tableProps.name)}`}
@@ -904,7 +931,13 @@ export function FancyTable<TData>(
                 >
                   Search
                 </label>
-                <div className="relative">
+                <form
+                  className="relative"
+                  onSubmit={event => {
+                    event.preventDefault();
+                    setIsFiltersOpen(false);
+                  }}
+                >
                   <InputText
                     value={search?.value}
                     onChange={event => {
@@ -924,7 +957,7 @@ export function FancyTable<TData>(
                   >
                     <MagnifyingGlassIcon className="absolute left-0 top-0 ml-2 size-5 h-full stroke-[3px]" />
                   </label>
-                </div>
+                </form>
               </div>
             )}
             {(filter || otherFilters) && (
@@ -940,13 +973,21 @@ export function FancyTable<TData>(
                 height: `calc( 100vh - ${headerHeight + LHeaderHeight + 16}px)`,
               }}
             >
-              {filter && <CategoryFilter {...filter} />}
+              {filter && (
+                <CategoryFilter
+                  {...filter}
+                  onChange={(...args) => {
+                    setIsFiltersOpen(false);
+                    filter?.onChange(...args);
+                  }}
+                />
+              )}
               {otherFilters}
             </div>
           )}
         </div>
-      )}
-      <div className="flex w-full flex-col bg-white">
+      </ConditionalRender>
+      <div className={cn('flex w-full flex-col bg-white')}>
         <div
           ref={rightStickyRef}
           className="sticky flex min-h-14 items-center bg-white px-4"
@@ -955,8 +996,15 @@ export function FancyTable<TData>(
             zIndex: 1,
           }}
         >
+          {maxMd && (
+            <FunnelIcon
+              onClick={() => {
+                setIsFiltersOpen(true);
+              }}
+              className="m-2 size-9 cursor-pointer p-2"
+            />
+          )}
           {tableHeader}
-
           {filter &&
             filter.value?.length > 0 &&
             !tableHeader &&
