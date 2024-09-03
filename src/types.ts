@@ -49,6 +49,12 @@ export enum RiskStatus {
   ExposedRisks = 'E',
 }
 
+export const RiskStatusWithoutSeverity = [
+  RiskStatus.MachineOpen,
+  RiskStatus.MachineDeleted,
+  RiskStatus.ExposedRisks,
+];
+
 export type RiskCombinedStatus = string;
 
 export enum RiskSeverity {

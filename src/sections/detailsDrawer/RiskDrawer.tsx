@@ -10,6 +10,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ArrowPathIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
 
 import { Button } from '@/components/Button';
+import { Chip } from '@/components/Chip';
 import { Drawer } from '@/components/Drawer';
 import { RisksIcon } from '@/components/icons';
 import { UnionIcon } from '@/components/icons/Union.icon';
@@ -36,6 +37,9 @@ import {
   JobStatus,
   Risk,
   RiskCombinedStatus,
+  RiskStatus,
+  RiskStatusLabel,
+  RiskStatusWithoutSeverity,
 } from '@/types';
 import { mergeJobStatus } from '@/utils/api';
 import { cn } from '@/utils/classname';
@@ -43,6 +47,7 @@ import { formatDate } from '@/utils/date.util';
 import { sToMs } from '@/utils/date.util';
 import { getSeverityClass } from '@/utils/getSeverityClass.util';
 import { getDescription, isManualORPRrovidedRisk } from '@/utils/risk.util';
+import { getRiskSeverity } from '@/utils/riskStatus.util';
 import { StorageKey, useStorage } from '@/utils/storage/useStorage.util';
 import { useSearchParams } from '@/utils/url.util';
 
@@ -673,15 +678,24 @@ function getHistoryDiff(
             <strong>First Tracked</strong>
             {EmptySpace}as{EmptySpace}
           </p>
-          <RiskDropdown
-            risk={{
-              status: history.to as RiskCombinedStatus,
-              key: '',
-              comment: '',
-            }}
-            type={'severity'}
-            styleType="chip"
-          />
+          {RiskStatusWithoutSeverity.includes(history.to as RiskStatus) ? (
+            <Chip
+              className="inline-flex min-h-[26px] whitespace-nowrap py-1"
+              style="default"
+            >
+              {RiskStatusLabel[history.to as RiskStatus]}
+            </Chip>
+          ) : (
+            <RiskDropdown
+              risk={{
+                status: history.to as RiskCombinedStatus,
+                key: '',
+                comment: '',
+              }}
+              type={'severity'}
+              styleType="chip"
+            />
+          )}
         </div>
       ),
       updated: formatDate(history.updated),
@@ -691,7 +705,11 @@ function getHistoryDiff(
   const isStatusChanged =
     `${history.from?.[0]}${history.from?.[2]}` !==
     `${history.to?.[0]}${history.to?.[2]}`;
-  const isSeverityChanged = history.from?.[1] !== history.to?.[1];
+  const isSeverityChanged =
+    RiskStatusWithoutSeverity.includes(history.from as RiskStatus) ||
+    RiskStatusWithoutSeverity.includes(history.to as RiskStatus)
+      ? false
+      : getRiskSeverity(history.from) !== getRiskSeverity(history.to);
   const isBothChanged = isSeverityChanged && isStatusChanged;
   const by = history?.by;
 

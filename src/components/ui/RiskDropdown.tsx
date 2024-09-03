@@ -14,7 +14,14 @@ import { Chip } from '@/components/Chip';
 import { Dropdown } from '@/components/Dropdown';
 import { ClosedStateModal } from '@/components/ui/ClosedStateModal';
 import { useBulkUpdateRisk, useDeleteRisk } from '@/hooks/useRisks';
-import { Risk, RiskStatus, RiskStatusLabel, SeverityDef } from '@/types';
+import {
+  Risk,
+  RiskSeverity,
+  RiskStatus,
+  RiskStatusLabel,
+  RiskStatusWithoutSeverity,
+  SeverityDef,
+} from '@/types';
 import { cn } from '@/utils/classname';
 import { getSeverityClass } from '@/utils/getSeverityClass.util';
 import { getRiskSeverity, getRiskStatus } from '@/utils/riskStatus.util';
@@ -92,7 +99,11 @@ export const RiskDropdown: React.FC<Props> = ({
   const generalChipClass = 'inline-flex min-h-[26px] py-1 whitespace-nowrap';
 
   const riskStatusKey = getRiskStatus(risk.status);
-  const riskSeverityKey = getRiskSeverity(risk.status);
+  const riskSeverityKey = RiskStatusWithoutSeverity.includes(
+    risk.status as RiskStatus
+  )
+    ? getRiskSeverity(RiskSeverity.Info)
+    : getRiskSeverity(risk.status);
 
   const statusLabel = RiskStatusLabel[riskStatusKey] || 'Closed'; // Closed is added to handle the old statuses
   const severityLabel = SeverityDef[riskSeverityKey];
