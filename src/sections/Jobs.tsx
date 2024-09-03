@@ -363,7 +363,12 @@ const Jobs: React.FC = () => {
               value={filters.status ? [filters.status] : []}
               status={dataStatus}
               onChange={statuses => {
-                setFilters({ ...filters, status: statuses[0], search: '' });
+                setFilters({
+                  status: statuses[0],
+                  search: '',
+                  sources: [],
+                  failedReason: [],
+                });
               }}
               category={[
                 {
@@ -385,7 +390,12 @@ const Jobs: React.FC = () => {
                 value={filters.failedReason}
                 status={dataStatus}
                 onChange={failedReason => {
-                  setFilters({ ...filters, failedReason });
+                  setFilters({
+                    failedReason,
+                    search: '',
+                    sources: [],
+                    status: '',
+                  });
                 }}
                 category={[
                   {
