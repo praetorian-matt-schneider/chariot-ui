@@ -534,6 +534,7 @@ export enum Integration {
   akamai = 'akamai',
   datadog = 'datadog',
   wiz = 'wiz',
+  digitalocean = 'digitalocean',
 }
 
 export interface IntegrationMeta {

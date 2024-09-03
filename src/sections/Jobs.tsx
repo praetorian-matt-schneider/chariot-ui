@@ -90,6 +90,7 @@ const Jobs: React.FC = () => {
     resource: 'job',
     query,
   });
+
   const { data: accounts, status: accountStatus } = useMy({
     resource: 'account',
   });
@@ -317,7 +318,12 @@ const Jobs: React.FC = () => {
         search={{
           value: filters.search,
           onChange: search => {
-            setFilters({ ...filters, search });
+            setFilters({
+              search,
+              sources: [],
+              status: '',
+              failedReason: [],
+            });
           },
         }}
         tableHeader={
@@ -329,7 +335,7 @@ const Jobs: React.FC = () => {
                   {filters.search ? filters.search : `All Jobs`}
                 </p>
               </div>
-              {filters.status.length > 0 && (
+              {filters.status?.length > 0 && (
                 <div className="flex items-center gap-2">
                   <p className="text-lg font-bold">Status:</p>
                   <p className="text-base font-semibold text-gray-500">
@@ -358,7 +364,12 @@ const Jobs: React.FC = () => {
               value={filters.status ? [filters.status] : []}
               status={dataStatus}
               onChange={statuses => {
-                setFilters({ ...filters, status: statuses[0] });
+                setFilters({
+                  status: statuses[0],
+                  search: '',
+                  sources: [],
+                  failedReason: [],
+                });
               }}
               category={[
                 {
@@ -380,7 +391,12 @@ const Jobs: React.FC = () => {
                 value={filters.failedReason}
                 status={dataStatus}
                 onChange={failedReason => {
-                  setFilters({ ...filters, failedReason });
+                  setFilters({
+                    failedReason,
+                    search: '',
+                    sources: [],
+                    status: '',
+                  });
                 }}
                 category={[
                   {

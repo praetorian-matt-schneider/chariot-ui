@@ -431,7 +431,7 @@ export function Risks() {
                   },
                 },
                 {
-                  label: 'Closed',
+                  label: RiskStatusLabel[RiskStatus.Remediated],
                   icon: getRiskStatusIcon(RiskStatus.Remediated),
                   onClick: () => {
                     setIsClosedSubStateModalOpen(true);

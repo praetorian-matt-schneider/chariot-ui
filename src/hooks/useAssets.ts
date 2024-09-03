@@ -140,8 +140,9 @@ export const useCreateAsset = () => {
 
   return useMutation<Asset, Error, Pick<Asset, 'name' | 'status'>>({
     defaultErrorMessage: `Failed to add asset`,
+    getErrorFromResponse: true,
     mutationFn: async asset => {
-      const promise = axios.post(`/asset`, {
+      const promise = axios.put(`/asset`, {
         dns: asset.name,
         name: asset.name,
         status: asset.status || AssetStatus.Active,
@@ -150,7 +151,6 @@ export const useCreateAsset = () => {
       toast.promise(promise, {
         loading: 'Adding asset',
         success: `Added ${asset.name}`,
-        error: 'Failed to add asset',
       });
 
       const { data } = await promise;
@@ -160,6 +160,11 @@ export const useCreateAsset = () => {
       invalidateCounts();
 
       return data;
+    },
+    onError: error => {
+      toast.error('Failed to add asset', {
+        description: `${error.name}. ${error.message}`,
+      });
     },
   });
 };
@@ -186,7 +191,7 @@ export const useBulkAddAsset = () => {
       const promise = Promise.all<Asset>(
         assets
           .map(async asset => {
-            const { data } = await axios.post<Asset[]>(`/asset`, {
+            const { data } = await axios.put<Asset[]>(`/asset`, {
               dns: asset.name,
               name: asset.name,
               status: asset.status || AssetStatus.Active,

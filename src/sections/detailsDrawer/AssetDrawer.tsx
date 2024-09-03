@@ -21,7 +21,6 @@ import { Button } from '@/components/Button';
 import { Drawer } from '@/components/Drawer';
 import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
 import { Loader } from '@/components/Loader';
-import { AssetStatusDropdown } from '@/components/ui/AssetPriorityDropdown';
 import { useMy } from '@/hooks';
 import { PartialAsset } from '@/hooks/useAssets';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
@@ -33,6 +32,7 @@ import { Asset, Attribute, Risk, RiskStatus, RiskStatusLabel } from '@/types';
 import { cn } from '@/utils/classname';
 import { formatDate } from '@/utils/date.util';
 import { getSeverityClass } from '@/utils/getSeverityClass.util';
+import { useGetScreenSize } from '@/utils/misc.util';
 import { createVerticalContainer } from '@/utils/reactFlor.util';
 import { Regex } from '@/utils/regex.util';
 import { getRiskSeverity, getRiskStatus } from '@/utils/riskStatus.util';
@@ -179,6 +179,8 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
 
   const splitBy3 = 768 / 3;
 
+  const screenSize = useGetScreenSize();
+
   return (
     <Drawer
       open={open}
@@ -187,20 +189,51 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
       className={cn('w-full rounded-t-lg pb-0 shadow-lg')}
       contentClassName="flex"
     >
-      <Loader isLoading={isInitialLoading}>
-        <div className="flex w-full">
-          <div className="w-1/2" style={{ minWidth: splitBy3 }}>
+      <Loader isLoading={isInitialLoading} type="spinner">
+        <div
+          className="grid w-full"
+          style={
+            screenSize.maxMd
+              ? {
+                  gridTemplateAreas: `'section2' 'section1' 'section3'`,
+                  gridTemplateColumns: `auto`,
+                  gridTemplateRows: '75% auto auto',
+                }
+              : screenSize.maxLg
+                ? {
+                    gridTemplateAreas: `'section2 section3' 'section2 section1'`,
+                    gridTemplateColumns: `auto minmax(${splitBy3}px, 25%)`,
+                    gridTemplateRows: '50% 50%',
+                  }
+                : {
+                    display: 'grid',
+                    gridTemplateAreas: `'section1 section2 section3'`,
+                    gridTemplateColumns: `minmax(${splitBy3}px, 25%) auto minmax(${splitBy3}px, 25%)`,
+                    gridTemplateRows: '100%',
+                  }
+          }
+        >
+          <div
+            className={cn(
+              'border-gray-300',
+              screenSize.maxMd
+                ? 'border-t border-b'
+                : screenSize.maxLg
+                  ? 'border-l border-t'
+                  : 'border-r'
+            )}
+            style={{ gridArea: 'section1' }}
+          >
             <RiskList risks={openRisks} />
           </div>
           <div
             className="flex w-full flex-col gap-4"
-            style={{ minWidth: splitBy3 }}
+            style={{ gridArea: 'section2' }}
           >
             <div className="flex flex-wrap justify-between gap-4 px-9 pt-6">
               <div className="max-w-1/2 flex flex-col gap-2">
                 <h1 className="text-2xl font-bold">{asset.name}</h1>
                 <div className="flex flex-wrap gap-2">
-                  <AssetStatusDropdown asset={asset} />
                   <Button
                     styleType="secondary"
                     className="text-nowrap px-3 py-2"
@@ -244,7 +277,10 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
               <AssetsGraph {...assetGraphProps} asset={assetWithRisk} />
             </div>
           </div>
-          <div className="w-1/2" style={{ minWidth: splitBy3 }}>
+          <div
+            className={cn('border-l border-gray-300')}
+            style={{ gridArea: 'section3' }}
+          >
             <AttributeList
               attributes={attributesGenericSearch?.attributes || []}
               resourceKey={asset.key}
@@ -263,8 +299,8 @@ function RiskList(props: RiskListProps) {
   const navigate = useNavigate();
 
   return (
-    <div className="flex h-full flex-col overflow-hidden border-r border-gray-300">
-      <h1 className="border-b border-gray-300 px-9 py-5 text-2xl font-bold">
+    <div className="flex h-full flex-col">
+      <h1 className="sticky top-0 border-b border-gray-300 bg-white px-9 py-5 text-2xl font-bold">
         Risks
       </h1>
       <div className="size-full overflow-auto">
@@ -317,8 +353,8 @@ interface AttributeListProps {
 }
 function AttributeList(props: AttributeListProps) {
   return (
-    <div className="flex h-full flex-col overflow-hidden border-l border-gray-300">
-      <h1 className="border-b border-gray-300 px-9 py-5 text-2xl font-bold">
+    <div className="flex h-full flex-col">
+      <h1 className="sticky top-0 border-b border-gray-300 bg-white px-9 py-5 text-2xl font-bold">
         <p>Attributes</p>
         <AddAttribute resourceKey={props.resourceKey} />
       </h1>

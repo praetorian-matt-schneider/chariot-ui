@@ -88,4 +88,4 @@ Parameters:
   Targets:
     Type: CommaDelimitedList
     Description: List of organizational units to deploy to. Leave blank to apply to this account only.
-    AllowedPattern: '^ou-[0-9a-z]{4,32}-[a-z0-9]{8,32}$'
+    AllowedPattern: '(^ou-[0-9a-z]{4,32}-[a-z0-9]{8,32}$)|(^$)'

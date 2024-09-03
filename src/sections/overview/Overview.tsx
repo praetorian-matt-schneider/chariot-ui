@@ -728,7 +728,7 @@ export const Overview: React.FC = () => {
             )
           }
         >
-          <div className="mx-12 pb-10">
+          <div className="mx-12 mt-6 pb-10">
             <div className="mb-12 flex flex-col items-center justify-between md:flex-row">
               <h1 className=" text-4xl font-extrabold">
                 Which surfaces are you in?
@@ -812,7 +812,7 @@ export const Overview: React.FC = () => {
             )
           }
         >
-          <div className="mx-12">
+          <div className="mx-12 mt-6">
             <h1 className="mb-4 text-4xl font-extrabold">
               Where do you want to be notified?
             </h1>

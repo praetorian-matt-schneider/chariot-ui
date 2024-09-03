@@ -10,18 +10,22 @@ import {
   BellSlashIcon,
   CheckIcon,
   ChevronDownIcon,
+  FunnelIcon,
   MagnifyingGlassIcon,
-  PuzzlePieceIcon,
 } from '@heroicons/react/24/outline';
 import {
   BellIcon,
   CheckCircleIcon,
+  PuzzlePieceIcon,
   QuestionMarkCircleIcon,
 } from '@heroicons/react/24/solid';
 
 import { Accordian } from '@/components/Accordian';
 import { Button } from '@/components/Button';
+import { ConditionalRender } from '@/components/ConditionalRender';
+import { Drawer } from '@/components/Drawer';
 import { Dropdown } from '@/components/Dropdown';
+import { DEFAULT_CONDITIONS } from '@/components/form/constants';
 import { InputText } from '@/components/form/InputText';
 import { RisksIcon } from '@/components/icons';
 import { getAssetStatusIcon } from '@/components/icons/AssetStatus.icon';
@@ -36,6 +40,7 @@ import { PartialAsset, useGetAssets, useUpdateAsset } from '@/hooks/useAssets';
 import { useCounts } from '@/hooks/useCounts';
 import { useIntegration } from '@/hooks/useIntegration';
 import { useBulkReRunJob } from '@/hooks/useJobs';
+import { AlertCategory } from '@/sections/Alerts';
 import { AssetStatusWarning } from '@/sections/AssetStatusWarning';
 import { RenderHeaderExtraContentSection } from '@/sections/AuthenticatedApp';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
@@ -114,7 +119,11 @@ const Assets: React.FC = () => {
     status: attributeCountsStatus,
   } = useCombineAttributesCount();
 
-  const { data: alerts, status: alertsStatus } = useMy({
+  const {
+    data: alerts,
+    status: alertsStatus,
+    refetch,
+  } = useMy({
     resource: 'condition',
   });
   const { data: accounts, status: accountsStatus } = useMy({
@@ -150,6 +159,8 @@ const Assets: React.FC = () => {
   const [showAssetStatusWarning, setShowAssetStatusWarning] =
     useState<boolean>(false);
   const [assetStatus, setAssetStatus] = useState<AssetStatus | ''>('');
+  const { mutate: addAlert } = useAddAlert();
+  const { mutate: removeAlert } = useRemoveAlert();
 
   useEffect(() => {
     setSelectedRows([]);
@@ -226,11 +237,21 @@ const Assets: React.FC = () => {
           const parsedAttValue =
             attributeValue.match(/arn:aws:([^:]+)/)?.[0] || '';
 
-          if (!currentATTvalue.find(({ label }) => label === parsedAttValue)) {
+          if (parsedAttValue) {
+            if (
+              !currentATTvalue.find(({ label }) => label === parsedAttValue)
+            ) {
+              currentATTvalue.push({
+                label: parsedAttValue,
+                count: value.toString(),
+                value: `#attribute#cloud#${parsedAttValue}`,
+              });
+            }
+          } else {
             currentATTvalue.push({
-              label: parsedAttValue,
+              label: attributeValue,
               count: value.toString(),
-              value: `#attribute#cloud#${parsedAttValue}`,
+              value: `${attributeKey}#`,
             });
           }
         } else {
@@ -416,10 +437,33 @@ const Assets: React.FC = () => {
     return alerts.some(alert => alert.key.match(Regex.CUSTOM_ALERT_KEY));
   }, [alerts]);
 
+  const [isCTAOpen, setIsCTAOpen] = useState<boolean>(false);
+  const [selectedConditions] = useState([]);
+
+  const closeCTADrawer = () => {
+    setIsCTAOpen(false);
+  };
+  const ports = Object.keys(attributeCounts).filter(key =>
+    key.match('#attribute#port#')
+  );
+  const protocols = Object.keys(attributeCounts).filter(key =>
+    key.match('#attribute#protocol#')
+  );
+  const clouds = Object.keys(attributeCounts).filter(key =>
+    key.match('#attribute#cloud#')
+  );
+  const surfaces = Object.keys(attributeCounts).filter(key =>
+    key.match('#attribute#source##asset#')
+  );
+
   return (
     <>
       <RenderHeaderExtraContentSection>
-        <div className="m-auto flex w-full flex-col items-center rounded-lg border-2 border-dashed border-header-dark bg-header p-8 text-center">
+        <div
+          role="button"
+          onClick={() => setIsCTAOpen(true)}
+          className="m-auto flex w-full cursor-pointer flex-col items-center rounded-lg border-2 border-dashed border-header-dark bg-header p-8 text-center"
+        >
           <Loader className="w-8" isLoading={alertsStatus === 'pending'}>
             {hasCustomAttributes ? (
               <CheckCircleIcon className="size-10 text-green-400" />
@@ -434,6 +478,129 @@ const Assets: React.FC = () => {
           </p>
         </div>
       </RenderHeaderExtraContentSection>
+      <Drawer
+        open={isCTAOpen}
+        onClose={closeCTADrawer}
+        onBack={closeCTADrawer}
+        className={cn('w-full rounded-t-sm shadow-lg p-0 bg-zinc-100')}
+        skipBack={true}
+        footer={
+          selectedConditions.length > 0 && (
+            <Button
+              styleType="primary"
+              className="mx-20 mb-10 h-20 w-full text-xl font-bold"
+              onClick={async () => {
+                // add integration   accounts
+                // const promises = selectedAttackSurfaceIntegrations
+                //   .map((integration: string) => {
+
+                //     return link({
+                //       username: integration,
+                //       value: isWaitlisted ? 'waitlisted' : 'setup',
+                //       config: {},
+                //     });
+                //   })
+                //   .map(promise => promise.catch(error => error));
+
+                // const response = await Promise.all(promises);
+
+                // const validResults = response.filter(
+                //   result => !(result instanceof Error)
+                // );
+
+                // if (validResults.length > 0) {
+                //   invalidateAccounts();
+                // }
+
+                closeCTADrawer();
+              }}
+            >
+              Add Conditions ({selectedConditions.length} selected)
+            </Button>
+          )
+        }
+      >
+        <div className="mx-12 mt-6 pb-10">
+          <div className="flex w-full flex-row items-center justify-between">
+            <h1 className="mb-4 text-4xl font-extrabold">
+              Customize Your Exposure Alerts
+            </h1>
+            <div className="flex flex-row items-center">
+              <Button
+                styleType="primary"
+                className="-translate-x-2 text-sm font-semibold"
+                onClick={() => {
+                  Object.keys(DEFAULT_CONDITIONS).forEach(key => {
+                    DEFAULT_CONDITIONS[
+                      key as keyof typeof DEFAULT_CONDITIONS
+                    ].forEach(value => {
+                      addAlert({
+                        value,
+                        name: `Assets with a ${key} value of ${value} identified`,
+                      });
+                    });
+                  });
+                  closeCTADrawer();
+                }}
+              >
+                Apply Default Policy
+              </Button>
+            </div>
+          </div>
+          <div className="flex w-full flex-row justify-between gap-x-10">
+            <AlertCategory
+              title="Recently Discovered"
+              icon={<img src="/icons/new.svg" className="size-20" />}
+              items={['#attribute#new#']}
+              alerts={alerts}
+              refetch={refetch}
+              addAlert={addAlert}
+              removeAlert={removeAlert}
+              attributeExtractor={(item: string) => item.split('#')[3]}
+            />
+            <AlertCategory
+              title="Port"
+              icon={<img src="/icons/port.svg" className="size-20" />}
+              items={ports}
+              alerts={alerts}
+              refetch={refetch}
+              addAlert={addAlert}
+              removeAlert={removeAlert}
+              attributeExtractor={(item: string) => item.split('#')[3]}
+            />
+            <AlertCategory
+              title="Protocol"
+              icon={<img src="/icons/shake.svg" className="size-20" />}
+              items={protocols}
+              alerts={alerts}
+              refetch={refetch}
+              addAlert={addAlert}
+              removeAlert={removeAlert}
+              attributeExtractor={(item: string) => item.split('#')[3]}
+            />
+            <AlertCategory
+              title="Cloud"
+              icon={<img src="/icons/lambda.svg" className="size-20" />}
+              items={clouds}
+              alerts={alerts}
+              refetch={refetch}
+              addAlert={addAlert}
+              removeAlert={removeAlert}
+              attributeExtractor={(item: string) => item.split('#')[3]}
+            />
+            <AlertCategory
+              title="Surface"
+              icon={<PuzzlePieceIcon className="size-20" />}
+              items={surfaces}
+              alerts={alerts}
+              refetch={refetch}
+              addAlert={addAlert}
+              removeAlert={removeAlert}
+              attributeExtractor={(item: string) => item.split('#')[4]}
+            />
+          </div>
+        </div>
+      </Drawer>
       <FancyTable
         addNew={{ onClick: () => setShowAddAsset(true) }}
         search={{
@@ -545,19 +712,7 @@ export function CategoryFilter(props: CategoryFilterProps) {
           </Tooltip>
         </h1>
       )}
-      {status === 'pending' &&
-        Array(2)
-          .fill(0)
-          .map((_, index) => {
-            return (
-              <Loader
-                className="my-1 h-5 w-full"
-                key={index}
-                isLoading
-              ></Loader>
-            );
-          })}
-      {status === 'success' && (
+      {category.length > 0 && (
         <ul className="flex flex-col gap-3">
           {category.map((item, index) => {
             const isOptionSelectedOnInit = Boolean(
@@ -622,6 +777,18 @@ export function CategoryFilter(props: CategoryFilterProps) {
           })}
         </ul>
       )}
+      {status === 'pending' &&
+        Array(Math.max(5 - category.length, 1))
+          .fill(0)
+          .map((_, index) => {
+            return (
+              <Loader
+                className="my-1 h-5 w-full"
+                key={index}
+                isLoading
+              ></Loader>
+            );
+          })}
     </div>
   );
 }
@@ -726,7 +893,6 @@ export function FancyTable(
 ) {
   const {
     className,
-    tableheader,
     addNew,
     search,
     filter,
@@ -736,8 +902,9 @@ export function FancyTable(
     name,
     children,
   } = props;
-  const screenSize = useGetScreenSize();
-  const isSmallScreen = screenSize < 768;
+  const { maxMd } = useGetScreenSize();
+
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
   const { getSticky, useCreateSticky } = useSticky();
   const leftStickyRef = useCreateSticky<HTMLDivElement>({ id: '2L' });
@@ -754,12 +921,26 @@ export function FancyTable(
   }, [JSON.stringify(filter?.value)]);
 
   return (
-    <div className="flex w-full flex-1 shadow-md">
-      {tableheader}
-      {!isSmallScreen && (
+    <div className="relative flex w-full flex-1 shadow-md">
+      <ConditionalRender
+        condition={maxMd}
+        conditionalWrapper={children => (
+          <Drawer
+            onBack={() => {}}
+            open={isFiltersOpen}
+            onClose={() => {
+              setIsFiltersOpen(false);
+            }}
+          >
+            {children}
+          </Drawer>
+        )}
+      >
         <div
-          className="w-[300px] shrink-0 bg-gray-100"
-          style={{ position: 'relative' }}
+          className={cn(
+            'shrink-0 bg-gray-100 relative',
+            maxMd ? 'w-full' : 'w-[300px]'
+          )}
         >
           <div
             ref={leftStickyRef}
@@ -776,10 +957,12 @@ export function FancyTable(
               <p className="text-3xl font-bold">{capitalize(name)}</p>
               {addNew && (
                 <Button
+                  className="ml-auto"
                   styleType="primary"
                   isLoading={addNew.isLoading}
                   onClick={() => {
                     addNew.onClick();
+                    setIsFiltersOpen(false);
                   }}
                 >
                   {addNew.label || `New ${capitalize(name)}`}
@@ -795,7 +978,13 @@ export function FancyTable(
                 >
                   Search
                 </label>
-                <div className="relative">
+                <form
+                  className="relative"
+                  onSubmit={event => {
+                    event.preventDefault();
+                    setIsFiltersOpen(false);
+                  }}
+                >
                   <InputText
                     value={search?.value}
                     onChange={event => {
@@ -810,7 +999,7 @@ export function FancyTable(
                   <label className="cursor-pointer" htmlFor={`${name}-search`}>
                     <MagnifyingGlassIcon className="absolute left-0 top-0 ml-2 size-5 h-full stroke-[3px]" />
                   </label>
-                </div>
+                </form>
               </div>
             )}
             {(filter || otherFilters) && (
@@ -826,13 +1015,21 @@ export function FancyTable(
                 height: `calc( 100vh - ${headerHeight + LHeaderHeight + 16}px)`,
               }}
             >
-              {filter && <CategoryFilter {...filter} />}
+              {filter && (
+                <CategoryFilter
+                  {...filter}
+                  onChange={(...args) => {
+                    setIsFiltersOpen(false);
+                    filter?.onChange(...args);
+                  }}
+                />
+              )}
               {otherFilters}
             </div>
           )}
         </div>
-      )}
-      <div className="flex w-full flex-col bg-white">
+      </ConditionalRender>
+      <div className={cn('flex w-full flex-col bg-white')}>
         <div
           ref={rightStickyRef}
           className={cn(
@@ -844,6 +1041,14 @@ export function FancyTable(
             zIndex: 1,
           }}
         >
+          {maxMd && (
+            <FunnelIcon
+              onClick={() => {
+                setIsFiltersOpen(true);
+              }}
+              className="m-2 size-9 cursor-pointer p-2"
+            />
+          )}
           {tableHeader}
           {filter &&
             filter.value?.length > 0 &&
@@ -863,7 +1068,7 @@ export function FancyTable(
 
               if (attribute === '#attribute#new#') {
                 valueToDisplay = 'Last 24 hours';
-                labelToDisplay = 'Recently Discovered';
+                labelToDisplay = 'New';
               }
 
               if (attribute === 'source:provided') {
@@ -986,11 +1191,6 @@ export function RiskSummary(asset: {
   if (!asset.riskSummary) {
     return null;
   }
-
-  const totalRisk = Object.values(asset.riskSummary || {}).reduce(
-    (acc, items) => acc + items.length,
-    0
-  );
 
   return (
     <Tooltip

@@ -156,11 +156,16 @@ function updateAllQueryCache<T>(key: QueryKey, data: (currentValue: T) => T) {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getQueryError(options: CustomOptions, error: any) {
   const isLicenseError = error?.response?.status === 402;
+  const errorFromResponse = options.getErrorFromResponse
+    ? error.response?.data
+    : '';
   const errorMessageByStatusCode =
     options.errorByStatusCode?.[error?.response?.status];
 
   const queryErrorTitle =
-    errorMessageByStatusCode || options.defaultErrorMessage;
+    errorFromResponse ||
+    errorMessageByStatusCode ||
+    options.defaultErrorMessage;
   let queryErrorMessage = '';
 
   if (isLicenseError && !errorMessageByStatusCode) {
@@ -183,6 +188,7 @@ function appendContactSupport(error: string) {
 interface CustomOptions {
   defaultErrorMessage: string;
   errorByStatusCode?: Record<number, string>;
+  getErrorFromResponse?: boolean;
 }
 
 export function mergeJobStatus(

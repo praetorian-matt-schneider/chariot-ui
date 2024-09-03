@@ -46,10 +46,11 @@ install_mkcert() {
 show_step_result() {
     local status=$1
     local step=$2
+    local pad=$(printf '%0.1s' " "{1..80})  # Padding to clear the line
     if [ "$status" == "OK" ]; then
-        echo -e "\033[1;32m[ OK ]\033[0m $step"
+        echo -e "\033[1;32m[ OK ]\033[0m $step${pad:0:$((${#step}+7))}\r"
     elif [ "$status" == "SKIP" ]; then
-        echo -e "\033[1;33m[ SKIP ]\033[0m $step"
+        echo -e "\033[1;33m[ SKIP ]\033[0m $step${pad:0:$((${#step}+9))}\r"
     elif [ "$status" == "RUNNING" ]; then
         echo -ne "\033[1;34m[ RUNNING ]\033[0m $step...\r"
     else
@@ -115,14 +116,18 @@ else
     show_step_result "SKIP" "mkcert installation"
 fi
 
-# Step 7: Install dependencies
-show_step_result "RUNNING" "npm dependencies installation"
+# Step 7: Switch to the next-release branch
+show_step_result "RUNNING" "Switching to the next-release branch"
+git checkout next-release >/dev/null 2>&1
+git pull origin next-release >/dev/null 2>&1
+show_step_result "OK" "Switching to the next-release branch"
 
-git switch Axios-refactor >/dev/null 2>&1
+# Step 8: Install dependencies
+show_step_result "RUNNING" "npm dependencies installation"
 npm install >/dev/null 2>&1
 show_step_result "OK" "npm dependencies installation"
 
-# Step 8: Set up HTTPS certificates
+# Step 9: Set up HTTPS certificates
 show_step_result "RUNNING" "HTTPS certificates setup"
 mkdir -p certs && cd certs
 mkcert create-ca >/dev/null 2>&1
@@ -130,6 +135,6 @@ mkcert create-cert >/dev/null 2>&1
 cd ..
 show_step_result "OK" "HTTPS certificates setup"
 
-# Step 9: Start the development server
+# Step 10: Start the development server
 show_step_result "RUNNING" "Development server start"
 npm start 

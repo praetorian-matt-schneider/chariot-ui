@@ -98,10 +98,10 @@ export const GettingStarted: React.FC<{
           <div className="m-auto flex w-full flex-col items-center rounded-lg border-2 border-dashed border-header-dark bg-header p-8 text-center">
             <ExclamationTriangleIcon className="mb-2 size-12 text-yellow-500" />
             <h2 className="text-xl font-bold text-header-light">
-              Uh oh, You are out of Space
+              Uh oh, you are out of space
             </h2>
             <p className="text-sm text-default-light">
-              {`Your current plan only allows up to ${total} assets. But don't worry, we got a plan for you.`}
+              {`Your current plan allows up to ${total} assets. But don't worry, we've got a plan for you.`}
             </p>
             <Button
               styleType="primary"
