@@ -536,6 +536,7 @@ const Assets: React.FC = () => {
                       }
                     );
                   });
+                  closeCTADrawer();
                 }}
               >
                 Apply Default Policy
