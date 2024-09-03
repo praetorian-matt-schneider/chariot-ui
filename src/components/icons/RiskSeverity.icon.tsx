@@ -53,6 +53,11 @@ export const getSeverityButton = (severity: RiskSeverity) => {
     [RiskSeverity.Info]: 'bg-gray-100',
   };
 
+  // If severity is not present in RiskSeverity
+  if (!Object.values(RiskSeverity).includes(severity as RiskSeverity)) {
+    return null;
+  }
+
   return (
     <div
       className={cn(
