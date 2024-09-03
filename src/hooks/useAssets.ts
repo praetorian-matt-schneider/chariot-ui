@@ -140,6 +140,7 @@ export const useCreateAsset = () => {
 
   return useMutation<Asset, Error, Pick<Asset, 'name' | 'status'>>({
     defaultErrorMessage: `Failed to add asset`,
+    getErrorFromResponse: true,
     mutationFn: async asset => {
       const promise = axios.post(`/asset`, {
         dns: asset.name,
@@ -150,7 +151,6 @@ export const useCreateAsset = () => {
       toast.promise(promise, {
         loading: 'Adding asset',
         success: `Added ${asset.name}`,
-        error: 'Failed to add asset',
       });
 
       const { data } = await promise;
@@ -160,6 +160,11 @@ export const useCreateAsset = () => {
       invalidateCounts();
 
       return data;
+    },
+    onError: error => {
+      toast.error('Failed to add asset', {
+        description: `${error.name}. ${error.message}`,
+      });
     },
   });
 };
