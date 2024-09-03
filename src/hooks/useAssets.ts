@@ -142,7 +142,7 @@ export const useCreateAsset = () => {
     defaultErrorMessage: `Failed to add asset`,
     getErrorFromResponse: true,
     mutationFn: async asset => {
-      const promise = axios.post(`/asset`, {
+      const promise = axios.put(`/asset`, {
         dns: asset.name,
         name: asset.name,
         status: asset.status || AssetStatus.Active,
@@ -191,7 +191,7 @@ export const useBulkAddAsset = () => {
       const promise = Promise.all<Asset>(
         assets
           .map(async asset => {
-            const { data } = await axios.post<Asset[]>(`/asset`, {
+            const { data } = await axios.put<Asset[]>(`/asset`, {
               dns: asset.name,
               name: asset.name,
               status: asset.status || AssetStatus.Active,
