@@ -25,7 +25,6 @@ import { RisksIcon } from '@/components/icons';
 import { getAssetStatusIcon } from '@/components/icons/AssetStatus.icon';
 import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
 import { Loader } from '@/components/Loader';
-import { Modal } from '@/components/Modal';
 import { Table } from '@/components/table/Table';
 import { Columns, TableActions, TableProps } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
@@ -435,7 +434,6 @@ const Assets: React.FC = () => {
   }, [alerts]);
 
   const [isCTAOpen, setIsCTAOpen] = useState<boolean>(false);
-  const [isPolicyOpen, setIsPolicyOpen] = useState<boolean>(false);
   const [selectedConditions] = useState([]);
 
   const closeCTADrawer = () => {
@@ -527,7 +525,18 @@ const Assets: React.FC = () => {
               <Button
                 styleType="primary"
                 className="-translate-x-2 text-sm font-semibold"
-                onClick={() => setIsPolicyOpen(true)}
+                onClick={() => {
+                  Object.keys(conditions).forEach(key => {
+                    conditions[key as keyof typeof conditions].forEach(
+                      value => {
+                        addAlert({
+                          value,
+                          name: `Assets with a ${key} value of ${value} identified`,
+                        });
+                      }
+                    );
+                  });
+                }}
               >
                 Apply Default Policy
               </Button>
@@ -660,69 +669,6 @@ const Assets: React.FC = () => {
           }
         }}
       />
-      <Modal
-        open={isPolicyOpen}
-        onClose={() => setIsPolicyOpen(false)}
-        title="Default Policy"
-        footer={{
-          text: 'Apply',
-          onClick: async () => {
-            // Apply the customizations
-            setIsPolicyOpen(false);
-            Object.keys(conditions).forEach(key => {
-              conditions[key as keyof typeof conditions].forEach(value => {
-                addAlert({
-                  value,
-                  name: `Assets with a ${key} value of ${value} identified`,
-                });
-              });
-            });
-          },
-          styleType: 'primary',
-        }}
-      >
-        <div className="space-y-4">
-          <p className="text-sm text-gray-600">
-            Adjust the default conditions used to evaluate exposure risk.
-          </p>
-
-          <form className="space-y-4">
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-800">
-                Ports
-              </label>
-              <textarea
-                className="w-full resize-none rounded-sm border border-gray-300 p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                rows={2}
-                value={conditions.ports.join(', ')}
-                onChange={e =>
-                  setConditions({
-                    ...conditions,
-                    ports: e.target.value.split(',').map(p => p.trim()),
-                  })
-                }
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-800">
-                Protocols
-              </label>
-              <textarea
-                className="w-full resize-none rounded-sm border border-gray-300 p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                rows={2}
-                value={conditions.protocols.join(', ')}
-                onChange={e =>
-                  setConditions({
-                    ...conditions,
-                    protocols: e.target.value.split(',').map(p => p.trim()),
-                  })
-                }
-              />
-            </div>
-          </form>
-        </div>
-      </Modal>
     </>
   );
 };
