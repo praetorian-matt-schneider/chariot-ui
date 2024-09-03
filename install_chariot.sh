@@ -46,12 +46,13 @@ install_mkcert() {
 show_step_result() {
     local status=$1
     local step=$2
+    local pad=$(printf '%0.1s' " "{1..80})  # Padding to clear the line
     if [ "$status" == "OK" ]; then
-        echo -ne "\033[1;32m[ OK ]\033[0m $step\033[K\r"
+        echo -e "\033[1;32m[ OK ]\033[0m $step${pad:0:$((${#step}+7))}\r"
     elif [ "$status" == "SKIP" ]; then
-        echo -ne "\033[1;33m[ SKIP ]\033[0m $step\033[K\r"
+        echo -e "\033[1;33m[ SKIP ]\033[0m $step${pad:0:$((${#step}+9))}\r"
     elif [ "$status" == "RUNNING" ]; then
-        echo -ne "\033[1;34m[ RUNNING ]\033[0m $step...\033[K\r"
+        echo -ne "\033[1;34m[ RUNNING ]\033[0m $step...\r"
     else
         echo -e "\033[1;31m[FAILED]\033[0m $step"
         exit 1
