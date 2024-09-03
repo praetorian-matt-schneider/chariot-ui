@@ -107,7 +107,9 @@ export function Table<TData>(props: TableProps<TData>) {
     status,
   ]);
 
-  const parentRef = document.getElementById(isTableView ? 'body' : 'localBody');
+  const parentRef = document.getElementById(
+    isTableView ? 'body' : `localBody-${tableName}`
+  );
 
   useScroll(parentRef, fetchNextPage);
 
@@ -299,7 +301,7 @@ export function Table<TData>(props: TableProps<TData>) {
   }, [JSON.stringify({ selectedRows, rawData }), bulkActions]);
 
   return (
-    <div id="localBody">
+    <div id={`localBody-${tableName}`}>
       {(bodyHeader || parsedActions || parsedPrimaryAction) && (
         <RenderHeaderExtraContentSection>
           <div className=" flex flex-col justify-between gap-4 lg:flex-row">
