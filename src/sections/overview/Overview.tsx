@@ -471,7 +471,7 @@ export const Overview: React.FC = () => {
                                   [
                                     'jobsFilters',
                                     JSON.stringify({
-                                      search: `#${row.id}`,
+                                      search: `#${row.id}#`,
                                       status: job.failedJobsCount
                                         ? JobStatus.Fail
                                         : job.status,
