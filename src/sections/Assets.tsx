@@ -130,7 +130,7 @@ const Assets: React.FC = () => {
     resource: 'account',
   });
 
-  const [conditions, setConditions] = useState(DEFAULT_CONDITIONS);
+  const [conditions] = useState(DEFAULT_CONDITIONS);
 
   const integratedAttackSurface = useMemo(() => {
     return [
@@ -150,6 +150,8 @@ const Assets: React.FC = () => {
   }, [JSON.stringify(accounts)]);
 
   const { mutateAsync: bulkReRunJob } = useBulkReRunJob();
+  const { mutateAsync: addAlert } = useAddAlert();
+  const { mutateAsync: removeAlert } = useRemoveAlert();
 
   const { getAssetDrawerLink } = getDrawerLink();
   const {
@@ -1031,10 +1033,7 @@ export function FancyTable(
       <div className={cn('flex w-full flex-col bg-white')}>
         <div
           ref={rightStickyRef}
-          className={cn(
-            'sticky flex min-h-14 items-center bg-white px-4',
-            className
-          )}
+          className={cn('sticky flex min-h-14 items-center bg-white px-4')}
           style={{
             top: headerHeight,
             zIndex: 1,

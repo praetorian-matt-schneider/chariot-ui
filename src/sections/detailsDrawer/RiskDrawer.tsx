@@ -29,6 +29,7 @@ import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useBulkReRunJob, useJobsStatus } from '@/hooks/useJobs';
 import { useReportRisk, useUpdateRisk } from '@/hooks/useRisks';
 import { AlertAction } from '@/sections/Alerts';
+import { ResponsiveGrid } from '@/sections/detailsDrawer/AssetDrawer';
 import { Comment } from '@/sections/detailsDrawer/Comment';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { getStatusColor } from '@/sections/Jobs';
@@ -230,215 +231,219 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
       className={'w-full rounded-t-lg pb-0 shadow-lg'}
     >
       <Loader isLoading={isInitialLoading} type="spinner">
-        <div className="flex size-full">
-          <div className="shrink-0 basis-1/4" style={{ width: width / 4 }}>
-            <History history={history}>
-              <Comment
-                risk={risk}
-                isLoading={isRiskFetching}
-                onSave={handleUpdateComment}
-              />
-            </History>
-          </div>
-
-          <div
-            className="h-full flex-1 border-x border-gray-300 px-9 py-5"
-            style={{ width: width / 2 }}
-          >
-            <div className="mb-8 flex items-start justify-between gap-4">
-              <div className="flex w-2/3 flex-col gap-2">
-                <div className="flex items-center gap-4">
-                  <h1
-                    className="text-2xl font-bold"
-                    style={{ wordBreak: 'break-word' }}
-                  >
-                    {risk.name}
-                  </h1>
-                  {knownExploitedThreats.includes(risk.name) && (
-                    <span className="text-red-500">
-                      [Known Exploited Threat]
-                    </span>
-                  )}
-                  <JobStatusBadge
-                    status={jobsStatus}
-                    lastScan={formatDate(lastScan)}
-                  />
-                </div>
-
-                {/* Actions Section */}
-                <div className="flex flex-row gap-3">
-                  <AlertAction
-                    item={risk}
-                    handleRefetch={() => {
-                      invalidateRiskData();
-                    }}
-                  />
-                  <Tooltip
-                    placement="top"
-                    title={
-                      isInitialLoading
-                        ? ''
-                        : risk.source && !isManualORPRrovidedRisk(risk)
-                          ? isJobsRunning
-                            ? 'Scanning in progress'
-                            : sourceKeys.length === 0
-                              ? 'On-demand scanning is only available for risk which have a source attribute'
-                              : 'Revalidate the risk'
-                          : 'On-demand scanning is only available for automated risk discovery.'
-                    }
-                  >
-                    <Button
-                      className="h-8 text-nowrap border border-gray-400 text-xs"
-                      startIcon={<ArrowPathIcon className="size-4" />}
-                      disabled={
-                        isInitialLoading ||
-                        sourceKeys.length === 0 ||
-                        isManualORPRrovidedRisk(risk) ||
-                        Boolean(isJobsRunning)
-                      }
-                      isLoading={
-                        reRunJobStatus === 'pending' ||
-                        allAssetJobsStatus === 'pending'
-                      }
-                      onClick={async () => {
-                        const [response] = await bulkReRunJobs(
-                          sourceKeys.map(jobKey => ({
-                            capability: risk.source,
-                            jobKey,
-                            config: {
-                              test: risk.name,
-                            },
-                          }))
-                        );
-                        setRiskJobsMap(riskJobsMap => ({
-                          ...riskJobsMap,
-                          [risk.key]: sourceKeys.reduce(
-                            (acc, current, index) =>
-                              response[index]?.key
-                                ? {
-                                    ...acc,
-                                    [current]: response[index].key,
-                                  }
-                                : acc,
-                            {}
-                          ),
-                        }));
-                      }}
-                    >
-                      Scan Now
-                    </Button>
-                  </Tooltip>
-                </div>
-              </div>
-              <RiskDetails risk={risk} />
+        <ResponsiveGrid
+          section1={
+            <div className="shrink-0 basis-1/4" style={{ width: width / 4 }}>
+              <History history={history}>
+                <Comment
+                  risk={risk}
+                  isLoading={isRiskFetching}
+                  onSave={handleUpdateComment}
+                />
+              </History>
             </div>
-
-            {/* POE and Description */}
-            <Tabs
-              tabs={[
-                {
-                  label: 'Description & Remediation',
-                  id: 'description',
-                  tabClassName: 'bg-transparent',
-                  Content: () => (
-                    <Loader
-                      isLoading={
-                        isDefinitionsFileFetching ||
-                        reportRiskStatus === 'pending'
-                      }
-                      className="h-6 bg-layer0"
+          }
+          section2={
+            <div
+              className="h-full flex-1 border-x border-gray-300 px-9 py-5"
+              style={{ width: width / 2 }}
+            >
+              <div className="mb-8 flex items-start justify-between gap-4">
+                <div className="flex w-2/3 flex-col gap-2">
+                  <div className="flex items-center gap-4">
+                    <h1
+                      className="text-2xl font-bold"
+                      style={{ wordBreak: 'break-word' }}
                     >
-                      <Modal
-                        size="6xl"
-                        open={isEditingMarkdown}
-                        onClose={() => setIsEditingMarkdown(false)}
-                        title="Description & Remediation"
-                        footer={{
-                          text: 'Save',
-                          isLoading: updateFileStatus === 'pending',
-                          onClick: async () => {
-                            await updateFile({
-                              ignoreSnackbar: true,
-                              name: `definitions/${name}`,
-                              content: markdownValue,
-                            });
-                            setIsEditingMarkdown(false);
-                          },
-                        }}
-                      >
-                        <div className="h-[60vh]">
-                          <MarkdownEditor
-                            value={markdownValue}
-                            onChange={value => setMarkdownValue(value || '')}
-                            filePathPrefix="definitions/files"
-                          />
-                        </div>
-                      </Modal>
-                      {definitionsFile ? (
-                        <MarkdownPreview
-                          source={definitionsFileValue}
-                          style={{
-                            padding: '0.75rem',
-                            wordBreak: 'break-word',
-                            minHeight: '20px',
-                          }}
-                        />
-                      ) : (
-                        <div className="my-8 flex size-full flex-1 flex-col items-center justify-center text-center text-default">
-                          <UnionIcon className="mt-8 size-16 text-default-light" />
-                          <p className="mt-7 text-lg font-bold">
-                            Generate Description & Remediation
-                          </p>
-                          <p className="mt-2">
-                            Add a Description & Remediation to this Risk
-                            <br />
-                            {`using Praetorian's Machine Learning.`}
-                          </p>
-                          <Button
-                            className="mt-10"
-                            startIcon={
-                              <UnionIcon className="size-3 text-brand-light" />
-                            }
-                            styleType="primary"
-                            onClick={() => reportRisk({ name })}
-                          >
-                            Generate Now
-                          </Button>
-                        </div>
-                      )}
-                      <Button
-                        styleType="none"
-                        className="mr-auto mt-4 pl-0 font-bold"
-                        endIcon={<PencilSquareIcon className="size-5" />}
-                        onClick={event => {
-                          event.preventDefault();
-                          event.stopPropagation();
-                          setIsEditingMarkdown(true);
-                        }}
-                      >
-                        Edit
-                      </Button>
-                    </Loader>
-                  ),
-                },
-                {
-                  label: 'Proof of Exploits',
-                  id: 'poe',
-                  tabClassName: 'bg-transparent',
-                  Content: () => <POE risk={risk} />,
-                },
-              ]}
-              defaultValue={'description'}
-              value={selectedTab}
-              onChange={setSelectedTab}
-              styleType="horizontal"
-            />
-          </div>
+                      {risk.name}
+                    </h1>
+                    {knownExploitedThreats.includes(risk.name) && (
+                      <span className="text-red-500">
+                        [Known Exploited Threat]
+                      </span>
+                    )}
+                    <JobStatusBadge
+                      status={jobsStatus}
+                      lastScan={formatDate(lastScan)}
+                    />
+                  </div>
 
-          <div className="shrink-0 basis-1/4" style={{ width: width / 4 }}>
-            <AffectedAssets assets={assetsOnRisk} />
-          </div>
-        </div>
+                  {/* Actions Section */}
+                  <div className="flex flex-row gap-3">
+                    <AlertAction
+                      item={risk}
+                      handleRefetch={() => {
+                        invalidateRiskData();
+                      }}
+                    />
+                    <Tooltip
+                      placement="top"
+                      title={
+                        isInitialLoading
+                          ? ''
+                          : risk.source && !isManualORPRrovidedRisk(risk)
+                            ? isJobsRunning
+                              ? 'Scanning in progress'
+                              : sourceKeys.length === 0
+                                ? 'On-demand scanning is only available for risk which have a source attribute'
+                                : 'Revalidate the risk'
+                            : 'On-demand scanning is only available for automated risk discovery.'
+                      }
+                    >
+                      <Button
+                        className="h-8 text-nowrap border border-gray-400 text-xs"
+                        startIcon={<ArrowPathIcon className="size-4" />}
+                        disabled={
+                          isInitialLoading ||
+                          sourceKeys.length === 0 ||
+                          isManualORPRrovidedRisk(risk) ||
+                          Boolean(isJobsRunning)
+                        }
+                        isLoading={
+                          reRunJobStatus === 'pending' ||
+                          allAssetJobsStatus === 'pending'
+                        }
+                        onClick={async () => {
+                          const [response] = await bulkReRunJobs(
+                            sourceKeys.map(jobKey => ({
+                              capability: risk.source,
+                              jobKey,
+                              config: {
+                                test: risk.name,
+                              },
+                            }))
+                          );
+                          setRiskJobsMap(riskJobsMap => ({
+                            ...riskJobsMap,
+                            [risk.key]: sourceKeys.reduce(
+                              (acc, current, index) =>
+                                response[index]?.key
+                                  ? {
+                                      ...acc,
+                                      [current]: response[index].key,
+                                    }
+                                  : acc,
+                              {}
+                            ),
+                          }));
+                        }}
+                      >
+                        Scan Now
+                      </Button>
+                    </Tooltip>
+                  </div>
+                </div>
+                <RiskDetails risk={risk} />
+              </div>
+
+              {/* POE and Description */}
+              <Tabs
+                tabs={[
+                  {
+                    label: 'Description & Remediation',
+                    id: 'description',
+                    tabClassName: 'bg-transparent',
+                    Content: () => (
+                      <Loader
+                        isLoading={
+                          isDefinitionsFileFetching ||
+                          reportRiskStatus === 'pending'
+                        }
+                        className="h-6 bg-layer0"
+                      >
+                        <Modal
+                          size="6xl"
+                          open={isEditingMarkdown}
+                          onClose={() => setIsEditingMarkdown(false)}
+                          title="Description & Remediation"
+                          footer={{
+                            text: 'Save',
+                            isLoading: updateFileStatus === 'pending',
+                            onClick: async () => {
+                              await updateFile({
+                                ignoreSnackbar: true,
+                                name: `definitions/${name}`,
+                                content: markdownValue,
+                              });
+                              setIsEditingMarkdown(false);
+                            },
+                          }}
+                        >
+                          <div className="h-[60vh]">
+                            <MarkdownEditor
+                              value={markdownValue}
+                              onChange={value => setMarkdownValue(value || '')}
+                              filePathPrefix="definitions/files"
+                            />
+                          </div>
+                        </Modal>
+                        {definitionsFile ? (
+                          <MarkdownPreview
+                            source={definitionsFileValue}
+                            style={{
+                              padding: '0.75rem',
+                              wordBreak: 'break-word',
+                              minHeight: '20px',
+                            }}
+                          />
+                        ) : (
+                          <div className="my-8 flex size-full flex-1 flex-col items-center justify-center text-center text-default">
+                            <UnionIcon className="mt-8 size-16 text-default-light" />
+                            <p className="mt-7 text-lg font-bold">
+                              Generate Description & Remediation
+                            </p>
+                            <p className="mt-2">
+                              Add a Description & Remediation to this Risk
+                              <br />
+                              {`using Praetorian's Machine Learning.`}
+                            </p>
+                            <Button
+                              className="mt-10"
+                              startIcon={
+                                <UnionIcon className="size-3 text-brand-light" />
+                              }
+                              styleType="primary"
+                              onClick={() => reportRisk({ name })}
+                            >
+                              Generate Now
+                            </Button>
+                          </div>
+                        )}
+                        <Button
+                          styleType="none"
+                          className="mr-auto mt-4 pl-0 font-bold"
+                          endIcon={<PencilSquareIcon className="size-5" />}
+                          onClick={event => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            setIsEditingMarkdown(true);
+                          }}
+                        >
+                          Edit
+                        </Button>
+                      </Loader>
+                    ),
+                  },
+                  {
+                    label: 'Proof of Exploits',
+                    id: 'poe',
+                    tabClassName: 'bg-transparent',
+                    Content: () => <POE risk={risk} />,
+                  },
+                ]}
+                defaultValue={'description'}
+                value={selectedTab}
+                onChange={setSelectedTab}
+                styleType="horizontal"
+              />
+            </div>
+          }
+          section3={
+            <div className="shrink-0 basis-1/4" style={{ width: width / 4 }}>
+              <AffectedAssets assets={assetsOnRisk} />
+            </div>
+          }
+        />
       </Loader>
     </Drawer>
   );

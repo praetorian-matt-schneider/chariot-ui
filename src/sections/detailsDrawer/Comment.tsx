@@ -72,8 +72,6 @@ export const Comment: React.FC<Props> = ({ risk, onSave }: Props) => {
     }
   };
 
-  console.log(status, severity);
-
   const isUpdated = isSeverityChanged || isStatusChanged || Boolean(value);
 
   function handleDeleteRisk() {
