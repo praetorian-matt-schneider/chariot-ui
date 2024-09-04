@@ -63,7 +63,7 @@ const isScannable = (attribute: Attribute) =>
 
 export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
   const navigate = useNavigate();
-  const [selectedTab, setSelectedTab] = useState('poe');
+  const [selectedTab, setSelectedTab] = useState('description');
   const { removeSearchParams } = useSearchParams();
   const [riskJobsMap, setRiskJobsMap] = useStorage<
     Record<string, Record<string, string>>
@@ -344,12 +344,6 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
             <Tabs
               tabs={[
                 {
-                  label: 'Proof of Exploits',
-                  id: 'poe',
-                  tabClassName: 'bg-transparent',
-                  Content: () => <POE risk={risk} />,
-                },
-                {
                   label: 'Description & Remediation',
                   id: 'description',
                   tabClassName: 'bg-transparent',
@@ -434,8 +428,14 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                     </Loader>
                   ),
                 },
+                {
+                  label: 'Proof of Exploits',
+                  id: 'poe',
+                  tabClassName: 'bg-transparent',
+                  Content: () => <POE risk={risk} />,
+                },
               ]}
-              defaultValue={'poe'}
+              defaultValue={'description'}
               value={selectedTab}
               onChange={setSelectedTab}
               styleType="horizontal"
