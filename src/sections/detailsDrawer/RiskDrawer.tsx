@@ -77,6 +77,12 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
   const [, dns, name] = compositeKey.split('#');
   const attributesFilter = `source:#risk#${dns}#${name}`;
 
+  const { searchParams } = useSearchParams();
+  const riskQuery = searchParams.get(StorageKey.RISK_QUERY) || '';
+  const { invalidate: invalidateRiskData } = useGenericSearch({
+    query: riskQuery,
+  });
+
   const [isEditingMarkdown, setIsEditingMarkdown] = useState(false);
   const [markdownValue, setMarkdownValue] = useState('');
   const { mutateAsync: bulkReRunJobs, status: reRunJobStatus } =
@@ -263,7 +269,9 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                 <div className="flex flex-row gap-3">
                   <AlertAction
                     item={risk}
-                    handleRefetch={() => location.reload()}
+                    handleRefetch={() => {
+                      invalidateRiskData();
+                    }}
                   />
                   <Tooltip
                     placement="top"

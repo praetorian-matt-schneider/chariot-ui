@@ -87,57 +87,60 @@ export const Comment: React.FC<Props> = ({ risk, onSave }: Props) => {
         'transition-all rounded-sm mt-4 bg-gray-100 p-4 cursor-pointer'
       )}
     >
-      <div className="mb-4 flex items-start gap-3">
-        {/* Severity */}
-        <Dropdown
-          className={cn(
-            `border-1 min-w-28 justify-between rounded-[2px] border border-default py-1 pr-2`,
-            getSeverityClass(severity)
-          )}
-          menu={{
-            items: riskSeverityOptions,
-            onClick: value => {
-              if (value) {
-                setSeverity(value as RiskSeverity);
-              }
-            },
-          }}
-          startIcon={
-            riskSeverityOptions.find(option => option.value === riskSeverityKey)
-              ?.icon
-          }
-          endIcon={<ChevronDownIcon className="size-3 text-default-light" />}
-          onClick={event => event.stopPropagation()}
-        >
-          <div className="flex-1 text-left">{severityLabel}</div>
-        </Dropdown>
-        {/* Status */}
-        <Dropdown
-          className={cn(
-            `border-1 min-w-28 justify-between rounded-[2px] border border-default py-1 pr-2`
-          )}
-          menu={{
-            items: riskStatusOptions,
-            onClick: value => {
-              if (value) {
-                if (value === RiskStatus.Remediated) {
-                  setIsClosedSubStateModalOpen(true);
-                } else {
-                  setStatus(value as RiskStatus);
+      {risk.status !== RiskStatus.ExposedRisks && (
+        <div className="mb-4 flex items-start gap-3">
+          {/* Severity */}
+          <Dropdown
+            className={cn(
+              `border-1 min-w-28 justify-between rounded-[2px] border border-default py-1 pr-2`,
+              getSeverityClass(severity)
+            )}
+            menu={{
+              items: riskSeverityOptions,
+              onClick: value => {
+                if (value) {
+                  setSeverity(value as RiskSeverity);
                 }
-              }
-            },
-          }}
-          startIcon={
-            riskStatusOptions.find(option => option.value === riskStatusKey)
-              ?.icon ?? <LockClosedIcon className="size-4 stroke-2" />
-          }
-          endIcon={<ChevronDownIcon className="size-3 text-default-light" />}
-          onClick={event => event.stopPropagation()}
-        >
-          <div className="flex-1 text-left">{statusLabel}</div>
-        </Dropdown>
-      </div>
+              },
+            }}
+            startIcon={
+              riskSeverityOptions.find(
+                option => option.value === riskSeverityKey
+              )?.icon
+            }
+            endIcon={<ChevronDownIcon className="size-3 text-default-light" />}
+            onClick={event => event.stopPropagation()}
+          >
+            <div className="flex-1 text-left">{severityLabel}</div>
+          </Dropdown>
+          {/* Status */}
+          <Dropdown
+            className={cn(
+              `border-1 min-w-28 justify-between rounded-[2px] border border-default py-1 pr-2`
+            )}
+            menu={{
+              items: riskStatusOptions,
+              onClick: value => {
+                if (value) {
+                  if (value === RiskStatus.Remediated) {
+                    setIsClosedSubStateModalOpen(true);
+                  } else {
+                    setStatus(value as RiskStatus);
+                  }
+                }
+              },
+            }}
+            startIcon={
+              riskStatusOptions.find(option => option.value === riskStatusKey)
+                ?.icon ?? <LockClosedIcon className="size-4 stroke-2" />
+            }
+            endIcon={<ChevronDownIcon className="size-3 text-default-light" />}
+            onClick={event => event.stopPropagation()}
+          >
+            <div className="flex-1 text-left">{statusLabel}</div>
+          </Dropdown>
+        </div>
+      )}
       <ClosedStateModal
         isOpen={isClosedSubStateModalOpen}
         onClose={() => setIsClosedSubStateModalOpen(false)}

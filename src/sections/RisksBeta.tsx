@@ -26,7 +26,7 @@ import { Risk, RiskFilters, RiskStatusLabel, SeverityDef } from '@/types';
 import { getRiskSeverity, getRiskStatus } from '@/utils/riskStatus.util';
 import { useQueryFilters } from '@/utils/storage/useQueryParams.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
-import { generatePathWithSearch } from '@/utils/url.util';
+import { generatePathWithSearch, useSearchParams } from '@/utils/url.util';
 
 const RisksBeta: React.FC = () => {
   const {
@@ -42,6 +42,7 @@ const RisksBeta: React.FC = () => {
       exposureRisk: '',
     },
   });
+  const { addSearchParams } = useSearchParams();
 
   const [isCTAOpen, setIsCTAOpen] = useState<boolean>(false);
   const closeCTADrawer = () => {
@@ -98,6 +99,23 @@ const RisksBeta: React.FC = () => {
     );
   }, [JSON.stringify({ conditions })]);
 
+  const exposureRiskQuery = useMemo(() => {
+    if (filters.exposureRisk) {
+      const alertName = (alerts || []).find(
+        alert => alert.value === filters.exposureRisk
+      )?.name;
+      return `name:${alertName}`;
+    }
+    return '';
+  }, [filters.exposureRisk, JSON.stringify({ alerts })]);
+
+  const query = filters.search || filters.alert || exposureRiskQuery || '';
+
+  // Add query to the URL
+  useEffect(() => {
+    addSearchParams(StorageKey.RISK_QUERY, query);
+  }, [query]);
+
   // Add default filter if none is selected
   useEffect(() => {
     if (!filters.search && !filters.alert && !filters.exposureRisk) {
@@ -121,20 +139,7 @@ const RisksBeta: React.FC = () => {
 
   function refetch() {
     refetchConditions();
-    setFilters({ search: '', alert: '', exposureRisk: '' });
   }
-
-  const exposureRiskQuery = useMemo(() => {
-    if (filters.exposureRisk) {
-      const alertName = (alerts || []).find(
-        alert => alert.value === filters.exposureRisk
-      )?.name;
-      return `name:${alertName}`;
-    }
-    return '';
-  }, [filters.exposureRisk, JSON.stringify({ alerts })]);
-
-  const query = filters.search || filters.alert || exposureRiskQuery || '';
 
   const columns: Columns<Risk> = useMemo(
     () => [
@@ -293,7 +298,7 @@ const RisksBeta: React.FC = () => {
                   {
                     label: 'Exposure Risks',
                     options: exposureRiskOptions,
-                    showCount: true,
+                    showCount: false,
                   },
                 ]}
                 alert={{
