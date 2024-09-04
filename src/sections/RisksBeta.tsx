@@ -330,22 +330,21 @@ const RisksBeta: React.FC = () => {
         className={'w-full rounded-t-sm bg-zinc-100 p-0 shadow-lg'}
         skipBack={true}
       >
-        <div className="mx-12 mt-6 pb-10">
+        <div className="mx-12 mt-6">
           <div className="flex w-full flex-row items-center justify-between">
             <h1 className="mb-4 text-4xl font-extrabold">Remediated Risks</h1>
           </div>
-          <div className="flex w-full flex-col items-start">
-            <Table
-              name={'remediated'}
-              resize={true}
-              columns={columns}
-              data={risksGeneric?.risks || []}
-              status={risksStatus}
-              error={risksError}
-              isFetchingNextPage={isFetchingNextPage}
-              fetchNextPage={fetchNextPage}
-            />
-          </div>
+          <Table
+            name={'remediated-risks'}
+            resize={true}
+            isTableView
+            columns={columns}
+            data={risksGeneric?.risks || []}
+            status={risksStatus}
+            error={risksError}
+            isFetchingNextPage={isFetchingNextPage}
+            fetchNextPage={fetchNextPage}
+          />
         </div>
       </Drawer>
     </>
