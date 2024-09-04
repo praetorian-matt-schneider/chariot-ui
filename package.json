@@ -45,6 +45,7 @@
   "scripts": {
     "start": "vite",
     "build": "tsc && vite build",
+    "next": "git tag -d next-release && git push origin :refs/tags/next-release && git tag next-release && git push origin next-release",
     "lint": "npm run ts:check && npm run prettier:fix && npm run eslint:fix",
     "serve": "vite preview",
     "prettier": "prettier . --config .prettierrc.json --check",
