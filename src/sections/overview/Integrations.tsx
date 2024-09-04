@@ -47,7 +47,7 @@ const NessusInstructions = () => {
 const AWSInstructions = () => {
   const { me, friend } = useAuth();
   const template =
-    'https://s3.us-east-2.amazonaws.com/preview.chariot.praetorian.com/templates/aws-permissions-template.yaml';
+    'https://s3.us-east-2.amazonaws.com/chariot.praetorian.com/templates/aws-permissions-template.yaml';
   const url = `https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=${template}&param_ExternalId=${friend || me}&stackName=Chariot`;
   return (
     <div>

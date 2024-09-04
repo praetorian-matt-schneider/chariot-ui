@@ -10,7 +10,7 @@
 [![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/praetorian-inc/chariot-ui/issues)
 
 :book: [Documentation](https://docs.praetorian.com)
-:link: [Chariot Platform](https://preview.chariot.praetorian.com)
+:link: [Chariot Platform](https://chariot.praetorian.com)
 :computer: [Praetorian CLI](https://github.com/praetorian-inc/praetorian-cli)
 
 ## Table of Contents

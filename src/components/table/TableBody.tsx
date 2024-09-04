@@ -36,6 +36,7 @@ interface TableBodyProps<TData> {
   expandedGroups: string[];
   toggleExpandedGroup: (group?: string) => void;
   groupBy?: TableProps<TData>['groupBy'];
+  rowClassName?: (rowData: TData) => string;
 }
 
 export function TableBody<TData>(props: TableBodyProps<TData>) {
@@ -54,6 +55,7 @@ export function TableBody<TData>(props: TableBodyProps<TData>) {
     isClickable,
     expandedGroups,
     toggleExpandedGroup,
+    rowClassName,
   } = props;
 
   const isFirstRow = rowIndex === 0;
@@ -96,7 +98,8 @@ export function TableBody<TData>(props: TableBodyProps<TData>) {
       }}
       className={cn(
         isChecked && 'bg-highlight/10',
-        isClickable && `cursor-pointer`
+        isClickable && `cursor-pointer`,
+        rowClassName && rowClassName(rowData)
       )}
       onClick={event => {
         event.preventDefault();
