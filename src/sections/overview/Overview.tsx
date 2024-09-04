@@ -465,10 +465,13 @@ export const Overview: React.FC = () => {
 
             <div>
               <Table
-                tableClassName="bg-header border-0 [&_thead_tr]:bg-header [&_tbody_tr:nth-child(odd)]:bg-header-dark [&_tr_td]:text-layer0 [&__tr_td_div:first]:border-t-4 [&_td_div]:border-header-dark [&_th_div]:border-0"
+                tableClassName="bg-header border-0 [&_thead_tr]:bg-header [&_tr_td]:text-layer0 [&__tr_td_div:first]:border-t-4 [&_td_div]:border-header-dark [&_th_div]:border-0"
                 name="attack-surface"
                 status="success"
                 error={null}
+                rowClassName={row => {
+                  return row.identifier === 'Provided' ? 'bg-header-dark' : '';
+                }}
                 columns={[
                   {
                     label: 'Status',
