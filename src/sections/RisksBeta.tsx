@@ -90,10 +90,10 @@ const RisksBeta: React.FC = () => {
     //   ({ count }) => count > 0
     // );
     return (
-      conditions.map(({ count, name, value }) => ({
+      conditions.map(({ name, value }) => ({
         label: name,
         value,
-        count: (count || 0).toLocaleString(),
+        count: '',
       })) || []
     );
   }, [JSON.stringify({ conditions })]);
