@@ -28,6 +28,8 @@ import {
 import { cn } from '@/utils/classname';
 import { formatDate } from '@/utils/date.util';
 import { getRiskSeverity, getRiskStatus } from '@/utils/riskStatus.util';
+import { StorageKey } from '@/utils/storage/useStorage.util';
+import { useSearchParams as useSearchParamsUtil } from '@/utils/url.util';
 
 type AlertType = Asset | Risk | Attribute;
 
@@ -58,11 +60,6 @@ export const Alerts: React.FC<Props> = ({
   refetch,
   unsubscribeAlert,
 }: Props) => {
-  const [isClosedSubStateModalOpen, setIsClosedSubStateModalOpen] =
-    useState(false);
-  const [selectedItem, setSelectedItem] = useState<Risk | null>(null);
-
-  const { mutateAsync: reRunJob, status: reRunJobStatus } = useReRunJob();
   const { data: alertsWithUpdatedQueries, refetch: refetchAlerts } =
     useGetAccountAlerts();
   const { getRiskDrawerLink, getAssetDrawerLink } = getDrawerLink();
@@ -76,11 +73,6 @@ export const Alerts: React.FC<Props> = ({
       ? `name:${alert.name}`
       : alert.value,
   }));
-
-  const { mutateAsync: updateAsset, status: updateAssetStatus } =
-    useUpdateAsset();
-  const { mutateAsync: updateRisk, status: updateRiskStatus } = useUpdateRisk();
-  const { mutateAsync: deleteRisk } = useDeleteRisk();
 
   useEffect(() => {
     const initialQuery = searchParams.get('query');
@@ -184,36 +176,6 @@ export const Alerts: React.FC<Props> = ({
     }
   }
 
-  function handleAssetChange(asset: Asset, status: AssetStatus) {
-    updateAsset({
-      key: asset.key,
-      name: asset.name,
-      status,
-      showSnackbar: true,
-    }).then(handleRefetch);
-  }
-
-  function handleRiskChange(
-    risk: Risk,
-    status: RiskStatus,
-    severity?: RiskSeverity
-  ) {
-    updateRisk({
-      key: risk.key,
-      name: risk.name,
-      status: `${status}${severity ? severity : ''}`,
-      showSnackbar: true,
-      comment: risk.comment,
-    }).then(() => {
-      handleRefetch();
-    });
-  }
-
-  const handleOpenModal = (item: Risk) => {
-    setSelectedItem(item);
-    setIsClosedSubStateModalOpen(true);
-  };
-
   const renderItemDetails = (item: AlertType) => {
     const isAsset = isAssetFn(item);
     const isRisk = isRiskFn(item);
@@ -269,194 +231,7 @@ export const Alerts: React.FC<Props> = ({
             )}
           </span>
         )}
-
-        {/* {(isAsset || isRisk) && (
-          <div className="flex items-center space-x-2">
-            <Tooltip title="Status">
-              <span className="rounded border border-red-400 px-2 py-1 text-xs font-medium text-red-500">
-                {isAsset && AssetStatusLabel[item.status as AssetStatus]}
-                {isRisk && RiskStatusLabel[getRiskStatus(item.status)]}
-              </span>
-            </Tooltip>
-          </div>
-        )} */}
-        <div className="flex space-x-2">
-          {isAsset && item.status === AssetStatus.ActiveLow && (
-            <>
-              <Tooltip title="Enable Risk Scanning">
-                <Button
-                  styleType="primary"
-                  className="h-8"
-                  onClick={e => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleAssetChange(item, AssetStatus.Active);
-                  }}
-                  disabled={updateAssetStatus === 'pending'}
-                >
-                  Enable
-                </Button>
-              </Tooltip>
-              <Tooltip title="Mark as Deleted">
-                <Button
-                  styleType="secondary"
-                  className="h-8"
-                  onClick={e => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleAssetChange(item, AssetStatus.Deleted);
-                  }}
-                  disabled={updateAssetStatus === 'pending'}
-                >
-                  Delete
-                </Button>
-              </Tooltip>
-            </>
-          )}
-          {isRisk && getRiskStatus(item.status) === RiskStatus.Triaged && (
-            <>
-              <Tooltip title="Mark as Open">
-                <Button
-                  styleType="primary"
-                  className="h-8"
-                  onClick={e => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleRiskChange(
-                      item,
-                      RiskStatus.Opened,
-                      getRiskSeverity(item.status)
-                    );
-                  }}
-                  disabled={updateRiskStatus === 'pending'}
-                >
-                  Accept
-                </Button>
-              </Tooltip>
-              <Tooltip title="Mark as Closed">
-                <Button
-                  styleType="secondary"
-                  className="h-8"
-                  onClick={e => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleOpenModal(item);
-                  }}
-                  disabled={updateRiskStatus === 'pending'}
-                >
-                  Reject
-                </Button>
-              </Tooltip>
-            </>
-          )}
-          {isRisk &&
-            getRiskStatus(item.status) === RiskStatus.MachineDeleted && (
-              <>
-                <Tooltip title="Mark as Closed">
-                  <Button
-                    styleType="primary"
-                    className="h-8"
-                    onClick={e => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleOpenModal(item);
-                    }}
-                    disabled={updateRiskStatus === 'pending'}
-                  >
-                    Confirm
-                  </Button>
-                </Tooltip>
-                <Tooltip title="Mark as Open">
-                  <Button
-                    styleType="secondary"
-                    className="h-8"
-                    onClick={e => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleRiskChange(
-                        item,
-                        RiskStatus.Opened,
-                        getRiskSeverity(item.status) as RiskSeverity
-                      );
-                    }}
-                    disabled={updateRiskStatus === 'pending'}
-                  >
-                    Reopen
-                  </Button>
-                </Tooltip>
-              </>
-            )}
-          {isRisk &&
-            (getRiskStatus(item.status) === RiskStatus.Opened ||
-              item.status === RiskStatus.MachineOpen) && (
-              <>
-                <Tooltip title="Rerun capability against this asset">
-                  <Button
-                    styleType="primary"
-                    className="h-8"
-                    onClick={e => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      reRunJob({
-                        capability: item.source,
-                        jobKey: `#asset#${item.dns}`,
-                      });
-                    }}
-                    disabled={reRunJobStatus === 'pending'}
-                  >
-                    Rescan
-                  </Button>
-                </Tooltip>
-                <Tooltip title="Mark as Closed">
-                  <Button
-                    styleType="secondary"
-                    className="h-8"
-                    onClick={e => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleOpenModal(item);
-                    }}
-                    disabled={updateRiskStatus === 'pending'}
-                  >
-                    Close
-                  </Button>
-                </Tooltip>
-              </>
-            )}
-          {/* Exposure Risks */}
-          {isRisk && getRiskStatus(item.status) === RiskStatus.ExposedRisks && (
-            <>
-              <Tooltip title="Mark as Open">
-                <Button
-                  styleType="primary"
-                  className="h-8"
-                  onClick={e => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleRiskChange(item, RiskStatus.MachineOpen);
-                  }}
-                  disabled={updateRiskStatus === 'pending'}
-                >
-                  Mark as Open
-                </Button>
-              </Tooltip>
-              <Tooltip title="Mark as Closed">
-                <Button
-                  styleType="secondary"
-                  className="h-8"
-                  onClick={e => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleOpenModal({ ...item, comment: 'Rejected Exposure' });
-                  }}
-                  disabled={updateRiskStatus === 'pending'}
-                >
-                  Reject
-                </Button>
-              </Tooltip>
-            </>
-          )}
-        </div>
+        <AlertAction item={item} handleRefetch={handleRefetch} />
       </div>
     );
   };
@@ -627,6 +402,62 @@ export const Alerts: React.FC<Props> = ({
           </div>
         )}
       </div>
+    </div>
+  );
+};
+
+export const AlertAction = ({
+  item,
+  handleRefetch,
+}: {
+  item: AlertType;
+  handleRefetch: () => void;
+}) => {
+  const isAsset = isAssetFn(item);
+  const isRisk = isRiskFn(item);
+  const { removeSearchParams } = useSearchParamsUtil();
+  const [isClosedSubStateModalOpen, setIsClosedSubStateModalOpen] =
+    useState(false);
+  const [selectedItem, setSelectedItem] = useState<Risk | null>(null);
+
+  const { mutateAsync: reRunJob, status: reRunJobStatus } = useReRunJob();
+  const { mutateAsync: updateAsset, status: updateAssetStatus } =
+    useUpdateAsset();
+  const { mutateAsync: updateRisk, status: updateRiskStatus } = useUpdateRisk();
+  const { mutateAsync: deleteRisk } = useDeleteRisk();
+
+  function handleAssetChange(asset: Asset, status: AssetStatus) {
+    updateAsset({
+      key: asset.key,
+      name: asset.name,
+      status,
+      showSnackbar: true,
+    }).then(handleRefetch);
+  }
+
+  function handleRiskChange(
+    risk: Risk,
+    status: RiskStatus,
+    severity?: RiskSeverity
+  ) {
+    updateRisk({
+      key: risk.key,
+      name: risk.name,
+      status: `${status}${severity ? severity : ''}`,
+      showSnackbar: true,
+      comment: risk.comment,
+    }).then(() => {
+      handleRefetch();
+    });
+  }
+
+  const handleOpenModal = (item: Risk) => {
+    setSelectedItem(item);
+    setIsClosedSubStateModalOpen(true);
+  };
+
+  return (
+    <div className="flex space-x-2">
       <ClosedStateModal
         isOpen={isClosedSubStateModalOpen}
         onClose={() => setIsClosedSubStateModalOpen(false)}
@@ -638,9 +469,184 @@ export const Alerts: React.FC<Props> = ({
             };
             deleteRisk([newSelectedItem]).then(handleRefetch);
             setSelectedItem(null);
+            removeSearchParams(StorageKey.DRAWER_COMPOSITE_KEY);
           }
         }}
       />
+      {isAsset && item.status === AssetStatus.ActiveLow && (
+        <>
+          <Tooltip title="Enable Risk Scanning">
+            <Button
+              styleType="primary"
+              className="h-8"
+              onClick={e => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleAssetChange(item, AssetStatus.Active);
+              }}
+              disabled={updateAssetStatus === 'pending'}
+            >
+              Enable
+            </Button>
+          </Tooltip>
+          <Tooltip title="Mark as Deleted">
+            <Button
+              styleType="secondary"
+              className="h-8"
+              onClick={e => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleAssetChange(item, AssetStatus.Deleted);
+              }}
+              disabled={updateAssetStatus === 'pending'}
+            >
+              Delete
+            </Button>
+          </Tooltip>
+        </>
+      )}
+      {isRisk && getRiskStatus(item.status) === RiskStatus.Triaged && (
+        <>
+          <Tooltip title="Mark as Open">
+            <Button
+              styleType="primary"
+              className="h-8"
+              onClick={e => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleRiskChange(
+                  item,
+                  RiskStatus.Opened,
+                  getRiskSeverity(item.status)
+                );
+              }}
+              disabled={updateRiskStatus === 'pending'}
+            >
+              Accept
+            </Button>
+          </Tooltip>
+          <Tooltip title="Mark as Closed">
+            <Button
+              styleType="secondary"
+              className="h-8"
+              onClick={e => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleOpenModal(item);
+              }}
+              disabled={updateRiskStatus === 'pending'}
+            >
+              Reject
+            </Button>
+          </Tooltip>
+        </>
+      )}
+      {isRisk && getRiskStatus(item.status) === RiskStatus.MachineDeleted && (
+        <>
+          <Tooltip title="Mark as Closed">
+            <Button
+              styleType="primary"
+              className="h-8"
+              onClick={e => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleOpenModal(item);
+              }}
+              disabled={updateRiskStatus === 'pending'}
+            >
+              Confirm
+            </Button>
+          </Tooltip>
+          <Tooltip title="Mark as Open">
+            <Button
+              styleType="secondary"
+              className="h-8"
+              onClick={e => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleRiskChange(
+                  item,
+                  RiskStatus.Opened,
+                  getRiskSeverity(item.status) as RiskSeverity
+                );
+              }}
+              disabled={updateRiskStatus === 'pending'}
+            >
+              Reopen
+            </Button>
+          </Tooltip>
+        </>
+      )}
+      {isRisk &&
+        (getRiskStatus(item.status) === RiskStatus.Opened ||
+          item.status === RiskStatus.MachineOpen) && (
+          <>
+            <Tooltip title="Rerun capability against this asset">
+              <Button
+                styleType="primary"
+                className="h-8"
+                onClick={e => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  reRunJob({
+                    capability: item.source,
+                    jobKey: `#asset#${item.dns}`,
+                  });
+                }}
+                disabled={reRunJobStatus === 'pending'}
+              >
+                Rescan
+              </Button>
+            </Tooltip>
+            <Tooltip title="Mark as Closed">
+              <Button
+                styleType="secondary"
+                className="h-8"
+                onClick={e => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleOpenModal(item);
+                }}
+                disabled={updateRiskStatus === 'pending'}
+              >
+                Close
+              </Button>
+            </Tooltip>
+          </>
+        )}
+      {/* Exposure Risks */}
+      {isRisk && getRiskStatus(item.status) === RiskStatus.ExposedRisks && (
+        <>
+          <Tooltip title="Mark as Open">
+            <Button
+              styleType="primary"
+              className="h-8"
+              onClick={e => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleRiskChange(item, RiskStatus.MachineOpen);
+              }}
+              disabled={updateRiskStatus === 'pending'}
+            >
+              Mark as Open
+            </Button>
+          </Tooltip>
+          <Tooltip title="Mark as Closed">
+            <Button
+              styleType="secondary"
+              className="h-8"
+              onClick={e => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleOpenModal({ ...item, comment: 'Rejected Exposure' });
+              }}
+              disabled={updateRiskStatus === 'pending'}
+            >
+              Reject
+            </Button>
+          </Tooltip>
+        </>
+      )}
     </div>
   );
 };

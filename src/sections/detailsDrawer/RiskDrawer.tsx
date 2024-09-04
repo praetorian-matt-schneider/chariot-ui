@@ -28,6 +28,7 @@ import { useGetFile, useUploadFile } from '@/hooks/useFiles';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useBulkReRunJob, useJobsStatus } from '@/hooks/useJobs';
 import { useReportRisk, useUpdateRisk } from '@/hooks/useRisks';
+import { AlertAction } from '@/sections/Alerts';
 import { Comment } from '@/sections/detailsDrawer/Comment';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { getStatusColor } from '@/sections/Jobs';
@@ -605,6 +606,7 @@ const RiskDetails = ({
           {formatDate(risk.created)}
         </p>
       </div>
+      <AlertAction item={risk} handleRefetch={() => location.reload()} />
     </div>
   );
 };
