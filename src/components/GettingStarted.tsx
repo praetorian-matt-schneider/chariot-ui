@@ -101,7 +101,7 @@ export const GettingStarted: React.FC<{
               Uh oh, you are out of space
             </h2>
             <p className="text-sm text-default-light">
-              {`Your current plan allows up to ${total} assets. But don't worry, we've got a plan for you.`}
+              {`Your current plan allows up to ${total} assets. You can keep adding more for now, and when you're ready, we've got a plan for you.`}
             </p>
             <Button
               styleType="primary"

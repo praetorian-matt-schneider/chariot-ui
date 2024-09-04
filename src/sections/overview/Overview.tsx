@@ -5,6 +5,7 @@ import {
   ExclamationTriangleIcon as ExclamationTriangleIconOutline,
   MagnifyingGlassIcon,
   PlusCircleIcon,
+  PlusIcon,
   XCircleIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
@@ -36,6 +37,7 @@ import {
   useGetRootDomain,
 } from '@/hooks/useAttribute';
 import { useCounts } from '@/hooks/useCounts';
+import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useIntegration } from '@/hooks/useIntegration';
 import useIntegrationCounts from '@/hooks/useIntegrationCounts';
 import { JobWithFailedCount, useJobsStatus } from '@/hooks/useJobs';
@@ -196,10 +198,12 @@ export const Overview: React.FC = () => {
   const { data: assetCount, status: assetCountStatus } = useCounts({
     resource: 'asset',
   });
-  const { data: providedAssets, status: providedAssetsStatus } = useCounts({
-    resource: 'attribute',
-    query: '#provided#',
-  });
+  const {
+    data: providedAssets,
+    status: providedAssetsStatus,
+    hasNextPage: hasNextPageProvidedAssets,
+  } = useGenericSearch({ query: `source:provided` });
+
   const {
     data: accounts,
 
@@ -310,21 +314,6 @@ export const Overview: React.FC = () => {
 
   const data = useMemo(() => {
     const tableData = [
-      {
-        status: 'success',
-        surface: 'Manually Added',
-        identifier: 'Provided',
-        discoveredAssets: providedAssets
-          ? Object.values(providedAssets).reduce((a, v) => a + v, 0)
-          : 0,
-        discoveredAssetsStatus: providedAssetsStatus,
-        actions: 'AddAsset',
-        connected: false,
-        id: 'chariot',
-        key: 'chariot',
-        account: undefined,
-        type: 'chariot',
-      },
       ...requiresSetupIntegrations.map(integration => {
         return {
           status: 'warning',
@@ -384,6 +373,19 @@ export const Overview: React.FC = () => {
     );
 
     return [
+      {
+        status: 'success',
+        surface: 'Manually Added',
+        identifier: 'Provided',
+        discoveredAssets: providedAssets?.assets?.length,
+        discoveredAssetsStatus: providedAssetsStatus,
+        actions: 'AddAsset',
+        connected: false,
+        id: 'chariot',
+        key: 'chariot',
+        account: undefined,
+        type: 'chariot',
+      },
       ...riskNotification.sort((a, b) => a.surface.localeCompare(b.surface)),
       ...rest.sort((a, b) => a.surface.localeCompare(b.surface)),
       ...waitlistedIntegrationsData,
@@ -397,6 +399,13 @@ export const Overview: React.FC = () => {
     waitlistedIntegrations,
     providedAssetsStatus,
   ]);
+
+  const showMore = (identifier: string) => {
+    if (identifier.trim().toLowerCase() === 'provided') {
+      return hasNextPageProvidedAssets ? '+' : '';
+    }
+    return '';
+  };
 
   return (
     <div>
@@ -444,7 +453,16 @@ export const Overview: React.FC = () => {
                   these points effectively.
                 </p>
               </div>
+              <Button
+                styleType="primary"
+                startIcon={<PlusIcon className="size-4" />}
+                onClick={() => setIsAttackSurfaceDrawerOpen(true)}
+                className="mt-6 h-10 rounded-md py-0"
+              >
+                New Attack Surface
+              </Button>
             </div>
+
             <div>
               <Table
                 tableClassName="bg-header border-0 [&_thead_tr]:bg-header [&_tbody_tr:nth-child(odd)]:bg-header-dark [&_tr_td]:text-layer0 [&__tr_td_div:first]:border-t-4 [&_td_div]:border-header-dark [&_th_div]:border-0"
@@ -471,7 +489,7 @@ export const Overview: React.FC = () => {
                                   [
                                     'jobsFilters',
                                     JSON.stringify({
-                                      search: `#${row.id}`,
+                                      search: `#${row.id}#`,
                                       status: job.failedJobsCount
                                         ? JobStatus.Fail
                                         : job.status,
@@ -557,7 +575,7 @@ export const Overview: React.FC = () => {
                                 );
                               }}
                             >
-                              <span>{`${row.discoveredAssets.toLocaleString()} Assets`}</span>
+                              <span>{`${Number(row.discoveredAssets)?.toLocaleString()}${showMore(row.identifier)} Assets`}</span>
                             </div>
                           )}
                         </Loader>
@@ -572,7 +590,7 @@ export const Overview: React.FC = () => {
                     cell: row => (
                       <div className="flex flex-row items-center justify-center">
                         {row.actions === 'AddAsset' && (
-                          <Tooltip title="Add Asset" placement="right">
+                          <Tooltip title="Add Asset" placement="top">
                             <Button
                               styleType="none"
                               className="mx-auto"
@@ -593,7 +611,7 @@ export const Overview: React.FC = () => {
                             >
                               Setup
                             </button>
-                            <Tooltip title="Disconnect" placement="right">
+                            <Tooltip title="Disconnect" placement="top">
                               <Button
                                 className="p-0"
                                 onClick={() => {
@@ -613,7 +631,7 @@ export const Overview: React.FC = () => {
                           </p>
                         )}
                         {row.actions === 'Disconnect' && (
-                          <Tooltip title="Disconnect" placement="right">
+                          <Tooltip title="Disconnect" placement="top">
                             <Button
                               styleType="none"
                               className="mx-auto"
@@ -729,19 +747,25 @@ export const Overview: React.FC = () => {
           }
         >
           <div className="mx-12 mt-6 pb-10">
-            <div className="mb-12 flex flex-col items-center justify-between md:flex-row">
-              <h1 className=" text-4xl font-extrabold">
-                Which surfaces are you in?
-              </h1>
+            <div className=" flex flex-col items-start justify-between md:flex-row">
+              <div className="flex flex-col space-y-1">
+                <h1 className=" text-4xl font-extrabold">
+                  Which surfaces are you in?
+                </h1>
+              </div>
               <Input
                 name="search"
                 startIcon={<MagnifyingGlassIcon className="size-6" />}
                 placeholder="Search integrations..."
-                className="w-[400px] rounded-sm  bg-gray-200 p-4 text-lg"
+                className="w-[400px] rounded-sm  bg-gray-200 text-lg"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
               />
             </div>
+            <p className="mb-4 mt-2 text-lg text-gray-700">
+              Once added, they’ll appear in your attack surface, ready for setup
+              later.
+            </p>
             <div
               className="grid gap-4"
               style={{
@@ -783,11 +807,16 @@ export const Overview: React.FC = () => {
                 className="mx-20 mb-10 h-20 w-full text-xl font-bold"
                 onClick={async () => {
                   // add integration   accounts
+
                   const promises = selectedRiskNotificationIntegrations
                     .map((integration: string) => {
+                      const isWaitlisted =
+                        comingSoonAttackSurfaceIntegrations.find(
+                          i => i.id === integration
+                        );
                       return link({
                         username: integration,
-                        value: 'setup',
+                        value: isWaitlisted ? 'waitlisted' : 'setup',
                         config: {},
                       });
                     })

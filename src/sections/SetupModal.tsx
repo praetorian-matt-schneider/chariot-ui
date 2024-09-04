@@ -91,6 +91,16 @@ const SetupModal: React.FC<{
                         <InformationCircleIcon className="size-5" />
                         <span>{integration.help.label}</span>
                       </Link>
+                      {/* <Link
+                        styleType="text"
+                        to={''}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        buttonClass="p-0 hover:underline text-indigo-600 font-normal"
+                      >
+                        <InformationCircleIcon className="size-5" />
+                        <span>How to: Invite a teammate</span>
+                      </Link> */}
                     </div>
                   </div>
                 )}
