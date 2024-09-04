@@ -626,7 +626,7 @@ export const AlertAction = ({
               onClick={e => {
                 e.preventDefault();
                 e.stopPropagation();
-                handleRiskChange(item, RiskStatus.Opened, RiskSeverity.Medium);
+                handleRiskChange(item, RiskStatus.Opened, RiskSeverity.Low);
               }}
               disabled={updateRiskStatus === 'pending'}
             >
