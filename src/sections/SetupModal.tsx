@@ -99,7 +99,7 @@ const SetupModal: React.FC<{
                         buttonClass="p-0 hover:underline text-indigo-600 font-normal"
                       >
                         <InformationCircleIcon className="size-5" />
-                        <span>How to: Invite someone to finish the setup</span>
+                        <span>How to: Invite a teammate</span>
                       </Link> */}
                     </div>
                   </div>

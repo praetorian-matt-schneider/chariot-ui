@@ -13,44 +13,77 @@ export const DomainDrawerContent: React.FC<DomainDrawerContentProps> = ({
   onChange,
 }) => {
   const { friend, me } = useAuth();
-
   const emailDomain = (friend || me).split('@')[1];
-  const domainToDiplay = domain ?? emailDomain;
-
-  const [newDomain, setNewDomain] = useState<string>(domainToDiplay);
+  const [newDomain, setNewDomain] = useState<string>(domain || ''); // Start with an empty domain
 
   useEffect(() => {
     onChange(newDomain, AssetStatus.Active);
-  }, [newDomain]);
+  }, [newDomain, onChange]);
 
   return (
-    <div className="mx-12 mt-6">
-      <h1 className="mb-4 text-4xl font-extrabold">Setup your root domain</h1>
-
-      <div className="mt-4">
-        <p>
-          We’ve detected your email domain as{' '}
-          <span className="font-bold">{emailDomain}</span>.
+    <div className="w-full space-y-8 p-4 sm:p-8">
+      {/* Root Domain Setup Section */}
+      <section className="rounded-sm bg-white p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold text-gray-800">
+          Confirm Your Root Domain
+        </h2>
+        <p className="mt-2 text-base text-gray-700">
+          This is the domain you are currently signed in with. You can update it
+          below if necessary.
         </p>
-        <p className="mt-1 text-sm">
-          This domain will be set automatically. If you prefer, you can enter a
-          different domain below.
-        </p>
-      </div>
 
-      <div className="mt-6">
-        <label htmlFor="domain" className="block text-sm font-medium">
-          Enter a Different Domain (optional)
-        </label>
-        <input
-          type="text"
-          id="domain"
-          className="mt-2 block w-full rounded-sm border border-gray-300 bg-white p-3 text-black placeholder:text-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
-          placeholder="example.com"
-          value={newDomain}
-          onChange={e => setNewDomain(e.target.value)}
-        />
-      </div>
+        <div className="mt-6">
+          <label
+            htmlFor="domain"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Root Domain
+          </label>
+          <input
+            type="text"
+            id="domain"
+            className="mt-2 block w-full rounded-sm border border-default px-4 py-3 text-lg"
+            placeholder="example.com"
+            value={newDomain || emailDomain}
+            onChange={e => setNewDomain(e.target.value)}
+          />
+        </div>
+      </section>
+
+      {/* Horizontal Info Section */}
+      <section className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+        <div className="rounded-sm bg-gray-50 p-6 shadow-sm">
+          <h2 className="text-xl font-semibold text-gray-800">
+            What is a Root Domain?
+          </h2>
+          <p className="mt-2 text-sm text-gray-600">
+            Your root domain is the primary domain of your organization. It’s
+            usually the domain tied to your business, like{' '}
+            <span className="font-bold">{emailDomain}</span>.
+          </p>
+        </div>
+
+        <div className="rounded-sm bg-gray-50 p-6 shadow-sm">
+          <h2 className="text-xl font-semibold text-gray-800">
+            What is an Asset?
+          </h2>
+          <p className="mt-2 text-sm text-gray-600">
+            An asset is anything in your organization that can hold or transmit
+            data, such as websites, IP addresses or GitHub organizations.
+          </p>
+        </div>
+
+        <div className="rounded-sm bg-gray-50 p-6 shadow-sm">
+          <h2 className="text-xl font-semibold text-gray-800">
+            What are Integrations?
+          </h2>
+          <p className="mt-2 text-sm text-gray-600">
+            Integrations allow you to add additional services, like cloud
+            providers, to expand your attack surface. These surfaces are
+            monitored continuously for new assets.
+          </p>
+        </div>
+      </section>
     </div>
   );
 };
