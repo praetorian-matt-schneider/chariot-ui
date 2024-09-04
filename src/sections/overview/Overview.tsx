@@ -763,8 +763,8 @@ export const Overview: React.FC = () => {
               />
             </div>
             <p className="text-md mb-4 mt-2 text-gray-700">
-              Choose the integrations your organization uses. Once added,
-              they’ll appear in your attack surface, ready for setup later.
+              Once added, they’ll appear in your attack surface, ready for setup
+              later.
             </p>
             <div
               className="grid gap-4"
