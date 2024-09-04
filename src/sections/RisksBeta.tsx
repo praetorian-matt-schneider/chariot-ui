@@ -1,21 +1,32 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   CheckCircleIcon,
+  DocumentTextIcon,
   QuestionMarkCircleIcon,
 } from '@heroicons/react/24/outline';
 import { BellIcon } from '@heroicons/react/24/solid';
 
 import { Drawer } from '@/components/Drawer';
+import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
+import { getRiskStatusIcon } from '@/components/icons/RiskStatus.icon';
 import { Loader } from '@/components/Loader';
+import { Table } from '@/components/table/Table';
+import { Columns } from '@/components/table/types';
+import { Tooltip } from '@/components/Tooltip';
 import { useMy } from '@/hooks';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
 import { Alerts } from '@/sections/Alerts';
 import { CategoryFilter, FancyTable } from '@/sections/Assets';
 import { RenderHeaderExtraContentSection } from '@/sections/AuthenticatedApp';
+import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { useGlobalState } from '@/state/global.state';
-import { RiskFilters } from '@/types';
+import { Risk, RiskFilters, RiskStatusLabel, SeverityDef } from '@/types';
+import { getRiskSeverity, getRiskStatus } from '@/utils/riskStatus.util';
 import { useQueryFilters } from '@/utils/storage/useQueryParams.util';
+import { StorageKey } from '@/utils/storage/useStorage.util';
+import { generatePathWithSearch } from '@/utils/url.util';
 
 const RisksBeta: React.FC = () => {
   const {
@@ -38,10 +49,17 @@ const RisksBeta: React.FC = () => {
   };
 
   // Check for remediated risks to update the CTA
-  const { data: risksGeneric, status: risksStatus } = useGenericSearch({
+  const {
+    data: risksGeneric,
+    status: risksStatus,
+    error: risksError,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useGenericSearch({
     query: 'status:R',
   });
   const hasRemediatedRisk = (risksGeneric?.risks || [])?.length > 0;
+  const { getRiskDrawerLink } = getDrawerLink();
 
   //   Security alert options, count
   const { data: alerts, status: alertsStatus } = useGetAccountAlerts();
@@ -117,6 +135,92 @@ const RisksBeta: React.FC = () => {
   }, [filters.exposureRisk, JSON.stringify({ alerts })]);
 
   const query = filters.search || filters.alert || exposureRiskQuery || '';
+
+  const columns: Columns<Risk> = useMemo(
+    () => [
+      {
+        label: 'Priority',
+        id: 'status',
+        fixedWidth: 80,
+        cell: (risk: Risk) => {
+          const riskStatusKey = getRiskStatus(risk.status);
+          const riskSeverityKey = getRiskSeverity(risk.status);
+
+          const statusIcon = getRiskStatusIcon(riskStatusKey);
+          const severityIcon = getRiskSeverityIcon(riskSeverityKey);
+
+          return (
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 text-default">
+                <Tooltip
+                  title={
+                    (RiskStatusLabel[riskStatusKey] || 'Closed') + ' Status'
+                  }
+                >
+                  {statusIcon}
+                </Tooltip>
+                <Tooltip title={SeverityDef[riskSeverityKey] + ' Severity'}>
+                  {severityIcon}
+                </Tooltip>
+              </div>
+            </div>
+          );
+        },
+      },
+      {
+        label: 'Risk',
+        id: 'name',
+        to: (item: Risk) => getRiskDrawerLink(item),
+        copy: true,
+      },
+      {
+        label: 'Status',
+        id: 'status',
+        className: 'text-left',
+        cell: (risk: Risk) => {
+          const riskStatusKey = getRiskStatus(risk.status);
+          return <span>{RiskStatusLabel[riskStatusKey]}</span>;
+        },
+      },
+      {
+        label: 'DNS',
+        id: 'dns',
+        className: 'hidden md:table-cell',
+        copy: true,
+      },
+      {
+        label: 'First Seen',
+        id: 'created',
+        cell: 'date',
+        className: 'hidden lg:table-cell',
+      },
+      {
+        label: 'Last Seen',
+        id: 'updated',
+        cell: 'date',
+        className: 'hidden lg:table-cell',
+      },
+      {
+        label: 'Proof',
+        id: '',
+        cell: risk => (
+          <Tooltip title="View Proof of Exploit">
+            <Link
+              to={generatePathWithSearch({
+                appendSearch: [[StorageKey.POE, `${risk.dns}/${risk.name}`]],
+              })}
+              className="cursor-pointer"
+            >
+              <DocumentTextIcon className="size-5 text-default" />
+            </Link>
+          </Tooltip>
+        ),
+        align: 'center',
+        fixedWidth: 70,
+      },
+    ],
+    []
+  );
 
   return (
     <>
@@ -230,7 +334,18 @@ const RisksBeta: React.FC = () => {
           <div className="flex w-full flex-row items-center justify-between">
             <h1 className="mb-4 text-4xl font-extrabold">Remediated Risks</h1>
           </div>
-          <div className="flex w-full flex-row justify-between gap-x-10"></div>
+          <div className="flex w-full flex-col items-start">
+            <Table
+              name={'remediated'}
+              resize={true}
+              columns={columns}
+              data={risksGeneric?.risks || []}
+              status={risksStatus}
+              error={risksError}
+              isFetchingNextPage={isFetchingNextPage}
+              fetchNextPage={fetchNextPage}
+            />
+          </div>
         </div>
       </Drawer>
     </>
