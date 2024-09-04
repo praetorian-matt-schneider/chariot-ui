@@ -314,19 +314,6 @@ export const Overview: React.FC = () => {
 
   const data = useMemo(() => {
     const tableData = [
-      {
-        status: 'success',
-        surface: 'Manually Added',
-        identifier: 'Provided',
-        discoveredAssets: providedAssets?.assets?.length,
-        discoveredAssetsStatus: providedAssetsStatus,
-        actions: 'AddAsset',
-        connected: false,
-        id: 'chariot',
-        key: 'chariot',
-        account: undefined,
-        type: 'chariot',
-      },
       ...requiresSetupIntegrations.map(integration => {
         return {
           status: 'warning',
@@ -386,6 +373,19 @@ export const Overview: React.FC = () => {
     );
 
     return [
+      {
+        status: 'success',
+        surface: 'Manually Added',
+        identifier: 'Provided',
+        discoveredAssets: providedAssets?.assets?.length,
+        discoveredAssetsStatus: providedAssetsStatus,
+        actions: 'AddAsset',
+        connected: false,
+        id: 'chariot',
+        key: 'chariot',
+        account: undefined,
+        type: 'chariot',
+      },
       ...riskNotification.sort((a, b) => a.surface.localeCompare(b.surface)),
       ...rest.sort((a, b) => a.surface.localeCompare(b.surface)),
       ...waitlistedIntegrationsData,
