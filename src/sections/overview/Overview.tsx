@@ -590,7 +590,7 @@ export const Overview: React.FC = () => {
                     cell: row => (
                       <div className="flex flex-row items-center justify-center">
                         {row.actions === 'AddAsset' && (
-                          <Tooltip title="Add Asset" placement="right">
+                          <Tooltip title="Add Asset" placement="top">
                             <Button
                               styleType="none"
                               className="mx-auto"
@@ -611,7 +611,7 @@ export const Overview: React.FC = () => {
                             >
                               Setup
                             </button>
-                            <Tooltip title="Disconnect" placement="right">
+                            <Tooltip title="Disconnect" placement="top">
                               <Button
                                 className="p-0"
                                 onClick={() => {
@@ -631,7 +631,7 @@ export const Overview: React.FC = () => {
                           </p>
                         )}
                         {row.actions === 'Disconnect' && (
-                          <Tooltip title="Disconnect" placement="right">
+                          <Tooltip title="Disconnect" placement="top">
                             <Button
                               styleType="none"
                               className="mx-auto"
