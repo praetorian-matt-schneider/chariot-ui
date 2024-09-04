@@ -322,11 +322,11 @@ function initAmplify(stack: BackendStack = defaultStack) {
             scopes: ['email', 'openid'],
             redirectSignIn: [
               'https://localhost:3000/hello',
-              'https://preview.chariot.praetorian.com/hello',
+              'https://chariot.praetorian.com/hello',
             ],
             redirectSignOut: [
               'https://localhost:3000/goodbye',
-              'https://preview.chariot.praetorian.com/goodbye',
+              'https://chariot.praetorian.com/goodbye',
             ],
             responseType: 'code',
           },
