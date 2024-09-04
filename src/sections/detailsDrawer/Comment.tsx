@@ -63,7 +63,13 @@ export const Comment: React.FC<Props> = ({ risk, onSave }: Props) => {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      onSave && (await onSave(value, `${status}${severity || ''}`));
+      if (onSave) {
+        if (risk.status === RiskStatus.ExposedRisks) {
+          await onSave(value, risk.status);
+        } else {
+          await onSave(value, `${status}${severity || ''}`);
+        }
+      }
       setValue('');
     } catch (e) {
       console.error(e);
