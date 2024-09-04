@@ -337,7 +337,6 @@ const RisksBeta: React.FC = () => {
           <Table
             name={'remediated-risks'}
             resize={true}
-            isTableView
             columns={columns}
             data={risksGeneric?.risks || []}
             status={risksStatus}

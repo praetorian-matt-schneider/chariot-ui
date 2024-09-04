@@ -399,7 +399,7 @@ export function Table<TData>(props: TableProps<TData>) {
             className={'sticky bg-layer1'}
             style={{
               zIndex: 1,
-              top: getSticky('1', '2R'),
+              top: getSticky(isTableView ? '1' : '0', '2R'),
             }}
           >
             <tr className="relative">
