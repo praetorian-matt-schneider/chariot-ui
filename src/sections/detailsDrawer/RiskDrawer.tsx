@@ -46,7 +46,6 @@ import { mergeJobStatus } from '@/utils/api';
 import { cn } from '@/utils/classname';
 import { formatDate } from '@/utils/date.util';
 import { sToMs } from '@/utils/date.util';
-import { getSeverityClass } from '@/utils/getSeverityClass.util';
 import { getDescription, isManualORPRrovidedRisk } from '@/utils/risk.util';
 import { getStatusSeverity } from '@/utils/riskStatus.util';
 import { StorageKey, useStorage } from '@/utils/storage/useStorage.util';
@@ -164,8 +163,6 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
   const isJobsRunning =
     jobsStatus === JobStatus.Running || jobsStatus === JobStatus.Queued;
 
-  const severityClass = getSeverityClass(risk.status?.[1]);
-
   const resetMarkdownValue = useCallback(() => {
     setMarkdownValue(isEditingMarkdown ? definitionsFileValue : '');
   }, [isEditingMarkdown]);
@@ -188,12 +185,12 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     return [firstTrackedHistory, ...riskHistory];
   }, [JSON.stringify(risk.history)]);
 
-  async function handleUpdateComment(comment = '') {
+  async function handleUpdateComment(comment = '', status = '') {
     await updateRisk({
       comment,
       key: risk.key,
       name: risk.name,
-      status: risk.status,
+      status,
     });
     refetchRisk();
   }
@@ -231,7 +228,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
           <div className="shrink-0 basis-1/4" style={{ width: width / 4 }}>
             <History history={history}>
               <Comment
-                comment={risk.comment}
+                risk={risk}
                 isLoading={isRiskFetching}
                 onSave={handleUpdateComment}
               />
@@ -264,24 +261,10 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
 
                 {/* Actions Section */}
                 <div className="flex flex-row gap-3">
-                  <Tooltip placement="top" title="Change risk severity">
-                    <RiskDropdown
-                      type="severity"
-                      risk={risk}
-                      className={cn(
-                        'transition-all h-8 text-xs',
-                        severityClass,
-                        'brightness-90'
-                      )}
-                    />
-                  </Tooltip>
-                  <Tooltip placement="top" title="Change risk status">
-                    <RiskDropdown
-                      type="status"
-                      risk={risk}
-                      className="h-8 border-gray-400 text-xs"
-                    />
-                  </Tooltip>
+                  <AlertAction
+                    item={risk}
+                    handleRefetch={() => location.reload()}
+                  />
                   <Tooltip
                     placement="top"
                     title={
@@ -606,7 +589,6 @@ const RiskDetails = ({
           {formatDate(risk.created)}
         </p>
       </div>
-      <AlertAction item={risk} handleRefetch={() => location.reload()} />
     </div>
   );
 };

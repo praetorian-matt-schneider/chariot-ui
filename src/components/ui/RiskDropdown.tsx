@@ -29,7 +29,7 @@ interface Props {
   styleType?: 'chip';
 }
 
-const riskStatusOptions = [
+export const riskStatusOptions = [
   {
     label: RiskStatusLabel[RiskStatus.Triaged],
     value: RiskStatus.Triaged,
