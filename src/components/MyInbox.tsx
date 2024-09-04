@@ -42,16 +42,16 @@ const MyInbox: React.FC<{ className?: string }> = ({ className }) => {
       ];
     } else {
       return [
-        {
-          label: 'All Risks',
-          labelSuffix: totalAlerts.toLocaleString(),
-          className: 'flex items-center',
-          to: getRoute(['app', 'risks']),
-        },
-        {
-          label: 'Divider',
-          type: 'divider' as const,
-        },
+        // {
+        //   label: 'All Risks',
+        //   labelSuffix: totalAlerts.toLocaleString(),
+        //   className: 'flex items-center',
+        //   to: getRoute(['app', 'risks']),
+        // },
+        // {
+        //   label: 'Divider',
+        //   type: 'divider' as const,
+        // },
         ...alerts.map(alert => ({
           label: alert.name,
           labelSuffix: alert.count.toLocaleString(),
