@@ -993,8 +993,8 @@ export function FancyTable<TData>(
               className="sticky overflow-auto border-r border-default"
               style={{
                 top: headerHeight + LHeaderHeight,
-                maxHeight: `calc( 100vh - ${headerHeight + LHeaderHeight + 16}px)`,
-                height: `calc( 100vh - ${headerHeight + LHeaderHeight + 16}px)`,
+                maxHeight: `calc( 100vh - ${headerHeight + LHeaderHeight + 64}px)`,
+                height: `calc( 100vh - ${headerHeight + LHeaderHeight + 64}px)`,
               }}
             >
               {filter && (
