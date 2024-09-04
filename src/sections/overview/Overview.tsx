@@ -36,6 +36,7 @@ import {
   useGetRootDomain,
 } from '@/hooks/useAttribute';
 import { useCounts } from '@/hooks/useCounts';
+import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useIntegration } from '@/hooks/useIntegration';
 import useIntegrationCounts from '@/hooks/useIntegrationCounts';
 import { JobWithFailedCount, useJobsStatus } from '@/hooks/useJobs';
@@ -196,10 +197,12 @@ export const Overview: React.FC = () => {
   const { data: assetCount, status: assetCountStatus } = useCounts({
     resource: 'asset',
   });
-  const { data: providedAssets, status: providedAssetsStatus } = useCounts({
-    resource: 'attribute',
-    query: '#provided#',
-  });
+  const {
+    data: providedAssets,
+    status: providedAssetsStatus,
+    hasNextPage: hasNextPageProvidedAssets,
+  } = useGenericSearch({ query: `source:provided` });
+
   const {
     data: accounts,
 
@@ -314,9 +317,7 @@ export const Overview: React.FC = () => {
         status: 'success',
         surface: 'Manually Added',
         identifier: 'Provided',
-        discoveredAssets: providedAssets
-          ? Object.values(providedAssets).reduce((a, v) => a + v, 0)
-          : 0,
+        discoveredAssets: providedAssets?.assets?.length,
         discoveredAssetsStatus: providedAssetsStatus,
         actions: 'AddAsset',
         connected: false,
@@ -397,6 +398,13 @@ export const Overview: React.FC = () => {
     waitlistedIntegrations,
     providedAssetsStatus,
   ]);
+
+  const showMore = (identifier: string) => {
+    if (identifier.trim().toLowerCase() === 'provided') {
+      return hasNextPageProvidedAssets ? '+' : '';
+    }
+    return '';
+  };
 
   return (
     <div>
@@ -557,7 +565,7 @@ export const Overview: React.FC = () => {
                                 );
                               }}
                             >
-                              <span>{`${row.discoveredAssets.toLocaleString()} Assets`}</span>
+                              <span>{`${Number(row.discoveredAssets)?.toLocaleString()}${showMore(row.identifier)} Assets`}</span>
                             </div>
                           )}
                         </Loader>
