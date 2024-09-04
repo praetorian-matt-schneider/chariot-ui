@@ -747,19 +747,25 @@ export const Overview: React.FC = () => {
           }
         >
           <div className="mx-12 mt-6 pb-10">
-            <div className="mb-12 flex flex-col items-center justify-between md:flex-row">
-              <h1 className=" text-4xl font-extrabold">
-                Which surfaces are you in?
-              </h1>
+            <div className=" flex flex-col items-start justify-between md:flex-row">
+              <div className="flex flex-col space-y-1">
+                <h1 className=" text-4xl font-extrabold">
+                  Which surfaces are you in?
+                </h1>
+              </div>
               <Input
                 name="search"
                 startIcon={<MagnifyingGlassIcon className="size-6" />}
                 placeholder="Search integrations..."
-                className="w-[400px] rounded-sm  bg-gray-200 p-4 text-lg"
+                className="w-[400px] rounded-sm  bg-gray-200 text-lg"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
               />
             </div>
+            <p className="text-md mb-4 mt-2 text-gray-700">
+              Choose the integrations your organization uses. Once added,
+              they’ll appear in your attack surface, ready for setup later.
+            </p>
             <div
               className="grid gap-4"
               style={{
