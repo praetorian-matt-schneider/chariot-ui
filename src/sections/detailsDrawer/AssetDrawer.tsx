@@ -177,116 +177,74 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
     }),
   ]);
 
-  const splitBy3 = 768 / 3;
-
-  const screenSize = useGetScreenSize();
-
   return (
     <Drawer
       open={open}
       onClose={() => removeSearchParams(StorageKey.DRAWER_COMPOSITE_KEY)}
       onBack={() => navigate(-1)}
-      className={cn('w-full rounded-t-lg pb-0 shadow-lg')}
+      className={cn('w-full rounded-t-lg pb-0 shadow-lg overflow-hidden')}
       contentClassName="flex"
     >
       <Loader isLoading={isInitialLoading} type="spinner">
-        <div
-          className="grid w-full"
-          style={
-            screenSize.maxMd
-              ? {
-                  gridTemplateAreas: `'section2' 'section1' 'section3'`,
-                  gridTemplateColumns: `auto`,
-                  gridTemplateRows: '75% auto auto',
-                }
-              : screenSize.maxLg
-                ? {
-                    gridTemplateAreas: `'section2 section3' 'section2 section1'`,
-                    gridTemplateColumns: `auto minmax(${splitBy3}px, 25%)`,
-                    gridTemplateRows: '50% 50%',
-                  }
-                : {
-                    display: 'grid',
-                    gridTemplateAreas: `'section1 section2 section3'`,
-                    gridTemplateColumns: `minmax(${splitBy3}px, 25%) auto minmax(${splitBy3}px, 25%)`,
-                    gridTemplateRows: '100%',
-                  }
+        <ResponsiveGrid
+          section1={<RiskList risks={openRisks} />}
+          section2={
+            <>
+              <div className="flex flex-wrap justify-between gap-4 px-9 pt-6">
+                <div className="max-w-1/2 flex flex-col gap-2">
+                  <h1 className="text-2xl font-bold">{asset.name}</h1>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      styleType="secondary"
+                      className="text-nowrap px-3 py-2"
+                      endIcon={<ArrowPathIcon className="size-4" />}
+                      onClick={() => {
+                        runJob({
+                          capability: 'nuclei',
+                          jobKey: `#asset#${asset.name}#${asset.dns}`,
+                        });
+                      }}
+                    >
+                      Scan now
+                    </Button>
+                  </div>
+                </div>
+                <div className="max-w-1/2 flex flex-col gap-2">
+                  <div className="flex items-start text-nowrap text-slate-600">
+                    DNS:
+                    <p
+                      className="-mt-0.5 ml-1 text-wrap font-bold text-slate-950"
+                      style={{ wordBreak: 'break-word' }}
+                    >
+                      {asset.dns}
+                    </p>
+                  </div>
+                  <div className="flex items-center text-nowrap text-slate-600">
+                    Last Seen:
+                    <p className="ml-1 font-bold text-slate-950">
+                      {formatDate(asset.updated)}
+                    </p>
+                  </div>
+                  <div className="flex items-center text-nowrap text-slate-600">
+                    First Seen:
+                    <p className="ml-1 font-bold text-slate-950">
+                      {formatDate(asset.created)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="size-full">
+                <AssetsGraph {...assetGraphProps} asset={assetWithRisk} />
+              </div>
+            </>
           }
-        >
-          <div
-            className={cn(
-              'border-gray-300',
-              screenSize.maxMd
-                ? 'border-t border-b'
-                : screenSize.maxLg
-                  ? 'border-l border-t'
-                  : 'border-r'
-            )}
-            style={{ gridArea: 'section1' }}
-          >
-            <RiskList risks={openRisks} />
-          </div>
-          <div
-            className="flex w-full flex-col gap-4"
-            style={{ gridArea: 'section2' }}
-          >
-            <div className="flex flex-wrap justify-between gap-4 px-9 pt-6">
-              <div className="max-w-1/2 flex flex-col gap-2">
-                <h1 className="text-2xl font-bold">{asset.name}</h1>
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    styleType="secondary"
-                    className="text-nowrap px-3 py-2"
-                    endIcon={<ArrowPathIcon className="size-4" />}
-                    onClick={() => {
-                      runJob({
-                        capability: 'nuclei',
-                        jobKey: `#asset#${asset.name}#${asset.dns}`,
-                      });
-                    }}
-                  >
-                    Scan now
-                  </Button>
-                </div>
-              </div>
-              <div className="max-w-1/2 flex flex-col gap-2">
-                <div className="flex items-start text-nowrap text-slate-600">
-                  DNS:
-                  <p
-                    className="-mt-0.5 ml-1 text-wrap font-bold text-slate-950"
-                    style={{ wordBreak: 'break-word' }}
-                  >
-                    {asset.dns}
-                  </p>
-                </div>
-                <div className="flex items-center text-nowrap text-slate-600">
-                  Last Seen:
-                  <p className="ml-1 font-bold text-slate-950">
-                    {formatDate(asset.updated)}
-                  </p>
-                </div>
-                <div className="flex items-center text-nowrap text-slate-600">
-                  First Seen:
-                  <p className="ml-1 font-bold text-slate-950">
-                    {formatDate(asset.created)}
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="size-full">
-              <AssetsGraph {...assetGraphProps} asset={assetWithRisk} />
-            </div>
-          </div>
-          <div
-            className={cn('border-l border-gray-300')}
-            style={{ gridArea: 'section3' }}
-          >
+          section3={
             <AttributeList
               attributes={attributesGenericSearch?.attributes || []}
               resourceKey={asset.key}
             />
-          </div>
-        </div>
+          }
+        />
       </Loader>
     </Drawer>
   );
@@ -793,5 +751,68 @@ export function AssetsGraph(props: AssetGraphProps) {
       </Controls>
       <Background color="#eee" size={3} />
     </ReactFlow>
+  );
+}
+
+interface ResponsiveGridProps {
+  section1: ReactNode;
+  section2: ReactNode;
+  section3: ReactNode;
+}
+
+export function ResponsiveGrid(props: ResponsiveGridProps) {
+  const sideSectionMinWidth = '300px';
+  const screenSize = useGetScreenSize();
+
+  return (
+    <div
+      className="grid w-full"
+      style={
+        screenSize.maxMd
+          ? {
+              gridTemplateAreas: `'section2' 'section1' 'section3'`,
+              gridTemplateColumns: `auto`,
+              gridTemplateRows: '75% auto auto',
+            }
+          : screenSize.maxLg
+            ? {
+                gridTemplateAreas: `'section2 section3' 'section2 section1'`,
+                gridTemplateColumns: `auto ${sideSectionMinWidth}`,
+                gridTemplateRows: '50% 50%',
+              }
+            : {
+                display: 'grid',
+                gridTemplateAreas: `'section1 section2 section3'`,
+                gridTemplateColumns: `minmax(${sideSectionMinWidth}, 25%) auto minmax(${sideSectionMinWidth}, 25%)`,
+                gridTemplateRows: '100%',
+              }
+      }
+    >
+      <div
+        className={cn(
+          'border-gray-300',
+          screenSize.maxMd
+            ? 'border-t border-b'
+            : screenSize.maxLg
+              ? 'border-l border-t'
+              : 'border-r'
+        )}
+        style={{ gridArea: 'section1' }}
+      >
+        {props.section1}
+      </div>
+      <div
+        className="flex w-full flex-col gap-4"
+        style={{ gridArea: 'section2' }}
+      >
+        {props.section2}
+      </div>
+      <div
+        className={cn('border-l border-gray-300')}
+        style={{ gridArea: 'section3' }}
+      >
+        {props.section3}
+      </div>
+    </div>
   );
 }

@@ -39,6 +39,7 @@ export interface TableProps<TData> {
     value: string;
     onChange: (value: string) => void;
   };
+  rowClassName?: (rowData: TData) => string;
 }
 
 export interface Column<TData> {

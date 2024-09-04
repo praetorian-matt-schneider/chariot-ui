@@ -61,6 +61,7 @@ export function Table<TData>(props: TableProps<TData>) {
     primaryAction,
     resize = false,
     search: controlledSearch,
+    rowClassName,
   } = props;
 
   const tableId = useId();
@@ -480,6 +481,7 @@ export function Table<TData>(props: TableProps<TData>) {
 
               return (
                 <TableBody
+                  rowClassName={rowClassName}
                   isClickable={Boolean(onRowClick)}
                   key={virtualRow.index}
                   columns={columns}
