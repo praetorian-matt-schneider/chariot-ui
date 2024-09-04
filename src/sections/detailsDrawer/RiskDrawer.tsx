@@ -47,7 +47,7 @@ import { formatDate } from '@/utils/date.util';
 import { sToMs } from '@/utils/date.util';
 import { getSeverityClass } from '@/utils/getSeverityClass.util';
 import { getDescription, isManualORPRrovidedRisk } from '@/utils/risk.util';
-import { getRiskSeverity } from '@/utils/riskStatus.util';
+import { getStatusSeverity } from '@/utils/riskStatus.util';
 import { StorageKey, useStorage } from '@/utils/storage/useStorage.util';
 import { useSearchParams } from '@/utils/url.util';
 
@@ -181,6 +181,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
       from: '',
       to: noHistory ? risk.status : risk.history[0].from,
       updated: risk.created,
+      comment: risk.comment,
     };
 
     return [firstTrackedHistory, ...riskHistory];
@@ -671,6 +672,10 @@ function getHistoryDiff(
   updated: string;
 } {
   if (isFirst) {
+    if (!history.to) {
+      return { title: '', updated: '' };
+    }
+
     return {
       title: (
         <div className="whitespace-break-spaces">
@@ -683,7 +688,7 @@ function getHistoryDiff(
               className="inline-flex min-h-[26px] whitespace-nowrap py-1"
               style="default"
             >
-              {RiskStatusLabel[history.to as RiskStatus]}
+              {RiskStatusLabel[history.to as RiskStatus] || history.to}
             </Chip>
           ) : (
             <RiskDropdown
@@ -702,15 +707,18 @@ function getHistoryDiff(
     };
   }
 
-  const isStatusChanged =
-    `${history.from?.[0]}${history.from?.[2]}` !==
-    `${history.to?.[0]}${history.to?.[2]}`;
-  const isSeverityChanged =
-    RiskStatusWithoutSeverity.includes(history.from as RiskStatus) ||
-    RiskStatusWithoutSeverity.includes(history.to as RiskStatus)
-      ? false
-      : getRiskSeverity(history.from) !== getRiskSeverity(history.to);
+  const { status: statusFrom, severity: severityFrom } = getStatusSeverity(
+    history.from
+  );
+  const { status: statusTo, severity: severityTo } = getStatusSeverity(
+    history.to
+  );
+
+  const isStatusChanged = statusFrom !== statusTo;
+  const isSeverityChanged = severityFrom !== severityTo;
+  const hasComment = Boolean(history.comment);
   const isBothChanged = isSeverityChanged && isStatusChanged;
+
   const by = history?.by;
 
   const severity = (
@@ -800,13 +808,32 @@ function getHistoryDiff(
     </>
   );
 
+  const comment =
+    isStatusChanged || isSeverityChanged ? (
+      <p className="inline">
+        {` with `}
+        <span className="font-semibold">Comment</span>
+        <i>{` "${history.comment}"`}</i>
+      </p>
+    ) : (
+      <p className="inline">
+        <span>
+          {by} added the <span className="font-semibold">Comment</span>
+          <i>{` "${history.comment}"`}</i>
+        </span>
+      </p>
+    );
+
+  const hasChange = isStatusChanged || isSeverityChanged || hasComment;
+
   return {
-    title: (
+    title: hasChange ? (
       <div className="whitespace-break-spaces leading-7">
         {(isSeverityChanged || isBothChanged) && severity}
         {(isStatusChanged || isBothChanged) && status}
+        {history.comment && comment}
       </div>
-    ),
+    ) : null,
     updated: formatDate(history.updated),
   };
 }

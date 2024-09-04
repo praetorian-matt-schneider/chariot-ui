@@ -17,6 +17,9 @@ export function Timeline(props: TimelineProps) {
         }}
       ></div>
       {props.items.map((item, index) => {
+        if (!item.title) {
+          return null;
+        }
         return (
           <div
             ref={index === props.items.length - 1 ? lastItemRef : undefined}
