@@ -5,6 +5,7 @@ import {
   ExclamationTriangleIcon as ExclamationTriangleIconOutline,
   MagnifyingGlassIcon,
   PlusCircleIcon,
+  PlusIcon,
   XCircleIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
@@ -452,7 +453,16 @@ export const Overview: React.FC = () => {
                   these points effectively.
                 </p>
               </div>
+              <Button
+                styleType="primary"
+                startIcon={<PlusIcon className="size-4" />}
+                onClick={() => setIsAttackSurfaceDrawerOpen(true)}
+                className="mt-6 h-10 rounded-md py-0"
+              >
+                New Attack Surface
+              </Button>
             </div>
+
             <div>
               <Table
                 tableClassName="bg-header border-0 [&_thead_tr]:bg-header [&_tbody_tr:nth-child(odd)]:bg-header-dark [&_tr_td]:text-layer0 [&__tr_td_div:first]:border-t-4 [&_td_div]:border-header-dark [&_th_div]:border-0"
