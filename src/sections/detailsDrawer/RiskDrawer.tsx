@@ -240,7 +240,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
           section2={
             <div className="col flex size-full flex-col overflow-hidden">
               <div className="flex items-start justify-between gap-4 px-9 py-5">
-                <div className="flex w-2/3 flex-col gap-2">
+                <div className="max-w-1/2 flex flex-col gap-2">
                   <div className="flex items-center gap-4">
                     <h1
                       className="text-2xl font-bold"
@@ -260,7 +260,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                   </div>
 
                   {/* Actions Section */}
-                  <div className="flex flex-row gap-3">
+                  <div className="flex flex-row flex-wrap gap-3">
                     <Tooltip placement="top" title="Change risk severity">
                       <RiskDropdown
                         type="severity"
@@ -336,7 +336,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                     </Tooltip>
                   </div>
                 </div>
-                <RiskDetails className="w-1/3" risk={risk} />
+                <RiskDetails className="max-w-1/2" risk={risk} />
               </div>
 
               {/* POE and Description */}
