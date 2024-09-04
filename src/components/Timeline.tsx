@@ -30,7 +30,7 @@ export function Timeline(props: TimelineProps) {
               {item.icon || <UserCircleIcon className="stroke-1" />}
             </div>
             <div className="flex flex-col gap-1">
-              <p className="text-sm">{item.title}</p>
+              <div className="text-sm">{item.title}</div>
               <div className="text-xs text-default-light">
                 {item.description}
               </div>

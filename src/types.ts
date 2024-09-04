@@ -44,10 +44,17 @@ export enum RiskStatus {
   Triaged = 'T',
   Opened = 'O',
   Remediated = 'R',
+
   MachineOpen = 'MO',
   MachineDeleted = 'MD',
   ExposedRisks = 'E',
 }
+
+export const RiskStatusWithSeverity = [
+  RiskStatus.Triaged,
+  RiskStatus.Opened,
+  RiskStatus.Remediated,
+];
 
 export const RiskStatusWithoutSeverity = [
   RiskStatus.MachineOpen,
@@ -220,6 +227,7 @@ export type EntityHistory = {
   to: string;
   updated: string;
   by?: string;
+  comment: string;
 };
 
 export interface Risk extends RiskTemplate {

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { forwardRef, useState } from 'react';
 import {
   AdjustmentsHorizontalIcon,
   Bars2Icon,
@@ -73,131 +73,133 @@ export const riskSeverityOptions = [
   },
 ];
 
-export const RiskDropdown: React.FC<Props> = ({
-  risk,
-  className,
-  type = 'severity',
-  selectedRowsData,
-  styleType,
-}: Props) => {
-  const [isClosedSubStateModalOpen, setIsClosedSubStateModalOpen] =
-    useState(false);
+export const RiskDropdown = forwardRef<HTMLButtonElement, Props>(
+  function RiskDropdown(
+    { risk, className, type = 'severity', selectedRowsData, styleType }: Props,
+    ref
+  ) {
+    const [isClosedSubStateModalOpen, setIsClosedSubStateModalOpen] =
+      useState(false);
 
-  const { handleUpdate: updateRisk } = useBulkUpdateRisk();
-  const { mutate: deleteRisk } = useDeleteRisk();
+    const { handleUpdate: updateRisk } = useBulkUpdateRisk();
+    const { mutate: deleteRisk } = useDeleteRisk();
 
-  const data =
-    selectedRowsData && selectedRowsData.length > 1 ? selectedRowsData : [risk];
+    const data =
+      selectedRowsData && selectedRowsData.length > 1
+        ? selectedRowsData
+        : [risk];
 
-  const generalChipClass = 'inline-flex min-h-[26px] py-1 whitespace-nowrap';
+    const generalChipClass = 'inline-flex min-h-[26px] py-1 whitespace-nowrap';
 
-  const { status: riskStatusKey, severity: riskSeverityKey } =
-    getStatusSeverity(risk.status);
+    const { status: riskStatusKey, severity: riskSeverityKey } =
+      getStatusSeverity(risk.status);
 
-  const statusLabel = RiskStatusLabel[riskStatusKey] || riskStatusKey;
-  const severityLabel = SeverityDef[riskSeverityKey] || riskSeverityKey;
+    const statusLabel = RiskStatusLabel[riskStatusKey] || riskStatusKey;
+    const severityLabel = SeverityDef[riskSeverityKey] || riskSeverityKey;
 
-  function handleStatusChange({
-    status,
-    severity,
-    comment,
-  }: {
-    status?: RiskStatus;
-    severity?: string;
-    comment?: string;
-  }) {
-    updateRisk({
-      selectedRows: data as Risk[],
+    function handleStatusChange({
       status,
       severity,
       comment,
-    });
-  }
+    }: {
+      status?: RiskStatus;
+      severity?: string;
+      comment?: string;
+    }) {
+      updateRisk({
+        selectedRows: data as Risk[],
+        status,
+        severity,
+        comment,
+      });
+    }
 
-  function handleDeleteRisk({ status }: { status: string }) {
-    const updatedData = data.map(data => ({
-      ...data,
-      comment: status,
-    }));
-    deleteRisk(updatedData);
-  }
+    function handleDeleteRisk({ status }: { status: string }) {
+      const updatedData = data.map(data => ({
+        ...data,
+        comment: status,
+      }));
+      deleteRisk(updatedData);
+    }
 
-  if (styleType === 'chip') {
-    return type === 'status' ? (
-      <Chip className={cn(generalChipClass, className)} style="default">
-        {statusLabel}
-      </Chip>
-    ) : (
-      <Chip
-        className={cn(
-          generalChipClass,
-          getSeverityClass(riskSeverityKey),
-          className
-        )}
-      >
-        {severityLabel}
-      </Chip>
-    );
-  }
-
-  if (type === 'status') {
-    return (
-      <>
-        <Dropdown
-          className={`min-w-32 justify-start rounded-[2px] border border-default py-1 ${className}`}
-          menu={{
-            items: riskStatusOptions,
-            onClick: value => {
-              if (value) {
-                if (value === RiskStatus.Remediated) {
-                  setIsClosedSubStateModalOpen(true);
-                } else {
-                  handleStatusChange({ status: value as RiskStatus });
-                }
-              }
-            },
-          }}
-          startIcon={
-            riskStatusOptions.find(option => option.value === riskStatusKey)
-              ?.icon ?? <LockClosedIcon className="size-4 stroke-2" />
-          }
-          endIcon={<ChevronDownIcon className="text-defualt size-3" />}
-          onClick={event => event.stopPropagation()}
+    if (styleType === 'chip') {
+      return type === 'status' ? (
+        <Chip className={cn(generalChipClass, className)} style="default">
+          {statusLabel}
+        </Chip>
+      ) : (
+        <Chip
+          className={cn(
+            generalChipClass,
+            getSeverityClass(riskSeverityKey),
+            className
+          )}
         >
-          <div className="flex-1 text-left">{statusLabel}</div>
-        </Dropdown>
+          {severityLabel}
+        </Chip>
+      );
+    }
 
-        <ClosedStateModal
-          isOpen={isClosedSubStateModalOpen}
-          onClose={() => setIsClosedSubStateModalOpen(false)}
-          onStatusChange={handleDeleteRisk}
-        />
-      </>
+    if (type === 'status') {
+      return (
+        <>
+          <Dropdown
+            className={`min-w-32 justify-start rounded-[2px] border border-default py-1 ${className}`}
+            menu={{
+              items: riskStatusOptions,
+              onClick: value => {
+                if (value) {
+                  if (value === RiskStatus.Remediated) {
+                    setIsClosedSubStateModalOpen(true);
+                  } else {
+                    handleStatusChange({ status: value as RiskStatus });
+                  }
+                }
+              },
+            }}
+            startIcon={
+              riskStatusOptions.find(option => option.value === riskStatusKey)
+                ?.icon ?? <LockClosedIcon className="size-4 stroke-2" />
+            }
+            endIcon={<ChevronDownIcon className="text-defualt size-3" />}
+            onClick={event => event.stopPropagation()}
+          >
+            <div className="flex-1 text-left">{statusLabel}</div>
+          </Dropdown>
+
+          <ClosedStateModal
+            isOpen={isClosedSubStateModalOpen}
+            onClose={() => setIsClosedSubStateModalOpen(false)}
+            onStatusChange={handleDeleteRisk}
+          />
+        </>
+      );
+    }
+
+    return (
+      <Dropdown
+        className={`border-1 min-w-28 justify-between rounded-[2px] border border-default py-1 pr-2 ${className}`}
+        menu={{
+          items: riskSeverityOptions,
+          onClick: value => {
+            if (value) {
+              handleStatusChange({ severity: value });
+            }
+          },
+        }}
+        startIcon={
+          riskSeverityOptions.find(option => option.value === riskSeverityKey)
+            ?.icon
+        }
+        endIcon={<ChevronDownIcon className="size-3 text-default-light" />}
+        onClick={event => event.stopPropagation()}
+        ref={ref}
+      >
+        <div className="flex-1 text-left">{severityLabel}</div>
+      </Dropdown>
     );
   }
-
-  return (
-    <Dropdown
-      className={`border-1 min-w-28 justify-between rounded-[2px] border border-default py-1 pr-2 ${className}`}
-      menu={{
-        items: riskSeverityOptions,
-        onClick: value => {
-          if (value) {
-            handleStatusChange({ severity: value });
-          }
-        },
-      }}
-      startIcon={
-        riskSeverityOptions.find(option => option.value === riskSeverityKey)
-          ?.icon
-      }
-      endIcon={<ChevronDownIcon className="size-3 text-default-light" />}
-      onClick={event => event.stopPropagation()}
-    >
-      <div className="flex-1 text-left">{severityLabel}</div>
-    </Dropdown>
-  );
-};
+);
 
 export const riskStatusFilterOptions = Object.values(RiskStatus).map(
   riskStatus => {
