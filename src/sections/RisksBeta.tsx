@@ -232,7 +232,7 @@ const RisksBeta: React.FC = () => {
       <RenderHeaderExtraContentSection>
         <div
           role="button"
-          onClick={() => setIsCTAOpen(true)}
+          onClick={() => (hasRemediatedRisk ? setIsCTAOpen(true) : {})}
           className="m-auto flex w-full flex-col items-center rounded-lg border-2 border-dashed border-header-dark bg-header p-8 text-center"
         >
           <Loader className="w-8" isLoading={risksStatus === 'pending'}>
