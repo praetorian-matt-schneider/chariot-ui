@@ -14,7 +14,7 @@ export const DomainDrawerContent: React.FC<DomainDrawerContentProps> = ({
 }) => {
   const { friend, me } = useAuth();
   const emailDomain = (friend || me).split('@')[1];
-  const [newDomain, setNewDomain] = useState<string>(domain || ''); // Start with an empty domain
+  const [newDomain, setNewDomain] = useState<string>(domain || emailDomain);
 
   useEffect(() => {
     onChange(newDomain, AssetStatus.Active);
