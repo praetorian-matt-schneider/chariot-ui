@@ -330,7 +330,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                   </Tooltip>
                 </div>
               </div>
-              <RiskDetails className="w-1/3" risk={risk} />
+              <RiskDetails risk={risk} />
             </div>
 
             {/* POE and Description */}
@@ -584,18 +584,18 @@ const RiskDetails = ({
   className?: string;
 }) => {
   return (
-    <div className={cn('flex flex-col gap-2', className)}>
-      <div className="flex items-center text-nowrap text-slate-600">
-        Last Seen:
-        <p className="ml-1 font-bold text-slate-950">
+    <div className={cn('flex gap-8', className)}>
+      <div className="text-nowrap text-slate-600">
+        <p className="text-xl font-bold text-slate-950">
           {formatDate(risk.updated)}
         </p>
+        <p>Last Seen</p>
       </div>
-      <div className="flex items-center text-nowrap text-slate-600">
-        First Seen:
-        <p className="ml-1 font-bold text-slate-950">
+      <div className="text-nowrap text-slate-600">
+        <p className="text-xl font-bold text-slate-950">
           {formatDate(risk.created)}
         </p>
+        <p>First Seen</p>
       </div>
     </div>
   );
