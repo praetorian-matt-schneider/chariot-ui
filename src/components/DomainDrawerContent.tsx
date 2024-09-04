@@ -28,8 +28,8 @@ export const DomainDrawerContent: React.FC<DomainDrawerContentProps> = ({
           Confirm Your Root Domain
         </h2>
         <p className="mt-2 text-base text-gray-700">
-          This is the domain you are currently signed in with. You can update it
-          below if necessary.
+          This is the domain you are currently signed in with. To change it,
+          invite a user from the new domain.
         </p>
 
         <div className="mt-6">
