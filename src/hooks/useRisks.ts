@@ -155,6 +155,12 @@ const useBulkUpdateRiskHook = () => {
 
         invalidateAlerts();
 
+        keys.forEach(key => {
+          queryClient.invalidateQueries({
+            queryKey: getQueryKey.getMy('risk', key.split('#risk')[1]),
+          });
+        });
+
         updateAllSubQueries(previous => {
           const updatedPages = previous.pages.map(page => {
             return {

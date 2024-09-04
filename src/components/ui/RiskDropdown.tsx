@@ -18,6 +18,8 @@ import { Risk, RiskStatus, RiskStatusLabel, SeverityDef } from '@/types';
 import { cn } from '@/utils/classname';
 import { getSeverityClass } from '@/utils/getSeverityClass.util';
 import { getStatusSeverity } from '@/utils/riskStatus.util';
+import { StorageKey } from '@/utils/storage/useStorage.util';
+import { useSearchParams } from '@/utils/url.util';
 
 interface Props {
   risk: Pick<Risk, 'status' | 'key' | 'comment'>;
@@ -83,6 +85,7 @@ export const RiskDropdown = forwardRef<HTMLButtonElement, Props>(
 
     const { handleUpdate: updateRisk } = useBulkUpdateRisk();
     const { mutate: deleteRisk } = useDeleteRisk();
+    const { removeSearchParams } = useSearchParams();
 
     const data =
       selectedRowsData && selectedRowsData.length > 1
@@ -120,6 +123,7 @@ export const RiskDropdown = forwardRef<HTMLButtonElement, Props>(
         comment: status,
       }));
       deleteRisk(updatedData);
+      removeSearchParams(StorageKey.DRAWER_COMPOSITE_KEY);
     }
 
     if (styleType === 'chip') {
