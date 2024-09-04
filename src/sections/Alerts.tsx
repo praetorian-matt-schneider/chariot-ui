@@ -28,6 +28,7 @@ import {
 import { cn } from '@/utils/classname';
 import { formatDate } from '@/utils/date.util';
 import { getRiskSeverity, getRiskStatus } from '@/utils/riskStatus.util';
+import { useSticky } from '@/utils/sticky.util';
 
 type AlertType = Asset | Risk | Attribute;
 
@@ -491,11 +492,14 @@ export const Alerts: React.FC<Props> = ({
     overscan: 5,
   });
 
+  const { getSticky, useCreateSticky } = useSticky();
+
+  const stickyRef = useCreateSticky<HTMLTableSectionElement>({
+    id: 'risk-header',
+  });
+
   return (
-    <div
-      className="relative z-10 flex rounded-sm border border-gray-200 bg-white"
-      style={{ height: 'calc(100vh - 135px)' }}
-    >
+    <div className="flex size-full bg-white">
       {/* Sidebar */}
       {!hideFilters && (
         <div className="w-1/4 overflow-auto border-r border-gray-200 bg-zinc-50 bg-gradient-to-l px-2 py-4">
@@ -561,7 +565,7 @@ export const Alerts: React.FC<Props> = ({
       )}
 
       {/* Main Content */}
-      <div className="flex-1 overflow-hidden">
+      <div className="size-full">
         {alerts === null && (
           <div className="mt-16 flex flex-1 items-center justify-center">
             <div className="text-center">
@@ -576,8 +580,15 @@ export const Alerts: React.FC<Props> = ({
           </div>
         )}
         {query && (
-          <div className="flex h-full flex-col">
-            <div className="p-4">
+          <div className="flex size-full flex-col">
+            <div
+              className="sticky bg-white p-4"
+              ref={stickyRef}
+              style={{
+                zIndex: 1,
+                top: getSticky('1'),
+              }}
+            >
               <div className="flex items-center justify-between">
                 <div>{getAlertDescription(query)}</div>
                 {unsubscribeAlert && (
