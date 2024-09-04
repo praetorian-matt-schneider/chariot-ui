@@ -762,7 +762,7 @@ export const Overview: React.FC = () => {
                 onChange={e => setSearch(e.target.value)}
               />
             </div>
-            <p className="text-md mb-4 mt-2 text-gray-700">
+            <p className="mb-4 mt-2 text-lg text-gray-700">
               Once added, they’ll appear in your attack surface, ready for setup
               later.
             </p>
