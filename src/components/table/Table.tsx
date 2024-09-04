@@ -1,14 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* TODO: Fix the types for the Table component */
 
-import React, {
-  ReactNode,
-  useEffect,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ChevronDownIcon,
   ExclamationCircleIcon,
@@ -64,8 +57,6 @@ export function Table<TData>(props: TableProps<TData>) {
     rowClassName,
   } = props;
 
-  const tableId = useId();
-
   const { getSticky, useCreateSticky } = useSticky();
 
   const stickyRef = useCreateSticky<HTMLTableSectionElement>({
@@ -117,7 +108,7 @@ export function Table<TData>(props: TableProps<TData>) {
     status,
   ]);
 
-  const parentRef = document.getElementById(isTableView ? 'body' : tableId);
+  const parentRef = document.getElementById(isTableView ? 'body' : 'localBody');
 
   useScroll(parentRef, fetchNextPage);
 
@@ -309,7 +300,7 @@ export function Table<TData>(props: TableProps<TData>) {
   }, [JSON.stringify({ selectedRows, rawData }), bulkActions]);
 
   return (
-    <div id={tableId}>
+    <div id="localBody">
       {(bodyHeader || parsedActions || parsedPrimaryAction) && (
         <RenderHeaderExtraContentSection>
           <div className=" flex flex-col justify-between gap-4 lg:flex-row">
