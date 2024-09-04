@@ -593,15 +593,6 @@ const RiskDetails = ({
 }) => {
   return (
     <div className={cn('flex flex-col gap-2', className)}>
-      <div className="flex items-start text-slate-600">
-        DNS:
-        <p
-          className="ml-1 break-words font-bold text-slate-950"
-          style={{ wordBreak: 'break-word' }}
-        >
-          {risk.dns}
-        </p>
-      </div>
       <div className="flex items-center text-nowrap text-slate-600">
         Last Seen:
         <p className="ml-1 font-bold text-slate-950">
