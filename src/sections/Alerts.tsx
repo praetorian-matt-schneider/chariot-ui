@@ -16,6 +16,7 @@ import { useReRunJob } from '@/hooks/useJobs';
 import { useDeleteRisk, useUpdateRisk } from '@/hooks/useRisks';
 import { AlertIcon } from '@/sections/Assets';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
+import { Empty } from '@/sections/Empty';
 import {
   Asset,
   AssetStatus,
@@ -378,7 +379,7 @@ export const Alerts: React.FC<Props> = ({
                   ))}
                 </>
               )}
-              {dataStatus !== 'pending' && (
+              {dataStatus !== 'pending' && items.length > 0 && (
                 <div
                   className="relative"
                   style={{
@@ -398,6 +399,7 @@ export const Alerts: React.FC<Props> = ({
                   ))}
                 </div>
               )}
+              {dataStatus !== 'pending' && items.length === 0 && <Empty />}
             </div>
           </div>
         )}

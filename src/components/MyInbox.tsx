@@ -35,9 +35,9 @@ const MyInbox: React.FC<{ className?: string }> = ({ className }) => {
     if (alerts === null || alerts.length === 0) {
       return [
         {
-          label: 'No alerts found',
+          label: 'No risks found',
           className: 'flex items-center text-gray-500 italic',
-          to: getRoute(['app', 'alerts']),
+          to: getRoute(['app', 'risks']),
         },
       ];
     } else {
