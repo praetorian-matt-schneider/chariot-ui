@@ -257,51 +257,46 @@ function RiskList(props: RiskListProps) {
   const navigate = useNavigate();
 
   return (
-    <div className="flex h-full flex-col">
-      <h1 className="sticky top-0 border-b border-gray-300 bg-white px-9 py-5 text-2xl font-bold">
-        Risks
-      </h1>
-      <div className="size-full overflow-auto">
-        {props.risks.length === 0 && (
-          <div className="px-10 py-3">
-            {`No risks have been detected for this asset. However, it's always a good practice to regularly monitor and scan for any new potential threats.`}
-          </div>
-        )}
-        {props.risks.map((risk, index) => {
-          const riskStatusKey = getRiskStatus(risk.status);
+    <StickHeaderSection label="Risks">
+      {props.risks.length === 0 && (
+        <div className="px-10 py-3">
+          {`No risks have been detected for this asset. However, it's always a good practice to regularly monitor and scan for any new potential threats.`}
+        </div>
+      )}
+      {props.risks.map((risk, index) => {
+        const riskStatusKey = getRiskStatus(risk.status);
 
-          return (
-            <div
-              key={index}
-              className={cn(
-                'gap-3 px-10 py-3',
-                getSeverityClass(getRiskSeverity(risk.status)),
-                'border-b border-gray-300'
-              )}
-            >
-              <div className="flex w-full items-center gap-2">
-                {getRiskSeverityIcon(getRiskSeverity(risk.status), 'size-5')}
-                <p className="text-sm font-medium text-slate-900">
-                  {RiskStatusLabel[riskStatusKey]}
-                </p>
-                <p className="ml-auto text-base font-medium text-slate-600">
-                  {formatDate(risk.updated)}
-                </p>
-              </div>
-              <div
-                className="cursor-pointer text-indigo-500 hover:underline"
-                style={{ wordBreak: 'break-word' }}
-                onClick={() => {
-                  navigate(getRiskDrawerLink(risk));
-                }}
-              >
-                {risk.name}
-              </div>
+        return (
+          <div
+            key={index}
+            className={cn(
+              'gap-3 px-10 py-3',
+              getSeverityClass(getRiskSeverity(risk.status)),
+              'border-b border-gray-300'
+            )}
+          >
+            <div className="flex w-full items-center gap-2">
+              {getRiskSeverityIcon(getRiskSeverity(risk.status), 'size-5')}
+              <p className="text-sm font-medium text-slate-900">
+                {RiskStatusLabel[riskStatusKey]}
+              </p>
+              <p className="ml-auto text-base font-medium text-slate-600">
+                {formatDate(risk.updated)}
+              </p>
             </div>
-          );
-        })}
-      </div>
-    </div>
+            <div
+              className="cursor-pointer text-indigo-500 hover:underline"
+              style={{ wordBreak: 'break-word' }}
+              onClick={() => {
+                navigate(getRiskDrawerLink(risk));
+              }}
+            >
+              {risk.name}
+            </div>
+          </div>
+        );
+      })}
+    </StickHeaderSection>
   );
 }
 
@@ -311,37 +306,38 @@ interface AttributeListProps {
 }
 function AttributeList(props: AttributeListProps) {
   return (
-    <div className="flex h-full flex-col">
-      <h1 className="sticky top-0 border-b border-gray-300 bg-white px-9 py-5 text-2xl font-bold">
-        <p>Attributes</p>
-        <AddAttribute resourceKey={props.resourceKey} />
-      </h1>
-      <div className="size-full overflow-auto">
-        {props.attributes.map((attribute, index) => {
-          return (
-            <div
-              key={index}
-              className={cn('gap-3 px-10 py-3', 'border-b border-gray-300')}
-            >
-              <div className="flex w-full items-center gap-2">
-                <p className="text-sm font-medium text-slate-600">
-                  {attribute.name}
-                </p>
-                <p className="ml-auto text-base font-medium text-slate-600">
-                  {formatDate(attribute.updated)}
-                </p>
-              </div>
-              <div
-                className="text-base font-semibold"
-                style={{ wordBreak: 'break-word' }}
-              >
-                {attribute.value}
-              </div>
+    <StickHeaderSection
+      label={
+        <>
+          <p>Attributes</p>
+          <AddAttribute resourceKey={props.resourceKey} />
+        </>
+      }
+    >
+      {props.attributes.map((attribute, index) => {
+        return (
+          <div
+            key={index}
+            className={cn('gap-3 px-10 py-3', 'border-b border-gray-300')}
+          >
+            <div className="flex w-full items-center gap-2">
+              <p className="text-sm font-medium text-slate-600">
+                {attribute.name}
+              </p>
+              <p className="ml-auto text-base font-medium text-slate-600">
+                {formatDate(attribute.updated)}
+              </p>
             </div>
-          );
-        })}
-      </div>
-    </div>
+            <div
+              className="text-base font-semibold"
+              style={{ wordBreak: 'break-word' }}
+            >
+              {attribute.value}
+            </div>
+          </div>
+        );
+      })}
+    </StickHeaderSection>
   );
 }
 
@@ -766,7 +762,7 @@ export function ResponsiveGrid(props: ResponsiveGridProps) {
 
   return (
     <div
-      className="grid w-full"
+      className="grid size-full"
       style={
         screenSize.maxMd
           ? {
@@ -783,7 +779,7 @@ export function ResponsiveGrid(props: ResponsiveGridProps) {
             : {
                 display: 'grid',
                 gridTemplateAreas: `'section1 section2 section3'`,
-                gridTemplateColumns: `minmax(${sideSectionMinWidth}, 25%) auto minmax(${sideSectionMinWidth}, 25%)`,
+                gridTemplateColumns: `minmax(${sideSectionMinWidth}, 25%) minmax(auto, calc( 100% - 600px)) minmax(${sideSectionMinWidth}, 25%)`,
                 gridTemplateRows: '100%',
               }
       }
@@ -802,7 +798,7 @@ export function ResponsiveGrid(props: ResponsiveGridProps) {
         {props.section1}
       </div>
       <div
-        className="flex w-full flex-col gap-4"
+        className="flex w-full flex-col gap-4 overflow-auto"
         style={{ gridArea: 'section2' }}
       >
         {props.section2}
@@ -813,6 +809,20 @@ export function ResponsiveGrid(props: ResponsiveGridProps) {
       >
         {props.section3}
       </div>
+    </div>
+  );
+}
+
+export function StickHeaderSection(props: {
+  label: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <div className="flex h-full flex-col">
+      <h1 className="sticky top-0 border-b border-gray-300 bg-white px-9 py-5 text-2xl font-bold">
+        {props.label}
+      </h1>
+      <div className="size-full overflow-auto">{props.children}</div>
     </div>
   );
 }

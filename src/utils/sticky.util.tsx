@@ -14,9 +14,10 @@ interface StickyContextType {
   useCreateSticky<T extends HTMLElement>(props: {
     id: string;
     offset?: number;
-    notSticky?: boolean;
+    enabled?: boolean;
   }): React.RefObject<T>;
   getSticky(...args: string[]): number;
+  stickyElements: Record<string, number>;
 }
 
 const StickyContext = createContext<StickyContextType | undefined>(undefined);
@@ -36,10 +37,11 @@ export const StickyProvider: React.FC<{ children: React.ReactNode }> = ({
     {}
   );
 
+  console.log('stickyElements', stickyElements);
   function useCreateSticky<T extends HTMLElement>(props: {
     id: string;
     offset?: number;
-    notSticky?: boolean;
+    enabled?: boolean;
   }): React.RefObject<T> {
     const ref = useRef<T>(null);
 
@@ -53,7 +55,7 @@ export const StickyProvider: React.FC<{ children: React.ReactNode }> = ({
     }
 
     useEffect(() => {
-      if (ref.current && !props.notSticky) {
+      if (ref.current && (props.enabled ?? true === true)) {
         const observer = new MutationObserver(getStickyElementsHeight);
 
         observer.observe(ref.current, {
@@ -79,7 +81,7 @@ export const StickyProvider: React.FC<{ children: React.ReactNode }> = ({
           omit(prevStickyElements, props.id)
         );
       }
-    }, [props.notSticky]);
+    }, [props.enabled]);
 
     return ref;
   }
@@ -92,7 +94,9 @@ export const StickyProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   return (
-    <StickyContext.Provider value={{ useCreateSticky, getSticky }}>
+    <StickyContext.Provider
+      value={{ useCreateSticky, getSticky, stickyElements }}
+    >
       {children}
     </StickyContext.Provider>
   );

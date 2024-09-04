@@ -134,7 +134,7 @@ export function Header() {
   const stickyRef = useCreateSticky<HTMLDivElement>({
     id: '1',
     offset: -16,
-    notSticky: !showSticky,
+    enabled: showSticky,
   });
 
   return (
