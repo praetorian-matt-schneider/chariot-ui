@@ -4,8 +4,9 @@ import { useMy } from '@/hooks/useMy';
 import {
   allIntegrations,
   availableAttackSurfaceIntegrations,
+  availableRiskIntegrations,
+  comingSoonRiskIntegrations,
   Integrations,
-  riskIntegrations,
 } from '@/sections/overview/Integrations';
 import { Account } from '@/types';
 
@@ -62,9 +63,10 @@ export const useIntegration = () => {
         let updatedAcc = acc;
         const integration = {
           ...integrationWithoutType,
-          type: riskIntegrations.find(
-            current => current.id === integrationWithoutType.member
-          )
+          type: [
+            ...availableRiskIntegrations,
+            ...comingSoonRiskIntegrations,
+          ].find(current => current.id === integrationWithoutType.member)
             ? 'riskNotification'
             : 'attack',
           displayName:
@@ -84,9 +86,10 @@ export const useIntegration = () => {
             ],
           };
         } else if (integration.value === 'waitlisted') {
-          const isNowAvailableToSetup = availableAttackSurfaceIntegrations.find(
-            i => i.id === integration.member
-          );
+          const isNowAvailableToSetup = [
+            ...availableAttackSurfaceIntegrations,
+            ...availableRiskIntegrations,
+          ].find(i => i.id === integration.member);
 
           if (isNowAvailableToSetup) {
             updatedAcc = {
@@ -117,9 +120,10 @@ export const useIntegration = () => {
           (acc.riskNotificationStatus !== 'connected' ||
             acc.attackSurfaceStatus !== 'connected')
         ) {
-          const isRiskIntegration = riskIntegrations.find(
-            ({ id }) => id === integration.member
-          );
+          const isRiskIntegration = [
+            ...availableRiskIntegrations,
+            ...comingSoonRiskIntegrations,
+          ].find(({ id }) => id === integration.member);
 
           if (isRiskIntegration) {
             if (acc.riskNotificationStatus !== 'connected') {

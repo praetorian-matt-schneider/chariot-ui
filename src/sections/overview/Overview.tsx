@@ -48,8 +48,9 @@ import {
 } from '@/sections/overview/IntegrationCards';
 import {
   availableAttackSurfaceIntegrations,
+  availableRiskIntegrations,
   comingSoonAttackSurfaceIntegrations,
-  riskIntegrations,
+  comingSoonRiskIntegrations,
 } from '@/sections/overview/Integrations';
 import SetupModal from '@/sections/SetupModal';
 import { useAuth } from '@/state/auth';
@@ -262,9 +263,11 @@ export const Overview: React.FC = () => {
       a.name.localeCompare(b.name)
     );
 
-    const filteredRiskNotificationIntegrations = riskIntegrations.filter(
-      integration =>
-        integration.name.toLowerCase().includes(search?.toLowerCase())
+    const filteredRiskNotificationIntegrations = [
+      ...availableRiskIntegrations,
+      ...comingSoonRiskIntegrations,
+    ].filter(integration =>
+      integration.name.toLowerCase().includes(search?.toLowerCase())
     );
 
     return {

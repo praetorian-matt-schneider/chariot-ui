@@ -1077,26 +1077,28 @@ export const comingSoonAttackSurfaceIntegrations = [
   Integrations.datadog,
   Integrations.wiz,
   Integrations.digitalocean,
-  Integrations.email,
-  Integrations.phone,
 ];
 
-export const riskIntegrations = [
+export const availableRiskIntegrations = [
   Integrations.slack,
   Integrations.jira,
   Integrations.webhook,
   Integrations.zulip,
   Integrations.teams,
+];
+
+export const comingSoonRiskIntegrations = [
   Integrations.email,
   Integrations.phone,
 ];
 
-export const riskIntegrationsKeys = riskIntegrations.map(
+export const availableRiskIntegrationsKeys = availableRiskIntegrations.map(
   integration => integration.id
 ) as string[];
 
 export const allIntegrations = [
   ...availableAttackSurfaceIntegrations,
   ...comingSoonAttackSurfaceIntegrations,
-  ...riskIntegrations,
+  ...availableRiskIntegrations,
+  ...comingSoonRiskIntegrations,
 ];
