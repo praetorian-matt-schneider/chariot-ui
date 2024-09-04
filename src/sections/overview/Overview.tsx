@@ -791,11 +791,16 @@ export const Overview: React.FC = () => {
                 className="mx-20 mb-10 h-20 w-full text-xl font-bold"
                 onClick={async () => {
                   // add integration   accounts
+
                   const promises = selectedRiskNotificationIntegrations
                     .map((integration: string) => {
+                      const isWaitlisted =
+                        comingSoonAttackSurfaceIntegrations.find(
+                          i => i.id === integration
+                        );
                       return link({
                         username: integration,
-                        value: 'setup',
+                        value: isWaitlisted ? 'waitlisted' : 'setup',
                         config: {},
                       });
                     })
