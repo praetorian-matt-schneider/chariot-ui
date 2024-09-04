@@ -1,10 +1,11 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   CheckCircleIcon,
   QuestionMarkCircleIcon,
 } from '@heroicons/react/24/outline';
 import { BellIcon } from '@heroicons/react/24/solid';
 
+import { Drawer } from '@/components/Drawer';
 import { Loader } from '@/components/Loader';
 import { useMy } from '@/hooks';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
@@ -30,6 +31,11 @@ const RisksBeta: React.FC = () => {
       exposureRisk: '',
     },
   });
+
+  const [isCTAOpen, setIsCTAOpen] = useState<boolean>(false);
+  const closeCTADrawer = () => {
+    setIsCTAOpen(false);
+  };
 
   // Check for remediated risks to update the CTA
   const { data: risksGeneric, status: risksStatus } = useGenericSearch({
@@ -115,7 +121,11 @@ const RisksBeta: React.FC = () => {
   return (
     <>
       <RenderHeaderExtraContentSection>
-        <div className="m-auto flex w-full flex-col items-center rounded-lg border-2 border-dashed border-header-dark bg-header p-8 text-center">
+        <div
+          role="button"
+          onClick={() => setIsCTAOpen(true)}
+          className="m-auto flex w-full flex-col items-center rounded-lg border-2 border-dashed border-header-dark bg-header p-8 text-center"
+        >
           <Loader className="w-8" isLoading={risksStatus === 'pending'}>
             {hasRemediatedRisk ? (
               <CheckCircleIcon className="size-10 text-green-400" />
@@ -209,6 +219,20 @@ const RisksBeta: React.FC = () => {
           </div>
         )}
       </FancyTable>
+      <Drawer
+        open={isCTAOpen}
+        onClose={closeCTADrawer}
+        onBack={closeCTADrawer}
+        className={'w-full rounded-t-sm bg-zinc-100 p-0 shadow-lg'}
+        skipBack={true}
+      >
+        <div className="mx-12 mt-6 pb-10">
+          <div className="flex w-full flex-row items-center justify-between">
+            <h1 className="mb-4 text-4xl font-extrabold">Remediated Risks</h1>
+          </div>
+          <div className="flex w-full flex-row justify-between gap-x-10"></div>
+        </div>
+      </Drawer>
     </>
   );
 };
