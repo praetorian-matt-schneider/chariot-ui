@@ -25,6 +25,7 @@ import {
   RiskSeverity,
   RiskStatus,
 } from '@/types';
+import { getAlertName } from '@/utils/attribute.util';
 import { cn } from '@/utils/classname';
 import { formatDate } from '@/utils/date.util';
 import { getRiskSeverity, getRiskStatus } from '@/utils/riskStatus.util';
@@ -596,19 +597,22 @@ const AlertButton = ({
   removeAlert: (alert: Pick<Condition, 'key'>) => void;
   label: string;
 }) => {
-  const isAlerting = alerts.some(alert => alert.value === attributeKey);
+  const alertName: string = getAlertName(attributeKey);
+
+  const isAlerting = alerts.some(alert => alert.value === alertName);
   const [isUpdating, setIsUpdating] = useState(false);
 
   const handleToggle = async () => {
     setIsUpdating(true);
+
     if (isAlerting) {
       await removeAlert({
-        key: `#condition#${attributeKey}`,
+        key: `#condition#${alertName}`,
       });
     } else {
       await addAlert({
-        value: attributeKey,
-        name: `Assets with ${label} identified`,
+        value: alertName,
+        name: alertName,
       });
     }
     refetch();
@@ -673,9 +677,10 @@ export const AlertCategory = ({
 
   const handleNewAlert = () => {
     setSearchTerm('');
+    const alert = `exposure-${title.toLowerCase()}-${searchTerm}`;
     addAlert({
-      value: `#attribute#${title?.toLowerCase()}#${searchTerm}`,
-      name: `Assets with ${searchTerm} identified`,
+      value: alert,
+      name: alert,
     });
     refetch();
   };

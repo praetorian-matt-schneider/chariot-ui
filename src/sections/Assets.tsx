@@ -63,6 +63,7 @@ import {
   SeverityOpenCounts,
 } from '@/types';
 import { QueryStatus, useMergeStatus } from '@/utils/api';
+import { getAlertName } from '@/utils/attribute.util';
 import { cn } from '@/utils/classname';
 import { capitalize } from '@/utils/lodash.util';
 import { useGetScreenSize } from '@/utils/misc.util';
@@ -783,7 +784,10 @@ export function CategoryFilter(props: CategoryFilterProps) {
                         )}
                         {item.showCount && <p>{option.count}</p>}
                         {alert && (
-                          <AlertIcon {...alert} currentValue={option.value} />
+                          <AlertIcon
+                            {...alert}
+                            currentValue={getAlertName(option.value)}
+                          />
                         )}
                       </div>
                     );
@@ -829,10 +833,8 @@ export function AlertIcon(props: AlertIconProps) {
     try {
       const attributeKey = props.currentValue;
       setIsLoading(true);
-      const [, attributeType = '', attributeValue = ''] =
-        attributeKey.match(Regex.ATTIBUTE_KEY) || [];
 
-      const alertName = `exposure-${attributeType}-${attributeValue.endsWith('#') ? attributeValue.slice(0, -1) : attributeValue}`;
+      const alertName = getAlertName(attributeKey);
 
       await addAlert({
         value: alertName,
@@ -1106,7 +1108,7 @@ export function FancyTable(
                   {filter.alert && (
                     <AlertIcon
                       {...filter.alert}
-                      currentValue={attribute}
+                      currentValue={getAlertName(attribute)}
                       styleType="button"
                     />
                   )}
