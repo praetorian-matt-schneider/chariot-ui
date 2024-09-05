@@ -1,11 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  CheckCircleIcon,
   DocumentTextIcon,
   QuestionMarkCircleIcon,
 } from '@heroicons/react/24/outline';
-import { BellIcon } from '@heroicons/react/24/solid';
+import { BellIcon, CheckCircleIcon } from '@heroicons/react/24/solid';
 
 import { Drawer } from '@/components/Drawer';
 import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
