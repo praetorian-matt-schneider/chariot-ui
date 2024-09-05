@@ -58,7 +58,7 @@ import { formatDate } from '@/utils/date.util';
 import { sToMs } from '@/utils/date.util';
 import { getJobStatus } from '@/utils/job';
 import { getDescription, isManualORPRrovidedRisk } from '@/utils/risk.util';
-import { getStatusSeverity } from '@/utils/riskStatus.util';
+import { getRiskStatus, getStatusSeverity } from '@/utils/riskStatus.util';
 import { useQueryFilters } from '@/utils/storage/useQueryParams.util';
 import { StorageKey, useStorage } from '@/utils/storage/useStorage.util';
 import { useSearchParams } from '@/utils/url.util';
@@ -124,16 +124,13 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     { enabled: open }
   );
 
-  const {
-    data: definitionsFile,
-    status: definitionsFileStatus,
-    isFetching: isDefinitionsFileFetching,
-  } = useGetFile(
-    {
-      name: `definitions/${name}`,
-    },
-    { enabled: open }
-  );
+  const { data: definitionsFile, isFetching: isDefinitionsFileFetching } =
+    useGetFile(
+      {
+        name: `definitions/${name}`,
+      },
+      { enabled: open }
+    );
   const { data: attributesGenericSearch } = useGenericSearch(
     {
       query: attributesFilter,
@@ -157,8 +154,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
       ? definitionsFile
       : JSON.stringify(definitionsFile);
 
-  const isInitialLoading =
-    riskStatus === 'pending' || definitionsFileStatus === 'pending';
+  const isInitialLoading = riskStatus === 'pending';
   const risk: Risk = risks[0] || {};
 
   const { status: riskStatusKey, severity: riskSeverityKey } =
@@ -269,7 +265,8 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
       open={open}
       onClose={handleClose}
       onBack={handleClose}
-      className={'w-full rounded-t-lg pb-0 shadow-lg'}
+      className={cn('w-full rounded-t-lg pb-0 shadow-lg')}
+      contentClassName="flex rounded-t-lg overflow-hidden"
     >
       <Loader isLoading={isInitialLoading} type="spinner">
         <ResponsiveGrid
@@ -356,61 +353,64 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                         invalidateRiskData();
                       }}
                     />
-                    <Tooltip
-                      placement="top"
-                      title={
-                        isInitialLoading
-                          ? ''
-                          : risk.source && !isManualORPRrovidedRisk(risk)
-                            ? isJobsRunning
-                              ? 'Scanning in progress'
-                              : sourceKeys.length === 0
-                                ? 'On-demand scanning is only available for risk which have a source attribute'
-                                : 'Revalidate the risk'
-                            : 'On-demand scanning is only available for automated risk discovery.'
-                      }
-                    >
-                      <Button
-                        className="h-8 text-nowrap border border-gray-400 text-xs"
-                        startIcon={<ArrowPathIcon className="size-4" />}
-                        disabled={
-                          isInitialLoading ||
-                          sourceKeys.length === 0 ||
-                          isManualORPRrovidedRisk(risk) ||
-                          Boolean(isJobsRunning)
-                        }
-                        isLoading={
-                          reRunJobStatus === 'pending' ||
-                          allAssetJobsStatus === 'pending'
-                        }
-                        onClick={async () => {
-                          const [response] = await bulkReRunJobs(
-                            sourceKeys.map(jobKey => ({
-                              capability: risk.source,
-                              jobKey,
-                              config: {
-                                test: risk.name,
-                              },
-                            }))
-                          );
-                          setRiskJobsMap(riskJobsMap => ({
-                            ...riskJobsMap,
-                            [risk.key]: sourceKeys.reduce(
-                              (acc, current, index) =>
-                                response[index]?.key
-                                  ? {
-                                      ...acc,
-                                      [current]: response[index].key,
-                                    }
-                                  : acc,
-                              {}
-                            ),
-                          }));
-                        }}
-                      >
-                        Scan Now
-                      </Button>
-                    </Tooltip>
+                    {getRiskStatus(risk.status) !== RiskStatus.Opened &&
+                      getRiskStatus(risk.status) !== RiskStatus.MachineOpen && (
+                        <Tooltip
+                          placement="top"
+                          title={
+                            isInitialLoading
+                              ? ''
+                              : risk.source && !isManualORPRrovidedRisk(risk)
+                                ? isJobsRunning
+                                  ? 'Scanning in progress'
+                                  : sourceKeys.length === 0
+                                    ? 'On-demand scanning is only available for risk which have a source attribute'
+                                    : 'Revalidate the risk'
+                                : 'On-demand scanning is only available for automated risk discovery.'
+                          }
+                        >
+                          <Button
+                            className="h-8 text-nowrap border border-gray-400 text-xs"
+                            startIcon={<ArrowPathIcon className="size-4" />}
+                            disabled={
+                              isInitialLoading ||
+                              sourceKeys.length === 0 ||
+                              isManualORPRrovidedRisk(risk) ||
+                              Boolean(isJobsRunning)
+                            }
+                            isLoading={
+                              reRunJobStatus === 'pending' ||
+                              allAssetJobsStatus === 'pending'
+                            }
+                            onClick={async () => {
+                              const [response] = await bulkReRunJobs(
+                                sourceKeys.map(jobKey => ({
+                                  capability: risk.source,
+                                  jobKey,
+                                  config: {
+                                    test: risk.name,
+                                  },
+                                }))
+                              );
+                              setRiskJobsMap(riskJobsMap => ({
+                                ...riskJobsMap,
+                                [risk.key]: sourceKeys.reduce(
+                                  (acc, current, index) =>
+                                    response[index]?.key
+                                      ? {
+                                          ...acc,
+                                          [current]: response[index].key,
+                                        }
+                                      : acc,
+                                  {}
+                                ),
+                              }));
+                            }}
+                          >
+                            Scan Now
+                          </Button>
+                        </Tooltip>
+                      )}
                   </div>
                 </div>
                 <RiskDetails risk={risk} />
@@ -418,7 +418,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
 
               {/* POE and Description */}
               <Tabs
-                className="overflow-hidden px-9 pb-5"
+                className="overflow-hidden pb-5"
                 contentWrapperClassName="overflow-auto"
                 tabs={[
                   {
@@ -427,11 +427,11 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                     tabClassName: 'bg-transparent',
                     Content: () => (
                       <Loader
+                        className="my-4 h-96"
                         isLoading={
                           isDefinitionsFileFetching ||
                           reportRiskStatus === 'pending'
                         }
-                        className="h-6 bg-layer0"
                       >
                         <Modal
                           size="6xl"
@@ -493,7 +493,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                         )}
                         <Button
                           styleType="none"
-                          className="mr-auto mt-4 pl-0 font-bold"
+                          className="ml-4 mr-auto mt-4 pl-0 font-bold"
                           endIcon={<PencilSquareIcon className="size-5" />}
                           onClick={event => {
                             event.preventDefault();
@@ -507,7 +507,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                     ),
                   },
                   {
-                    label: 'Proof of Exploits',
+                    label: 'Proof of Exploit',
                     id: 'poe',
                     tabClassName: 'bg-transparent',
                     Content: () => <POE risk={risk} />,
@@ -575,14 +575,14 @@ const POE: React.FC<{ risk: Risk }> = ({ risk }) => {
   }, [file]);
 
   return (
-    <Loader className="my-8 h-96" isLoading={fileStatus === 'pending'}>
+    <Loader className="my-4 h-96" isLoading={fileStatus === 'pending'}>
       {!proofOfExploit && (
-        <div className="mt-12">
+        <div className="mt-4">
           <p className="text-lg font-bold">No Proof of Exploit found.</p>
         </div>
       )}
       {proofOfExploit && (
-        <div className="relative my-8 overflow-auto">
+        <div className="relative my-4 overflow-auto">
           {Object.entries(proofOfExploit).map(([key, value]) => (
             <div className="mb-8" key={key}>
               <h3 className="text-lg font-bold">{key}</h3>
@@ -626,9 +626,9 @@ const AffectedAssets: React.FC<{
                   dns: asset.dns,
                   name: asset.name,
                 })}
-                className="hover:underline"
+                className="hover:text-indigo-600 hover:underline"
               >
-                <h2 className="text-brand">{asset.name}</h2>
+                <h2 className="font-semibold text-indigo-500">{asset.name}</h2>
               </Link>
               <p
                 className="text-sm text-gray-500"

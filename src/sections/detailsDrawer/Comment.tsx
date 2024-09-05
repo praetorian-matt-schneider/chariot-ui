@@ -102,9 +102,7 @@ export const Comment: React.FC<Props> = ({
 
   return (
     <div
-      className={cn(
-        'transition-all rounded-sm mt-4 bg-gray-100 p-4 cursor-pointer'
-      )}
+      className={cn('transition-all rounded-sm bg-gray-100 p-4 cursor-pointer')}
     >
       {risk.status !== RiskStatus.ExposedRisks && (
         <div className="mb-4 flex items-start gap-3">

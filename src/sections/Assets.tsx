@@ -800,7 +800,10 @@ export function CategoryFilter(props: CategoryFilterProps) {
                           />
                           {item.showCount && <p>{option.count}</p>}
                           {alert && (
-                            <AlertIcon {...alert} currentValue={getAlertName(option.value)} />
+                            <AlertIcon
+                              {...alert}
+                              currentValue={getAlertName(option.value)}
+                            />
                           )}
                         </div>
                       </Loader>

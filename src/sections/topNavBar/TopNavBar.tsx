@@ -5,7 +5,10 @@ import { LogoIcon } from '@/components/icons/Logo.icon';
 import MyInbox from '@/components/MyInbox';
 import { AccountDropdown } from '@/sections/topNavBar/AccountDropdown';
 import { Notifications } from '@/sections/topNavBar/Notifications';
+import { cn } from '@/utils/classname';
 import { getRoute } from '@/utils/route.util';
+
+const LINK_CLASS = `mt-1 border-b-2 px-3 pb-1 text-sm font-medium capitalize transition-colors hover:text-gray-100`;
 
 export const TopNavBar: React.FC = () => {
   const [, setShowNotification] = useState<boolean>(false);
@@ -37,22 +40,23 @@ export const TopNavBar: React.FC = () => {
                     'app',
                     link as 'overview' | 'assets' | 'risks',
                   ])}
-                  className={`mt-1 border-b-2 px-3 pb-1 text-sm font-medium capitalize transition-colors 
-                  hover:text-gray-100 ${
+                  className={cn(
+                    LINK_CLASS,
                     isCurrentPage(link)
                       ? 'border-layer0 hover:border-layer0'
                       : 'border-transparent hover:border-header'
-                  }`}
+                  )}
                 >
                   {remap(link)}
                 </Link>
               ))}
               <MyInbox
-                className={
+                className={cn(
+                  LINK_CLASS,
                   isCurrentPage('risks')
                     ? 'border-layer0 hover:border-layer0'
                     : 'border-transparent hover:border-header'
-                }
+                )}
               />
             </nav>
 

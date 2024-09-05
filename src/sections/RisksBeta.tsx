@@ -70,9 +70,12 @@ const RisksBeta: React.FC = () => {
   //   Security alert options
   const { data: alertsWithConditions, status: alertsStatus } =
     useGetAccountAlerts();
+  const alertsWithoutAttributes = (alertsWithConditions || []).filter(
+    alert => !alert.value.startsWith('#attribute')
+  );
 
   const [alerts, conditions] = partition(
-    alertsWithConditions,
+    alertsWithoutAttributes,
     ({ source }) => source === 'system'
   );
 
@@ -86,9 +89,7 @@ const RisksBeta: React.FC = () => {
           search: '',
           query: alerts[0].value,
         });
-      }
-
-      if (conditions && conditions.length > 0) {
+      } else if (conditions && conditions.length > 0) {
         setFilters({
           search: '',
           query: conditions[0].value,
@@ -256,7 +257,7 @@ const RisksBeta: React.FC = () => {
     <>
       <RenderHeaderExtraContentSection>
         <div
-          role="button"
+          role={hasRemediatedRisk ? 'button' : 'none'}
           onClick={() => (hasRemediatedRisk ? setIsCTAOpen(true) : {})}
           className="m-auto flex w-full flex-col items-center rounded-lg border-2 border-dashed border-header-dark bg-header p-8 text-center"
         >

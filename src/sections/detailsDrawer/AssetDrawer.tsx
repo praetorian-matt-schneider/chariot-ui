@@ -185,8 +185,8 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
       open={open}
       onClose={() => removeSearchParams(StorageKey.DRAWER_COMPOSITE_KEY)}
       onBack={() => navigate(-1)}
-      className={cn('w-full rounded-t-lg pb-0 shadow-lg overflow-hidden')}
-      contentClassName="flex"
+      className={cn('w-full rounded-t-lg pb-0 shadow-lg')}
+      contentClassName="flex rounded-t-lg overflow-hidden"
     >
       <Loader isLoading={isInitialLoading} type="spinner">
         <ResponsiveGrid

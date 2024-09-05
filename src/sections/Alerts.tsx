@@ -133,7 +133,7 @@ export const Alerts: React.FC<Props> = ({
             <div className="flex flex-1 items-center space-x-3 overflow-hidden">
               <div className="flex w-full flex-col overflow-hidden">
                 <Tooltip title={item.name ?? (isAsset ? item.dns : item.key)}>
-                  <span className="truncate text-base font-semibold text-brand hover:text-brand-dark">
+                  <span className="truncate text-base font-semibold text-indigo-500">
                     {item.name}
                   </span>
                 </Tooltip>
@@ -146,7 +146,7 @@ export const Alerts: React.FC<Props> = ({
           <span className="text-xs text-gray-500">
             {item.created !== item.updated ? (
               <Tooltip title={`Created ${formatDate(item.created)}`}>
-                Updated {formatDate(item.updated)}
+                Identified {formatDate(item.updated)}
               </Tooltip>
             ) : (
               <span>
@@ -492,7 +492,7 @@ export const AlertAction = ({
       )}
       {isRisk &&
         (getRiskStatus(item.status) === RiskStatus.Opened ||
-          item.status === RiskStatus.MachineOpen) && (
+          getRiskStatus(item.status) === RiskStatus.MachineOpen) && (
           <>
             <Tooltip title="Rerun capability against this asset">
               <Button
@@ -541,7 +541,7 @@ export const AlertAction = ({
               }}
               disabled={updateRiskStatus === 'pending'}
             >
-              Mark as Open
+              Accept
             </Button>
           </Tooltip>
           <Tooltip title="Mark as Closed">
