@@ -6,7 +6,6 @@ import {
 } from '@heroicons/react/24/solid';
 import confetti from 'canvas-confetti';
 
-import { useAuth } from '@/state/auth';
 import { GetStartedStatus } from '@/types';
 import { cn } from '@/utils/classname';
 import { getRoute } from '@/utils/route.util';
@@ -27,11 +26,10 @@ const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
   notificationsConfigured,
   exposureAlertsConfigured,
 }) => {
-  const { friend, me } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [showChecklist, setShowChecklist] = useStorage(
     {
-      key: `show-onboarding-checklist-${friend || me}`,
+      key: `onboarding`,
     },
     true
   );
