@@ -31,7 +31,6 @@ import { Tooltip } from '@/components/Tooltip';
 import { useMy } from '@/hooks';
 import { useAddAlert, useRemoveAlert } from '@/hooks/useAlerts';
 import { PartialAsset, useGetAssets, useUpdateAsset } from '@/hooks/useAssets';
-import { useCounts } from '@/hooks/useCounts';
 import { useIntegration } from '@/hooks/useIntegration';
 import { useBulkReRunJob } from '@/hooks/useJobs';
 import { AlertCategory } from '@/sections/Alerts';
@@ -55,6 +54,7 @@ import {
   Severity,
   SeverityDef,
   SeverityOpenCounts,
+  Statistic,
 } from '@/types';
 import { QueryStatus, useMergeStatus } from '@/utils/api';
 import { cn } from '@/utils/classname';
@@ -109,10 +109,8 @@ const Assets: React.FC = () => {
     filters,
     setFilters,
   } = useGetAssets();
-  const {
-    data: attributeCounts = {} as Record<string, number>,
-    status: attributeCountsStatus,
-  } = useCombineAttributesCount();
+  const { data: attributeStats, status: attributeStatsStatus } =
+    useGetAttributeStats();
 
   const {
     data: alerts,
@@ -177,13 +175,15 @@ const Assets: React.FC = () => {
           );
 
           return (
-            <div className="flex items-center gap-2 text-black">
-              <p className="font-semibold text-indigo-500">{asset.name}</p>
-              <p className="text-blueGray-500">{asset.dns}</p>
+            <div className="flex items-center gap-2 overflow-hidden text-black">
+              <p className="shrink truncate font-semibold text-indigo-500">
+                {asset.name}
+              </p>
+              <p className="overflow-hidden text-blueGray-500">{asset.dns}</p>
               <RiskSummary riskSummary={asset.riskSummary} />
               {integration && (
                 <Tooltip title="Integration">
-                  <PuzzlePieceIcon className="size-5" />
+                  <PuzzlePieceIcon className="size-5 shrink-0" />
                 </Tooltip>
               )}
             </div>
@@ -217,8 +217,12 @@ const Assets: React.FC = () => {
     ];
   }, [JSON.stringify({ selectedRows, assets })]);
   const category = useMemo(() => {
-    const nonDuplicateAttributes = Object.entries(attributeCounts).reduce(
-      (acc, [attributeKey, value]) => {
+    const nonDuplicateAttributes = Object.entries({
+      ...attributeStats.port,
+      ...attributeStats.cloud,
+      ...attributeStats.protocol,
+    }).reduce(
+      (acc, [attributeKey]) => {
         const [, attributeName = '', attributeValue = ''] =
           attributeKey.match(Regex.ATTIBUTE_KEY) || [];
 
@@ -238,21 +242,21 @@ const Assets: React.FC = () => {
             ) {
               currentATTvalue.push({
                 label: parsedAttValue,
-                count: value.toString(),
+                count: '',
                 value: `#attribute#cloud#${parsedAttValue}`,
               });
             }
           } else {
             currentATTvalue.push({
               label: attributeValue,
-              count: value.toString(),
+              count: '',
               value: `${attributeKey}#`,
             });
           }
         } else {
           currentATTvalue.push({
             label: attributeValue,
-            count: value.toString(),
+            count: '',
             value: `${attributeKey}#`,
           });
         }
@@ -285,28 +289,33 @@ const Assets: React.FC = () => {
           },
         ],
       },
-      ...(integratedAttackSurface.length > 0
-        ? [
-            {
-              label: 'Surface',
-              options: [
+      {
+        label: 'Surface',
+        options: [
+          {
+            label: 'Provided',
+            value: 'source:provided',
+            count: '',
+          },
+          ...(accountsStatus === 'pending'
+            ? [
                 {
-                  label: 'Provided',
-                  value: 'source:provided',
+                  label: '',
+                  value: '',
                   count: '',
+                  isLoading: true,
                 },
-                ...integratedAttackSurface.map(surface => {
-                  return {
-                    label:
-                      Integrations[surface as keyof typeof Integrations].name,
-                    value: `#attribute#source##asset#${surface}`,
-                    count: '',
-                  };
-                }),
-              ],
-            },
-          ]
-        : []),
+              ]
+            : integratedAttackSurface.map(surface => {
+                return {
+                  label:
+                    Integrations[surface as keyof typeof Integrations].name,
+                  value: `#attribute#source##asset#${surface}`,
+                  count: '',
+                };
+              })),
+        ],
+      },
       ...Object.entries(nonDuplicateAttributes).map(([label, value]) => {
         return {
           label: capitalize(label),
@@ -316,7 +325,8 @@ const Assets: React.FC = () => {
     ];
   }, [
     JSON.stringify({
-      attributeCounts,
+      accountsStatus,
+      attributeStats,
       integratedAttackSurface,
     }),
   ]);
@@ -438,18 +448,12 @@ const Assets: React.FC = () => {
   const closeCTADrawer = () => {
     setIsCTAOpen(false);
   };
-  const ports = Object.keys(attributeCounts).filter(key =>
-    key.match('#attribute#port#')
-  );
-  const protocols = Object.keys(attributeCounts).filter(key =>
-    key.match('#attribute#protocol#')
-  );
-  const clouds = Object.keys(attributeCounts).filter(key =>
-    key.match('#attribute#cloud#')
-  );
-  const surfaces = Object.keys(attributeCounts).filter(key =>
-    key.match('#attribute#source##asset#')
-  );
+  const ports = Object.keys(attributeStats.port);
+  const protocols = Object.keys(attributeStats.protocol);
+  const clouds = Object.keys(attributeStats.cloud);
+  const surfaces = integratedAttackSurface.map(surface => {
+    return `#attribute#source##asset#${surface}`;
+  });
 
   // Open the drawer based on the search params
   const { searchParams, removeSearchParams } = useSearchParams();
@@ -607,7 +611,7 @@ const Assets: React.FC = () => {
               refetch={refetch}
               addAlert={addAlert}
               removeAlert={removeAlert}
-              attributeExtractor={item => item.split('#')[4]}
+              attributeExtractor={item => item.split('#')[5]}
             />
           </div>
         </div>
@@ -626,7 +630,7 @@ const Assets: React.FC = () => {
             setFilters({ attributes, search: '' });
           },
           category,
-          status: useMergeStatus(accountsStatus, attributeCountsStatus),
+          status: useMergeStatus(attributeStatsStatus),
           alert: {
             value: alerts.map(alert => alert.value),
             onAdd: async (attributeKey: string) => {
@@ -696,9 +700,15 @@ interface CategoryFilterProps {
   value: string[];
   onChange: (value: string[]) => void;
   category: {
+    isLoading?: boolean;
     showCount?: boolean;
     label: string;
-    options: { label: string; value: string; count: string }[];
+    options: {
+      label: string;
+      value: string;
+      count: string;
+      isLoading?: boolean;
+    }[];
   }[];
   status: QueryStatus;
   className?: string;
@@ -754,37 +764,42 @@ export function CategoryFilter(props: CategoryFilterProps) {
                 >
                   {item.options.map((option, index) => {
                     return (
-                      <div
-                        className={cn(
-                          'flex items-center rounded-sm px-3 cursor-pointer text-sm font-medium py-2 gap-2',
-                          index % 2 !== 0 ? 'bg-layer1' : '',
-
-                          value.includes(option.value) && 'bg-brand/20'
-                        )}
+                      <Loader
                         key={index}
-                        onClick={() => {
-                          if (value.includes(option.value)) {
-                            onChange(value.filter(v => v !== option.value));
-                          } else {
-                            onChange([option.value]);
-                            ``;
-                          }
-                        }}
+                        isLoading={option.isLoading}
+                        className="my-3 h-3"
                       >
-                        <p
-                          className="flex-1"
-                          style={{ wordBreak: 'break-word' }}
+                        <div
+                          className={cn(
+                            'flex items-center rounded-sm px-3 cursor-pointer text-sm font-medium py-2 gap-2',
+                            index % 2 !== 0 ? 'bg-layer1' : '',
+
+                            value.includes(option.value) && 'bg-brand/20'
+                          )}
+                          onClick={() => {
+                            if (value.includes(option.value)) {
+                              onChange(value.filter(v => v !== option.value));
+                            } else {
+                              onChange([option.value]);
+                              ``;
+                            }
+                          }}
                         >
-                          {option.label}
-                        </p>
-                        {value.includes(option.value) && (
-                          <CheckIcon className="mr-auto size-4 shrink-0 stroke-[3px] text-brand" />
-                        )}
-                        {item.showCount && <p>{option.count}</p>}
-                        {alert && (
-                          <AlertIcon {...alert} currentValue={option.value} />
-                        )}
-                      </div>
+                          <p
+                            className="flex-1"
+                            style={{ wordBreak: 'break-word' }}
+                          >
+                            {option.label}
+                          </p>
+                          {value.includes(option.value) && (
+                            <CheckIcon className="mr-auto size-4 shrink-0 stroke-[3px] text-brand" />
+                          )}
+                          {item.showCount && <p>{option.count}</p>}
+                          {alert && (
+                            <AlertIcon {...alert} currentValue={option.value} />
+                          )}
+                        </div>
+                      </Loader>
                     );
                   })}
                 </Accordian>
@@ -1154,34 +1169,26 @@ export function IntegratedRisksNotifications() {
   );
 }
 
-export const useCombineAttributesCount = () => {
-  const {
-    data: attributeCountsCloud = {} as Record<string, number>,
-    status: attributesStatusCloud,
-  } = useCounts({
-    resource: 'attribute',
+export const useGetAttributeStats = () => {
+  const { data: attributeCountsCloud, status: attributesStatusCloud } = useMy({
+    resource: 'statistic',
     query: '#cloud#',
   });
-  const {
-    data: attributeCountsPort = {} as Record<string, number>,
-    status: attributesStatusPort,
-  } = useCounts({
-    resource: 'attribute',
+  const { data: attributeCountsPort, status: attributesStatusPort } = useMy({
+    resource: 'statistic',
     query: '#port#',
   });
-  const {
-    data: attributeCountsProtocol = {} as Record<string, number>,
-    status: attributesStatusProtocol,
-  } = useCounts({
-    resource: 'attribute',
-    query: '#protocol#',
-  });
+  const { data: attributeCountsProtocol, status: attributesStatusProtocol } =
+    useMy({
+      resource: 'statistic',
+      query: '#protocol#',
+    });
 
   return {
     data: {
-      ...attributeCountsCloud,
-      ...attributeCountsPort,
-      ...attributeCountsProtocol,
+      cloud: mapStatistics(attributeCountsCloud),
+      port: mapStatistics(attributeCountsPort),
+      protocol: mapStatistics(attributeCountsProtocol),
     },
     status: useMergeStatus(
       attributesStatusCloud,
@@ -1190,6 +1197,18 @@ export const useCombineAttributesCount = () => {
     ),
   };
 };
+
+function mapStatistics(statistics: Statistic[]) {
+  return statistics.reduce(
+    (acc, statistic) => {
+      return {
+        ...acc,
+        [`#attribute#${statistic.name}#${statistic.value}`]: statistic,
+      };
+    },
+    {} as Record<string, Statistic>
+  );
+}
 
 export function RiskSummary(asset: {
   riskSummary: PartialAsset['riskSummary'];
