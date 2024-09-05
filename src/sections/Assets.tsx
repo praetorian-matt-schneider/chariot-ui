@@ -1033,7 +1033,7 @@ export function FancyTable(
       <div className={cn('flex w-full flex-col bg-white')}>
         <div
           ref={rightStickyRef}
-          className={cn('sticky flex min-h-14 items-center bg-white px-4')}
+          className={cn('sticky flex items-center bg-white px-4 py-2')}
           style={{
             top: headerHeight,
             zIndex: 1,

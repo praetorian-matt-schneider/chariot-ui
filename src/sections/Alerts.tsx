@@ -14,7 +14,6 @@ import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
 import { useReRunJob } from '@/hooks/useJobs';
 import { useDeleteRisk, useUpdateRisk } from '@/hooks/useRisks';
-import { AlertIcon } from '@/sections/Assets';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { Empty } from '@/sections/Empty';
 import {
@@ -51,7 +50,6 @@ interface Props {
   setQuery: (query: string) => void;
   hideFilters?: boolean;
   refetch?: () => void;
-  unsubscribeAlert?: string;
 }
 
 export const Alerts: React.FC<Props> = ({
@@ -59,7 +57,6 @@ export const Alerts: React.FC<Props> = ({
   setQuery,
   hideFilters,
   refetch,
-  unsubscribeAlert,
 }: Props) => {
   const { data: alertsWithUpdatedQueries, refetch: refetchAlerts } =
     useGetAccountAlerts();
@@ -105,76 +102,6 @@ export const Alerts: React.FC<Props> = ({
     refetchData();
     refetchAlerts();
     refetch && refetch();
-  }
-
-  function getAlertDescription(query: string) {
-    const statusCode = query.split(':')[1] as AssetStatus | RiskStatus;
-    switch (statusCode) {
-      case RiskStatus.Opened:
-      case RiskStatus.MachineOpen:
-        return (
-          <>
-            <h1 className="text-xl font-bold text-gray-900">
-              These are all your open risks that need remediation.
-            </h1>
-            <p className="mt-4 text-sm text-gray-700">
-              <span className="font-semibold">Recommended Action:</span>{' '}
-              Remediate the risk, then either rescan to confirm or close if no
-              longer valid.
-            </p>
-          </>
-        );
-      case RiskStatus.Triaged:
-        return (
-          <>
-            <h1 className="text-xl font-bold text-gray-900">
-              These are newly discovered risks that require triaging.
-            </h1>
-            <p className="mt-4 text-sm text-gray-700">
-              <span className="font-semibold">Recommended Action:</span> Accept
-              the risk if it is valid, or reject it if it is invalid.
-            </p>
-          </>
-        );
-      case RiskStatus.MachineDeleted:
-        return (
-          <>
-            <h1 className="text-xl font-bold text-gray-900">
-              These risks were previously open but are no longer detected.
-            </h1>
-            <p className="mt-4 text-sm text-gray-700">
-              <span className="font-semibold">Recommended Action:</span> Confirm
-              that the risk is no longer present or reopen the risk if
-              necessary.
-            </p>
-          </>
-        );
-      case AssetStatus.ActiveLow:
-        return (
-          <>
-            <h1 className="text-xl font-bold text-gray-900">
-              These assets are not being scanned for risks.
-            </h1>
-            <p className="mt-4 text-sm text-gray-700">
-              <span className="font-semibold">Recommended Action:</span> Enable
-              risk scanning for these assets or delete them if they are not of
-              interest.
-            </p>
-          </>
-        );
-      default:
-        return (
-          <>
-            <h1 className="text-xl font-bold text-gray-900">
-              These are all your exposure risks
-            </h1>
-            <p className="mt-4 text-sm text-gray-700">
-              <span className="font-semibold">Recommended Action:</span> Open or
-              close the risk as needed.
-            </p>
-          </>
-        );
-    }
   }
 
   const renderItemDetails = (item: AlertType) => {
@@ -268,10 +195,7 @@ export const Alerts: React.FC<Props> = ({
   });
 
   return (
-    <div
-      className="relative z-10 flex rounded-sm border border-gray-200 bg-white"
-      style={{ height: 'calc(100vh - 135px)' }}
-    >
+    <div className="flex size-full bg-white">
       {/* Sidebar */}
       {!hideFilters && (
         <div className="w-1/4 overflow-auto border-r border-gray-200 bg-zinc-50 bg-gradient-to-l px-2 py-4">
@@ -337,7 +261,7 @@ export const Alerts: React.FC<Props> = ({
       )}
 
       {/* Main Content */}
-      <div className="flex-1 overflow-hidden">
+      <div className="size-full">
         {alerts === null && (
           <div className="mt-16 flex flex-1 items-center justify-center">
             <div className="text-center">
@@ -352,21 +276,7 @@ export const Alerts: React.FC<Props> = ({
           </div>
         )}
         {query && (
-          <div className="flex h-full flex-col">
-            <div className="p-4">
-              <div className="flex items-center justify-between">
-                <div>{getAlertDescription(query)}</div>
-                {unsubscribeAlert && (
-                  <AlertIcon
-                    value={[unsubscribeAlert]}
-                    currentValue={unsubscribeAlert}
-                    styleType="button"
-                    onAdd={handleRefetch}
-                    onRemove={handleRefetch}
-                  />
-                )}
-              </div>
-            </div>
+          <div className="flex size-full flex-col">
             <div ref={parentRef} className="flex-1 overflow-auto">
               {dataStatus === 'pending' && (
                 <>

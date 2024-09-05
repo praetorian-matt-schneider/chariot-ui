@@ -18,11 +18,18 @@ import { useMy } from '@/hooks';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
 import { Alerts } from '@/sections/Alerts';
-import { CategoryFilter, FancyTable } from '@/sections/Assets';
+import { AlertIcon, CategoryFilter, FancyTable } from '@/sections/Assets';
 import { RenderHeaderExtraContentSection } from '@/sections/AuthenticatedApp';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { useGlobalState } from '@/state/global.state';
-import { Risk, RiskFilters, RiskStatusLabel, SeverityDef } from '@/types';
+import {
+  AssetStatus,
+  Risk,
+  RiskFilters,
+  RiskStatus,
+  RiskStatusLabel,
+  SeverityDef,
+} from '@/types';
 import { getRiskSeverity, getRiskStatus } from '@/utils/riskStatus.util';
 import { useQueryFilters } from '@/utils/storage/useQueryParams.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
@@ -227,6 +234,76 @@ const RisksBeta: React.FC = () => {
     []
   );
 
+  function getAlertDescription(query: string) {
+    const statusCode = query.split(':')[1] as AssetStatus | RiskStatus;
+    switch (statusCode) {
+      case RiskStatus.Opened:
+      case RiskStatus.MachineOpen:
+        return (
+          <>
+            <h1 className="text-xl font-bold text-gray-900">
+              These are all your open risks that need remediation.
+            </h1>
+            <p className="mt-4 text-sm text-gray-700">
+              <span className="font-semibold">Recommended Action:</span>{' '}
+              Remediate the risk, then either rescan to confirm or close if no
+              longer valid.
+            </p>
+          </>
+        );
+      case RiskStatus.Triaged:
+        return (
+          <>
+            <h1 className="text-xl font-bold text-gray-900">
+              These are newly discovered risks that require triaging.
+            </h1>
+            <p className="mt-4 text-sm text-gray-700">
+              <span className="font-semibold">Recommended Action:</span> Accept
+              the risk if it is valid, or reject it if it is invalid.
+            </p>
+          </>
+        );
+      case RiskStatus.MachineDeleted:
+        return (
+          <>
+            <h1 className="text-xl font-bold text-gray-900">
+              These risks were previously open but are no longer detected.
+            </h1>
+            <p className="mt-4 text-sm text-gray-700">
+              <span className="font-semibold">Recommended Action:</span> Confirm
+              that the risk is no longer present or reopen the risk if
+              necessary.
+            </p>
+          </>
+        );
+      case AssetStatus.ActiveLow:
+        return (
+          <>
+            <h1 className="text-xl font-bold text-gray-900">
+              These assets are not being scanned for risks.
+            </h1>
+            <p className="mt-4 text-sm text-gray-700">
+              <span className="font-semibold">Recommended Action:</span> Enable
+              risk scanning for these assets or delete them if they are not of
+              interest.
+            </p>
+          </>
+        );
+      default:
+        return (
+          <>
+            <h1 className="text-xl font-bold text-gray-900">
+              These are all your exposure risks
+            </h1>
+            <p className="mt-4 text-sm text-gray-700">
+              <span className="font-semibold">Recommended Action:</span> Open or
+              close the risk as needed.
+            </p>
+          </>
+        );
+    }
+  }
+
   return (
     <>
       <RenderHeaderExtraContentSection>
@@ -309,6 +386,22 @@ const RisksBeta: React.FC = () => {
             )}
           </>
         }
+        tableHeader={
+          <div className="w-full">
+            <div className="flex w-full items-center justify-between">
+              <div>{getAlertDescription(query)}</div>
+              {filters.exposureRisk && (
+                <AlertIcon
+                  value={[filters.exposureRisk]}
+                  currentValue={filters.exposureRisk}
+                  styleType="button"
+                  onAdd={refetch}
+                  onRemove={refetch}
+                />
+              )}
+            </div>
+          </div>
+        }
       >
         {query && (
           <Alerts
@@ -316,7 +409,6 @@ const RisksBeta: React.FC = () => {
             setQuery={() => {}}
             hideFilters={true}
             refetch={refetch}
-            unsubscribeAlert={filters.exposureRisk}
           />
         )}
         {!query && (

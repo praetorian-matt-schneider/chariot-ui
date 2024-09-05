@@ -29,7 +29,10 @@ import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useBulkReRunJob, useJobsStatus } from '@/hooks/useJobs';
 import { useReportRisk, useUpdateRisk } from '@/hooks/useRisks';
 import { AlertAction } from '@/sections/Alerts';
-import { ResponsiveGrid } from '@/sections/detailsDrawer/AssetDrawer';
+import {
+  ResponsiveGrid,
+  StickHeaderSection,
+} from '@/sections/detailsDrawer/AssetDrawer';
 import { Comment } from '@/sections/detailsDrawer/Comment';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { getStatusColor } from '@/sections/Jobs';
@@ -221,8 +224,6 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     [attributesGenericSearch?.attributes]
   );
 
-  const width = document.body.clientWidth;
-
   return (
     <Drawer
       open={open}
@@ -233,23 +234,18 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
       <Loader isLoading={isInitialLoading} type="spinner">
         <ResponsiveGrid
           section1={
-            <div className="shrink-0 basis-1/4" style={{ width: width / 4 }}>
-              <History history={history}>
-                <Comment
-                  risk={risk}
-                  isLoading={isRiskFetching}
-                  onSave={handleUpdateComment}
-                />
-              </History>
-            </div>
+            <History history={history}>
+              <Comment
+                risk={risk}
+                isLoading={isRiskFetching}
+                onSave={handleUpdateComment}
+              />
+            </History>
           }
           section2={
-            <div
-              className="h-full flex-1 border-x border-gray-300 px-9 py-5"
-              style={{ width: width / 2 }}
-            >
-              <div className="mb-8 flex items-start justify-between gap-4">
-                <div className="flex w-2/3 flex-col gap-2">
+            <div className="col flex size-full flex-col overflow-hidden">
+              <div className="flex items-start gap-4 px-9 py-5">
+                <div className="max-w-1/2 flex flex-col gap-2">
                   <div className="flex items-center gap-4">
                     <h1
                       className="text-2xl font-bold"
@@ -269,7 +265,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                   </div>
 
                   {/* Actions Section */}
-                  <div className="flex flex-row gap-3">
+                  <div className="flex flex-row flex-wrap gap-3">
                     <AlertAction
                       item={risk}
                       handleRefetch={() => {
@@ -338,6 +334,8 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
 
               {/* POE and Description */}
               <Tabs
+                className="overflow-hidden px-9 pb-5"
+                contentWrapperClassName="overflow-auto"
                 tabs={[
                   {
                     label: 'Description & Remediation',
@@ -438,11 +436,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
               />
             </div>
           }
-          section3={
-            <div className="shrink-0 basis-1/4" style={{ width: width / 4 }}>
-              <AffectedAssets assets={assetsOnRisk} />
-            </div>
-          }
+          section3={<AffectedAssets assets={assetsOnRisk} />}
         />
       </Loader>
     </Drawer>
@@ -454,35 +448,27 @@ const History: React.FC<PropsWithChildren & { history: EntityHistory[] }> = ({
   history = [],
 }) => {
   return (
-    <div className="flex h-full flex-col overflow-hidden">
-      <h1 className="border-b border-gray-300 px-9 py-5 text-2xl font-bold">
-        History
-      </h1>
-      <div className="size-full overflow-auto px-4">
-        {children}
-        <Timeline
-          items={[
-            ...(history
-              ?.map((item, itemIndex) => {
-                const { title, updated } = getHistoryDiff(
-                  item,
-                  itemIndex === 0
-                );
-                return {
-                  title,
-                  description: updated,
-                  className: 'text-default',
-                  icon:
-                    itemIndex === 0 ? (
-                      <RisksIcon className="stroke-1" />
-                    ) : undefined,
-                };
-              })
-              .reverse() || []),
-          ]}
-        />
-      </div>
-    </div>
+    <StickHeaderSection label="History">
+      {children}
+      <Timeline
+        items={[
+          ...(history
+            ?.map((item, itemIndex) => {
+              const { title, updated } = getHistoryDiff(item, itemIndex === 0);
+              return {
+                title,
+                description: updated,
+                className: 'text-default',
+                icon:
+                  itemIndex === 0 ? (
+                    <RisksIcon className="stroke-1" />
+                  ) : undefined,
+              };
+            })
+            .reverse() || []),
+        ]}
+      />
+    </StickHeaderSection>
   );
 };
 
@@ -538,46 +524,41 @@ const AffectedAssets: React.FC<{
   const { getAssetDrawerLink } = getDrawerLink();
 
   return (
-    <div className="flex h-full flex-col overflow-hidden">
-      <h1 className="border-b border-gray-300 px-9 py-5 text-2xl font-bold">
-        Affected Assets
-      </h1>
-      <div className="size-full overflow-auto">
-        {assets?.length === 0 && (
-          <div className="p-4 text-center text-gray-500">
-            <p>No assets found.</p>
-          </div>
-        )}
-        {assets.length > 0 &&
-          assets.map(asset => (
-            <div
-              className="flex flex-col items-start justify-between gap-4 border-b border-gray-300 p-4 md:flex-row"
-              key={asset.key}
-            >
-              <div>
-                <Link
-                  to={getAssetDrawerLink({
-                    dns: asset.dns,
-                    name: asset.name,
-                  })}
-                  className="hover:underline"
-                >
-                  <h2 className="text-brand">{asset.name}</h2>
-                </Link>
-                <p
-                  className="text-sm text-gray-500"
-                  style={{ wordBreak: 'break-word' }}
-                >
-                  {asset.dns}
-                </p>
-              </div>
-              <span className="text-sm text-gray-500">
-                {formatDate(asset.updated)}
-              </span>
+    <StickHeaderSection label="Affected Assets">
+      {assets?.length === 0 && (
+        <div className="p-4 text-center text-gray-500">
+          <p>No assets found.</p>
+        </div>
+      )}
+      {assets.length > 0 &&
+        assets.map(asset => (
+          <div
+            className="flex flex-col items-start justify-between gap-4 border-b border-gray-300 p-4 md:flex-row"
+            key={asset.key}
+          >
+            <div>
+              <Link
+                to={getAssetDrawerLink({
+                  dns: asset.dns,
+                  name: asset.name,
+                })}
+                className="hover:underline"
+              >
+                <h2 className="text-brand">{asset.name}</h2>
+              </Link>
+              <p
+                className="text-sm text-gray-500"
+                style={{ wordBreak: 'break-word' }}
+              >
+                {asset.dns}
+              </p>
             </div>
-          ))}
-      </div>
-    </div>
+            <span className="text-sm text-gray-500">
+              {formatDate(asset.updated)}
+            </span>
+          </div>
+        ))}
+    </StickHeaderSection>
   );
 };
 
@@ -589,14 +570,14 @@ const RiskDetails = ({
   className?: string;
 }) => {
   return (
-    <div className={cn('flex gap-8', className)}>
-      <div className="text-nowrap text-slate-600">
+    <div className={cn('flex flex-wrap ml-auto gap-8 max-w-1/2', className)}>
+      <div className="ml-auto text-nowrap text-slate-600">
         <p className="text-xl font-bold text-slate-950">
           {formatDate(risk.updated)}
         </p>
         <p>Last Seen</p>
       </div>
-      <div className="text-nowrap text-slate-600">
+      <div className="ml-auto text-nowrap text-slate-600">
         <p className="text-xl font-bold text-slate-950">
           {formatDate(risk.created)}
         </p>
