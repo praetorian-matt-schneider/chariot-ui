@@ -236,6 +236,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
           section1={
             <History history={history}>
               <Comment
+                key={risk.status}
                 risk={risk}
                 isLoading={isRiskFetching}
                 onSave={handleUpdateComment}
