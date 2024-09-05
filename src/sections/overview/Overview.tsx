@@ -15,6 +15,7 @@ import {
   ExclamationTriangleIcon,
   WrenchScrewdriverIcon,
 } from '@heroicons/react/24/solid';
+import confetti from 'canvas-confetti';
 import { Hourglass, Unplug } from 'lucide-react';
 
 import { AssetUsage } from '@/components/AssetUsage';
@@ -333,6 +334,12 @@ export const Overview: React.FC = () => {
 
     refetch();
     setIsDomainDrawerOpen(false);
+
+    // Trigger the confetti effect
+    confetti({
+      particleCount: 150,
+      spread: 60,
+    });
   }
 
   const data = useMemo(() => {
