@@ -8,9 +8,7 @@ import {
   comingSoonRiskIntegrations,
   Integrations,
 } from '@/sections/overview/Integrations';
-import { Account } from '@/types';
-
-export type GetStartedStatus = 'notConnected' | 'setup' | 'connected';
+import { Account, GetStartedStatus } from '@/types';
 
 type AccountWithType = Account & { type: string; displayName: string };
 

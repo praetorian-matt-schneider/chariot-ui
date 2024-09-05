@@ -1,10 +1,13 @@
-import React, { ReactNode, useEffect, useRef, useState } from 'react';
+import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 
+import OnboardingChecklist from '@/components/OnboardingChecklist';
 import { ShortcutsHelper } from '@/components/ui/Shortcuts';
 import { useMy } from '@/hooks';
 import { useGetAccountDetails } from '@/hooks/useAccounts';
+import { useGetRootDomain } from '@/hooks/useAttribute';
+import { useIntegration } from '@/hooks/useIntegration';
 import { AddAsset } from '@/sections/add/AddAsset';
 import { AddFile } from '@/sections/add/AddFile';
 import { AddRisks } from '@/sections/add/AddRisks';
@@ -18,6 +21,7 @@ import { useAuth } from '@/state/auth';
 import { useBreadCrumbsContext } from '@/state/breadcrumbs';
 import { cn } from '@/utils/classname';
 import { useGetScreenSize } from '@/utils/misc.util';
+import { Regex } from '@/utils/regex.util';
 import { getRoute } from '@/utils/route.util';
 import { useSticky } from '@/utils/sticky.util';
 
@@ -89,6 +93,19 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
     order: 1,
   });
 
+  const {
+    data: { riskNotificationStatus, attackSurfaceStatus },
+  } = useIntegration();
+  const { data: alerts } = useMy({
+    resource: 'condition',
+  });
+  const { data: rootDomain } = useGetRootDomain();
+  const hasCustomAttributes = useMemo(() => {
+    return alerts.some(alert => alert.key.match(Regex.CUSTOM_ALERT_KEY));
+  }, [alerts]);
+
+  console.log(riskNotificationStatus, attackSurfaceStatus);
+
   return (
     <div
       className={'flex h-full flex-col items-center overflow-hidden bg-layer1'}
@@ -112,6 +129,13 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
       <AddFile />
       <UpgradeModal />
       <LinkAWS />
+      <OnboardingChecklist
+        rootDomain={rootDomain}
+        attackSurfacesConfigured={riskNotificationStatus}
+        notificationsConfigured={attackSurfaceStatus}
+        exposureAlertsConfigured={hasCustomAttributes}
+        risksRemediated={1}
+      />
     </div>
   );
 }

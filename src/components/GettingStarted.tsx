@@ -10,7 +10,7 @@ import {
 import { Button } from '@/components/Button';
 import { Tooltip } from '@/components/Tooltip';
 import { useModifyAccount } from '@/hooks';
-import { GetStartedStatus } from '@/hooks/useIntegration';
+import { GetStartedStatus } from '@/types';
 import { cn } from '@/utils/classname';
 
 export const GettingStartedStep: React.FC<{
@@ -77,12 +77,6 @@ export const GettingStarted: React.FC<{
   total,
   isFreemiumMaxed,
 }) => {
-  const allStepsCompleted = [
-    completedSteps.rootDomain,
-    completedSteps.attackSurface,
-    completedSteps.riskNotifications,
-  ].every(status => status === 'connected');
-
   const focusedStepIndex = [
     completedSteps.rootDomain,
     completedSteps.attackSurface,
@@ -92,7 +86,7 @@ export const GettingStarted: React.FC<{
   const { mutate: upgrade, status: upgradeStatus } = useModifyAccount('link');
 
   return (
-    <div className="flex justify-center space-x-6" style={{ zIndex: 1 }}>
+    <div className="z-10 flex justify-center space-x-6">
       <div className="w-full rounded-sm">
         {isFreemiumMaxed && (
           <div className="m-auto flex w-full flex-col items-center rounded-lg border-2 border-dashed border-header-dark bg-header p-8 text-center">

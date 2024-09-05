@@ -63,6 +63,7 @@ import { useGetScreenSize } from '@/utils/misc.util';
 import { Regex } from '@/utils/regex.util';
 import { getRiskSeverity, getRiskStatus } from '@/utils/riskStatus.util';
 import { useSticky } from '@/utils/sticky.util';
+import { useSearchParams } from '@/utils/url.util';
 
 export function buildOpenRiskDataset(
   risks: Risk[]
@@ -449,6 +450,22 @@ const Assets: React.FC = () => {
   const surfaces = Object.keys(attributeCounts).filter(key =>
     key.match('#attribute#source##asset#')
   );
+
+  // Open the drawer based on the search params
+  const { searchParams, removeSearchParams } = useSearchParams();
+  useEffect(() => {
+    if (searchParams) {
+      const params = new URLSearchParams(searchParams);
+      const action = params.get('action');
+      if (action) {
+        if (action === 'set-exposure-alerts') {
+          setIsCTAOpen(true);
+        }
+      }
+      // clear the search params
+      removeSearchParams('action');
+    }
+  }, [searchParams]);
 
   return (
     <>

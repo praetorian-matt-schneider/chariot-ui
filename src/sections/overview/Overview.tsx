@@ -67,7 +67,7 @@ import { partition } from '@/utils/array.util';
 import { cn } from '@/utils/classname';
 import { getRoute } from '@/utils/route.util';
 import { useStorage } from '@/utils/storage/useStorage.util';
-import { generatePathWithSearch } from '@/utils/url.util';
+import { generatePathWithSearch, useSearchParams } from '@/utils/url.util';
 
 const getStatusIcon = (status: string) => {
   switch (status) {
@@ -176,6 +176,26 @@ export const Overview: React.FC = () => {
     selectedRiskNotificationIntegrations,
     setSelectedRiskNotificationIntegrations,
   ] = useState<string[]>([]);
+
+  // Open the drawer based on the search params
+  const { searchParams, removeSearchParams } = useSearchParams();
+  useEffect(() => {
+    if (searchParams) {
+      const params = new URLSearchParams(searchParams);
+      const action = params.get('action');
+      if (action) {
+        if (action === 'set-root-domain') {
+          setIsDomainDrawerOpen(true);
+        } else if (action === 'build-attack-surface') {
+          setIsAttackSurfaceDrawerOpen(true);
+        } else if (action === 'set-risk-notifications') {
+          setIsRiskNotificationsDrawerOpen(true);
+        }
+      }
+      // clear the search params
+      removeSearchParams('action');
+    }
+  }, [searchParams]);
 
   const {
     modal: {
@@ -436,7 +456,7 @@ export const Overview: React.FC = () => {
           onRiskNotificationsClick={() =>
             setIsRiskNotificationsDrawerOpen(true)
           }
-          total={FREEMIUM_ASSETS_LIMIT}
+          total={FREEMIUM_ASSETS_LIMIT * 10_000}
           isFreemiumMaxed={
             currentPlan === 'freemium' &&
             FREEMIUM_ASSETS_LIMIT - usedAssets <= 0
