@@ -28,7 +28,7 @@ import { useReRunJob } from '@/hooks/useJobs';
 import { buildOpenRiskDataset, RiskSummary } from '@/sections/Assets';
 import { AddAttribute } from '@/sections/detailsDrawer/AddAttribute';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
-import { Asset, Attribute, Risk, RiskStatus, RiskStatusLabel } from '@/types';
+import { Asset, Attribute, Risk, RiskStatusLabel } from '@/types';
 import { cn } from '@/utils/classname';
 import { formatDate } from '@/utils/date.util';
 import { getSeverityClass } from '@/utils/getSeverityClass.util';
@@ -118,14 +118,12 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
 
   const openRisks = useMemo(() => {
     const sortOrder = ['C', 'H', 'M', 'L', 'I'];
-    return risks
-      .filter(({ status }) => getRiskStatus(status) === RiskStatus.Opened)
-      .sort((a, b) => {
-        return (
-          sortOrder.indexOf(a.status[1]) - sortOrder.indexOf(b.status[1]) ||
-          new Date(b.updated).getTime() - new Date(a.updated).getTime()
-        );
-      });
+    return risks.sort((a, b) => {
+      return (
+        sortOrder.indexOf(a.status[1]) - sortOrder.indexOf(b.status[1]) ||
+        new Date(b.updated).getTime() - new Date(a.updated).getTime()
+      );
+    });
   }, [JSON.stringify(risks)]);
 
   const assetGraphProps = useMemo((): Pick<
