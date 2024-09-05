@@ -131,8 +131,8 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
       <LinkAWS />
       <OnboardingChecklist
         rootDomain={rootDomain}
-        attackSurfacesConfigured={riskNotificationStatus}
-        notificationsConfigured={attackSurfaceStatus}
+        attackSurfacesConfigured={attackSurfaceStatus}
+        notificationsConfigured={riskNotificationStatus}
         exposureAlertsConfigured={hasCustomAttributes}
         risksRemediated={1}
       />
