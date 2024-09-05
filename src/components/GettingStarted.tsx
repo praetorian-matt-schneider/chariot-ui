@@ -111,7 +111,7 @@ export const GettingStarted: React.FC<{
           <>
             <div className="mb-6 flex w-full justify-between gap-6">
               <GettingStartedStep
-                title="Set Your Root Domain"
+                title="Confirm Your Root Domain"
                 description="Start by defining your root domain. This helps us identify the core assets you need to monitor."
                 status={completedSteps.rootDomain}
                 focusedStep={focusedStepIndex === 0}
@@ -127,7 +127,7 @@ export const GettingStarted: React.FC<{
                 onClick={onAttackSurfaceClick}
               />
               <GettingStartedStep
-                title="Set Risk Notifications"
+                title="Add Push Notifications"
                 description="Configure notifications to stay informed about potential risks and vulnerabilities."
                 status={completedSteps.riskNotifications}
                 focusedStep={focusedStepIndex === 2}

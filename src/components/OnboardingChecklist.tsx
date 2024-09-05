@@ -57,7 +57,7 @@ const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
 
   const ctaItems = [
     {
-      label: 'Set Your Root Domain',
+      label: 'Confirm Your Root Domain',
       action: () => {
         setIsOpen(false);
         navigate(
@@ -83,7 +83,7 @@ const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
       },
     },
     {
-      label: 'Set Risk Notifications',
+      label: 'Add Push Notifications',
       isCompleted: notificationsConfigured === 'connected',
       action: () => {
         setIsOpen(false);
@@ -96,7 +96,7 @@ const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
       },
     },
     {
-      label: 'Set Exposure Alerts',
+      label: 'Get Exposure Alerts',
       isCompleted: exposureAlertsConfigured,
       action: () => {
         setIsOpen(false);
@@ -112,6 +112,12 @@ const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
 
   // Calculate the number of incomplete tasks
   const incompleteTasks = ctaItems.filter(item => !item.isCompleted).length;
+
+  useEffect(() => {
+    if (incompleteTasks > 0) {
+      setShowChecklist(true);
+    }
+  }, [incompleteTasks]);
 
   if (!showChecklist) {
     return null; // Hide the checklist if dismissed
