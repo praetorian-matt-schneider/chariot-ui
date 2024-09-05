@@ -14,6 +14,7 @@ import { Columns } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
 import { useModifyAccount, useMy } from '@/hooks';
 import { useCounts } from '@/hooks/useCounts';
+import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useReRunJob } from '@/hooks/useJobs';
 import { CategoryFilter, FancyTable } from '@/sections/Assets';
 import { getJobStatusIcon } from '@/sections/overview/Overview';
@@ -70,15 +71,24 @@ const getFailedComment = (job: Job) => {
 const Jobs: React.FC = () => {
   const [filters, setFilters] = useQueryFilters<JobFilters>({
     key: 'jobsFilters',
-    defaultFilters: { status: '', sources: [], search: '', failedReason: [] },
+    defaultFilters: { status: '', search: '', failedReason: '' },
   });
-  const query = filters.search.startsWith('#') ? filters.search : undefined;
+  const [debouncedSearch] = useDebounce(filters.search, 500);
+  const query = useMemo(() => {
+    if (filters.status && debouncedSearch) {
+      return `status:${filters.status}#${debouncedSearch}`;
+    } else if (filters.status) {
+      return `status:${filters.status}`;
+    } else if (debouncedSearch) {
+      return `source:${debouncedSearch}`;
+    }
+    return '#job';
+  }, [filters.status, debouncedSearch]);
   const { data: stats = {} } = useCounts({
     resource: 'job',
-    query,
   });
   const {
-    data: jobs = [],
+    data,
     refetch,
     error,
     status,
@@ -86,10 +96,10 @@ const Jobs: React.FC = () => {
     fetchNextPage,
     isFetching,
     hasNextPage,
-  } = useMy({
-    resource: 'job',
+  } = useGenericSearch({
     query,
   });
+  const jobs = data?.jobs || [];
 
   const { data: accounts, status: accountStatus } = useMy({
     resource: 'account',
@@ -117,8 +127,6 @@ const Jobs: React.FC = () => {
     accounts.find(account => account.member === FROZEN_ACCOUNT)
   );
 
-  const [debouncedSearch] = useDebounce(filters.search, 500);
-
   const failedJobStats = useMemo(() => {
     const failedJobs = jobs.filter(job => job.status === JobStatus.Fail);
     const failedJobStats = failedJobs.reduce(
@@ -144,35 +152,16 @@ const Jobs: React.FC = () => {
 
   const filteredJobs: Job[] = useMemo(() => {
     let filteredJobs = jobs;
-    const { status, sources } = filters;
 
-    if (status) {
-      filteredJobs = filteredJobs.filter(job => job.status === status);
-    }
-
-    if (sources.filter(Boolean).length > 0) {
-      filteredJobs = filteredJobs.filter(job => sources.includes(job.source));
-    }
-
-    if (debouncedSearch && debouncedSearch.length > 0) {
-      filteredJobs = filteredJobs.filter(item => {
-        const found = Object.values(item).find(value =>
-          String(value).toLowerCase().includes(debouncedSearch.toLowerCase())
-        );
-
-        return found;
-      });
-    }
-
-    if (filters.failedReason?.length > 0 && !query) {
+    if (filters.failedReason && !query) {
       filteredJobs = filteredJobs.filter(job => {
         const comment = getFailedComment(job);
-        return comment ? filters.failedReason.includes(comment) : false;
+        return comment ? filters.failedReason === comment : false;
       });
     }
 
     return filteredJobs;
-  }, [debouncedSearch, query, JSON.stringify({ jobs, filters })]);
+  }, [JSON.stringify({ jobs }), filters.failedReason]);
 
   const jobStats = useMemo(() => {
     return Object.entries(stats).reduce(
@@ -320,9 +309,8 @@ const Jobs: React.FC = () => {
           onChange: search => {
             setFilters({
               search,
-              sources: [],
-              status: '',
-              failedReason: [],
+              status: filters.status,
+              failedReason: '',
             });
           },
         }}
@@ -335,7 +323,7 @@ const Jobs: React.FC = () => {
                   {filters.search ? filters.search : `All Jobs`}
                 </p>
               </div>
-              {filters.status?.length > 0 && (
+              {filters.status && (
                 <div className="flex items-center gap-2">
                   <p className="text-lg font-bold">Status:</p>
                   <p className="text-base font-semibold text-gray-500">
@@ -343,11 +331,11 @@ const Jobs: React.FC = () => {
                   </p>
                 </div>
               )}
-              {filters.failedReason?.length > 0 && (
+              {filters.failedReason && (
                 <div className="flex items-center gap-2">
                   <p className="text-lg font-bold">Failed Reason:</p>
                   <p className="text-base font-semibold text-gray-500">
-                    {filters.failedReason[0]}
+                    {filters.failedReason}
                   </p>
                 </div>
               )}
@@ -366,9 +354,8 @@ const Jobs: React.FC = () => {
               onChange={statuses => {
                 setFilters({
                   status: statuses[0],
-                  search: '',
-                  sources: [],
-                  failedReason: [],
+                  search: filters.search,
+                  failedReason: '',
                 });
               }}
               category={[
@@ -388,13 +375,12 @@ const Jobs: React.FC = () => {
             {Object.keys(failedJobStats).length > 0 ? (
               <CategoryFilter
                 hideHeader={true}
-                value={filters.failedReason}
+                value={[filters.failedReason]}
                 status={dataStatus}
-                onChange={failedReason => {
+                onChange={failedReasons => {
                   setFilters({
-                    failedReason,
+                    failedReason: failedReasons[0],
                     search: '',
-                    sources: [],
                     status: '',
                   });
                 }}

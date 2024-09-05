@@ -567,10 +567,9 @@ export interface AssetFilters {
 }
 
 export interface JobFilters {
-  sources: string[];
   status: string;
   search: string;
-  failedReason: string[];
+  failedReason: string;
 }
 
 export interface RiskFilters {
