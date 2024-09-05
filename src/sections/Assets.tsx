@@ -552,8 +552,8 @@ const Assets: React.FC = () => {
                       key as keyof typeof DEFAULT_CONDITIONS
                     ].forEach(value => {
                       addAlert({
-                        value,
-                        name: `Assets with a ${key} value of ${value} identified`,
+                        value: `exposure-${key}-${value}`,
+                        name: `exposure-${key}-${value}`,
                       });
                     });
                   });
@@ -832,9 +832,11 @@ export function AlertIcon(props: AlertIconProps) {
       const [, attributeType = '', attributeValue = ''] =
         attributeKey.match(Regex.ATTIBUTE_KEY) || [];
 
+      const alertName = `exposure-${attributeType}-${attributeValue.endsWith('#') ? attributeValue.slice(0, -1) : attributeValue}`;
+
       await addAlert({
-        value: attributeKey,
-        name: `${attributeType}-${attributeValue.endsWith('#') ? attributeValue.slice(0, -1) : attributeValue}-exposure`,
+        value: alertName,
+        name: alertName,
       });
 
       props.onAdd && props.onAdd();
