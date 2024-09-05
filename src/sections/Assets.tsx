@@ -548,16 +548,16 @@ const Assets: React.FC = () => {
                 styleType="primary"
                 className="-translate-x-2 text-sm font-semibold"
                 onClick={() => {
-                  Object.keys(DEFAULT_CONDITIONS).forEach(key => {
-                    DEFAULT_CONDITIONS[
-                      key as keyof typeof DEFAULT_CONDITIONS
-                    ].forEach(value => {
-                      addAlert({
-                        value: `exposure-${key}-${value}`,
-                        name: `exposure-${key}-${value}`,
+                  Object.entries(DEFAULT_CONDITIONS).forEach(
+                    ([key, values]) => {
+                      values.forEach(value => {
+                        addAlert({
+                          value: `exposure-${key}-${value}`,
+                          name: `exposure-${key}-${value}`,
+                        });
                       });
-                    });
-                  });
+                    }
+                  );
                   closeCTADrawer();
                 }}
               >
