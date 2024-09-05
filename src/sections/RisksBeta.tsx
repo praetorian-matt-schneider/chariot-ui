@@ -33,7 +33,7 @@ import { partition } from '@/utils/array.util';
 import { getRiskSeverity, getRiskStatus } from '@/utils/riskStatus.util';
 import { useQueryFilters } from '@/utils/storage/useQueryParams.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
-import { generatePathWithSearch } from '@/utils/url.util';
+import { generatePathWithSearch, useSearchParams } from '@/utils/url.util';
 
 const RisksBeta: React.FC = () => {
   const {
@@ -97,6 +97,22 @@ const RisksBeta: React.FC = () => {
       }
     }
   }, [JSON.stringify({ alerts, filters, conditions })]);
+
+  // Open the drawer based on the search params
+  const { searchParams, removeSearchParams } = useSearchParams();
+  useEffect(() => {
+    if (searchParams) {
+      const params = new URLSearchParams(searchParams);
+      const action = params.get('action');
+      if (action) {
+        if (action === 'remediate-a-risk') {
+          setIsCTAOpen(true);
+        }
+      }
+      // clear the search params
+      removeSearchParams('action');
+    }
+  }, [searchParams]);
 
   const columns: Columns<Risk> = useMemo(
     () => [

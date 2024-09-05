@@ -26,6 +26,7 @@ const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
   attackSurfacesConfigured,
   notificationsConfigured,
   exposureAlertsConfigured,
+  risksRemediated,
 }) => {
   const { friend, me } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
@@ -104,6 +105,19 @@ const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
           generatePathWithSearch({
             pathname: getRoute(['app', 'assets']),
             appendSearch: [['action', 'set-exposure-alerts']],
+          })
+        );
+      },
+    },
+    {
+      label: 'Remediate a Risk',
+      isCompleted: risksRemediated > 0,
+      action: () => {
+        setIsOpen(false);
+        navigate(
+          generatePathWithSearch({
+            pathname: getRoute(['app', 'risks']),
+            appendSearch: [['action', 'remediate-a-risk']],
           })
         );
       },
