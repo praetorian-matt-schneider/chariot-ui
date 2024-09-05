@@ -14,7 +14,7 @@ export const TopNavBar: React.FC = () => {
   const currentPage = location.pathname.split('/').pop();
   const isCurrentPage = (page: string) => currentPage === page;
 
-  const links = ['overview', 'assets', 'risks'];
+  const links = ['overview', 'assets'];
 
   // Function to keep the overview link as attack surface
   const remap = (link: string) =>
@@ -47,6 +47,13 @@ export const TopNavBar: React.FC = () => {
                   {remap(link)}
                 </Link>
               ))}
+              <MyInbox
+                className={
+                  isCurrentPage('risks')
+                    ? 'border-layer0 hover:border-layer0'
+                    : 'border-transparent hover:border-header'
+                }
+              />
             </nav>
 
             <div className="ml-auto flex items-center md:space-x-4">
@@ -56,7 +63,7 @@ export const TopNavBar: React.FC = () => {
                 }}
                 onClick={() => setShowNotification(false)}
               />
-              <MyInbox />
+
               <AccountDropdown />
             </div>
           </div>

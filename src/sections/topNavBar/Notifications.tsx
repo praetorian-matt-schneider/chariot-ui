@@ -2,10 +2,9 @@ import React, { useEffect } from 'react';
 import { ArrowPathRoundedSquareIcon } from '@heroicons/react/24/outline';
 
 import { Dropdown } from '@/components/Dropdown';
-import { useMy } from '@/hooks/useMy';
+import { useJobStats } from '@/hooks/useJobs';
 import { JobStatus } from '@/types';
 import { cn } from '@/utils/classname';
-import { sToMs } from '@/utils/date.util';
 import { abbreviateNumber } from '@/utils/misc.util';
 import { getRoute } from '@/utils/route.util';
 import { StorageKey, useStorage } from '@/utils/storage/useStorage.util';
@@ -17,28 +16,14 @@ interface Props {
 }
 
 export const Notifications: React.FC<Props> = ({ onNotify, onClick }) => {
-  const { data: jobs = [], isPending } = useMy(
-    {
-      resource: 'job',
-    },
-    {
-      refetchInterval: sToMs(10),
-    }
-  );
-
   const [prevRunningJobs, setPrevRunningJobs] = useStorage<undefined | number>(
     { key: StorageKey.RUNNING_JOBS },
     undefined
   );
 
-  const runningJobs = jobs.filter(
-    job => job.status === JobStatus.Running
-  ).length;
-  const queuedJobs = jobs.filter(job => job.status === JobStatus.Queued).length;
-  const failedJobs = jobs.filter(job => job.status === JobStatus.Fail).length;
-  const completedJobs = jobs.filter(
-    job => job.status === JobStatus.Pass
-  ).length;
+  const { jobStats, status } = useJobStats();
+  const runningJobs = jobStats[JobStatus.Running];
+  const isPending = status === 'pending';
 
   useEffect(() => {
     if (runningJobs !== prevRunningJobs) {
@@ -79,7 +64,7 @@ export const Notifications: React.FC<Props> = ({ onNotify, onClick }) => {
                 </span>
               </span>
             ),
-            labelSuffix: jobs.length.toLocaleString(),
+            labelSuffix: jobStats.total.toLocaleString(),
             className: 'flex items-center',
             to: getRoute(['app', 'jobs']),
           },
@@ -89,26 +74,26 @@ export const Notifications: React.FC<Props> = ({ onNotify, onClick }) => {
           },
           {
             label: 'Running',
-            labelSuffix: runningJobs?.toLocaleString(),
+            labelSuffix: jobStats[JobStatus.Running].toLocaleString(),
             className: 'flex items-center',
             to: getJobPath(JobStatus.Running),
           },
           {
             className: 'flex items-center',
             label: 'Queued',
-            labelSuffix: queuedJobs?.toLocaleString(),
+            labelSuffix: jobStats[JobStatus.Queued].toLocaleString(),
             to: getJobPath(JobStatus.Queued),
           },
           {
             label: 'Failed',
-            labelSuffix: failedJobs?.toLocaleString(),
+            labelSuffix: jobStats[JobStatus.Fail].toLocaleString(),
             className: 'flex items-center',
             to: getJobPath(JobStatus.Fail),
           },
           {
             className: 'flex items-center',
             label: 'Completed',
-            labelSuffix: completedJobs?.toLocaleString(),
+            labelSuffix: jobStats[JobStatus.Pass].toLocaleString(),
             to: getJobPath(JobStatus.Pass),
           },
         ],

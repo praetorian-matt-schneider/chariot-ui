@@ -64,6 +64,7 @@ import {
 import { JobStatus, JobStatusLabel } from '@/types';
 import { partition } from '@/utils/array.util';
 import { cn } from '@/utils/classname';
+import { getJobStatus } from '@/utils/job';
 import { getRoute } from '@/utils/route.util';
 import { useStorage } from '@/utils/storage/useStorage.util';
 import { generatePathWithSearch, useSearchParams } from '@/utils/url.util';
@@ -91,10 +92,7 @@ const getStatusIcon = (status: string) => {
   }
 };
 
-export const getJobStatusIcon = (
-  status?: Job['status'],
-  className?: string
-) => {
+export const getJobStatusIcon = (status: JobStatus, className?: string) => {
   switch (status) {
     case JobStatus.Fail:
       return <XCircleIcon className={cn('size-7 text-[#F87171]', className)} />;
@@ -121,7 +119,8 @@ export const getJobStatusIcon = (
 };
 
 const getJobsStatus = (job?: JobWithFailedCount) => {
-  const status = job?.status;
+  const status = getJobStatus(job as Job);
+  const isFailed = (job?.failedJobsCount ?? 0) > 0;
 
   return (
     <Tooltip
@@ -130,18 +129,20 @@ const getJobsStatus = (job?: JobWithFailedCount) => {
         status ? (
           <div className="space-y-4">
             <div>
-              {job.failedJobsCount
-                ? `${job.failedJobsCount} Failed Jobs`
+              {isFailed
+                ? `${job?.failedJobsCount} Failed Jobs`
                 : `Job ${JobStatusLabel[status]}`}
             </div>
-            {job.failedJobsCount > 0 && <p>Click to view details</p>}
+            {isFailed && <p>Click to view details</p>}
           </div>
         ) : (
           ''
         )
       }
     >
-      {getJobStatusIcon(job?.failedJobsCount ? JobStatus.Fail : status)}
+      {getJobStatusIcon(
+        job?.failedJobsCount ? JobStatus.Fail : getJobStatus(job as Job)
+      )}
     </Tooltip>
   );
 };
@@ -515,10 +516,10 @@ export const Overview: React.FC = () => {
                                   [
                                     'jobsFilters',
                                     JSON.stringify({
-                                      search: `#${row.id}#`,
+                                      search: row.id,
                                       status: job.failedJobsCount
                                         ? JobStatus.Fail
-                                        : job.status,
+                                        : getJobStatus(job),
                                       sources: [],
                                     }),
                                   ],

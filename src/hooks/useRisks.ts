@@ -87,6 +87,16 @@ export const useUpdateRisk = () => {
         queryKey: getQueryKey.getCounts('risk'),
       });
 
+      // TODO : verify this logic
+      if (riskTemplate.key) {
+        queryClient.invalidateQueries({
+          queryKey: getQueryKey.getMy(
+            'risk',
+            riskTemplate.key.split('#risk')[1]
+          ),
+        });
+      }
+
       updateAllSubQueries(previous => {
         const updatedPages = previous.pages.map(page => {
           return {
@@ -144,6 +154,12 @@ const useBulkUpdateRiskHook = () => {
         const keys = risks.map(r => r.key);
 
         invalidateAlerts();
+
+        keys.forEach(key => {
+          queryClient.invalidateQueries({
+            queryKey: getQueryKey.getMy('risk', key.split('#risk')[1]),
+          });
+        });
 
         updateAllSubQueries(previous => {
           const updatedPages = previous.pages.map(page => {

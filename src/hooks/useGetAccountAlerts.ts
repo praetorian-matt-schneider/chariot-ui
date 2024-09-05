@@ -7,6 +7,7 @@ export interface Alert {
   priority: string;
   name: string;
   count: number;
+  source: string;
   value: string;
 }
 

@@ -13,7 +13,7 @@ import Hello from '@/sections/Hello';
 import Jobs from '@/sections/Jobs';
 import Logout from '@/sections/Logout';
 import { Overview } from '@/sections/overview/Overview';
-import { Risks } from '@/sections/RisksTable';
+import RisksBeta from '@/sections/RisksBeta';
 import { ForgotPassword, Login, Signup } from '@/sections/signup';
 import { LoginSSO } from '@/sections/signup/LoginSSO';
 import { useAuth } from '@/state/auth';
@@ -111,7 +111,7 @@ const appRoutes = {
       title: 'Assets',
     },
     risks: {
-      element: <Risks />,
+      element: <RisksBeta />,
       title: 'Risks',
     },
     jobs: {

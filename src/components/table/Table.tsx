@@ -64,14 +64,12 @@ export function Table<TData>(props: TableProps<TData>) {
     rowClassName,
   } = props;
 
-  const tableId = useId();
-
   const { getSticky, useCreateSticky } = useSticky();
 
   const stickyRef = useCreateSticky<HTMLTableSectionElement>({
     id: 'table-header',
   });
-
+  const tableId = useId();
   const [expandedGroups, setExpandedGroups] = useState(
     groupBy?.map(group => group.label) || []
   );
@@ -401,7 +399,7 @@ export function Table<TData>(props: TableProps<TData>) {
             className={'sticky bg-layer1'}
             style={{
               zIndex: 1,
-              top: getSticky('1', '2R'),
+              top: getSticky(isTableView ? '1' : '0', '2R'),
             }}
           >
             <tr className="relative">

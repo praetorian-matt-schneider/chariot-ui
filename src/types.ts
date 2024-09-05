@@ -44,9 +44,23 @@ export enum RiskStatus {
   Triaged = 'T',
   Opened = 'O',
   Remediated = 'R',
+
   MachineOpen = 'MO',
   MachineDeleted = 'MD',
+  ExposedRisks = 'E',
 }
+
+export const RiskStatusWithSeverity = [
+  RiskStatus.Triaged,
+  RiskStatus.Opened,
+  RiskStatus.Remediated,
+];
+
+export const RiskStatusWithoutSeverity = [
+  RiskStatus.MachineOpen,
+  RiskStatus.MachineDeleted,
+  RiskStatus.ExposedRisks,
+];
 
 export type RiskCombinedStatus = string;
 
@@ -79,6 +93,7 @@ export const RiskStatusLabel: Record<RiskStatus, string> = {
   R: 'Remediated',
   MO: 'Recommended Opened',
   MD: 'Recommended Deleted',
+  E: 'Exposed Risks',
 };
 
 export const SeverityDef: Record<RiskSeverity, string> = {
@@ -212,6 +227,7 @@ export type EntityHistory = {
   to: string;
   updated: string;
   by?: string;
+  comment: string;
 };
 
 export interface Risk extends RiskTemplate {
@@ -384,6 +400,7 @@ export interface Condition {
   name: string;
   value: string;
   key: string;
+  count: number;
 }
 
 export interface Search {
@@ -559,10 +576,14 @@ export interface AssetFilters {
 }
 
 export interface JobFilters {
-  sources: string[];
   status: string;
   search: string;
-  failedReason: string[];
+  failedReason: string;
+}
+
+export interface RiskFilters {
+  search: string;
+  query: string;
 }
 
 export type Severity = 'I' | 'L' | 'M' | 'H' | 'C';

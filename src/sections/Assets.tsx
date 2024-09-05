@@ -1,4 +1,10 @@
-import React, { ReactNode, useEffect, useMemo, useState } from 'react';
+import React, {
+  PropsWithChildren,
+  ReactNode,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import {
   BellAlertIcon,
   BellSlashIcon,
@@ -26,7 +32,7 @@ import { getAssetStatusIcon } from '@/components/icons/AssetStatus.icon';
 import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
 import { Loader } from '@/components/Loader';
 import { Table } from '@/components/table/Table';
-import { Columns, TableActions, TableProps } from '@/components/table/types';
+import { Columns, TableActions } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
 import { useMy } from '@/hooks';
 import { useAddAlert, useRemoveAlert } from '@/hooks/useAlerts';
@@ -56,6 +62,7 @@ import {
   SeverityOpenCounts,
   Statistic,
 } from '@/types';
+import { getAlertName } from '@/utils/alert.util';
 import { QueryStatus, useMergeStatus } from '@/utils/api';
 import { cn } from '@/utils/classname';
 import { capitalize } from '@/utils/lodash.util';
@@ -140,9 +147,9 @@ const Assets: React.FC = () => {
     ];
   }, [JSON.stringify(accounts)]);
 
+  const { mutateAsync: bulkReRunJob } = useBulkReRunJob();
   const { mutateAsync: addAlert } = useAddAlert();
   const { mutateAsync: removeAlert } = useRemoveAlert();
-  const { mutateAsync: bulkReRunJob } = useBulkReRunJob();
 
   const { getAssetDrawerLink } = getDrawerLink();
   const {
@@ -545,16 +552,16 @@ const Assets: React.FC = () => {
                 styleType="primary"
                 className="-translate-x-2 text-sm font-semibold"
                 onClick={() => {
-                  Object.keys(DEFAULT_CONDITIONS).forEach(key => {
-                    DEFAULT_CONDITIONS[
-                      key as keyof typeof DEFAULT_CONDITIONS
-                    ].forEach(value => {
-                      addAlert({
-                        value,
-                        name: `Assets with a ${key} value of ${value} identified`,
+                  Object.entries(DEFAULT_CONDITIONS).forEach(
+                    ([key, values]) => {
+                      values.forEach(value => {
+                        addAlert({
+                          value: `exposure-${key}-${value}`,
+                          name: `exposure-${key}-${value}`,
+                        });
                       });
-                    });
-                  });
+                    }
+                  );
                   closeCTADrawer();
                 }}
               >
@@ -633,52 +640,46 @@ const Assets: React.FC = () => {
           status: useMergeStatus(attributeStatsStatus),
           alert: {
             value: alerts.map(alert => alert.value),
-            onAdd: async (attributeKey: string) => {
-              const [, attributeType = '', attributeValue = ''] =
-                attributeKey.match(Regex.ATTIBUTE_KEY) || [];
-
-              await addAlert({
-                value: attributeKey,
-                name: `Assets with a ${attributeType} value of ${attributeValue} identified`,
-              });
-            },
-            onRemove: async (value: string) => {
-              await removeAlert({
-                key: `#condition#${value}`,
-              });
-            },
           },
         }}
-        isTableView
         name="asset"
-        selection={{ value: selectedRows, onChange: setSelectedRows }}
-        rowActions={(asset: PartialAsset) => {
-          const assets = [asset];
+      >
+        <Table
+          isTableView
+          name="asset"
+          selection={{
+            value: selectedRows,
+            onChange: setSelectedRows,
+            selectAll: false,
+          }}
+          rowActions={(asset: PartialAsset) => {
+            const assets = [asset];
 
-          if (!asset) {
-            return {
-              menu: {
-                items: [],
-              },
-            };
-          }
+            if (!asset) {
+              return {
+                menu: {
+                  items: [],
+                },
+              };
+            }
 
-          return renderActions(assets);
-        }}
-        tableClassName="border-r-0 border-l border-gray-300"
-        columns={columns}
-        data={assets}
-        error={assetsError}
-        status={assetsStatus}
-        fetchNextPage={fetchNextPage}
-        isFetchingNextPage={isFetchingNextPage}
-        noData={{
-          title: 'No Assets found',
-          description: filters.search
-            ? 'Add an asset now to get started'
-            : 'No assets found with this filter',
-        }}
-      />
+            return renderActions(assets);
+          }}
+          tableClassName="border-none"
+          columns={columns}
+          data={assets}
+          error={assetsError}
+          status={assetsStatus}
+          fetchNextPage={fetchNextPage}
+          isFetchingNextPage={isFetchingNextPage}
+          noData={{
+            title: 'No Assets found',
+            description: filters.search
+              ? 'Add an asset now to get started'
+              : 'No assets found with this filter',
+          }}
+        />
+      </FancyTable>
       <AssetStatusWarning
         open={showAssetStatusWarning}
         onClose={() => setShowAssetStatusWarning(false)}
@@ -791,12 +792,15 @@ export function CategoryFilter(props: CategoryFilterProps) {
                           >
                             {option.label}
                           </p>
-                          {value.includes(option.value) && (
-                            <CheckIcon className="mr-auto size-4 shrink-0 stroke-[3px] text-brand" />
-                          )}
+                          <CheckIcon
+                            className={cn(
+                              'mr-auto size-4 shrink-0 stroke-[3px] text-brand invisible',
+                              value.includes(option.value) && 'visible'
+                            )}
+                          />
                           {item.showCount && <p>{option.count}</p>}
                           {alert && (
-                            <AlertIcon {...alert} currentValue={option.value} />
+                            <AlertIcon {...alert} currentValue={getAlertName(option.value)} />
                           )}
                         </div>
                       </Loader>
@@ -826,25 +830,44 @@ export function CategoryFilter(props: CategoryFilterProps) {
 
 interface AlertIconProps {
   value: string[];
-  onAdd: (value: string) => Promise<void>;
-  onRemove: (value: string) => Promise<void>;
+  onAdd?: () => void; // callback
+  onRemove?: () => void; // callback
   currentValue: string;
   styleType?: 'filter' | 'button';
 }
 
-function AlertIcon(props: AlertIconProps) {
+export function AlertIcon(props: AlertIconProps) {
   const [isLoading, setIsLoading] = useState(false);
   const isSubscribed = props.value.includes(props.currentValue);
   const Icon = isSubscribed ? BellSlashIcon : BellAlertIcon;
+  const { mutateAsync: addAlert } = useAddAlert();
+  const { mutateAsync: removeAlert } = useRemoveAlert();
 
-  async function handleClick() {
+  async function handleAdd() {
+    try {
+      const attributeKey = props.currentValue;
+      setIsLoading(true);
+
+      const alertName = getAlertName(attributeKey);
+
+      await addAlert({
+        value: alertName,
+        name: alertName,
+      });
+
+      props.onAdd && props.onAdd();
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function handleRemove() {
     try {
       setIsLoading(true);
-      if (isSubscribed) {
-        await props.onRemove(props.currentValue);
-      } else {
-        await props.onAdd(props.currentValue);
-      }
+      await removeAlert({
+        key: `#condition#${props.currentValue}`,
+      });
+      props.onRemove && props.onRemove();
     } finally {
       setIsLoading(false);
     }
@@ -858,7 +881,7 @@ function AlertIcon(props: AlertIconProps) {
         startIcon={
           <Icon className="size-6 shrink-0 rounded-full stroke-[2px] p-1" />
         }
-        onClick={handleClick}
+        onClick={isSubscribed ? handleRemove : handleAdd}
       >
         {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
       </Button>
@@ -878,7 +901,7 @@ function AlertIcon(props: AlertIconProps) {
               'ml-auto size-4 shrink-0 stroke-[2px]',
               !isSubscribed && 'text-gray-400'
             )}
-            onClick={handleClick}
+            onClick={isSubscribed ? handleRemove : handleAdd}
           />
         </Tooltip>
       </Loader>
@@ -886,8 +909,10 @@ function AlertIcon(props: AlertIconProps) {
   );
 }
 
-export function FancyTable<TData>(
-  props: TableProps<TData> & {
+export function FancyTable(
+  props: PropsWithChildren & {
+    className?: string;
+    tableheader?: ReactNode;
     addNew?: {
       label?: ReactNode;
       onClick: () => void;
@@ -898,6 +923,7 @@ export function FancyTable<TData>(
     otherFilters?: ReactNode;
     belowTitleContainer?: ReactNode;
     tableHeader?: ReactNode;
+    name: string;
   }
 ) {
   const {
@@ -907,7 +933,8 @@ export function FancyTable<TData>(
     belowTitleContainer,
     otherFilters,
     tableHeader,
-    ...tableProps
+    name,
+    children,
   } = props;
   const { maxMd } = useGetScreenSize();
 
@@ -960,10 +987,8 @@ export function FancyTable<TData>(
               zIndex: 1,
             }}
           >
-            <div className="flex items-center  px-4">
-              <p className="text-3xl font-bold">
-                {capitalize(tableProps.name)}
-              </p>
+            <div className="flex items-center justify-between  px-4">
+              <p className="text-3xl font-bold">{capitalize(name)}</p>
               {addNew && (
                 <Button
                   className="ml-auto"
@@ -974,7 +999,7 @@ export function FancyTable<TData>(
                     setIsFiltersOpen(false);
                   }}
                 >
-                  {addNew.label || `New ${capitalize(tableProps.name)}`}
+                  {addNew.label || `New ${capitalize(name)}`}
                 </Button>
               )}
             </div>
@@ -983,7 +1008,7 @@ export function FancyTable<TData>(
               <div className="flex flex-col gap-2 px-4">
                 <label
                   className="text-sm font-semibold"
-                  htmlFor={`${tableProps.name}-search`}
+                  htmlFor={`${name}-search`}
                 >
                   Search
                 </label>
@@ -999,18 +1024,13 @@ export function FancyTable<TData>(
                     onChange={event => {
                       search?.onChange(event.target.value);
                     }}
-                    name={`${tableProps.name}-search`}
+                    name={`${name}-search`}
                     className="pl-8"
                     placeholder={
-                      tableProps.name === 'jobs'
-                        ? 'Go to source'
-                        : `Go to ${tableProps.name}s`
+                      name === 'jobs' ? 'Go to source' : `Go to ${name}s`
                     }
                   />
-                  <label
-                    className="cursor-pointer"
-                    htmlFor={`${tableProps.name}-search`}
-                  >
+                  <label className="cursor-pointer" htmlFor={`${name}-search`}>
                     <MagnifyingGlassIcon className="absolute left-0 top-0 ml-2 size-5 h-full stroke-[3px]" />
                   </label>
                 </form>
@@ -1046,7 +1066,7 @@ export function FancyTable<TData>(
       <div className={cn('flex w-full flex-col bg-white')}>
         <div
           ref={rightStickyRef}
-          className="sticky flex min-h-14 items-center bg-white px-4"
+          className={cn('sticky flex items-center bg-white px-4 py-2')}
           style={{
             top: headerHeight,
             zIndex: 1,
@@ -1102,7 +1122,7 @@ export function FancyTable<TData>(
                   {filter.alert && (
                     <AlertIcon
                       {...filter.alert}
-                      currentValue={attribute}
+                      currentValue={getAlertName(attribute)}
                       styleType="button"
                     />
                   )}
@@ -1118,23 +1138,14 @@ export function FancyTable<TData>(
                   <p className="text-lg font-semibold text-gray-500">
                     {props.search && props.search?.value?.length > 0
                       ? props.search?.value
-                      : `All ${capitalize(tableProps.name)}`}
+                      : `All ${capitalize(name)}`}
                   </p>
                 </div>
               </div>
             </div>
           )}
         </div>
-        <Table
-          {...tableProps}
-          selection={
-            tableProps.selection
-              ? { ...tableProps.selection, selectAll: false }
-              : undefined
-          }
-          isTableView
-          tableClassName="border-none"
-        />
+        {children}
       </div>
     </div>
   );

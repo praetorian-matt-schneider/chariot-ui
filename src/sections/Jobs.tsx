@@ -9,11 +9,12 @@ import { useDebounce } from 'use-debounce';
 
 import { HorseIcon } from '@/components/icons/Horse.icon';
 import { Modal } from '@/components/Modal';
+import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
 import { useModifyAccount, useMy } from '@/hooks';
-import { useCounts } from '@/hooks/useCounts';
-import { useReRunJob } from '@/hooks/useJobs';
+import { useGenericSearch } from '@/hooks/useGenericSearch';
+import { useJobStats, useReRunJob } from '@/hooks/useJobs';
 import { CategoryFilter, FancyTable } from '@/sections/Assets';
 import { getJobStatusIcon } from '@/sections/overview/Overview';
 import {
@@ -27,6 +28,7 @@ import {
 } from '@/types';
 import { cn } from '@/utils/classname';
 import { getCronRelativeTime, mToMs } from '@/utils/date.util';
+import { getJobStatus } from '@/utils/job';
 import { useQueryFilters } from '@/utils/storage/useQueryParams.util';
 
 export const getStatusColor = (status: JobStatus) => {
@@ -69,15 +71,22 @@ const getFailedComment = (job: Job) => {
 const Jobs: React.FC = () => {
   const [filters, setFilters] = useQueryFilters<JobFilters>({
     key: 'jobsFilters',
-    defaultFilters: { status: '', sources: [], search: '', failedReason: [] },
+    defaultFilters: { status: '', search: '', failedReason: '' },
   });
-  const query = filters.search.startsWith('#') ? filters.search : undefined;
-  const { data: stats = {} } = useCounts({
-    resource: 'job',
-    query,
-  });
+  const [debouncedSearch] = useDebounce(filters.search, 500);
+  const query = useMemo(() => {
+    if (filters.status && debouncedSearch) {
+      return `status:${filters.status}#${debouncedSearch}`;
+    } else if (filters.status) {
+      return `status:${filters.status}`;
+    } else if (debouncedSearch) {
+      return `source:${debouncedSearch}`;
+    }
+    return '#job';
+  }, [filters.status, debouncedSearch]);
+  const { jobStats } = useJobStats();
   const {
-    data: jobs = [],
+    data,
     refetch,
     error,
     status,
@@ -85,10 +94,10 @@ const Jobs: React.FC = () => {
     fetchNextPage,
     isFetching,
     hasNextPage,
-  } = useMy({
-    resource: 'job',
+  } = useGenericSearch({
     query,
   });
+  const jobs = data?.jobs || [];
 
   const { data: accounts, status: accountStatus } = useMy({
     resource: 'account',
@@ -116,10 +125,8 @@ const Jobs: React.FC = () => {
     accounts.find(account => account.member === FROZEN_ACCOUNT)
   );
 
-  const [debouncedSearch] = useDebounce(filters.search, 500);
-
   const failedJobStats = useMemo(() => {
-    const failedJobs = jobs.filter(job => job.status === JobStatus.Fail);
+    const failedJobs = jobs.filter(job => getJobStatus(job) === JobStatus.Fail);
     const failedJobStats = failedJobs.reduce(
       (acc, job) => {
         const comment = getFailedComment(job);
@@ -143,55 +150,16 @@ const Jobs: React.FC = () => {
 
   const filteredJobs: Job[] = useMemo(() => {
     let filteredJobs = jobs;
-    const { status, sources } = filters;
 
-    if (status) {
-      filteredJobs = filteredJobs.filter(job => job.status === status);
-    }
-
-    if (sources.filter(Boolean).length > 0) {
-      filteredJobs = filteredJobs.filter(job => sources.includes(job.source));
-    }
-
-    if (debouncedSearch && debouncedSearch.length > 0) {
-      filteredJobs = filteredJobs.filter(item => {
-        const found = Object.values(item).find(value =>
-          String(value).toLowerCase().includes(debouncedSearch.toLowerCase())
-        );
-
-        return found;
-      });
-    }
-
-    if (filters.failedReason?.length > 0 && !query) {
+    if (filters.failedReason && !query) {
       filteredJobs = filteredJobs.filter(job => {
         const comment = getFailedComment(job);
-        return comment ? filters.failedReason.includes(comment) : false;
+        return comment ? filters.failedReason === comment : false;
       });
     }
 
     return filteredJobs;
-  }, [debouncedSearch, query, JSON.stringify({ jobs, filters })]);
-
-  const jobStats = useMemo(() => {
-    return Object.entries(stats).reduce(
-      (acc, [key, value]) => {
-        Object.values(JobStatus).forEach(jobKey => {
-          if (key.endsWith(jobKey)) {
-            acc[jobKey] = (acc[jobKey] || 0) + value;
-          }
-        });
-
-        return acc;
-      },
-      {
-        JF: 0,
-        JP: 0,
-        JQ: 0,
-        JR: 0,
-      } as Record<JobStatus, number>
-    );
-  }, [JSON.stringify(stats)]);
+  }, [JSON.stringify({ jobs }), filters.failedReason]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -213,7 +181,7 @@ const Jobs: React.FC = () => {
                 job.comment && 'cursor-pointer'
               )}
             >
-              {getJobStatusIcon(job.status, 'size-6')}
+              {getJobStatusIcon(getJobStatus(job), 'size-6')}
               {job.source} <span className="text-gray-500">(job)</span>
               <span>
                 {job.name} <span className="text-gray-500">(source)</span>
@@ -239,8 +207,9 @@ const Jobs: React.FC = () => {
       fixedWidth: 75,
       align: 'center',
       cell: (job: Job) => {
+        const jobStatus = getJobStatus(job);
         const isRunning =
-          job.status === JobStatus.Running || job.status === JobStatus.Queued;
+          jobStatus === JobStatus.Running || jobStatus === JobStatus.Queued;
 
         return (
           <ArrowPathIcon
@@ -319,9 +288,8 @@ const Jobs: React.FC = () => {
           onChange: search => {
             setFilters({
               search,
-              sources: [],
-              status: '',
-              failedReason: [],
+              status: filters.status,
+              failedReason: '',
             });
           },
         }}
@@ -334,7 +302,7 @@ const Jobs: React.FC = () => {
                   {filters.search ? filters.search : `All Jobs`}
                 </p>
               </div>
-              {filters.status?.length > 0 && (
+              {filters.status && (
                 <div className="flex items-center gap-2">
                   <p className="text-lg font-bold">Status:</p>
                   <p className="text-base font-semibold text-gray-500">
@@ -342,11 +310,11 @@ const Jobs: React.FC = () => {
                   </p>
                 </div>
               )}
-              {filters.failedReason?.length > 0 && (
+              {filters.failedReason && (
                 <div className="flex items-center gap-2">
                   <p className="text-lg font-bold">Failed Reason:</p>
                   <p className="text-base font-semibold text-gray-500">
-                    {filters.failedReason[0]}
+                    {filters.failedReason}
                   </p>
                 </div>
               )}
@@ -365,9 +333,8 @@ const Jobs: React.FC = () => {
               onChange={statuses => {
                 setFilters({
                   status: statuses[0],
-                  search: '',
-                  sources: [],
-                  failedReason: [],
+                  search: filters.search,
+                  failedReason: '',
                 });
               }}
               category={[
@@ -387,13 +354,12 @@ const Jobs: React.FC = () => {
             {Object.keys(failedJobStats).length > 0 ? (
               <CategoryFilter
                 hideHeader={true}
-                value={filters.failedReason}
+                value={[filters.failedReason]}
                 status={dataStatus}
-                onChange={failedReason => {
+                onChange={failedReasons => {
                   setFilters({
-                    failedReason,
+                    failedReason: failedReasons[0],
                     search: '',
-                    sources: [],
                     status: '',
                   });
                 }}
@@ -414,22 +380,25 @@ const Jobs: React.FC = () => {
             ) : null}
           </>
         }
-        isTableView
         name="jobs"
-        tableClassName="border-r-0 border-l border-gray-300"
-        columns={columns}
-        data={filteredJobs}
-        error={error}
-        status={dataStatus}
-        fetchNextPage={fetchNextPage}
-        isFetchingNextPage={isFetchingNextPage}
-        noData={{
-          icon: <HorseIcon />,
-          title: 'No Jobs found',
-          description:
-            'There are no job found with this search, update the search',
-        }}
-      />
+      >
+        <Table
+          name="jobs"
+          tableClassName="border-none"
+          columns={columns}
+          data={filteredJobs}
+          error={error}
+          status={dataStatus}
+          fetchNextPage={fetchNextPage}
+          isFetchingNextPage={isFetchingNextPage}
+          noData={{
+            icon: <HorseIcon />,
+            title: 'No Jobs found',
+            description:
+              'There are no job found with this search, update the search',
+          }}
+        />
+      </FancyTable>
     </div>
   );
 };

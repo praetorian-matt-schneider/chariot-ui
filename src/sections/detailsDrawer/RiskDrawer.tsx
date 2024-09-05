@@ -1,25 +1,28 @@
-import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import {
+  PropsWithChildren,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
+import { Link } from 'react-router-dom';
 import {
   ArrowPathIcon,
-  DocumentTextIcon,
+  ExclamationTriangleIcon,
   PencilSquareIcon,
 } from '@heroicons/react/24/outline';
-import {
-  ClipboardCheck,
-  HistoryIcon,
-  MessageSquare,
-  NotepadText,
-} from 'lucide-react';
 
 import { Button } from '@/components/Button';
+import { Chip } from '@/components/Chip';
 import { Drawer } from '@/components/Drawer';
-import { AssetsIcon, RisksIcon } from '@/components/icons';
+import { RisksIcon } from '@/components/icons';
 import { UnionIcon } from '@/components/icons/Union.icon';
 import { Loader } from '@/components/Loader';
 import { MarkdownEditor } from '@/components/markdown/MarkdownEditor';
 import { MarkdownPreview } from '@/components/markdown/MarkdownPreview';
 import { Modal } from '@/components/Modal';
+import { Tabs } from '@/components/Tab';
 import { Timeline } from '@/components/Timeline';
 import { Tooltip } from '@/components/Tooltip';
 import { RiskDropdown } from '@/components/ui/RiskDropdown';
@@ -29,7 +32,11 @@ import { useGetFile, useUploadFile } from '@/hooks/useFiles';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useBulkReRunJob, useJobsStatus } from '@/hooks/useJobs';
 import { useReportRisk, useUpdateRisk } from '@/hooks/useRisks';
-import { AddAttribute } from '@/sections/detailsDrawer/AddAttribute';
+import { AlertAction } from '@/sections/Alerts';
+import {
+  ResponsiveGrid,
+  StickHeaderSection,
+} from '@/sections/detailsDrawer/AssetDrawer';
 import { Comment } from '@/sections/detailsDrawer/Comment';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { getStatusColor } from '@/sections/Jobs';
@@ -39,16 +46,22 @@ import {
   JobStatus,
   Risk,
   RiskCombinedStatus,
+  RiskFilters,
+  RiskSeverity,
+  RiskStatus,
+  RiskStatusLabel,
+  RiskStatusWithoutSeverity,
 } from '@/types';
 import { mergeJobStatus } from '@/utils/api';
 import { cn } from '@/utils/classname';
 import { formatDate } from '@/utils/date.util';
 import { sToMs } from '@/utils/date.util';
-import { getSeverityClass } from '@/utils/getSeverityClass.util';
-import { Regex } from '@/utils/regex.util';
-import { isManualORPRrovidedRisk } from '@/utils/risk.util';
+import { getJobStatus } from '@/utils/job';
+import { getDescription, isManualORPRrovidedRisk } from '@/utils/risk.util';
+import { getStatusSeverity } from '@/utils/riskStatus.util';
+import { useQueryFilters } from '@/utils/storage/useQueryParams.util';
 import { StorageKey, useStorage } from '@/utils/storage/useStorage.util';
-import { generatePathWithSearch, useSearchParams } from '@/utils/url.util';
+import { useSearchParams } from '@/utils/url.util';
 
 interface RiskDrawerProps {
   open: boolean;
@@ -61,9 +74,9 @@ const isScannable = (attribute: Attribute) =>
     attribute.value.startsWith('#asset'));
 
 export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
-  const navigate = useNavigate();
+  const [selectedTab, setSelectedTab] = useState('description');
+  const [isWarningModalOpen, setIsWarningModalOpen] = useState(false);
   const { removeSearchParams } = useSearchParams();
-  const { getAssetDrawerLink } = getDrawerLink();
   const [riskJobsMap, setRiskJobsMap] = useStorage<
     Record<string, Record<string, string>>
   >(
@@ -72,9 +85,23 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     },
     {}
   );
+  const [comment, setComment] = useState<string>('');
+  const [status, setStatus] = useState<RiskStatus>();
+  const [severity, setSeverity] = useState<RiskSeverity>();
 
   const [, dns, name] = compositeKey.split('#');
   const attributesFilter = `source:#risk#${dns}#${name}`;
+
+  const [riskFilters] = useQueryFilters<RiskFilters>({
+    key: StorageKey.RISK_FILTERS,
+    defaultFilters: {
+      search: '',
+      query: '',
+    },
+  });
+  const { invalidate: invalidateRiskData } = useGenericSearch({
+    query: riskFilters.search || riskFilters.query,
+  });
 
   const [isEditingMarkdown, setIsEditingMarkdown] = useState(false);
   const [markdownValue, setMarkdownValue] = useState('');
@@ -85,7 +112,11 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
   const { mutateAsync: updateFile, status: updateFileStatus } = useUploadFile();
   const { mutateAsync: reportRisk, status: reportRiskStatus } = useReportRisk();
 
-  const { data: risks = [], status: riskStatus } = useMy(
+  const {
+    data: risks = [],
+    status: riskStatus,
+    refetch: refetchRisk,
+  } = useMy(
     {
       resource: 'risk',
       query: compositeKey,
@@ -130,12 +161,29 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     riskStatus === 'pending' || definitionsFileStatus === 'pending';
   const risk: Risk = risks[0] || {};
 
+  const { status: riskStatusKey, severity: riskSeverityKey } =
+    getStatusSeverity(risk.status);
+
+  const hasLocalChanges =
+    riskStatusKey !== status ||
+    riskSeverityKey !== severity ||
+    Boolean(comment);
+
+  useEffect(() => {
+    if (risk && risk.status) {
+      setStatus(riskStatusKey as RiskStatus);
+      setSeverity(riskSeverityKey as RiskSeverity);
+      setComment(risk.comment);
+    }
+  }, [JSON.stringify(risk), riskStatusKey, riskSeverityKey]);
+
   // This variable filters the jobs from localStorage and only keeps the jobs that are related to the current risk
   const attributeJobMap = Object.fromEntries(
     Object.entries(riskJobsMap[risk.key] || {}).filter(([key]) =>
       sourceKeys.includes(key)
     )
   );
+
   const { data: jobsData = {}, status: allAssetJobsStatus } = useJobsStatus(
     attributeJobMap,
     {
@@ -145,7 +193,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
   );
 
   const jobsStatus = mergeJobStatus(
-    Object.values(jobsData).map(job => job?.status)
+    Object.values(jobsData).map(job => getJobStatus(job))
   );
 
   const lastScan =
@@ -156,8 +204,6 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
 
   const isJobsRunning =
     jobsStatus === JobStatus.Running || jobsStatus === JobStatus.Queued;
-
-  const severityClass = getSeverityClass(risk.status?.[1]);
 
   const resetMarkdownValue = useCallback(() => {
     setMarkdownValue(isEditingMarkdown ? definitionsFileValue : '');
@@ -175,18 +221,20 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
       from: '',
       to: noHistory ? risk.status : risk.history[0].from,
       updated: risk.created,
+      comment: risk.comment,
     };
 
     return [firstTrackedHistory, ...riskHistory];
   }, [JSON.stringify(risk.history)]);
 
-  async function handleUpdateComment(comment = '') {
+  async function handleUpdateComment(comment = '', status = '') {
     await updateRisk({
       comment,
       key: risk.key,
       name: risk.name,
-      status: risk.status,
+      status,
     });
+    refetchRisk();
   }
 
   const assetsOnRisk = useMemo(
@@ -208,497 +256,420 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     [attributesGenericSearch?.attributes]
   );
 
-  const discovered = (
-    <>
-      <Tooltip title="First Seen">
-        <p className="text-sm font-normal text-gray-500">
-          {formatDate(risk.created)}
-        </p>
-      </Tooltip>
-      <p className="text-sm font-normal text-gray-500">-</p>
-      <Tooltip title="Last Seen">
-        <p className="text-sm font-normal text-gray-500">
-          {formatDate(risk.updated)}
-        </p>
-      </Tooltip>
-    </>
-  );
+  function handleClose() {
+    if (hasLocalChanges) {
+      setIsWarningModalOpen(true);
+    } else {
+      removeSearchParams(StorageKey.DRAWER_COMPOSITE_KEY);
+    }
+  }
 
   return (
     <Drawer
       open={open}
-      onClose={() => removeSearchParams(StorageKey.DRAWER_COMPOSITE_KEY)}
-      onBack={() => navigate(-1)}
-      className={cn(
-        'w-full rounded-t-lg bg-zinc-100 pb-0 shadow-lg',
-        severityClass
-      )}
+      onClose={handleClose}
+      onBack={handleClose}
+      className={'w-full rounded-t-lg pb-0 shadow-lg'}
     >
       <Loader isLoading={isInitialLoading} type="spinner">
-        <div className="flex h-full flex-col gap-2 px-8 pt-0">
-          <div className="grid grid-cols-2 gap-4">
-            {/* Description & Remediation */}
-            <div
-              className={cn(
-                'bg-white flex flex-col  p-8 transition-all rounded-lg hover:shadow-md'
-              )}
-            >
-              <div className="mb-4 flex flex-row items-start space-x-1">
-                <ClipboardCheck className="mt-1 size-12 text-gray-800" />
-                <h3
-                  className={cn(
-                    'text-2xl font-semibold tracking-wide text-gray-900'
-                  )}
-                >
-                  <div className="flex flex-col justify-start text-left">
-                    <p className="text-2xl font-semibold text-gray-900">
-                      {risk.name}{' '}
-                      {knownExploitedThreats.includes(risk.name) && (
-                        <span className="text-red-500">
-                          [Known Exploited Threat]
-                        </span>
-                      )}
-                    </p>
-                    <p
-                      className="ml-1 flex w-full flex-wrap gap-2 overflow-hidden  text-sm font-normal text-gray-500"
+        <ResponsiveGrid
+          section1={
+            <History history={history}>
+              <Comment
+                key={risk.status}
+                risk={risk}
+                isLoading={isRiskFetching}
+                onSave={handleUpdateComment}
+                value={{
+                  comment,
+                  setComment,
+                  status,
+                  setStatus,
+                  severity,
+                  setSeverity,
+                }}
+                hasLocalChanges={hasLocalChanges}
+              />
+              <Modal
+                style="dialog"
+                title={
+                  <div className="flex items-center gap-1">
+                    <ExclamationTriangleIcon className="size-5 text-yellow-600" />
+                    Unsaved Changes
+                  </div>
+                }
+                open={isWarningModalOpen}
+                onClose={() => {
+                  setIsWarningModalOpen(false);
+                  removeSearchParams(StorageKey.DRAWER_COMPOSITE_KEY);
+                }}
+                closeOnOutsideClick={false}
+                footer={{
+                  text: 'Save',
+                  onClick: async () => {
+                    // Add api to save the changes
+                    if (risk.status === RiskStatus.ExposedRisks) {
+                      await handleUpdateComment(comment, risk.status);
+                    } else {
+                      await handleUpdateComment(
+                        comment,
+                        `${status}${severity || ''}`
+                      );
+                    }
+                    setIsWarningModalOpen(false);
+                  },
+                }}
+              >
+                <div className="space-y-2 text-sm text-default-light">
+                  There are some changes on status. Do you want to save ?
+                </div>
+              </Modal>
+            </History>
+          }
+          section2={
+            <div className="col flex size-full flex-col overflow-hidden">
+              <div className="flex items-start gap-4 px-9 py-5">
+                <div className="max-w-1/2 flex flex-col gap-2">
+                  <div className="flex items-center gap-4">
+                    <h1
+                      className="text-2xl font-bold"
                       style={{ wordBreak: 'break-word' }}
                     >
-                      via {risk.source} on {risk.dns}
-                      <div className="border-l border-gray-400"></div>
-                      {discovered}
-                    </p>
-                  </div>
-                </h3>
-              </div>
-              <Loader
-                isLoading={
-                  isDefinitionsFileFetching || reportRiskStatus === 'pending'
-                }
-                className="h-6"
-              >
-                <Modal
-                  size="6xl"
-                  open={isEditingMarkdown}
-                  onClose={() => setIsEditingMarkdown(false)}
-                  title="Description & Remediation"
-                  footer={{
-                    text: 'Save',
-                    isLoading: updateFileStatus === 'pending',
-                    onClick: async () => {
-                      await updateFile({
-                        ignoreSnackbar: true,
-                        name: `definitions/${name}`,
-                        content: markdownValue,
-                      });
-                      setIsEditingMarkdown(false);
-                    },
-                  }}
-                >
-                  <div className="h-[60vh]">
-                    <MarkdownEditor
-                      value={markdownValue}
-                      onChange={value => setMarkdownValue(value || '')}
-                      filePathPrefix="definitions/files"
+                      {risk.name}
+                    </h1>
+                    {knownExploitedThreats.includes(risk.name) && (
+                      <span className="text-red-500">
+                        [Known Exploited Threat]
+                      </span>
+                    )}
+                    <JobStatusBadge
+                      status={jobsStatus}
+                      lastScan={formatDate(lastScan)}
                     />
                   </div>
-                </Modal>
-                {definitionsFile ? (
-                  <MarkdownPreview
-                    source={definitionsFileValue}
-                    style={{
-                      padding: '0.75rem',
-                      wordBreak: 'break-word',
-                      minHeight: '20px',
-                    }}
-                  />
-                ) : (
-                  <div className="flex w-full flex-1 flex-col items-center justify-center text-center text-default">
-                    <UnionIcon className="mt-8 size-16 text-default-light" />
-                    <p className="mt-7 text-lg font-bold">
-                      Generate Description & Remediation
-                    </p>
-                    <p className="mt-2">
-                      Add a Description & Remediation to this Risk
-                      <br />
-                      {`using Praetorian's Machine Learning.`}
-                    </p>
-                    <Button
-                      className="mt-10"
-                      startIcon={
-                        <UnionIcon className="size-3 text-brand-light" />
+
+                  {/* Actions Section */}
+                  <div className="flex flex-row flex-wrap gap-3">
+                    <AlertAction
+                      item={risk}
+                      handleRefetch={() => {
+                        invalidateRiskData();
+                      }}
+                    />
+                    <Tooltip
+                      placement="top"
+                      title={
+                        isInitialLoading
+                          ? ''
+                          : risk.source && !isManualORPRrovidedRisk(risk)
+                            ? isJobsRunning
+                              ? 'Scanning in progress'
+                              : sourceKeys.length === 0
+                                ? 'On-demand scanning is only available for risk which have a source attribute'
+                                : 'Revalidate the risk'
+                            : 'On-demand scanning is only available for automated risk discovery.'
                       }
-                      styleType="primary"
-                      onClick={() => reportRisk({ name })}
                     >
-                      Generate Now
-                    </Button>
-                  </div>
-                )}
-                <Button
-                  styleType="none"
-                  className="mr-auto mt-4 pl-0 font-bold"
-                  endIcon={<PencilSquareIcon className="size-5" />}
-                  onClick={event => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    setIsEditingMarkdown(true);
-                  }}
-                >
-                  Edit
-                </Button>
-              </Loader>
-            </div>
-
-            <div className="flex flex-col gap-4">
-              {/* Actions Section */}
-              <div className="flex flex-row justify-end space-x-3">
-                <Tooltip placement="top" title="Change risk status">
-                  <RiskDropdown
-                    type="status"
-                    risk={risk}
-                    className="h-14 rounded-md border-none bg-white text-default"
-                  />
-                </Tooltip>
-                <Tooltip placement="top" title="Change risk severity">
-                  <RiskDropdown
-                    type="severity"
-                    risk={risk}
-                    className={cn(
-                      'transition-all h-15 rounded-md border-none',
-                      severityClass,
-                      'brightness-90'
-                    )}
-                  />
-                </Tooltip>
-                <Tooltip placement="top" title="View proof of exploit">
-                  <Button
-                    className="h-15 text-nowrap rounded-md border-none bg-white"
-                    startIcon={<DocumentTextIcon className="size-5" />}
-                    onClick={() => {
-                      navigate(
-                        generatePathWithSearch({
-                          appendSearch: [[StorageKey.POE, `${dns}/${name}`]],
-                        })
-                      );
-                    }}
-                  >
-                    Proof of Exploit
-                  </Button>
-                </Tooltip>
-
-                <Tooltip
-                  placement="top"
-                  title={
-                    isInitialLoading
-                      ? ''
-                      : risk.source && !isManualORPRrovidedRisk(risk)
-                        ? isJobsRunning
-                          ? 'Scanning in progress'
-                          : sourceKeys.length === 0
-                            ? 'On-demand scanning is only available for risk which have a source attribute'
-                            : 'Revalidate the risk'
-                        : 'On-demand scanning is only available for automated risk discovery.'
-                  }
-                >
-                  <Button
-                    className="h-15 text-nowrap rounded-md border-none bg-white"
-                    startIcon={<ArrowPathIcon className="size-5" />}
-                    disabled={
-                      isInitialLoading ||
-                      sourceKeys.length === 0 ||
-                      isManualORPRrovidedRisk(risk) ||
-                      Boolean(isJobsRunning)
-                    }
-                    isLoading={
-                      reRunJobStatus === 'pending' ||
-                      allAssetJobsStatus === 'pending'
-                    }
-                    onClick={async () => {
-                      const [response] = await bulkReRunJobs(
-                        sourceKeys.map(jobKey => ({
-                          capability: risk.source,
-                          jobKey,
-                          config: {
-                            test: risk.name,
-                          },
-                        }))
-                      );
-                      setRiskJobsMap(riskJobsMap => ({
-                        ...riskJobsMap,
-                        [risk.key]: sourceKeys.reduce(
-                          (acc, current, index) => ({
-                            ...acc,
-                            [current]: response[index].key,
-                          }),
-                          {}
-                        ),
-                      }));
-                    }}
-                  >
-                    Scan Now
-                  </Button>
-                </Tooltip>
-              </div>
-
-              {/* Attributes Section */}
-              <div
-                className={cn(
-                  ' bg-white p-8 pb-2 transition-all rounded-lg hover:shadow-md'
-                )}
-              >
-                <div className="flex flex-row items-center space-x-1">
-                  <NotepadText className="size-6 text-gray-800" />
-                  <h3 className="text-2xl font-semibold tracking-wide text-gray-900">
-                    Attributes
-                  </h3>
-                  <AddAttribute className="ml-auto" resourceKey={risk.key} />
-                  <JobStatusBadge
-                    status={jobsStatus}
-                    lastScan={formatDate(lastScan)}
-                  />
-                </div>
-
-                <div className="space-y-4">
-                  {attributesGenericSearch?.attributes?.length === 0 ||
-                  !attributesGenericSearch?.attributes ? (
-                    <div className="text-center text-gray-500">
-                      <p>No attributes added to this risk yet.</p>
-                    </div>
-                  ) : (
-                    <table className="min-w-full table-auto">
-                      <thead>
-                        <tr>
-                          <th className="p-2 text-left text-sm font-medium text-gray-600">
-                            Name
-                          </th>
-                          <th className="p-2 text-left text-sm font-medium text-gray-600">
-                            Value
-                          </th>
-                          <th className="p-2 text-left text-sm font-medium text-gray-600">
-                            Last Updated
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {attributesGenericSearch?.attributes?.map(data => {
-                          const job = isScannable(data)
-                            ? jobsData[data.value]
-                            : undefined;
-                          const status = job?.status;
-                          const lastScan = job?.updated
-                            ? formatDate(job.updated)
-                            : '';
-
-                          const [, assetLink] =
-                            data.value.match(Regex.CONTAINS_ASSET) || [];
-
-                          return (
-                            <tr
-                              key={data.name}
-                              className="hover: border-b border-gray-200 bg-white"
-                            >
-                              <td className="p-2 text-sm font-medium text-gray-800">
-                                {data.name}
-                              </td>
-                              <td className=" break-all p-2 text-sm text-gray-500">
-                                <span className="flex justify-between">
-                                  <span className="">
-                                    {assetLink ? (
-                                      data.value
-                                    ) : data.value.startsWith('http') ? (
-                                      <a
-                                        href={data.value}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="text-blue-500 hover:underline"
-                                      >
-                                        {data.value}
-                                      </a>
-                                    ) : (
-                                      data.value
-                                    )}
-                                  </span>
-                                  {isScannable(data) && (
-                                    <Tooltip
-                                      title={
-                                        status
-                                          ? getJobStatusText({
-                                              status,
-                                              lastScan,
-                                            })
-                                          : ''
-                                      }
-                                    >
-                                      <ArrowPathIcon
-                                        className={cn(
-                                          'size-5 cursor-pointer',
-                                          status &&
-                                            ![
-                                              JobStatus.Pass,
-                                              JobStatus.Fail,
-                                            ].includes(status) &&
-                                            'animate-spin cursor-not-allowed'
-                                        )}
-                                        onClick={
-                                          status !== JobStatus.Running
-                                            ? async () => {
-                                                const [response] =
-                                                  await bulkReRunJobs([
-                                                    {
-                                                      capability: risk.source,
-                                                      jobKey: data.value,
-                                                      config: {
-                                                        test: risk.name,
-                                                      },
-                                                    },
-                                                  ]);
-                                                setRiskJobsMap(riskJobsMap => ({
-                                                  ...riskJobsMap,
-                                                  [risk.key]: {
-                                                    ...riskJobsMap[risk.key],
-                                                    [data.value]:
-                                                      response[0].key,
-                                                  },
-                                                }));
-                                              }
-                                            : () => {}
-                                        }
-                                      />
-                                    </Tooltip>
-                                  )}
-                                </span>
-                              </td>
-                              <td className="p-2 text-sm text-gray-500">
-                                {formatDate(data.updated)}
-                              </td>
-                            </tr>
+                      <Button
+                        className="h-8 text-nowrap border border-gray-400 text-xs"
+                        startIcon={<ArrowPathIcon className="size-4" />}
+                        disabled={
+                          isInitialLoading ||
+                          sourceKeys.length === 0 ||
+                          isManualORPRrovidedRisk(risk) ||
+                          Boolean(isJobsRunning)
+                        }
+                        isLoading={
+                          reRunJobStatus === 'pending' ||
+                          allAssetJobsStatus === 'pending'
+                        }
+                        onClick={async () => {
+                          const [response] = await bulkReRunJobs(
+                            sourceKeys.map(jobKey => ({
+                              capability: risk.source,
+                              jobKey,
+                              config: {
+                                test: risk.name,
+                              },
+                            }))
                           );
-                        })}
-                      </tbody>
-                    </table>
-                  )}
-                </div>
-              </div>
-              <div className="w-full">
-                {/* Assets Section */}
-                <div
-                  className={cn(
-                    'bg-white p-8 transition-all rounded-lg hover:shadow-md'
-                  )}
-                >
-                  <div className="mb-4 flex flex-row items-center space-x-1">
-                    <AssetsIcon className="size-6 text-gray-800" />
-                    <h3 className="text-2xl font-semibold text-gray-900">
-                      Assets
-                    </h3>
+                          setRiskJobsMap(riskJobsMap => ({
+                            ...riskJobsMap,
+                            [risk.key]: sourceKeys.reduce(
+                              (acc, current, index) =>
+                                response[index]?.key
+                                  ? {
+                                      ...acc,
+                                      [current]: response[index].key,
+                                    }
+                                  : acc,
+                              {}
+                            ),
+                          }));
+                        }}
+                      >
+                        Scan Now
+                      </Button>
+                    </Tooltip>
                   </div>
-                  {assetsOnRisk?.length === 0 ? (
-                    <div className="text-center text-gray-500">
-                      <p>No assets found.</p>
-                    </div>
-                  ) : (
-                    <table className="min-w-full table-auto text-default">
-                      <thead>
-                        <tr>
-                          <th className="w-28 p-2 text-left text-sm font-medium text-gray-600">
-                            Name
-                          </th>
-                          <th className="p-2 text-left text-sm font-medium text-gray-600">
-                            DNS
-                          </th>
-                          <th className="p-2 text-left text-sm font-medium text-gray-600">
-                            Last Updated
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {assetsOnRisk?.map(asset => {
-                          return (
-                            <tr
-                              key={asset.key}
-                              className="hover: border-b border-gray-200 bg-white"
-                            >
-                              <td className="p-2 text-sm text-blue-500">
-                                <Link
-                                  to={getAssetDrawerLink({
-                                    dns: asset.dns,
-                                    name: asset.name,
-                                  })}
-                                  className="hover:underline"
-                                >
-                                  {asset.name}
-                                </Link>
-                              </td>
-                              <td className="p-2 text-sm">{asset.dns}</td>
-                              <td className="p-2 text-sm">
-                                {formatDate(asset.updated)}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  )}
                 </div>
+                <RiskDetails risk={risk} />
               </div>
-              {/* Comment Section */}
-              <div
-                className={cn(
-                  'bg-white p-8 transition-all rounded-lg hover:shadow-md'
-                )}
-              >
-                <div className="mb-4 flex flex-row items-center space-x-1">
-                  <MessageSquare className="size-6 text-gray-800" />
-                  <h3 className="text-2xl font-semibold tracking-wide text-gray-900">
-                    Comments
-                  </h3>
-                </div>
-                <Comment
-                  comment={risk.comment}
-                  isLoading={isRiskFetching}
-                  onSave={handleUpdateComment}
-                />
-              </div>
-            </div>
-          </div>
 
-          {/* History Section */}
-          <div
-            className={cn(
-              'bg-white p-8 mb-8 transition-all rounded-lg hover:shadow-md'
-            )}
-          >
-            <div className="mb-4 flex flex-row items-center space-x-1">
-              <HistoryIcon className="size-6 text-gray-800" />
-              <h3 className="text-2xl font-semibold text-gray-900">History</h3>
+              {/* POE and Description */}
+              <Tabs
+                className="overflow-hidden px-9 pb-5"
+                contentWrapperClassName="overflow-auto"
+                tabs={[
+                  {
+                    label: 'Description & Remediation',
+                    id: 'description',
+                    tabClassName: 'bg-transparent',
+                    Content: () => (
+                      <Loader
+                        isLoading={
+                          isDefinitionsFileFetching ||
+                          reportRiskStatus === 'pending'
+                        }
+                        className="h-6 bg-layer0"
+                      >
+                        <Modal
+                          size="6xl"
+                          open={isEditingMarkdown}
+                          onClose={() => setIsEditingMarkdown(false)}
+                          title="Description & Remediation"
+                          footer={{
+                            text: 'Save',
+                            isLoading: updateFileStatus === 'pending',
+                            onClick: async () => {
+                              await updateFile({
+                                ignoreSnackbar: true,
+                                name: `definitions/${name}`,
+                                content: markdownValue,
+                              });
+                              setIsEditingMarkdown(false);
+                            },
+                          }}
+                        >
+                          <div className="h-[60vh]">
+                            <MarkdownEditor
+                              value={markdownValue}
+                              onChange={value => setMarkdownValue(value || '')}
+                              filePathPrefix="definitions/files"
+                            />
+                          </div>
+                        </Modal>
+                        {definitionsFile ? (
+                          <MarkdownPreview
+                            source={definitionsFileValue}
+                            style={{
+                              padding: '0.75rem',
+                              wordBreak: 'break-word',
+                              minHeight: '20px',
+                            }}
+                          />
+                        ) : (
+                          <div className="my-8 flex size-full flex-1 flex-col items-center justify-center text-center text-default">
+                            <UnionIcon className="mt-8 size-16 text-default-light" />
+                            <p className="mt-7 text-lg font-bold">
+                              Generate Description & Remediation
+                            </p>
+                            <p className="mt-2">
+                              Add a Description & Remediation to this Risk
+                              <br />
+                              {`using Praetorian's Machine Learning.`}
+                            </p>
+                            <Button
+                              className="mt-10"
+                              startIcon={
+                                <UnionIcon className="size-3 text-brand-light" />
+                              }
+                              styleType="primary"
+                              onClick={() => reportRisk({ name })}
+                            >
+                              Generate Now
+                            </Button>
+                          </div>
+                        )}
+                        <Button
+                          styleType="none"
+                          className="mr-auto mt-4 pl-0 font-bold"
+                          endIcon={<PencilSquareIcon className="size-5" />}
+                          onClick={event => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            setIsEditingMarkdown(true);
+                          }}
+                        >
+                          Edit
+                        </Button>
+                      </Loader>
+                    ),
+                  },
+                  {
+                    label: 'Proof of Exploits',
+                    id: 'poe',
+                    tabClassName: 'bg-transparent',
+                    Content: () => <POE risk={risk} />,
+                  },
+                ]}
+                defaultValue={'description'}
+                value={selectedTab}
+                onChange={setSelectedTab}
+                styleType="horizontal"
+              />
             </div>
-            <Timeline
-              items={[
-                ...(history
-                  ?.map((item, itemIndex) => {
-                    const { title, updated } = getHistoryDiff(
-                      item,
-                      itemIndex === 0
-                    );
-                    return {
-                      title,
-                      description: updated,
-                      className: 'text-default',
-                      icon:
-                        itemIndex === 0 ? (
-                          <RisksIcon className="stroke-1" />
-                        ) : undefined,
-                    };
-                  })
-                  .reverse() || []),
-              ]}
-            />
-          </div>
-        </div>
+          }
+          section3={<AffectedAssets assets={assetsOnRisk} />}
+        />
       </Loader>
     </Drawer>
   );
 }
+
+const History: React.FC<PropsWithChildren & { history: EntityHistory[] }> = ({
+  children,
+  history = [],
+}) => {
+  return (
+    <StickHeaderSection label="History">
+      {children}
+      <Timeline
+        items={[
+          ...(history
+            ?.map((item, itemIndex) => {
+              const { title, updated } = getHistoryDiff(item, itemIndex === 0);
+              return {
+                title,
+                description: updated,
+                className: 'text-default',
+                icon:
+                  itemIndex === 0 ? (
+                    <RisksIcon className="stroke-1" />
+                  ) : undefined,
+              };
+            })
+            .reverse() || []),
+        ]}
+      />
+    </StickHeaderSection>
+  );
+};
+
+const POE: React.FC<{ risk: Risk }> = ({ risk }) => {
+  const poe = `${risk.dns}/${risk.name}`;
+  const { data: file, status: fileStatus } = useGetFile({
+    name: `proofs/${poe}`,
+  });
+
+  const proofOfExploit = useMemo(() => {
+    const proofDescription = getDescription(file);
+
+    const { Request, Response } = proofDescription;
+    return Request || Response
+      ? {
+          Request,
+          Response,
+        }
+      : null;
+  }, [file]);
+
+  return (
+    <Loader className="my-8 h-96" isLoading={fileStatus === 'pending'}>
+      {!proofOfExploit && (
+        <div className="mt-12">
+          <p className="text-lg font-bold">No Proof of Exploit found.</p>
+        </div>
+      )}
+      {proofOfExploit && (
+        <div className="relative my-8 overflow-auto">
+          {Object.entries(proofOfExploit).map(([key, value]) => (
+            <div className="mb-8" key={key}>
+              <h3 className="text-lg font-bold">{key}</h3>
+              <code className="prose whitespace-pre-wrap text-xs">
+                {(value as ReactNode) || 'Not Found'}
+              </code>
+            </div>
+          ))}
+        </div>
+      )}
+    </Loader>
+  );
+};
+
+const AffectedAssets: React.FC<{
+  assets: {
+    key: string;
+    dns: string;
+    name: string;
+    updated: string;
+  }[];
+}> = ({ assets }) => {
+  const { getAssetDrawerLink } = getDrawerLink();
+
+  return (
+    <StickHeaderSection label="Affected Assets">
+      {assets?.length === 0 && (
+        <div className="p-4 text-center text-gray-500">
+          <p>No assets found.</p>
+        </div>
+      )}
+      {assets.length > 0 &&
+        assets.map(asset => (
+          <div
+            className="flex flex-col items-start justify-between gap-4 border-b border-gray-300 p-4 md:flex-row"
+            key={asset.key}
+          >
+            <div>
+              <Link
+                to={getAssetDrawerLink({
+                  dns: asset.dns,
+                  name: asset.name,
+                })}
+                className="hover:underline"
+              >
+                <h2 className="text-brand">{asset.name}</h2>
+              </Link>
+              <p
+                className="text-sm text-gray-500"
+                style={{ wordBreak: 'break-word' }}
+              >
+                {asset.dns}
+              </p>
+            </div>
+            <span className="text-sm text-gray-500">
+              {formatDate(asset.updated)}
+            </span>
+          </div>
+        ))}
+    </StickHeaderSection>
+  );
+};
+
+const RiskDetails = ({
+  risk,
+  className,
+}: {
+  risk: Risk;
+  className?: string;
+}) => {
+  return (
+    <div className={cn('flex flex-wrap ml-auto gap-8 max-w-1/2', className)}>
+      <div className="ml-auto text-nowrap text-slate-600">
+        <p className="text-xl font-bold text-slate-950">
+          {formatDate(risk.updated)}
+        </p>
+        <p>Last Seen</p>
+      </div>
+      <div className="ml-auto text-nowrap text-slate-600">
+        <p className="text-xl font-bold text-slate-950">
+          {formatDate(risk.created)}
+        </p>
+        <p>First Seen</p>
+      </div>
+    </div>
+  );
+};
 
 const JobStatusBadge = ({
   status,
@@ -754,6 +725,10 @@ function getHistoryDiff(
   updated: string;
 } {
   if (isFirst) {
+    if (!history.to) {
+      return { title: '', updated: '' };
+    }
+
     return {
       title: (
         <div className="whitespace-break-spaces">
@@ -761,26 +736,45 @@ function getHistoryDiff(
             <strong>First Tracked</strong>
             {EmptySpace}as{EmptySpace}
           </p>
-          <RiskDropdown
-            risk={{
-              status: history.to as RiskCombinedStatus,
-              key: '',
-              comment: '',
-            }}
-            type={'severity'}
-            styleType="chip"
-          />
+          {RiskStatusWithoutSeverity.includes(history.to as RiskStatus) ? (
+            <Chip
+              className="inline-flex min-h-[26px] whitespace-nowrap py-1"
+              style="default"
+            >
+              {RiskStatusLabel[history.to as RiskStatus] || history.to}
+            </Chip>
+          ) : (
+            <RiskDropdown
+              risk={{
+                status: history.to as RiskCombinedStatus,
+                key: '',
+                comment: '',
+              }}
+              type={'severity'}
+              styleType="chip"
+            />
+          )}
         </div>
       ),
       updated: formatDate(history.updated),
     };
   }
 
-  const isStatusChanged =
-    `${history.from?.[0]}${history.from?.[2]}` !==
-    `${history.to?.[0]}${history.to?.[2]}`;
-  const isSeverityChanged = history.from?.[1] !== history.to?.[1];
+  const { status: statusFrom, severity: severityFrom } = getStatusSeverity(
+    history.from
+  );
+  const { status: statusTo, severity: severityTo } = getStatusSeverity(
+    history.to
+  );
+  const isStatusWithoutSeverityFrom = RiskStatusWithoutSeverity.includes(
+    history.from as RiskStatus
+  );
+
+  const isStatusChanged = statusFrom !== statusTo;
+  const isSeverityChanged = severityFrom !== severityTo;
+  const hasComment = Boolean(history.comment);
   const isBothChanged = isSeverityChanged && isStatusChanged;
+
   const by = history?.by;
 
   const severity = (
@@ -789,27 +783,32 @@ function getHistoryDiff(
         {by ? (
           <span>
             {by} changed the <span className="font-semibold">Severity</span>{' '}
-            from
+            {isStatusWithoutSeverityFrom ? 'to' : 'from'}
           </span>
         ) : (
           <span>
-            <span className="font-semibold">Severity</span> changed from
+            <span className="font-semibold">Severity</span>
+            {isStatusWithoutSeverityFrom ? ' set to' : ' changed from'}
           </span>
         )}
         {EmptySpace}
       </p>
-      <RiskDropdown
-        risk={{
-          status: history.from as RiskCombinedStatus,
-          key: '',
-          comment: '',
-        }}
-        type={'severity'}
-        styleType="chip"
-      />
-      <p className="inline">
-        {EmptySpace}to{EmptySpace}
-      </p>
+      {!isStatusWithoutSeverityFrom && (
+        <>
+          <RiskDropdown
+            risk={{
+              status: history.from as RiskCombinedStatus,
+              key: '',
+              comment: '',
+            }}
+            type={'severity'}
+            styleType="chip"
+          />
+          <p className="inline">
+            {EmptySpace}to{EmptySpace}
+          </p>
+        </>
+      )}
       <RiskDropdown
         risk={{
           status: history.to as RiskCombinedStatus,
@@ -870,13 +869,32 @@ function getHistoryDiff(
     </>
   );
 
+  const comment =
+    isStatusChanged || isSeverityChanged ? (
+      <p className="inline">
+        {` with `}
+        <span className="font-semibold">Comment</span>
+        <i>{` "${history.comment}"`}</i>
+      </p>
+    ) : (
+      <p className="inline">
+        <span>
+          {by} added the <span className="font-semibold">Comment</span>
+          <i>{` "${history.comment}"`}</i>
+        </span>
+      </p>
+    );
+
+  const hasChange = isStatusChanged || isSeverityChanged || hasComment;
+
   return {
-    title: (
+    title: hasChange ? (
       <div className="whitespace-break-spaces leading-7">
         {(isSeverityChanged || isBothChanged) && severity}
         {(isStatusChanged || isBothChanged) && status}
+        {history.comment && comment}
       </div>
-    ),
+    ) : null,
     updated: formatDate(history.updated),
   };
 }

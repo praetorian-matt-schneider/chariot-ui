@@ -53,7 +53,7 @@ export function Tabs<ID = string>(props: TabsProps<ID>) {
       {tabLabels.length > 0 && (
         <div
           className={cn(
-            'border-r-2 border-layer1 overflow-auto flex flex-col',
+            'border-layer1 overflow-auto flex flex-col',
             styleType === 'horizontal'
               ? 'flex-row w-full'
               : 'h-full flex-shrink-0',
@@ -94,7 +94,7 @@ export function Tabs<ID = string>(props: TabsProps<ID>) {
       )}
       <div
         className={cn(
-          'w-full px-4 overflow-auto h-ful',
+          'w-full px-4 overflow-auto h-full',
           props?.contentWrapperClassName
         )}
       >
