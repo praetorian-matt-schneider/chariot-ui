@@ -104,6 +104,7 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
   const hasCustomAttributes = useMemo(() => {
     return alerts.some(alert => alert.key.match(Regex.CUSTOM_ALERT_KEY));
   }, [alerts]);
+
   const { data: risksGeneric } = useGenericSearch({
     query: 'status:R',
   });

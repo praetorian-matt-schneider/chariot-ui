@@ -445,8 +445,8 @@ const Assets: React.FC = () => {
     };
   }
 
-  const hasCustomAttributes = useMemo(() => {
-    return alerts.some(alert => alert.key.match(Regex.CUSTOM_ALERT_KEY));
+  const exposureAlertsConfigured = useMemo(() => {
+    return alerts.filter(alert => alert.key.match(Regex.CUSTOM_ALERT_KEY));
   }, [alerts]);
 
   const [isCTAOpen, setIsCTAOpen] = useState<boolean>(false);
@@ -487,13 +487,17 @@ const Assets: React.FC = () => {
           className="m-auto flex w-full cursor-pointer flex-col items-center rounded-lg border-2 border-dashed border-header-dark bg-header p-8 text-center"
         >
           <Loader className="w-8" isLoading={alertsStatus === 'pending'}>
-            {hasCustomAttributes ? (
+            {exposureAlertsConfigured?.length > 0 ? (
               <CheckCircleIcon className="size-10 text-green-400" />
             ) : (
               <BellIcon className="size-10 animate-bounce text-white" />
             )}
           </Loader>
-          <h1 className="text-3xl font-bold text-white">Get Exposure Alerts</h1>
+          <h1 className="text-3xl font-bold text-white">
+            {exposureAlertsConfigured?.length > 0
+              ? `${exposureAlertsConfigured?.length?.toLocaleString()} Alerts Configured`
+              : 'Get Exposure Alerts'}
+          </h1>
           <p className="max-w-[700px] text-sm text-gray-500">
             Subscribe to changes in your attack surface and get notified when
             new assets are discovered
@@ -574,6 +578,9 @@ const Assets: React.FC = () => {
               title="Recently Discovered"
               icon={<img src="/icons/new.svg" className="size-20" />}
               items={['#attribute#new#']}
+              conditions={alerts.filter(alert =>
+                alert.key?.includes('#attribute#new#')
+              )}
               alerts={alerts}
               refetch={refetch}
               addAlert={addAlert}
@@ -584,6 +591,9 @@ const Assets: React.FC = () => {
               title="Port"
               icon={<img src="/icons/port.svg" className="size-20" />}
               items={ports}
+              conditions={alerts.filter(alert =>
+                alert.key?.includes?.('#attribute#port#')
+              )}
               alerts={alerts}
               refetch={refetch}
               addAlert={addAlert}
@@ -594,6 +604,9 @@ const Assets: React.FC = () => {
               title="Protocol"
               icon={<img src="/icons/shake.svg" className="size-20" />}
               items={protocols}
+              conditions={alerts.filter(alert =>
+                alert.key?.includes?.('#attribute#protocol#')
+              )}
               alerts={alerts}
               refetch={refetch}
               addAlert={addAlert}
@@ -604,6 +617,9 @@ const Assets: React.FC = () => {
               title="Cloud"
               icon={<img src="/icons/lambda.svg" className="size-20" />}
               items={clouds}
+              conditions={alerts.filter(alert =>
+                alert.key?.includes?.('#attribute#cloud#')
+              )}
               alerts={alerts}
               refetch={refetch}
               addAlert={addAlert}
@@ -614,6 +630,9 @@ const Assets: React.FC = () => {
               title="Surface"
               icon={<PuzzlePieceIcon className="size-20" />}
               items={surfaces}
+              conditions={alerts.filter(alert =>
+                alert.key?.includes?.('#attribute#surface#')
+              )}
               alerts={alerts}
               refetch={refetch}
               addAlert={addAlert}

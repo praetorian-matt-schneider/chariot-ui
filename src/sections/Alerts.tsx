@@ -65,12 +65,14 @@ export const Alerts: React.FC<Props> = ({
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  // TODO - Refactor this on BE instead
+  // TODO - Refactor this on BE instead)
   const alerts = (alertsWithUpdatedQueries || []).map(alert => ({
     ...alert,
-    value: alert.value.startsWith('#attribute')
-      ? `name:${alert.name}`
-      : alert.value,
+    value:
+      alert.value.startsWith('#attribute') ||
+      alert.value.startsWith('#condition')
+        ? `name:${alert.name}`
+        : alert.value,
   }));
 
   useEffect(() => {
@@ -655,6 +657,7 @@ export const AlertCategory = ({
   icon,
   items,
   alerts,
+  conditions,
   refetch,
   addAlert,
   removeAlert,
@@ -664,6 +667,7 @@ export const AlertCategory = ({
   icon: JSX.Element;
   items: string[];
   alerts: Condition[];
+  conditions: Condition[];
   refetch: () => void;
   addAlert: (alert: Pick<Condition, 'value' | 'name'>) => void;
   removeAlert: (alert: Pick<Condition, 'key'>) => void;
@@ -671,8 +675,11 @@ export const AlertCategory = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredItems = items.filter(item =>
-    attributeExtractor(item).toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredItems = [...items, ...conditions.map(c => c.value)].filter(
+    item =>
+      attributeExtractor(item)
+        ?.toLowerCase()
+        ?.includes(searchTerm?.toLowerCase())
   );
 
   const handleNewAlert = () => {
