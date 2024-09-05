@@ -56,6 +56,7 @@ import { mergeJobStatus } from '@/utils/api';
 import { cn } from '@/utils/classname';
 import { formatDate } from '@/utils/date.util';
 import { sToMs } from '@/utils/date.util';
+import { getJobStatus } from '@/utils/job';
 import { getDescription, isManualORPRrovidedRisk } from '@/utils/risk.util';
 import { getStatusSeverity } from '@/utils/riskStatus.util';
 import { useQueryFilters } from '@/utils/storage/useQueryParams.util';
@@ -192,7 +193,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
   );
 
   const jobsStatus = mergeJobStatus(
-    Object.values(jobsData).map(job => job?.status)
+    Object.values(jobsData).map(job => getJobStatus(job))
   );
 
   const lastScan =

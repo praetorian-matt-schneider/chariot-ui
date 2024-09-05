@@ -28,6 +28,7 @@ import {
 } from '@/types';
 import { cn } from '@/utils/classname';
 import { getCronRelativeTime, mToMs } from '@/utils/date.util';
+import { getJobStatus } from '@/utils/job';
 import { useQueryFilters } from '@/utils/storage/useQueryParams.util';
 
 export const getStatusColor = (status: JobStatus) => {
@@ -125,7 +126,7 @@ const Jobs: React.FC = () => {
   );
 
   const failedJobStats = useMemo(() => {
-    const failedJobs = jobs.filter(job => job.status === JobStatus.Fail);
+    const failedJobs = jobs.filter(job => getJobStatus(job) === JobStatus.Fail);
     const failedJobStats = failedJobs.reduce(
       (acc, job) => {
         const comment = getFailedComment(job);
@@ -180,7 +181,7 @@ const Jobs: React.FC = () => {
                 job.comment && 'cursor-pointer'
               )}
             >
-              {getJobStatusIcon(job.status, 'size-6')}
+              {getJobStatusIcon(getJobStatus(job), 'size-6')}
               {job.source} <span className="text-gray-500">(job)</span>
               <span>
                 {job.name} <span className="text-gray-500">(source)</span>
@@ -206,8 +207,9 @@ const Jobs: React.FC = () => {
       fixedWidth: 75,
       align: 'center',
       cell: (job: Job) => {
+        const jobStatus = getJobStatus(job);
         const isRunning =
-          job.status === JobStatus.Running || job.status === JobStatus.Queued;
+          jobStatus === JobStatus.Running || jobStatus === JobStatus.Queued;
 
         return (
           <ArrowPathIcon

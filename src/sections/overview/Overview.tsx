@@ -93,10 +93,7 @@ const getStatusIcon = (status: string) => {
   }
 };
 
-export const getJobStatusIcon = (
-  status?: Job['status'],
-  className?: string
-) => {
+export const getJobStatusIcon = (status: JobStatus, className?: string) => {
   switch (status) {
     case JobStatus.Fail:
       return <XCircleIcon className={cn('size-7 text-[#F87171]', className)} />;
@@ -144,7 +141,9 @@ const getJobsStatus = (job?: JobWithFailedCount) => {
         )
       }
     >
-      {getJobStatusIcon(job?.failedJobsCount ? JobStatus.Fail : status)}
+      {getJobStatusIcon(
+        job?.failedJobsCount ? JobStatus.Fail : getJobStatus(job as Job)
+      )}
     </Tooltip>
   );
 };

@@ -10,6 +10,7 @@ import { getQueryKey } from '@/hooks/useQueryKeys';
 import { Job, JobStatus, Statistics } from '@/types';
 import { mergeStatus, UseExtendQueryOptions, useMutation } from '@/utils/api';
 import { formatDate } from '@/utils/date.util';
+import { getJobStatus } from '@/utils/job';
 
 export function useReRunJob() {
   const axios = useAxios();
@@ -111,10 +112,10 @@ export const useJobsStatus = (
           });
 
           const allSuccessfulJobs = res.data.jobs.every(
-            (job: Job) => job.status === JobStatus.Pass
+            (job: Job) => getJobStatus(job) === JobStatus.Pass
           );
           const failedJobs = res.data.jobs.filter(
-            (job: Job) => job.status === JobStatus.Fail
+            (job: Job) => getJobStatus(job) === JobStatus.Fail
           );
 
           return allSuccessfulJobs
