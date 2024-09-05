@@ -779,9 +779,12 @@ export function CategoryFilter(props: CategoryFilterProps) {
                         >
                           {option.label}
                         </p>
-                        {value.includes(option.value) && (
-                          <CheckIcon className="mr-auto size-4 shrink-0 stroke-[3px] text-brand" />
-                        )}
+                        <CheckIcon
+                          className={cn(
+                            'mr-auto size-4 shrink-0 stroke-[3px] text-brand invisible',
+                            value.includes(option.value) && 'visible'
+                          )}
+                        />
                         {item.showCount && <p>{option.count}</p>}
                         {alert && (
                           <AlertIcon
