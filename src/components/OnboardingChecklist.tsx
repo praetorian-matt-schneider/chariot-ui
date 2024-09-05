@@ -168,7 +168,7 @@ const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
       {/* Menu */}
       <div
         className={cn(
-          'absolute bottom-24 right-0 w-72 rounded-lg bg-white p-4 shadow-lg transform transition-all duration-500 ease-in-out',
+          'absolute bottom-24 right-0 w-80 rounded-lg bg-white p-4 shadow-lg transform transition-all duration-500 ease-in-out',
           isOpen
             ? 'scale-100 opacity-100 translate-y-0'
             : 'scale-75 opacity-0 translate-y-4 pointer-events-none'
