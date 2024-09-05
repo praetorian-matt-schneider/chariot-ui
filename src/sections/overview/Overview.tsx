@@ -389,7 +389,7 @@ export const Overview: React.FC = () => {
       }
     );
 
-    const [riskNotification, rest] = partition(
+    const [, rest] = partition(
       tableData,
       row => row.type === 'riskNotification'
     );
@@ -408,7 +408,6 @@ export const Overview: React.FC = () => {
         account: undefined,
         type: 'chariot',
       },
-      ...riskNotification.sort((a, b) => a.surface.localeCompare(b.surface)),
       ...rest.sort((a, b) => a.surface.localeCompare(b.surface)),
       ...waitlistedIntegrationsData,
     ];
