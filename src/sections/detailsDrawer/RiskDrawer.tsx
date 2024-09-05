@@ -46,6 +46,7 @@ import {
   JobStatus,
   Risk,
   RiskCombinedStatus,
+  RiskFilters,
   RiskSeverity,
   RiskStatus,
   RiskStatusLabel,
@@ -57,6 +58,7 @@ import { formatDate } from '@/utils/date.util';
 import { sToMs } from '@/utils/date.util';
 import { getDescription, isManualORPRrovidedRisk } from '@/utils/risk.util';
 import { getStatusSeverity } from '@/utils/riskStatus.util';
+import { useQueryFilters } from '@/utils/storage/useQueryParams.util';
 import { StorageKey, useStorage } from '@/utils/storage/useStorage.util';
 import { useSearchParams } from '@/utils/url.util';
 
@@ -89,10 +91,15 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
   const [, dns, name] = compositeKey.split('#');
   const attributesFilter = `source:#risk#${dns}#${name}`;
 
-  const { searchParams } = useSearchParams();
-  const riskQuery = searchParams.get(StorageKey.RISK_QUERY) || '';
+  const [riskFilters] = useQueryFilters<RiskFilters>({
+    key: StorageKey.RISK_FILTERS,
+    defaultFilters: {
+      search: '',
+      query: '',
+    },
+  });
   const { invalidate: invalidateRiskData } = useGenericSearch({
-    query: riskQuery,
+    query: riskFilters.search || riskFilters.query,
   });
 
   const [isEditingMarkdown, setIsEditingMarkdown] = useState(false);

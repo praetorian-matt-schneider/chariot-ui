@@ -14,7 +14,6 @@ import { Loader } from '@/components/Loader';
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
-import { useMy } from '@/hooks';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
 import { Alerts } from '@/sections/Alerts';
@@ -30,10 +29,11 @@ import {
   RiskStatusLabel,
   SeverityDef,
 } from '@/types';
+import { partition } from '@/utils/array.util';
 import { getRiskSeverity, getRiskStatus } from '@/utils/riskStatus.util';
 import { useQueryFilters } from '@/utils/storage/useQueryParams.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
-import { generatePathWithSearch, useSearchParams } from '@/utils/url.util';
+import { generatePathWithSearch } from '@/utils/url.util';
 
 const RisksBeta: React.FC = () => {
   const {
@@ -42,14 +42,12 @@ const RisksBeta: React.FC = () => {
     },
   } = useGlobalState();
   const [filters, setFilters] = useQueryFilters<RiskFilters>({
-    key: 'riskFilters',
+    key: StorageKey.RISK_FILTERS,
     defaultFilters: {
       search: '',
-      alert: '',
-      exposureRisk: '',
+      query: '',
     },
   });
-  const { addSearchParams } = useSearchParams();
 
   const [isCTAOpen, setIsCTAOpen] = useState<boolean>(false);
   const closeCTADrawer = () => {
@@ -69,83 +67,41 @@ const RisksBeta: React.FC = () => {
   const hasRemediatedRisk = (risksGeneric?.risks || [])?.length > 0;
   const { getRiskDrawerLink } = getDrawerLink();
 
-  //   Security alert options, count
-  const { data: alerts, status: alertsStatus } = useGetAccountAlerts();
-
-  //   Exposure risks
+  //   Security alert options
   const {
-    data: conditions,
-    status: conditionsStatus,
-    refetch: refetchConditions,
-  } = useMy({
-    resource: 'condition',
-  });
+    data: alertsWithConditions,
+    status: alertsStatus,
+    refetch: refetchAlerts,
+  } = useGetAccountAlerts();
 
-  const alertsOptions = useMemo(
-    () =>
-      (alerts || [])
-        .map(alert => ({
-          label: alert.name,
-          value: alert.value,
-          count: alert.count.toLocaleString(),
-        }))
-        .filter(({ value }) => !value.startsWith('#attribute')), // Filtered out attributes as they'll be shown in the exposure risks
-    [JSON.stringify({ alerts })]
+  const [alerts, conditions] = partition(
+    alertsWithConditions,
+    ({ source }) => source === 'system'
   );
 
-  const exposureRiskOptions = useMemo(() => {
-    // const conditionsWithCount = (conditions || []).filter(
-    //   ({ count }) => count > 0
-    // );
-    return (
-      conditions.map(({ count, name, value }) => ({
-        label: name,
-        value,
-        count: (count || 0).toLocaleString(),
-      })) || []
-    );
-  }, [JSON.stringify({ conditions })]);
-
-  const exposureRiskQuery = useMemo(() => {
-    if (filters.exposureRisk) {
-      const alertName = (alerts || []).find(
-        alert => alert.value === filters.exposureRisk
-      )?.name;
-      return `name:${alertName}`;
-    }
-    return '';
-  }, [filters.exposureRisk, JSON.stringify({ alerts })]);
-
-  const query = filters.search || filters.alert || exposureRiskQuery || '';
-
-  // Add query to the URL
-  useEffect(() => {
-    addSearchParams(StorageKey.RISK_QUERY, query);
-  }, [query]);
+  const query = filters.search || filters.query || '';
 
   // Add default filter if none is selected
   useEffect(() => {
-    if (!filters.search && !filters.alert && !filters.exposureRisk) {
-      if (alertsOptions && alertsOptions.length > 0) {
+    if (!filters.search && !filters.query) {
+      if (alerts && alerts.length > 0) {
         setFilters({
           search: '',
-          alert: alertsOptions[0].value,
-          exposureRisk: '',
+          query: alerts[0].value,
         });
       }
 
-      if (exposureRiskOptions && exposureRiskOptions.length > 0) {
+      if (conditions && conditions.length > 0) {
         setFilters({
           search: '',
-          alert: '',
-          exposureRisk: exposureRiskOptions[0].value,
+          query: conditions[0].value,
         });
       }
     }
-  }, [JSON.stringify({ alertsOptions, filters, exposureRiskOptions })]);
+  }, [JSON.stringify({ alerts, filters, conditions })]);
 
   function refetch() {
-    refetchConditions();
+    refetchAlerts();
   }
 
   const columns: Columns<Risk> = useMemo(
@@ -329,58 +285,63 @@ const RisksBeta: React.FC = () => {
         search={{
           value: filters.search,
           onChange: search => {
-            setFilters({ search, alert: '', exposureRisk: '' });
+            setFilters({ search, query: '' });
           },
         }}
         className="h-0 min-h-0"
         name="risk"
         otherFilters={
           <>
-            {alertsOptions.length > 0 && (
+            {alerts.length > 0 && (
               <CategoryFilter
-                value={filters.alert ? [filters.alert] : []}
+                value={filters.query ? [filters.query] : []}
                 hideHeader={true}
                 onChange={alerts => {
                   setFilters({
                     ...filters,
                     search: '',
-                    exposureRisk: '',
-                    alert: alerts[0],
+                    query: alerts[0],
                   });
                 }}
                 category={[
                   {
                     label: 'Security Alerts',
-                    options: alertsOptions,
-                    showCount: true,
+                    options: alerts.map(({ name, value }) => ({
+                      label: name,
+                      value,
+                      count: '0', // No need to show count
+                    })),
                   },
                 ]}
                 status={alertsStatus}
               />
             )}
-            {exposureRiskOptions.length > 0 && (
+            {conditions.length > 0 && (
               <CategoryFilter
-                value={filters.exposureRisk ? [filters.exposureRisk] : []}
+                value={filters.query ? [filters.query] : []}
                 hideHeader={true}
                 onChange={attributes => {
                   setFilters({
                     ...filters,
                     search: '',
-                    alert: '',
-                    exposureRisk: attributes[0],
+                    query: attributes[0],
                   });
                 }}
                 category={[
                   {
                     label: 'Exposure Risks',
-                    options: exposureRiskOptions,
+                    options: conditions.map(({ name, value }) => ({
+                      label: name,
+                      value,
+                      count: '0',
+                    })),
                     showCount: false,
                   },
                 ]}
                 alert={{
                   value: (conditions || []).map(condition => condition.value),
                 }}
-                status={conditionsStatus}
+                status={alertsStatus}
               />
             )}
           </>
@@ -389,10 +350,10 @@ const RisksBeta: React.FC = () => {
           <div className="w-full">
             <div className="flex w-full items-center justify-between">
               <div>{getAlertDescription(query)}</div>
-              {filters.exposureRisk && (
+              {conditions.find(({ value }) => value === filters.query) && (
                 <AlertIcon
-                  value={[filters.exposureRisk]}
-                  currentValue={filters.exposureRisk}
+                  value={[filters.query]}
+                  currentValue={filters.query}
                   styleType="button"
                   onAdd={refetch}
                   onRemove={refetch}

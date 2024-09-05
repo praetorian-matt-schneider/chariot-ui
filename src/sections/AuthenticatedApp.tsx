@@ -104,8 +104,6 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
     return alerts.some(alert => alert.key.match(Regex.CUSTOM_ALERT_KEY));
   }, [alerts]);
 
-  console.log(riskNotificationStatus, attackSurfaceStatus);
-
   return (
     <div
       className={'flex h-full flex-col items-center overflow-hidden bg-layer1'}

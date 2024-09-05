@@ -574,9 +574,8 @@ export interface JobFilters {
 }
 
 export interface RiskFilters {
-  alert: string;
   search: string;
-  exposureRisk: string;
+  query: string;
 }
 
 export type Severity = 'I' | 'L' | 'M' | 'H' | 'C';
