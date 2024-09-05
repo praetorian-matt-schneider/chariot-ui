@@ -13,9 +13,8 @@ import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
 import { useModifyAccount, useMy } from '@/hooks';
-import { useCounts } from '@/hooks/useCounts';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
-import { useReRunJob } from '@/hooks/useJobs';
+import { useJobStats, useReRunJob } from '@/hooks/useJobs';
 import { CategoryFilter, FancyTable } from '@/sections/Assets';
 import { getJobStatusIcon } from '@/sections/overview/Overview';
 import {
@@ -84,9 +83,7 @@ const Jobs: React.FC = () => {
     }
     return '#job';
   }, [filters.status, debouncedSearch]);
-  const { data: stats = {} } = useCounts({
-    resource: 'job',
-  });
+  const { jobStats } = useJobStats();
   const {
     data,
     refetch,
@@ -162,26 +159,6 @@ const Jobs: React.FC = () => {
 
     return filteredJobs;
   }, [JSON.stringify({ jobs }), filters.failedReason]);
-
-  const jobStats = useMemo(() => {
-    return Object.entries(stats).reduce(
-      (acc, [key, value]) => {
-        Object.values(JobStatus).forEach(jobKey => {
-          if (key.endsWith(jobKey)) {
-            acc[jobKey] = (acc[jobKey] || 0) + value;
-          }
-        });
-
-        return acc;
-      },
-      {
-        JF: 0,
-        JP: 0,
-        JQ: 0,
-        JR: 0,
-      } as Record<JobStatus, number>
-    );
-  }, [JSON.stringify(stats)]);
 
   useEffect(() => {
     const interval = setInterval(() => {

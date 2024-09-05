@@ -1,11 +1,13 @@
+import { useMemo } from 'react';
 // eslint-disable-next-line no-restricted-imports
 import { useQueries } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import { useAxios } from '@/hooks/useAxios';
+import { useCounts } from '@/hooks/useCounts';
 import { useMy } from '@/hooks/useMy';
 import { getQueryKey } from '@/hooks/useQueryKeys';
-import { Job, JobStatus } from '@/types';
+import { Job, JobStatus, Statistics } from '@/types';
 import { mergeStatus, UseExtendQueryOptions, useMutation } from '@/utils/api';
 import { formatDate } from '@/utils/date.util';
 
@@ -178,4 +180,41 @@ export const getJobTimeline = ({
     ...current,
     description: current.status === status ? description : '',
   }));
+};
+
+export const useJobStats = (options?: UseExtendQueryOptions<Statistics>) => {
+  const { data: stats = {}, status } = useCounts(
+    {
+      resource: 'job',
+    },
+    options
+  );
+
+  const jobStats = useMemo(() => {
+    return Object.entries(stats).reduce(
+      (acc, [key, value]) => {
+        Object.values(JobStatus).forEach(jobKey => {
+          if (key.endsWith(jobKey)) {
+            acc[jobKey] = (acc[jobKey] || 0) + value;
+          }
+        });
+
+        return acc;
+      },
+      {
+        JF: 0,
+        JP: 0,
+        JQ: 0,
+        JR: 0,
+      } as Record<JobStatus, number>
+    );
+  }, [JSON.stringify(stats)]);
+
+  return {
+    jobStats: {
+      ...jobStats,
+      total: Object.values(jobStats).reduce((acc, current) => acc + current, 0),
+    },
+    status,
+  };
 };
