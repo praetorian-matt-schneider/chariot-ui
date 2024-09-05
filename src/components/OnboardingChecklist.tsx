@@ -57,7 +57,7 @@ const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
 
   const ctaItems = [
     {
-      label: 'Set Your Root Domain',
+      label: 'Confirm Your Root Domain',
       action: () => {
         setIsOpen(false);
         navigate(
@@ -83,7 +83,7 @@ const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
       },
     },
     {
-      label: 'Set Risk Notifications',
+      label: 'Add Push Notifications',
       isCompleted: notificationsConfigured === 'connected',
       action: () => {
         setIsOpen(false);
@@ -96,7 +96,7 @@ const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
       },
     },
     {
-      label: 'Set Exposure Alerts',
+      label: 'Get Exposure Alerts',
       isCompleted: exposureAlertsConfigured,
       action: () => {
         setIsOpen(false);
@@ -112,6 +112,12 @@ const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
 
   // Calculate the number of incomplete tasks
   const incompleteTasks = ctaItems.filter(item => !item.isCompleted).length;
+
+  useEffect(() => {
+    if (incompleteTasks > 0) {
+      setShowChecklist(true);
+    }
+  }, [incompleteTasks]);
 
   if (!showChecklist) {
     return null; // Hide the checklist if dismissed
@@ -162,7 +168,7 @@ const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
       {/* Menu */}
       <div
         className={cn(
-          'absolute bottom-24 right-0 w-72 rounded-lg bg-white p-4 shadow-lg transform transition-all duration-500 ease-in-out',
+          'absolute bottom-24 right-0 w-80 rounded-lg bg-white p-4 shadow-lg transform transition-all duration-500 ease-in-out',
           isOpen
             ? 'scale-100 opacity-100 translate-y-0'
             : 'scale-75 opacity-0 translate-y-4 pointer-events-none'

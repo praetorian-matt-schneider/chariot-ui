@@ -374,6 +374,15 @@ export interface MyResource {
   attribute: Attribute[];
   file: MyFile[];
   condition: Condition[];
+  statistic: Statistic[];
+}
+
+export interface Statistic {
+  username: string;
+  key: string;
+  name: string;
+  value: string;
+  ttl: string;
 }
 
 export interface GenericResource {

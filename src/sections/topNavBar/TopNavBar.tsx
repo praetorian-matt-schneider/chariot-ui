@@ -13,9 +13,13 @@ export const TopNavBar: React.FC = () => {
 
   const currentPage = location.pathname.split('/').pop();
   const isCurrentPage = (page: string) => currentPage === page;
-  const linkSize = 'w-15 md:w-20';
 
   const links = ['overview', 'assets'];
+
+  // Function to keep the overview link as attack surface
+  const remap = (link: string) =>
+    link === 'overview' ? 'attack surface' : link;
+
   return (
     <div>
       <div className="flex flex-col items-center justify-between py-3 md:flex-row">
@@ -33,14 +37,14 @@ export const TopNavBar: React.FC = () => {
                     'app',
                     link as 'overview' | 'assets' | 'risks',
                   ])}
-                  className={`${linkSize} mt-1 border-b-2 pb-1 text-sm font-medium capitalize transition-colors 
+                  className={`mt-1 border-b-2 px-3 pb-1 text-sm font-medium capitalize transition-colors 
                   hover:text-gray-100 ${
                     isCurrentPage(link)
                       ? 'border-layer0 hover:border-layer0'
                       : 'border-transparent hover:border-header'
                   }`}
                 >
-                  {link}
+                  {remap(link)}
                 </Link>
               ))}
               <MyInbox

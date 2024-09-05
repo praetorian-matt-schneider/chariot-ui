@@ -10,14 +10,13 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 import {
-  BellIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
   WrenchScrewdriverIcon,
 } from '@heroicons/react/24/solid';
-import { Hourglass, Unplug } from 'lucide-react';
+import confetti from 'canvas-confetti';
+import { Hourglass, TriangleAlertIcon, Unplug } from 'lucide-react';
 
-import { AssetUsage } from '@/components/AssetUsage';
 import { Button } from '@/components/Button';
 import { DomainDrawerContent } from '@/components/DomainDrawerContent';
 import { Drawer } from '@/components/Drawer';
@@ -334,6 +333,12 @@ export const Overview: React.FC = () => {
 
     refetch();
     setIsDomainDrawerOpen(false);
+
+    // Trigger the confetti effect
+    confetti({
+      particleCount: 150,
+      spread: 60,
+    });
   }
 
   const data = useMemo(() => {
@@ -431,18 +436,12 @@ export const Overview: React.FC = () => {
     return '';
   };
 
+  const isFreemiumMaxed =
+    currentPlan === 'freemium' && usedAssets >= FREEMIUM_ASSETS_LIMIT;
   return (
     <div>
       <RenderHeaderExtraContentSection>
-        <div className="flex w-full flex-row justify-end">
-          <AssetUsage
-            currentPlan={currentPlan}
-            used={usedAssets}
-            assetCountStatus={assetCountStatus}
-            total={FREEMIUM_ASSETS_LIMIT}
-            setIsUpgradePlanOpen={setIsUpgradePlanOpen}
-          />
-        </div>
+        <div>{/* Retained for consitent spacing */}</div>
       </RenderHeaderExtraContentSection>
       <div className="flex w-full flex-col text-gray-200">
         <GettingStarted
@@ -458,23 +457,24 @@ export const Overview: React.FC = () => {
             setIsRiskNotificationsDrawerOpen(true)
           }
           total={FREEMIUM_ASSETS_LIMIT}
-          isFreemiumMaxed={
-            currentPlan === 'freemium' &&
-            FREEMIUM_ASSETS_LIMIT - usedAssets <= 0
-          }
+          isFreemiumMaxed={isFreemiumMaxed}
         />
         <main className="mt-6 w-full">
           <div className="overflow-hidden rounded-lg border-2 border-header-dark bg-header shadow-md">
             <div className="flex w-full p-8">
               <div className="flex flex-1 flex-col">
                 <p className="text-xl font-bold text-white">Attack Surface</p>
-                <p className="text-xs font-normal text-gray-500">
-                  Your attack surface represents all the points where a
-                  potential risk could occur in your digital environment.
-                </p>
-                <p className="text-xs font-normal text-gray-500">
-                  Building your attack surface helps you monitor and protect
-                  these points effectively.
+                <p className="flex items-center space-x-2 text-sm font-normal text-gray-500">
+                  {isFreemiumMaxed && (
+                    <TriangleAlertIcon className="mr-1 block size-4 text-yellow-500" />
+                  )}
+                  <Loader
+                    isLoading={assetCountStatus === 'pending'}
+                    className="inline-block w-5"
+                  >
+                    {usedAssets?.toLocaleString()}
+                  </Loader>{' '}
+                  Assets being monitored
                 </p>
               </div>
               <Button
@@ -566,11 +566,8 @@ export const Overview: React.FC = () => {
                         <Loader
                           isLoading={row.discoveredAssetsStatus === 'pending'}
                         >
-                          {row.type === 'riskNotification' && (
-                            <BellIcon className="size-4 text-default-light" />
-                          )}
                           {row.type === 'riskNotification' ? (
-                            'Risk Notification'
+                            'Notification'
                           ) : (
                             <div
                               className={cn(
