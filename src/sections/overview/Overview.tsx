@@ -10,7 +10,6 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 import {
-  BellIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
   WrenchScrewdriverIcon,
@@ -566,11 +565,8 @@ export const Overview: React.FC = () => {
                         <Loader
                           isLoading={row.discoveredAssetsStatus === 'pending'}
                         >
-                          {row.type === 'riskNotification' && (
-                            <BellIcon className="size-4 text-default-light" />
-                          )}
                           {row.type === 'riskNotification' ? (
-                            'Risk Notification'
+                            'Notification'
                           ) : (
                             <div
                               className={cn(
