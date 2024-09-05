@@ -8,7 +8,7 @@ import { getRoute } from '@/utils/route.util';
 import { generatePathWithSearch } from '@/utils/url.util';
 
 const MyInbox: React.FC<{ className?: string }> = ({ className }) => {
-  const { data: alertsWithAttribute = [] } = useGetAccountAlerts({
+  const { data: alertsWithAttribute = [], status } = useGetAccountAlerts({
     refetchInterval: sToMs(30),
   });
   const alerts = alertsWithAttribute.filter(
@@ -61,7 +61,7 @@ const MyInbox: React.FC<{ className?: string }> = ({ className }) => {
       className={cn('h-7 relative')}
       startIcon={
         <span className="inline-flex items-center space-x-2">
-          {alerts.length === 0 && (
+          {status !== 'pending' && alerts.length === 0 && (
             <span
               role="label"
               className={cn(
