@@ -8,6 +8,6 @@ export const DISABLED_CLASS =
   'disabled:cursor-not-allowed disabled:bg-layer2 disabled:text-gray-500 disabled:ring-gray-200';
 
 export const DEFAULT_CONDITIONS = {
-  ports: ['21', '389', '3389', '445', '23'],
-  protocols: ['ftp', 'ldap', 'rdp', 'smb', 'telnet', 'vnc'],
+  port: ['21', '389', '3389', '445', '23'],
+  protocol: ['ftp', 'ldap', 'rdp', 'smb', 'telnet', 'vnc'],
 };

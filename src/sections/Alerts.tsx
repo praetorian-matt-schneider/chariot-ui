@@ -25,7 +25,7 @@ import {
   RiskSeverity,
   RiskStatus,
 } from '@/types';
-import { getAlertName } from '@/utils/attribute.util';
+import { getAlertName } from '@/utils/alert.util';
 import { cn } from '@/utils/classname';
 import { formatDate } from '@/utils/date.util';
 import { getRiskSeverity, getRiskStatus } from '@/utils/riskStatus.util';

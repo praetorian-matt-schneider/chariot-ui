@@ -1,6 +1,7 @@
 import { toast } from 'sonner';
 
 import { useAxios } from '@/hooks/useAxios';
+import { useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
 import { useMy } from '@/hooks/useMy';
 import { Condition } from '@/types';
 import { useMutation } from '@/utils/api';
@@ -9,6 +10,7 @@ export function useAddAlert() {
   const axios = useAxios();
 
   const { invalidate } = useMy({ resource: 'condition' });
+  const { invalidate: invalidateAlerts } = useGetAccountAlerts();
 
   return useMutation({
     defaultErrorMessage: 'Failed to add alert',
@@ -28,6 +30,7 @@ export function useAddAlert() {
     },
     onSuccess: () => {
       invalidate();
+      invalidateAlerts();
     },
   });
 }
@@ -36,6 +39,7 @@ export function useRemoveAlert() {
   const axios = useAxios();
 
   const { invalidate } = useMy({ resource: 'condition' });
+  const { invalidate: invalidateAlerts } = useGetAccountAlerts();
 
   return useMutation({
     defaultErrorMessage: 'Failed to add alert',
@@ -56,6 +60,7 @@ export function useRemoveAlert() {
     },
     onSuccess: () => {
       invalidate();
+      invalidateAlerts();
     },
   });
 }

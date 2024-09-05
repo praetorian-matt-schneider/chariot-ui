@@ -68,11 +68,8 @@ const RisksBeta: React.FC = () => {
   const { getRiskDrawerLink } = getDrawerLink();
 
   //   Security alert options
-  const {
-    data: alertsWithConditions,
-    status: alertsStatus,
-    refetch: refetchAlerts,
-  } = useGetAccountAlerts();
+  const { data: alertsWithConditions, status: alertsStatus } =
+    useGetAccountAlerts();
 
   const [alerts, conditions] = partition(
     alertsWithConditions,
@@ -99,10 +96,6 @@ const RisksBeta: React.FC = () => {
       }
     }
   }, [JSON.stringify({ alerts, filters, conditions })]);
-
-  function refetch() {
-    refetchAlerts();
-  }
 
   const columns: Columns<Risk> = useMemo(
     () => [
@@ -355,8 +348,6 @@ const RisksBeta: React.FC = () => {
                   value={[filters.query]}
                   currentValue={filters.query}
                   styleType="button"
-                  onAdd={refetch}
-                  onRemove={refetch}
                 />
               )}
             </div>
@@ -364,12 +355,7 @@ const RisksBeta: React.FC = () => {
         }
       >
         {query && (
-          <Alerts
-            query={query}
-            setQuery={() => {}}
-            hideFilters={true}
-            refetch={refetch}
-          />
+          <Alerts query={query} setQuery={() => {}} hideFilters={true} />
         )}
         {!query && (
           <div className="mt-12 flex flex-col items-center justify-center">

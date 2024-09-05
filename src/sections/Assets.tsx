@@ -62,8 +62,8 @@ import {
   SeverityDef,
   SeverityOpenCounts,
 } from '@/types';
+import { getAlertName } from '@/utils/alert.util';
 import { QueryStatus, useMergeStatus } from '@/utils/api';
-import { getAlertName } from '@/utils/attribute.util';
 import { cn } from '@/utils/classname';
 import { capitalize } from '@/utils/lodash.util';
 import { useGetScreenSize } from '@/utils/misc.util';
