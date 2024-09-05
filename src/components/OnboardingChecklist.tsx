@@ -31,7 +31,7 @@ const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [showChecklist, setShowChecklist] = useStorage(
     {
-      key: 'show-onboarding-checklist-' + (friend || me),
+      key: `show-onboarding-checklist-${friend || me}`,
     },
     true
   );
