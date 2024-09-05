@@ -456,7 +456,7 @@ export const Overview: React.FC = () => {
           onRiskNotificationsClick={() =>
             setIsRiskNotificationsDrawerOpen(true)
           }
-          total={FREEMIUM_ASSETS_LIMIT * 10_000}
+          total={FREEMIUM_ASSETS_LIMIT}
           isFreemiumMaxed={
             currentPlan === 'freemium' &&
             FREEMIUM_ASSETS_LIMIT - usedAssets <= 0
