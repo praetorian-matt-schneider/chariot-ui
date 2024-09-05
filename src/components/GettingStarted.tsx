@@ -59,6 +59,7 @@ export const GettingStartedStep: React.FC<{
 };
 
 export const GettingStarted: React.FC<{
+  title?: string;
   completedSteps: {
     rootDomain: GetStartedStatus;
     attackSurface: GetStartedStatus;
@@ -69,6 +70,9 @@ export const GettingStarted: React.FC<{
   onRiskNotificationsClick: () => void;
   total: number;
   isFreemiumMaxed: boolean;
+  domain?: string;
+  surfaces?: number;
+  notifications?: number;
 }> = ({
   completedSteps,
   onRootDomainClick,
@@ -76,6 +80,9 @@ export const GettingStarted: React.FC<{
   onRiskNotificationsClick,
   total,
   isFreemiumMaxed,
+  domain,
+  surfaces,
+  notifications,
 }) => {
   const focusedStepIndex = [
     completedSteps.rootDomain,
@@ -84,6 +91,10 @@ export const GettingStarted: React.FC<{
   ].findIndex(status => status === 'notConnected');
 
   const { mutate: upgrade, status: upgradeStatus } = useModifyAccount('link');
+
+  const pluralize = (count: number, singularForm: string) => {
+    return count === 1 ? singularForm : `${singularForm}s`;
+  };
 
   return (
     <div className="z-10 flex justify-center space-x-6">
@@ -111,7 +122,7 @@ export const GettingStarted: React.FC<{
           <>
             <div className="mb-6 flex w-full justify-between gap-6">
               <GettingStartedStep
-                title="Confirm Your Root Domain"
+                title={domain ?? 'Confirm Your Root Domain'}
                 description="Start by defining your root domain. This helps us identify the core assets you need to monitor."
                 status={completedSteps.rootDomain}
                 focusedStep={focusedStepIndex === 0}
@@ -119,7 +130,11 @@ export const GettingStarted: React.FC<{
                 onClick={onRootDomainClick}
               />
               <GettingStartedStep
-                title="Build Your Attack Surface"
+                title={
+                  surfaces && surfaces > 0
+                    ? `${surfaces?.toLocaleString()} ${pluralize(surfaces, 'Surface')} Configured`
+                    : 'Build Your Attack Surface'
+                }
                 description="Add integrations to map out and monitor all the assets within your organization."
                 status={completedSteps.attackSurface}
                 focusedStep={focusedStepIndex === 1}
@@ -127,7 +142,11 @@ export const GettingStarted: React.FC<{
                 onClick={onAttackSurfaceClick}
               />
               <GettingStartedStep
-                title="Add Push Notifications"
+                title={
+                  notifications && notifications > 0
+                    ? `${notifications?.toLocaleString()} ${pluralize(notifications, 'Notification')} Configured`
+                    : 'Add Push Notifications'
+                }
                 description="Configure notifications to stay informed about potential risks and vulnerabilities."
                 status={completedSteps.riskNotifications}
                 focusedStep={focusedStepIndex === 2}

@@ -46,6 +46,7 @@ import { RenderHeaderExtraContentSection } from '@/sections/AuthenticatedApp';
 import { AttackSurfaceCard } from '@/sections/overview/IntegrationCards';
 import {
   availableAttackSurfaceIntegrations,
+  availableAttackSurfaceIntegrationsKeys,
   availableRiskIntegrations,
   comingSoonAttackSurfaceIntegrations,
   comingSoonRiskIntegrations,
@@ -456,6 +457,15 @@ export const Overview: React.FC = () => {
           }
           total={FREEMIUM_ASSETS_LIMIT}
           isFreemiumMaxed={isFreemiumMaxed}
+          domain={rootDomain?.value}
+          surfaces={
+            connectedIntegrations?.filter(integration =>
+              availableAttackSurfaceIntegrationsKeys.includes(
+                integration.member
+              )
+            )?.length
+          }
+          notifications={connectedNotifications.length}
         />
         <main className="mt-6 w-full">
           <div className="overflow-hidden rounded-lg border-2 border-header-dark bg-header shadow-md">

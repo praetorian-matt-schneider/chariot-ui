@@ -283,7 +283,11 @@ const RisksBeta: React.FC = () => {
               <BellIcon className="size-10 animate-bounce text-white" />
             )}
           </Loader>
-          <h1 className="text-3xl font-bold text-white">Remediate a Risk</h1>
+          <h1 className="text-3xl font-bold text-white">
+            {hasRemediatedRisk
+              ? `${risksGeneric?.risks?.length} Risks Remediated`
+              : 'Remediate a Risk'}
+          </h1>
           <p className="max-w-[700px] text-sm text-gray-500">
             Keep your environment secure by addressing risks regularly
           </p>
