@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { LockClosedIcon } from '@heroicons/react/24/outline';
 import { ChevronDownIcon } from 'lucide-react';
 
@@ -30,29 +30,46 @@ interface Props {
   onSave?: (comment: string, status: string) => Promise<void>;
   title?: string;
   risk: Risk;
+  value: {
+    comment: string;
+    setComment: Dispatch<SetStateAction<string>>;
+    status: RiskStatus | undefined;
+    setStatus: Dispatch<SetStateAction<RiskStatus | undefined>>;
+    severity: RiskSeverity | undefined;
+    setSeverity: Dispatch<SetStateAction<RiskSeverity | undefined>>;
+  };
+  hasLocalChanges: boolean;
 }
 
-export const Comment: React.FC<Props> = ({ risk, onSave }: Props) => {
+export const Comment: React.FC<Props> = ({
+  risk,
+  onSave,
+  value: propsValue,
+  hasLocalChanges,
+}: Props) => {
   const comment = risk.comment;
   const isEditing = true;
   const { status: riskStatusKey, severity: riskSeverityKey } =
     getStatusSeverity(risk.status);
-  const [value, setValue] = useState(comment);
-  const [isSaving, setIsSaving] = useState(false);
 
-  const [status, setStatus] = useState(riskStatusKey);
-  const [severity, setSeverity] = useState(riskSeverityKey);
+  const {
+    comment: value,
+    setComment: setValue,
+    status,
+    setStatus,
+    severity,
+    setSeverity,
+  } = propsValue;
+
+  const [isSaving, setIsSaving] = useState(false);
   const [isClosedSubStateModalOpen, setIsClosedSubStateModalOpen] =
     useState(false);
 
   const { mutate: deleteRisk } = useDeleteRisk();
   const { removeSearchParams } = useSearchParams();
 
-  const statusLabel = RiskStatusLabel[status] || status;
-  const severityLabel = SeverityDef[severity] || severity;
-
-  const isSeverityChanged = riskSeverityKey !== severity;
-  const isStatusChanged = riskStatusKey !== status;
+  const statusLabel = status ? RiskStatusLabel[status] || status : '';
+  const severityLabel = severity ? SeverityDef[severity] || severity : '';
 
   useEffect(() => {
     if (!isEditing) {
@@ -78,8 +95,6 @@ export const Comment: React.FC<Props> = ({ risk, onSave }: Props) => {
     }
   };
 
-  const isUpdated = isSeverityChanged || isStatusChanged || Boolean(value);
-
   function handleDeleteRisk() {
     deleteRisk([risk]);
     removeSearchParams(StorageKey.DRAWER_COMPOSITE_KEY);
@@ -97,7 +112,7 @@ export const Comment: React.FC<Props> = ({ risk, onSave }: Props) => {
           <Dropdown
             className={cn(
               `border-1 min-w-28 justify-between rounded-[2px] border border-default py-1 pr-2`,
-              getSeverityClass(severity)
+              getSeverityClass(severity || '')
             )}
             menu={{
               items: riskSeverityOptions,
@@ -161,9 +176,9 @@ export const Comment: React.FC<Props> = ({ risk, onSave }: Props) => {
       <div className="mt-2 flex justify-end space-x-2">
         <Button
           onClick={handleSave}
-          disabled={isSaving || !isUpdated}
+          disabled={isSaving || !hasLocalChanges}
           className="py-2"
-          styleType={isUpdated ? 'primary' : 'none'}
+          styleType={hasLocalChanges ? 'primary' : 'none'}
         >
           {isSaving ? 'Saving...' : 'Save'}
         </Button>

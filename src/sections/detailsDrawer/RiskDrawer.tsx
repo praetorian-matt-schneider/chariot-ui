@@ -6,8 +6,12 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { ArrowPathIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
+import { Link } from 'react-router-dom';
+import {
+  ArrowPathIcon,
+  ExclamationTriangleIcon,
+  PencilSquareIcon,
+} from '@heroicons/react/24/outline';
 
 import { Button } from '@/components/Button';
 import { Chip } from '@/components/Chip';
@@ -42,6 +46,7 @@ import {
   JobStatus,
   Risk,
   RiskCombinedStatus,
+  RiskSeverity,
   RiskStatus,
   RiskStatusLabel,
   RiskStatusWithoutSeverity,
@@ -66,8 +71,8 @@ const isScannable = (attribute: Attribute) =>
     attribute.value.startsWith('#asset'));
 
 export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
-  const navigate = useNavigate();
   const [selectedTab, setSelectedTab] = useState('description');
+  const [isWarningModalOpen, setIsWarningModalOpen] = useState(false);
   const { removeSearchParams } = useSearchParams();
   const [riskJobsMap, setRiskJobsMap] = useStorage<
     Record<string, Record<string, string>>
@@ -77,6 +82,9 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     },
     {}
   );
+  const [comment, setComment] = useState<string>('');
+  const [status, setStatus] = useState<RiskStatus>();
+  const [severity, setSeverity] = useState<RiskSeverity>();
 
   const [, dns, name] = compositeKey.split('#');
   const attributesFilter = `source:#risk#${dns}#${name}`;
@@ -144,6 +152,22 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
   const isInitialLoading =
     riskStatus === 'pending' || definitionsFileStatus === 'pending';
   const risk: Risk = risks[0] || {};
+
+  const { status: riskStatusKey, severity: riskSeverityKey } =
+    getStatusSeverity(risk.status);
+
+  const hasLocalChanges =
+    riskStatusKey !== status ||
+    riskSeverityKey !== severity ||
+    Boolean(comment);
+
+  useEffect(() => {
+    if (risk && risk.status) {
+      setStatus(riskStatusKey as RiskStatus);
+      setSeverity(riskSeverityKey as RiskSeverity);
+      setComment(risk.comment);
+    }
+  }, [JSON.stringify(risk), riskStatusKey, riskSeverityKey]);
 
   // This variable filters the jobs from localStorage and only keeps the jobs that are related to the current risk
   const attributeJobMap = Object.fromEntries(
@@ -224,11 +248,19 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     [attributesGenericSearch?.attributes]
   );
 
+  function handleClose() {
+    if (hasLocalChanges) {
+      setIsWarningModalOpen(true);
+    } else {
+      removeSearchParams(StorageKey.DRAWER_COMPOSITE_KEY);
+    }
+  }
+
   return (
     <Drawer
       open={open}
-      onClose={() => removeSearchParams(StorageKey.DRAWER_COMPOSITE_KEY)}
-      onBack={() => navigate(-1)}
+      onClose={handleClose}
+      onBack={handleClose}
       className={'w-full rounded-t-lg pb-0 shadow-lg'}
     >
       <Loader isLoading={isInitialLoading} type="spinner">
@@ -240,7 +272,50 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                 risk={risk}
                 isLoading={isRiskFetching}
                 onSave={handleUpdateComment}
+                value={{
+                  comment,
+                  setComment,
+                  status,
+                  setStatus,
+                  severity,
+                  setSeverity,
+                }}
+                hasLocalChanges={hasLocalChanges}
               />
+              <Modal
+                style="dialog"
+                title={
+                  <div className="flex items-center gap-1">
+                    <ExclamationTriangleIcon className="size-5 text-yellow-600" />
+                    Unsaved Changes
+                  </div>
+                }
+                open={isWarningModalOpen}
+                onClose={() => {
+                  setIsWarningModalOpen(false);
+                  removeSearchParams(StorageKey.DRAWER_COMPOSITE_KEY);
+                }}
+                closeOnOutsideClick={false}
+                footer={{
+                  text: 'Save',
+                  onClick: async () => {
+                    // Add api to save the changes
+                    if (risk.status === RiskStatus.ExposedRisks) {
+                      await handleUpdateComment(comment, risk.status);
+                    } else {
+                      await handleUpdateComment(
+                        comment,
+                        `${status}${severity || ''}`
+                      );
+                    }
+                    setIsWarningModalOpen(false);
+                  },
+                }}
+              >
+                <div className="space-y-2 text-sm text-default-light">
+                  There are some changes on status. Do you want to save ?
+                </div>
+              </Modal>
             </History>
           }
           section2={
