@@ -242,12 +242,12 @@ const RisksBeta: React.FC = () => {
         return (
           <>
             <h1 className="text-xl font-bold text-gray-900">
-              These are all your open risks that need remediation.
+              These are all your open risks that need remediation
             </h1>
             <p className="mt-4 text-sm text-gray-700">
               <span className="font-semibold">Recommended Action:</span>{' '}
               Remediate the risk, then either rescan to confirm or close if no
-              longer valid.
+              longer valid
             </p>
           </>
         );
@@ -255,11 +255,11 @@ const RisksBeta: React.FC = () => {
         return (
           <>
             <h1 className="text-xl font-bold text-gray-900">
-              These are newly discovered risks that require triaging.
+              These are newly discovered risks that require triaging
             </h1>
             <p className="mt-4 text-sm text-gray-700">
               <span className="font-semibold">Recommended Action:</span> Accept
-              the risk if it is valid, or reject it if it is invalid.
+              the risk if it is valid, or reject it if it is invalid
             </p>
           </>
         );
@@ -267,12 +267,11 @@ const RisksBeta: React.FC = () => {
         return (
           <>
             <h1 className="text-xl font-bold text-gray-900">
-              These risks were previously open but are no longer detected.
+              These risks were previously open but are no longer detected
             </h1>
             <p className="mt-4 text-sm text-gray-700">
               <span className="font-semibold">Recommended Action:</span> Confirm
-              that the risk is no longer present or reopen the risk if
-              necessary.
+              that the risk is no longer present or reopen the risk if necessary
             </p>
           </>
         );
@@ -280,12 +279,12 @@ const RisksBeta: React.FC = () => {
         return (
           <>
             <h1 className="text-xl font-bold text-gray-900">
-              These assets are not being scanned for risks.
+              These assets are not being scanned for risks
             </h1>
             <p className="mt-4 text-sm text-gray-700">
               <span className="font-semibold">Recommended Action:</span> Enable
               risk scanning for these assets or delete them if they are not of
-              interest.
+              interest
             </p>
           </>
         );
@@ -297,7 +296,7 @@ const RisksBeta: React.FC = () => {
             </h1>
             <p className="mt-4 text-sm text-gray-700">
               <span className="font-semibold">Recommended Action:</span> Open or
-              close the risk as needed.
+              close the risk as needed
             </p>
           </>
         );
@@ -321,7 +320,7 @@ const RisksBeta: React.FC = () => {
           </Loader>
           <h1 className="text-3xl font-bold text-white">Remediate a Risk</h1>
           <p className="max-w-[700px] text-sm text-gray-500">
-            Keep your environment secure by addressing risks regularly.
+            Keep your environment secure by addressing risks regularly
           </p>
         </div>
       </RenderHeaderExtraContentSection>

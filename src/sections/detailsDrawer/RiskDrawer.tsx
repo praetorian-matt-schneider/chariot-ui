@@ -683,6 +683,9 @@ function getHistoryDiff(
   const { status: statusTo, severity: severityTo } = getStatusSeverity(
     history.to
   );
+  const isStatusWithoutSeverityFrom = RiskStatusWithoutSeverity.includes(
+    history.from as RiskStatus
+  );
 
   const isStatusChanged = statusFrom !== statusTo;
   const isSeverityChanged = severityFrom !== severityTo;
@@ -697,27 +700,32 @@ function getHistoryDiff(
         {by ? (
           <span>
             {by} changed the <span className="font-semibold">Severity</span>{' '}
-            from
+            {isStatusWithoutSeverityFrom ? 'to' : 'from'}
           </span>
         ) : (
           <span>
-            <span className="font-semibold">Severity</span> changed from
+            <span className="font-semibold">Severity</span>
+            {isStatusWithoutSeverityFrom ? ' set to' : ' changed from'}
           </span>
         )}
         {EmptySpace}
       </p>
-      <RiskDropdown
-        risk={{
-          status: history.from as RiskCombinedStatus,
-          key: '',
-          comment: '',
-        }}
-        type={'severity'}
-        styleType="chip"
-      />
-      <p className="inline">
-        {EmptySpace}to{EmptySpace}
-      </p>
+      {!isStatusWithoutSeverityFrom && (
+        <>
+          <RiskDropdown
+            risk={{
+              status: history.from as RiskCombinedStatus,
+              key: '',
+              comment: '',
+            }}
+            type={'severity'}
+            styleType="chip"
+          />
+          <p className="inline">
+            {EmptySpace}to{EmptySpace}
+          </p>
+        </>
+      )}
       <RiskDropdown
         risk={{
           status: history.to as RiskCombinedStatus,
