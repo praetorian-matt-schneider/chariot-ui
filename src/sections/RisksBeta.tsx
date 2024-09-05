@@ -105,7 +105,7 @@ const RisksBeta: React.FC = () => {
       const params = new URLSearchParams(searchParams);
       const action = params.get('action');
       if (action) {
-        if (action === 'remediate-a-risk') {
+        if (action === 'remediate-a-risk' && hasRemediatedRisk) {
           setIsCTAOpen(true);
         }
       }
