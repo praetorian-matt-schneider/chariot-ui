@@ -47,7 +47,7 @@ const NessusInstructions = () => {
 const AWSInstructions = () => {
   const { me, friend } = useAuth();
   const template =
-    'https://s3.us-east-2.amazonaws.com/preview.chariot.praetorian.com/templates/aws-permissions-template.yaml';
+    'https://s3.us-east-2.amazonaws.com/chariot.praetorian.com/templates/aws-permissions-template.yaml';
   const url = `https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=${template}&param_ExternalId=${friend || me}&stackName=Chariot`;
   return (
     <div>
@@ -1077,26 +1077,28 @@ export const comingSoonAttackSurfaceIntegrations = [
   Integrations.datadog,
   Integrations.wiz,
   Integrations.digitalocean,
-  Integrations.email,
-  Integrations.phone,
 ];
 
-export const riskIntegrations = [
+export const availableRiskIntegrations = [
   Integrations.slack,
   Integrations.jira,
   Integrations.webhook,
   Integrations.zulip,
   Integrations.teams,
+];
+
+export const comingSoonRiskIntegrations = [
   Integrations.email,
   Integrations.phone,
 ];
 
-export const riskIntegrationsKeys = riskIntegrations.map(
+export const availableRiskIntegrationsKeys = availableRiskIntegrations.map(
   integration => integration.id
 ) as string[];
 
 export const allIntegrations = [
   ...availableAttackSurfaceIntegrations,
   ...comingSoonAttackSurfaceIntegrations,
-  ...riskIntegrations,
+  ...availableRiskIntegrations,
+  ...comingSoonRiskIntegrations,
 ];

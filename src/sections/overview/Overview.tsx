@@ -48,8 +48,9 @@ import {
 } from '@/sections/overview/IntegrationCards';
 import {
   availableAttackSurfaceIntegrations,
+  availableRiskIntegrations,
   comingSoonAttackSurfaceIntegrations,
-  riskIntegrations,
+  comingSoonRiskIntegrations,
 } from '@/sections/overview/Integrations';
 import SetupModal from '@/sections/SetupModal';
 import { useAuth } from '@/state/auth';
@@ -66,7 +67,7 @@ import { partition } from '@/utils/array.util';
 import { cn } from '@/utils/classname';
 import { getRoute } from '@/utils/route.util';
 import { useStorage } from '@/utils/storage/useStorage.util';
-import { generatePathWithSearch } from '@/utils/url.util';
+import { generatePathWithSearch, useSearchParams } from '@/utils/url.util';
 
 const getStatusIcon = (status: string) => {
   switch (status) {
@@ -176,6 +177,26 @@ export const Overview: React.FC = () => {
     setSelectedRiskNotificationIntegrations,
   ] = useState<string[]>([]);
 
+  // Open the drawer based on the search params
+  const { searchParams, removeSearchParams } = useSearchParams();
+  useEffect(() => {
+    if (searchParams) {
+      const params = new URLSearchParams(searchParams);
+      const action = params.get('action');
+      if (action) {
+        if (action === 'set-root-domain') {
+          setIsDomainDrawerOpen(true);
+        } else if (action === 'build-attack-surface') {
+          setIsAttackSurfaceDrawerOpen(true);
+        } else if (action === 'set-risk-notifications') {
+          setIsRiskNotificationsDrawerOpen(true);
+        }
+      }
+      // clear the search params
+      removeSearchParams('action');
+    }
+  }, [searchParams]);
+
   const {
     modal: {
       asset: { onOpenChange: onAddAssetOpenChange },
@@ -262,9 +283,11 @@ export const Overview: React.FC = () => {
       a.name.localeCompare(b.name)
     );
 
-    const filteredRiskNotificationIntegrations = riskIntegrations.filter(
-      integration =>
-        integration.name.toLowerCase().includes(search?.toLowerCase())
+    const filteredRiskNotificationIntegrations = [
+      ...availableRiskIntegrations,
+      ...comingSoonRiskIntegrations,
+    ].filter(integration =>
+      integration.name.toLowerCase().includes(search?.toLowerCase())
     );
 
     return {

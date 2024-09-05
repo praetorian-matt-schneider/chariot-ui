@@ -591,3 +591,5 @@ export enum ParsedFileTypes {
   PDF = 'pdf',
   DOCUMENT = 'document',
 }
+
+export type GetStartedStatus = 'notConnected' | 'setup' | 'connected';

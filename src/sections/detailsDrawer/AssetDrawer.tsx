@@ -34,6 +34,7 @@ import { formatDate } from '@/utils/date.util';
 import { getSeverityClass } from '@/utils/getSeverityClass.util';
 import { useGetScreenSize } from '@/utils/misc.util';
 import { createVerticalContainer } from '@/utils/reactFlor.util';
+import { useComponentDidUpdate } from '@/utils/reactHooks.util';
 import { Regex } from '@/utils/regex.util';
 import { getRiskSeverity, getRiskStatus } from '@/utils/riskStatus.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
@@ -132,19 +133,23 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
     'child' | 'parent'
   > => {
     return {
-      child: childAssetsAttributes.map(attribute => {
-        const [, assetdns, assetname] =
-          attribute.source.match(Regex.ASSET_KEY) || [];
-        const riskSummary = openAllRiskDataset[assetdns];
+      child: childAssetsAttributes
+        ?.filter?.(attribute => {
+          return attribute.source !== asset.key;
+        })
+        .map(attribute => {
+          const [, assetdns, assetname] =
+            attribute.source.match(Regex.ASSET_KEY) || [];
+          const riskSummary = openAllRiskDataset[assetdns];
 
-        return {
-          key: attribute.source,
-          name: assetname,
-          dns: assetdns,
-          updated: attribute.updated,
-          riskSummary,
-        };
-      }),
+          return {
+            key: attribute.source,
+            name: assetname,
+            dns: assetdns,
+            updated: attribute.updated,
+            riskSummary,
+          };
+        }),
       parent:
         attributesGenericSearch?.attributes
           ?.filter?.(attribute => {
@@ -459,7 +464,7 @@ export function AssetsGraph(props: AssetGraphProps) {
     const links: Edge[] = [];
 
     const showNChild = defaultNodeShowCount + childNMore;
-    const showNParent = defaultNodeShowCount + childNMore;
+    const showNParent = defaultNodeShowCount + parentNMore;
 
     if (props.parent.length > 0) {
       const parentNodes: Node[] = [];
@@ -520,7 +525,7 @@ export function AssetsGraph(props: AssetGraphProps) {
               <div
                 className="flex size-full items-center justify-center"
                 onClick={() => {
-                  setParentNMore(prevNMore => prevNMore + 5);
+                  setParentNMore(prevNMore => prevNMore + 100);
                 }}
               >{`+${props.parent.length - showNParent} more`}</div>
             ),
@@ -620,7 +625,7 @@ export function AssetsGraph(props: AssetGraphProps) {
               <div
                 className="flex size-full items-center justify-center"
                 onClick={() => {
-                  setChildNMore(prevNMore => prevNMore + 5);
+                  setChildNMore(prevNMore => prevNMore + 100);
                 }}
               >{`+${props.child.length - showNChild} more`}</div>
             ),
@@ -688,6 +693,13 @@ export function AssetsGraph(props: AssetGraphProps) {
     });
   }
 
+  useComponentDidUpdate(() => {
+    const { nodes, edges } = getNodeAndLinks();
+
+    setNodes(nodes);
+    setEdges(edges);
+  }, [getNodeAndLinks]);
+
   useEffect(() => {
     const { nodes, edges } = getNodeAndLinks();
 
@@ -699,7 +711,7 @@ export function AssetsGraph(props: AssetGraphProps) {
         reCenter();
       });
     }, 0);
-  }, [getNodeAndLinks]);
+  }, []);
 
   return (
     <ReactFlow
@@ -715,6 +727,8 @@ export function AssetsGraph(props: AssetGraphProps) {
       nodeTypes={nodeTypes}
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
+      maxZoom={20}
+      minZoom={0.1}
     >
       <Controls
         fitViewOptions={{

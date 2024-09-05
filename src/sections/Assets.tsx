@@ -46,9 +46,9 @@ import { RenderHeaderExtraContentSection } from '@/sections/AuthenticatedApp';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import {
   availableAttackSurfaceIntegrationsKeys,
+  availableRiskIntegrations,
+  availableRiskIntegrationsKeys,
   Integrations,
-  riskIntegrations,
-  riskIntegrationsKeys,
 } from '@/sections/overview/Integrations';
 import { parseKeys } from '@/sections/SearchByType';
 import { useGlobalState } from '@/state/global.state';
@@ -69,6 +69,7 @@ import { useGetScreenSize } from '@/utils/misc.util';
 import { Regex } from '@/utils/regex.util';
 import { getRiskSeverity, getRiskStatus } from '@/utils/riskStatus.util';
 import { useSticky } from '@/utils/sticky.util';
+import { useSearchParams } from '@/utils/url.util';
 
 export function buildOpenRiskDataset(
   risks: Risk[]
@@ -129,8 +130,6 @@ const Assets: React.FC = () => {
   const { data: accounts, status: accountsStatus } = useMy({
     resource: 'account',
   });
-
-  const [conditions] = useState(DEFAULT_CONDITIONS);
 
   const integratedAttackSurface = useMemo(() => {
     return [
@@ -458,6 +457,22 @@ const Assets: React.FC = () => {
     key.match('#attribute#source##asset#')
   );
 
+  // Open the drawer based on the search params
+  const { searchParams, removeSearchParams } = useSearchParams();
+  useEffect(() => {
+    if (searchParams) {
+      const params = new URLSearchParams(searchParams);
+      const action = params.get('action');
+      if (action) {
+        if (action === 'set-exposure-alerts') {
+          setIsCTAOpen(true);
+        }
+      }
+      // clear the search params
+      removeSearchParams('action');
+    }
+  }, [searchParams]);
+
   return (
     <>
       <RenderHeaderExtraContentSection>
@@ -532,15 +547,15 @@ const Assets: React.FC = () => {
                 styleType="primary"
                 className="-translate-x-2 text-sm font-semibold"
                 onClick={() => {
-                  Object.keys(conditions).forEach(key => {
-                    conditions[key as keyof typeof conditions].forEach(
-                      value => {
-                        addAlert({
-                          value,
-                          name: `Assets with a ${key} value of ${value} identified`,
-                        });
-                      }
-                    );
+                  Object.keys(DEFAULT_CONDITIONS).forEach(key => {
+                    DEFAULT_CONDITIONS[
+                      key as keyof typeof DEFAULT_CONDITIONS
+                    ].forEach(value => {
+                      addAlert({
+                        value,
+                        name: `Assets with a ${key} value of ${value} identified`,
+                      });
+                    });
                   });
                   closeCTADrawer();
                 }}
@@ -1012,8 +1027,8 @@ export function FancyTable(
               className="sticky overflow-auto border-r border-default"
               style={{
                 top: headerHeight + LHeaderHeight,
-                maxHeight: `calc( 100vh - ${headerHeight + LHeaderHeight + 16}px)`,
-                height: `calc( 100vh - ${headerHeight + LHeaderHeight + 16}px)`,
+                maxHeight: `calc( 100vh - ${headerHeight + LHeaderHeight + 64}px)`,
+                height: `calc( 100vh - ${headerHeight + LHeaderHeight + 64}px)`,
               }}
             >
               {filter && (
@@ -1126,11 +1141,12 @@ export function IntegratedRisksNotifications() {
   const integratedRisksLogos = useMemo(() => {
     return accounts
       .filter(account => {
-        return riskIntegrationsKeys.includes(account.member);
+        return availableRiskIntegrationsKeys.includes(account.member);
       })
       .map(account => {
         return (
-          riskIntegrations.find(({ id }) => id === account.member)?.logo || ''
+          availableRiskIntegrations.find(({ id }) => id === account.member)
+            ?.logo || ''
         );
       });
   }, [JSON.stringify(accounts)]);
