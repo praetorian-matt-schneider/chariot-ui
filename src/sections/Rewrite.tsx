@@ -103,7 +103,7 @@ export default function Rewrite() {
             <OnFireLogo src="/icons/kubernetes.svg" />
             <OnFireLogo src="/icons/GoogleCloud.svg" />
             <OnFireLogo src="/icons/mysql.svg" />
-            <OnFireLogo src="/icons/kafka.svg" />
+            <OnFireLogo src="/icons/kafka.png" />
             <OnFireLogo src="/icons/redis.svg" />
             <OnFireLogo src="/icons/istio.svg" />
             <OnFireLogo src="/icons/benthos.png" />
