@@ -1092,6 +1092,17 @@ export const comingSoonRiskIntegrations = [
   Integrations.phone,
 ];
 
+export const streamingRiskIntegrations = [
+  Integrations.slack,
+  Integrations.zulip,
+  Integrations.teams,
+];
+
+export const ticketingRiskIntegrations = [
+  Integrations.jira,
+  Integrations.webhook,
+];
+
 export const availableRiskIntegrationsKeys = availableRiskIntegrations.map(
   integration => integration.id
 ) as string[];

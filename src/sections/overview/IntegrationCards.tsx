@@ -40,17 +40,21 @@ export function RiskNotificationCard({
   integration,
   selectedIntegrations,
   setSelectedIntegrations,
+  className,
 }: {
   integration: IntegrationMeta;
   selectedIntegrations: string[];
   setSelectedIntegrations: (integrations: string[]) => void;
+  className?: string;
 }) {
   return (
     <div
       key={integration.id}
       className={cn(
         ' w-[150px] resize-none rounded-sm bg-white p-6 text-center',
-        selectedIntegrations.includes(integration.id) && 'border-2 border-brand'
+        selectedIntegrations.includes(integration.id) &&
+          'border-2 border-brand',
+        className
       )}
       role="button"
       onClick={() => {

@@ -21,9 +21,11 @@ import { Button } from '@/components/Button';
 import { DomainDrawerContent } from '@/components/DomainDrawerContent';
 import { Drawer } from '@/components/Drawer';
 import { Input } from '@/components/form/Input';
+import { Values } from '@/components/form/Inputs';
 import { GettingStarted } from '@/components/GettingStarted';
 import { Loader } from '@/components/Loader';
 import { Modal } from '@/components/Modal';
+import PushNotificationDrawer from '@/components/PushNotificationDrawer';
 import { Table } from '@/components/table/Table';
 import { Tooltip } from '@/components/Tooltip';
 import UpgradeMenu from '@/components/UpgradeMenu';
@@ -41,15 +43,14 @@ import { useIntegration } from '@/hooks/useIntegration';
 import useIntegrationCounts from '@/hooks/useIntegrationCounts';
 import { JobWithFailedCount, useJobsStatus } from '@/hooks/useJobs';
 import { RenderHeaderExtraContentSection } from '@/sections/AuthenticatedApp';
-import {
-  AttackSurfaceCard,
-  RiskNotificationCard,
-} from '@/sections/overview/IntegrationCards';
+import { AttackSurfaceCard } from '@/sections/overview/IntegrationCards';
 import {
   availableAttackSurfaceIntegrations,
   availableRiskIntegrations,
   comingSoonAttackSurfaceIntegrations,
   comingSoonRiskIntegrations,
+  streamingRiskIntegrations,
+  ticketingRiskIntegrations,
 } from '@/sections/overview/Integrations';
 import SetupModal from '@/sections/SetupModal';
 import { useAuth } from '@/state/auth';
@@ -59,6 +60,7 @@ import {
   AssetStatus,
   FREEMIUM_ASSETS_LIMIT,
   Job,
+  LinkAccount,
   Plan,
 } from '@/types';
 import { JobStatus, JobStatusLabel } from '@/types';
@@ -172,10 +174,6 @@ export const Overview: React.FC = () => {
     selectedAttackSurfaceIntegrations,
     setSelectedAttackSurfaceIntegrations,
   ] = useState<string[]>([]);
-  const [
-    selectedRiskNotificationIntegrations,
-    setSelectedRiskNotificationIntegrations,
-  ] = useState<string[]>([]);
 
   // Open the drawer based on the search params
   const { searchParams, removeSearchParams } = useSearchParams();
@@ -268,10 +266,7 @@ export const Overview: React.FC = () => {
       ? Object.values(assetCount).reduce((acc, val) => acc + val, 0)
       : 0;
   }, [JSON.stringify(assetCount)]);
-  const {
-    filteredRiskNotificationIntegrations,
-    filteredAttackSurfaceIntegrations,
-  } = useMemo(() => {
+  const { filteredAttackSurfaceIntegrations } = useMemo(() => {
     const filteredAttackSurfaceIntegrations = [
       ...availableAttackSurfaceIntegrations,
       ...comingSoonAttackSurfaceIntegrations,
@@ -309,8 +304,6 @@ export const Overview: React.FC = () => {
   }
 
   function closeRiskNotificationDrawer() {
-    setSelectedRiskNotificationIntegrations([]);
-
     setIsRiskNotificationsDrawerOpen(false);
   }
 
@@ -435,6 +428,12 @@ export const Overview: React.FC = () => {
     }
     return '';
   };
+
+  const connectedNotifications = useMemo(() => {
+    return connectedIntegrations.filter(
+      integration => integration.type === 'riskNotification'
+    );
+  }, [stringifiedConnectedIntegrations]);
 
   const isFreemiumMaxed =
     currentPlan === 'freemium' && usedAssets >= FREEMIUM_ASSETS_LIMIT;
@@ -817,88 +816,20 @@ export const Overview: React.FC = () => {
             </p>
           </div>
         </Drawer>
-        <Drawer
-          open={isRiskNotificationsDrawerOpen}
+        <PushNotificationDrawer
+          isOpen={isRiskNotificationsDrawerOpen}
           onClose={closeRiskNotificationDrawer}
-          onBack={closeRiskNotificationDrawer}
-          className={cn('w-full rounded-t-sm shadow-lg pb-0 bg-zinc-100')}
-          footerClassname=""
-          skipBack={true}
-          footer={
-            selectedRiskNotificationIntegrations.length > 0 && (
-              <Button
-                styleType="primary"
-                className="mx-20 mb-10 h-20 w-full text-xl font-bold"
-                onClick={async () => {
-                  // add integration   accounts
+          onDisconnect={(account: Account) => {
+            setDisconnectIntegrationKey(account.key);
+          }}
+          onConnect={async (formData: Values) => {
+            await link(formData as unknown as LinkAccount);
+          }}
+          streamingIntegrations={streamingRiskIntegrations}
+          ticketingIntegrations={ticketingRiskIntegrations}
+          connectedIntegrations={connectedNotifications}
+        />
 
-                  const promises = selectedRiskNotificationIntegrations
-                    .map((integration: string) => {
-                      const isWaitlisted =
-                        comingSoonAttackSurfaceIntegrations.find(
-                          i => i.id === integration
-                        );
-                      return link({
-                        username: integration,
-                        value: isWaitlisted ? 'waitlisted' : 'setup',
-                        config: {},
-                      });
-                    })
-                    .map(promise => promise.catch(error => error));
-
-                  const response = await Promise.all(promises);
-
-                  const validResults = response.filter(
-                    result => !(result instanceof Error)
-                  );
-
-                  if (validResults.length > 0) {
-                    invalidateAccounts();
-                  }
-
-                  closeRiskNotificationDrawer();
-                }}
-              >
-                Set Notification Channels (
-                {selectedRiskNotificationIntegrations.length} selected)
-              </Button>
-            )
-          }
-        >
-          <div className="mx-12 mt-6">
-            <h1 className="mb-4 text-4xl font-extrabold">
-              Where do you want to be notified?
-            </h1>
-            <p className="mb-8 text-lg text-gray-700">
-              Select where you would like to be notified when new risks are
-              identified in your attack surface.
-            </p>
-            <div className="mb-8 flex flex-row flex-wrap gap-4">
-              {filteredRiskNotificationIntegrations.map(
-                (integration, index) => {
-                  return (
-                    <RiskNotificationCard
-                      key={index}
-                      integration={integration}
-                      selectedIntegrations={
-                        selectedRiskNotificationIntegrations
-                      }
-                      setSelectedIntegrations={
-                        setSelectedRiskNotificationIntegrations
-                      }
-                    />
-                  );
-                }
-              )}
-            </div>
-            <p className="mb-8 text-sm italic">
-              {`Contact us for more integrations support: `}
-              <a className="text-brand" href="mailto:support@praetorian.com">
-                support@praetorian.com
-              </a>
-            </p>
-          </div>
-        </Drawer>
         <Drawer
           open={isDomainDrawerOpen}
           onClose={() => setIsDomainDrawerOpen(false)}
