@@ -7,6 +7,7 @@ import { ShortcutsHelper } from '@/components/ui/Shortcuts';
 import { useMy } from '@/hooks';
 import { useGetAccountDetails } from '@/hooks/useAccounts';
 import { useGetRootDomain } from '@/hooks/useAttribute';
+import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useIntegration } from '@/hooks/useIntegration';
 import { AddAsset } from '@/sections/add/AddAsset';
 import { AddFile } from '@/sections/add/AddFile';
@@ -103,6 +104,10 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
   const hasCustomAttributes = useMemo(() => {
     return alerts.some(alert => alert.key.match(Regex.CUSTOM_ALERT_KEY));
   }, [alerts]);
+  const { data: risksGeneric } = useGenericSearch({
+    query: 'status:R',
+  });
+  const hasRemediatedRisk = (risksGeneric?.risks || [])?.length > 0;
 
   return (
     <div
@@ -132,7 +137,7 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
         attackSurfacesConfigured={attackSurfaceStatus}
         notificationsConfigured={riskNotificationStatus}
         exposureAlertsConfigured={hasCustomAttributes}
-        risksRemediated={1}
+        risksRemediated={hasRemediatedRisk}
       />
     </div>
   );

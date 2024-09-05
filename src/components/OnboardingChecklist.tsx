@@ -18,7 +18,7 @@ interface OnboardingChecklistProps {
   attackSurfacesConfigured: GetStartedStatus;
   notificationsConfigured: GetStartedStatus;
   exposureAlertsConfigured: boolean;
-  risksRemediated: number;
+  risksRemediated: boolean;
 }
 
 const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
@@ -111,7 +111,7 @@ const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
     },
     {
       label: 'Remediate a Risk',
-      isCompleted: risksRemediated > 0,
+      isCompleted: risksRemediated,
       action: () => {
         setIsOpen(false);
         navigate(
