@@ -730,7 +730,7 @@ const Assets: React.FC = () => {
 
 export default Assets;
 
-interface CategoryFilterProps {
+export interface CategoryFilterProps {
   alert?: Omit<AlertIconProps, 'currentValue'>;
   value: string[];
   onChange: (value: string[]) => void;
@@ -746,6 +746,7 @@ interface CategoryFilterProps {
       value: string;
       count: string;
       isLoading?: boolean;
+      alert?: boolean;
     }[];
   }[];
   status: QueryStatus;
@@ -837,7 +838,7 @@ export function CategoryFilter(props: CategoryFilterProps) {
                             )}
                           />
                           {item.showCount && <p>{option.count}</p>}
-                          {alert && (
+                          {(option.alert ?? true) && alert && (
                             <AlertIcon
                               {...alert}
                               currentValue={getAlertName(option.value)}

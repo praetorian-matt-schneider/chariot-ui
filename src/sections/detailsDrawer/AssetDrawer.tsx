@@ -25,6 +25,7 @@ import { useMy } from '@/hooks';
 import { PartialAsset } from '@/hooks/useAssets';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useReRunJob } from '@/hooks/useJobs';
+import { AlertAction } from '@/sections/Alerts';
 import { buildOpenRiskDataset, RiskSummary } from '@/sections/Assets';
 import { AddAttribute } from '@/sections/detailsDrawer/AddAttribute';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
@@ -186,7 +187,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
       onClose={() => removeSearchParams(StorageKey.DRAWER_COMPOSITE_KEY)}
       onBack={() => navigate(-1)}
       className={cn('w-full rounded-t-lg pb-0 shadow-lg')}
-      contentClassName="flex rounded-t-lg overflow-hidden"
+      contentClassName="flex rounded-t-lg"
     >
       <Loader isLoading={isInitialLoading} type="spinner">
         <ResponsiveGrid
@@ -197,19 +198,27 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
                 <div className="max-w-1/2 flex flex-col gap-2">
                   <h1 className="text-2xl font-bold">{asset.name}</h1>
                   <div className="flex flex-wrap gap-2">
-                    <Button
-                      styleType="secondary"
-                      className="text-nowrap px-3 py-2"
-                      endIcon={<ArrowPathIcon className="size-4" />}
-                      onClick={() => {
-                        runJob({
-                          capability: 'nuclei',
-                          jobKey: `#asset#${asset.name}#${asset.dns}`,
-                        });
-                      }}
-                    >
-                      Scan now
-                    </Button>
+                    {/* Actions Section */}
+                    <AlertAction
+                      item={asset}
+                      showQuestionTooltip
+                      handleRefetch={() => {}}
+                      extraAction={
+                        <Button
+                          styleType="secondary"
+                          className="text-nowrap px-3 py-2"
+                          endIcon={<ArrowPathIcon className="size-4" />}
+                          onClick={() => {
+                            runJob({
+                              capability: 'nuclei',
+                              jobKey: `#asset#${asset.name}#${asset.dns}`,
+                            });
+                          }}
+                        >
+                          Scan now
+                        </Button>
+                      }
+                    />
                   </div>
                 </div>
                 <div className="max-w-1/2 flex flex-col gap-2">

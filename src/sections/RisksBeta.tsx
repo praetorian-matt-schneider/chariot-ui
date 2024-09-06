@@ -21,7 +21,12 @@ import { useMy } from '@/hooks';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
 import { Alerts } from '@/sections/Alerts';
-import { AlertIcon, CategoryFilter, FancyTable } from '@/sections/Assets';
+import {
+  AlertIcon,
+  CategoryFilter,
+  CategoryFilterProps,
+  FancyTable,
+} from '@/sections/Assets';
 import { RenderHeaderExtraContentSection } from '@/sections/AuthenticatedApp';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { getCurrentPlan } from '@/sections/overview/Overview';
@@ -213,74 +218,67 @@ const RisksBeta: React.FC = () => {
     []
   );
 
-  function getAlertDescription(query: string) {
-    const statusCode = query.split(':')[1] as AssetStatus | RiskStatus;
-    switch (statusCode) {
-      case RiskStatus.Opened:
-      case RiskStatus.MachineOpen:
-        return (
-          <>
-            <h1 className="text-xl font-bold text-gray-900">
-              These are all your open risks that need remediation
-            </h1>
-            <p className="mt-4 text-sm text-gray-700">
-              <span className="font-semibold">Recommended Action:</span>{' '}
-              Remediate the risk, then either rescan to confirm or close if no
-              longer valid
-            </p>
-          </>
-        );
-      case RiskStatus.Triaged:
-        return (
-          <>
-            <h1 className="text-xl font-bold text-gray-900">
-              These are newly discovered risks that require triaging
-            </h1>
-            <p className="mt-4 text-sm text-gray-700">
-              <span className="font-semibold">Recommended Action:</span> Accept
-              the risk if it is valid, or reject it if it is invalid
-            </p>
-          </>
-        );
-      case RiskStatus.MachineDeleted:
-        return (
-          <>
-            <h1 className="text-xl font-bold text-gray-900">
-              These risks were previously open but are no longer detected
-            </h1>
-            <p className="mt-4 text-sm text-gray-700">
-              <span className="font-semibold">Recommended Action:</span> Confirm
-              that the risk is no longer present or reopen the risk if necessary
-            </p>
-          </>
-        );
-      case AssetStatus.ActiveLow:
-        return (
-          <>
-            <h1 className="text-xl font-bold text-gray-900">
-              These assets are not being scanned for risks
-            </h1>
-            <p className="mt-4 text-sm text-gray-700">
-              <span className="font-semibold">Recommended Action:</span> Enable
-              risk scanning for these assets or delete them if they are not of
-              interest
-            </p>
-          </>
-        );
-      default:
-        return (
-          <>
-            <h1 className="text-xl font-bold text-gray-900">
-              These are all your exposure risks
-            </h1>
-            <p className="mt-4 text-sm text-gray-700">
-              <span className="font-semibold">Recommended Action:</span> Open or
-              close the risk as needed
-            </p>
-          </>
-        );
-    }
-  }
+  const statusCode = query.split(':')[1] as AssetStatus | RiskStatus;
+
+  const category = useMemo((): CategoryFilterProps['category'] => {
+    return [
+      ...(alerts.length > 0
+        ? [
+            {
+              defaultOpen: true,
+              label: 'Security Alerts',
+              options: alerts.map(({ name, value }) => ({
+                label: name,
+                value,
+                count: '0', // No need to show count
+                alert: false,
+              })),
+            },
+          ]
+        : []),
+      ...(conditions.length > 0
+        ? [
+            {
+              defaultOpen: true,
+              label: 'Exposure Risks',
+              options: conditions.map(({ name, value }) => ({
+                label: name,
+                value,
+                count: '0',
+              })),
+              showCount: false,
+            },
+          ]
+        : []),
+    ];
+  }, [JSON.stringify({ alerts, conditions })]);
+
+  const selectedCategory = useMemo(() => {
+    return category.reduce(
+      (acc, category) => {
+        if (!acc.label) {
+          const found = category.options.find(
+            option => option.value === filters.query
+          );
+
+          if (found) {
+            return {
+              label: category.selectedLabel || category.label,
+              value: found.selectedLabel || found.label,
+              alert: found.alert ?? true,
+            };
+          }
+        }
+
+        return acc;
+      },
+      { label: '', value: '', alert: true } as {
+        label: string;
+        value: string;
+        alert: boolean;
+      }
+    );
+  }, [JSON.stringify({ category, query: filters.query })]);
 
   return (
     <>
@@ -318,76 +316,37 @@ const RisksBeta: React.FC = () => {
         className="h-0 min-h-0"
         name="risk"
         otherFilters={
-          <>
-            {alerts.length > 0 && (
-              <CategoryFilter
-                value={filters.query ? [filters.query] : []}
-                hideHeader={true}
-                onChange={alerts => {
-                  setFilters({
-                    ...filters,
-                    search: '',
-                    query: alerts[0],
-                  });
-                }}
-                category={[
-                  {
-                    defaultOpen: true,
-                    label: 'Security Alerts',
-                    options: alerts.map(({ name, value }) => ({
-                      label: name,
-                      value,
-                      count: '0', // No need to show count
-                    })),
-                  },
-                ]}
-                alert={{
-                  value: (alerts || []).map(alert => alert.value),
-                }}
-                status={alertsStatus}
-              />
-            )}
-            {conditions.length > 0 && (
-              <CategoryFilter
-                value={filters.query ? [filters.query] : []}
-                hideHeader={true}
-                onChange={attributes => {
-                  setFilters({
-                    ...filters,
-                    search: '',
-                    query: attributes[0],
-                  });
-                }}
-                category={[
-                  {
-                    defaultOpen: true,
-                    label: 'Exposure Risks',
-                    options: conditions.map(({ name, value }) => ({
-                      label: name,
-                      value,
-                      count: '0',
-                    })),
-                    showCount: false,
-                  },
-                ]}
-                alert={{
-                  value: (conditions || []).map(alert => alert.value),
-                }}
-                status={alertsStatus}
-              />
-            )}
-          </>
+          <CategoryFilter
+            value={filters.query ? [filters.query] : []}
+            hideHeader={true}
+            onChange={alerts => {
+              setFilters({
+                ...filters,
+                search: '',
+                query: alerts[0],
+              });
+            }}
+            category={category}
+            alert={{
+              value: (alertsWithoutAttributes || []).map(alert => alert.value),
+            }}
+            status={alertsStatus}
+          />
         }
         tableHeader={
           <div className="w-full">
             <div className="flex w-full items-center justify-between">
-              <div>{getAlertDescription(query)}</div>
-              <AlertIcon
-                value={[filters.query]}
-                currentValue={filters.query}
-                styleType="button"
-                onRemove={() => setFilters({ search: '', query: '' })}
-              />
+              <h1 className="text-xl font-bold text-gray-900">
+                {AlertDescriptions[statusCode]}
+              </h1>
+              {selectedCategory.alert && (
+                <AlertIcon
+                  value={[filters.query]}
+                  currentValue={filters.query}
+                  styleType="button"
+                  onRemove={() => setFilters({ search: '', query: '' })}
+                />
+              )}
             </div>
           </div>
         }
@@ -479,3 +438,25 @@ const RisksBeta: React.FC = () => {
 };
 
 export default RisksBeta;
+
+export const AlertDescriptions: Record<string, string> = {
+  [RiskStatus.Opened]: 'Should these risks be closed?',
+  [RiskStatus.MachineOpen]:
+    'Chariot A.I. thinks these risks are valid. Should they be opened?',
+  [RiskStatus.Triaged]: 'Are these risks valid?',
+  [RiskStatus.MachineDeleted]:
+    'Chariot A.I. thinks these risks are invalid. Should they be closed?',
+  [AssetStatus.ActiveLow]: 'Should these assets be scanned for risks?',
+  [RiskStatus.ExposedRisks]: 'Are these exposures valid?',
+};
+
+export const SingularAlertDescriptions: Record<string, string> = {
+  [RiskStatus.Opened]: 'Should this risk be closed?',
+  [RiskStatus.MachineOpen]:
+    'Chariot A.I. thinks this risk is valid. Should it be opened?',
+  [RiskStatus.Triaged]: 'Is this risk valid?',
+  [RiskStatus.MachineDeleted]:
+    'Chariot A.I. thinks this risk is invalid. Should it be closed?',
+  [AssetStatus.ActiveLow]: 'Should this asset be scanned for risks?',
+  [RiskStatus.ExposedRisks]: 'Is this exposure valid?',
+};

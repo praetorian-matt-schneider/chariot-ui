@@ -265,7 +265,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
       onClose={handleClose}
       onBack={handleClose}
       className={cn('w-full rounded-t-lg pb-0 shadow-lg')}
-      contentClassName="flex rounded-t-lg overflow-hidden"
+      contentClassName="flex rounded-t-lg"
     >
       <Loader isLoading={isInitialLoading} type="spinner">
         <ResponsiveGrid
@@ -339,7 +339,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
           section2={
             <div className="col flex size-full flex-col overflow-hidden">
               <div className="flex items-start gap-4 px-9 py-5">
-                <div className="max-w-1/2 flex flex-col gap-2">
+                <div className="max-w-1/2 flex flex-col gap-1">
                   <div className="flex items-center gap-4">
                     <h1
                       className="text-2xl font-bold"
@@ -362,68 +362,72 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                   <div className="flex flex-row flex-wrap gap-3">
                     <AlertAction
                       item={risk}
+                      showQuestionTooltip
                       handleRefetch={() => {
                         invalidateRiskData();
                       }}
-                    />
-                    {getRiskStatus(risk.status) !== RiskStatus.Opened &&
-                      getRiskStatus(risk.status) !== RiskStatus.MachineOpen && (
-                        <Tooltip
-                          placement="top"
-                          title={
-                            isInitialLoading
-                              ? ''
-                              : risk.source && !isManualORPRrovidedRisk(risk)
-                                ? isJobsRunning
-                                  ? 'Scanning in progress'
-                                  : sourceKeys.length === 0
-                                    ? 'On-demand scanning is only available for risk which have a source attribute'
-                                    : 'Revalidate the risk'
-                                : 'On-demand scanning is only available for automated risk discovery.'
-                          }
-                        >
-                          <Button
-                            className="h-8 text-nowrap border border-gray-400 text-xs"
-                            startIcon={<ArrowPathIcon className="size-4" />}
-                            disabled={
-                              isInitialLoading ||
-                              sourceKeys.length === 0 ||
-                              isManualORPRrovidedRisk(risk) ||
-                              Boolean(isJobsRunning)
+                      extraAction={
+                        getRiskStatus(risk.status) !== RiskStatus.Opened &&
+                        getRiskStatus(risk.status) !==
+                          RiskStatus.MachineOpen && (
+                          <Tooltip
+                            placement="top"
+                            title={
+                              isInitialLoading
+                                ? ''
+                                : risk.source && !isManualORPRrovidedRisk(risk)
+                                  ? isJobsRunning
+                                    ? 'Scanning in progress'
+                                    : sourceKeys.length === 0
+                                      ? 'On-demand scanning is only available for risk which have a source attribute'
+                                      : 'Revalidate the risk'
+                                  : 'On-demand scanning is only available for automated risk discovery.'
                             }
-                            isLoading={
-                              reRunJobStatus === 'pending' ||
-                              allAssetJobsStatus === 'pending'
-                            }
-                            onClick={async () => {
-                              const [response] = await bulkReRunJobs(
-                                sourceKeys.map(jobKey => ({
-                                  capability: risk.source,
-                                  jobKey,
-                                  config: {
-                                    test: risk.name,
-                                  },
-                                }))
-                              );
-                              setRiskJobsMap(riskJobsMap => ({
-                                ...riskJobsMap,
-                                [risk.key]: sourceKeys.reduce(
-                                  (acc, current, index) =>
-                                    response[index]?.key
-                                      ? {
-                                          ...acc,
-                                          [current]: response[index].key,
-                                        }
-                                      : acc,
-                                  {}
-                                ),
-                              }));
-                            }}
                           >
-                            Scan Now
-                          </Button>
-                        </Tooltip>
-                      )}
+                            <Button
+                              className="h-8 text-nowrap border border-gray-400 text-xs"
+                              startIcon={<ArrowPathIcon className="size-4" />}
+                              disabled={
+                                isInitialLoading ||
+                                sourceKeys.length === 0 ||
+                                isManualORPRrovidedRisk(risk) ||
+                                Boolean(isJobsRunning)
+                              }
+                              isLoading={
+                                reRunJobStatus === 'pending' ||
+                                allAssetJobsStatus === 'pending'
+                              }
+                              onClick={async () => {
+                                const [response] = await bulkReRunJobs(
+                                  sourceKeys.map(jobKey => ({
+                                    capability: risk.source,
+                                    jobKey,
+                                    config: {
+                                      test: risk.name,
+                                    },
+                                  }))
+                                );
+                                setRiskJobsMap(riskJobsMap => ({
+                                  ...riskJobsMap,
+                                  [risk.key]: sourceKeys.reduce(
+                                    (acc, current, index) =>
+                                      response[index]?.key
+                                        ? {
+                                            ...acc,
+                                            [current]: response[index].key,
+                                          }
+                                        : acc,
+                                    {}
+                                  ),
+                                }));
+                              }}
+                            >
+                              Scan Now
+                            </Button>
+                          </Tooltip>
+                        )
+                      }
+                    />
                   </div>
                 </div>
                 <RiskDetails risk={risk} />
