@@ -429,7 +429,7 @@ const RisksBeta: React.FC = () => {
               <ul className="mb-6 text-left text-gray-600">
                 <li className="mb-2">
                   1. Open the risk to review its description and suggested
-                  remediation. If a remediation isn't available, you can
+                  remediation. If a remediation isn&apos;t available, you can
                   generate one directly.
                 </li>
                 <li className="mb-2">
@@ -437,9 +437,9 @@ const RisksBeta: React.FC = () => {
                   and impacted assets.
                 </li>
                 <li className="mb-2">
-                  3. We automatically recheck every 30 minutes. If it's fixed,
-                  we'll close it for you, or you can manually close it if you're
-                  certain it's no longer a risk.
+                  3. We automatically recheck every 30 minutes. If it&apos;s
+                  fixed, we&apos;ll close it for you, or you can manually close
+                  it if you&apos;re certain it&apos;s no longer a risk.
                 </li>
               </ul>
               <div className="text-gray-500">
