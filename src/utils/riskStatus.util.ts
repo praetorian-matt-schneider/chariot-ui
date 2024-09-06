@@ -65,7 +65,8 @@ export const getRiskSeverity = (status: string = '') => {
 };
 
 export const getRiskStatusLabel = (riskStatus: RiskCombinedStatus = '') => {
-  const { status, severity } = getStatusSeverity(riskStatus);
+  const status = getRiskStatus(riskStatus);
+  const severity = getRiskSeverity(riskStatus);
 
   return {
     status,
