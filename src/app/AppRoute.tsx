@@ -13,7 +13,6 @@ import Hello from '@/sections/Hello';
 import Jobs from '@/sections/Jobs';
 import Logout from '@/sections/Logout';
 import { Overview } from '@/sections/overview/Overview';
-import Rewrite from '@/sections/Rewrite';
 import RisksBeta from '@/sections/RisksBeta';
 import { ForgotPassword, Login, Signup } from '@/sections/signup';
 import { LoginSSO } from '@/sections/signup/LoginSSO';
@@ -130,10 +129,6 @@ const appRoutes = {
     overview: {
       element: <Overview />,
       title: 'Overview',
-    },
-    rewrite: {
-      element: <Rewrite />,
-      title: 'Rewrite',
     },
     '*': <Navigate to="/app/overview" replace />,
   },
