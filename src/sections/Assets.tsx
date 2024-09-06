@@ -747,6 +747,7 @@ export interface CategoryFilterProps {
       count: string;
       isLoading?: boolean;
       alert?: boolean;
+      subQueries?: string[];
     }[];
   }[];
   status: QueryStatus;

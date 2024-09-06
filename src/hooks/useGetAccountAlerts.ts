@@ -9,6 +9,7 @@ export interface Alert {
   count: number;
   source: string;
   value: string;
+  sort?: string[];
 }
 
 export function useGetAccountAlerts(options?: UseExtendQueryOptions<Alert[]>) {

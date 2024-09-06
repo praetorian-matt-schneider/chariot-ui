@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
+  ChevronDownIcon,
   DocumentTextIcon,
   QuestionMarkCircleIcon,
 } from '@heroicons/react/24/outline';
@@ -11,12 +12,17 @@ import {
 } from '@heroicons/react/24/solid';
 
 import { Drawer } from '@/components/Drawer';
+import { Dropdown } from '@/components/Dropdown';
 import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
 import { getRiskStatusIcon } from '@/components/icons/RiskStatus.icon';
 import { Loader } from '@/components/Loader';
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
+import {
+  RISK_DROPDOWN_CLASS,
+  riskSeverityOptions,
+} from '@/components/ui/RiskDropdown';
 import { useMy } from '@/hooks';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
@@ -41,7 +47,13 @@ import {
   SeverityDef,
 } from '@/types';
 import { partition } from '@/utils/array.util';
-import { getRiskSeverity, getRiskStatus } from '@/utils/riskStatus.util';
+import { cn } from '@/utils/classname';
+import { getSeverityClass } from '@/utils/getSeverityClass.util';
+import {
+  getRiskSeverity,
+  getRiskStatus,
+  getRiskStatusLabel,
+} from '@/utils/riskStatus.util';
 import { useQueryFilters } from '@/utils/storage/useQueryParams.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
 import { generatePathWithSearch, useSearchParams } from '@/utils/url.util';
@@ -57,6 +69,7 @@ const RisksBeta: React.FC = () => {
     defaultFilters: {
       search: '',
       query: '',
+      subQuery: '',
     },
   });
 
@@ -90,7 +103,7 @@ const RisksBeta: React.FC = () => {
     ({ source }) => source === 'system'
   );
 
-  const query = filters.search || filters.query || '';
+  const query = filters.search || filters.subQuery || filters.query || '';
 
   const { friend } = useAuth();
   const { data: accounts } = useMy({
@@ -106,11 +119,13 @@ const RisksBeta: React.FC = () => {
         setFilters({
           search: '',
           query: alerts[0].value,
+          subQuery: '',
         });
       } else if (conditions && conditions.length > 0) {
         setFilters({
           search: '',
           query: conditions[0].value,
+          subQuery: '',
         });
       }
     }
@@ -218,7 +233,9 @@ const RisksBeta: React.FC = () => {
     []
   );
 
-  const statusCode = query.split(':')[1] as AssetStatus | RiskStatus;
+  const statusCode = filters.query.startsWith('exposure')
+    ? 'E'
+    : (filters.query.split(':')[1] as AssetStatus | RiskStatus);
 
   const category = useMemo((): CategoryFilterProps['category'] => {
     return [
@@ -227,11 +244,12 @@ const RisksBeta: React.FC = () => {
             {
               defaultOpen: true,
               label: 'Security Alerts',
-              options: alerts.map(({ name, value }) => ({
+              options: alerts.map(({ name, value, sort }) => ({
                 label: name,
                 value,
                 count: '0', // No need to show count
                 alert: false,
+                subQueries: sort,
               })),
             },
           ]
@@ -266,19 +284,25 @@ const RisksBeta: React.FC = () => {
               label: category.selectedLabel || category.label,
               value: found.selectedLabel || found.label,
               alert: found.alert ?? true,
+              subQueries: found.subQueries || [],
             };
           }
         }
 
         return acc;
       },
-      { label: '', value: '', alert: true } as {
+      { label: '', value: '', alert: true, subQueries: [] } as {
         label: string;
         value: string;
         alert: boolean;
+        subQueries: string[];
       }
     );
   }, [JSON.stringify({ category, query: filters.query })]);
+
+  const selectedSeverity = useMemo(() => {
+    return filters.subQuery ? filters.subQuery.slice(-1) : '';
+  }, [JSON.stringify({ subQuery: filters.subQuery })]);
 
   return (
     <>
@@ -310,7 +334,7 @@ const RisksBeta: React.FC = () => {
         search={{
           value: filters.search,
           onChange: search => {
-            setFilters({ search, query: '' });
+            setFilters({ search, query: '', subQuery: '' });
           },
         }}
         className="h-0 min-h-0"
@@ -320,10 +344,12 @@ const RisksBeta: React.FC = () => {
             value={filters.query ? [filters.query] : []}
             hideHeader={true}
             onChange={alerts => {
+              console.log('alerts', alerts);
               setFilters({
                 ...filters,
                 search: '',
-                query: alerts[0],
+                subQuery: '',
+                query: alerts[0] || '',
               });
             }}
             category={category}
@@ -339,12 +365,57 @@ const RisksBeta: React.FC = () => {
               <h1 className="text-xl font-bold text-gray-900">
                 {AlertDescriptions[statusCode]}
               </h1>
+              {selectedCategory.subQueries.length > 0 && (
+                <Dropdown
+                  className={cn(
+                    RISK_DROPDOWN_CLASS,
+                    getSeverityClass(selectedSeverity)
+                  )}
+                  startIcon={
+                    riskSeverityOptions.find(
+                      option => option.value === selectedSeverity
+                    )?.icon
+                  }
+                  endIcon={
+                    <ChevronDownIcon className="size-3 text-default-light" />
+                  }
+                  menu={{
+                    value: filters.subQuery,
+                    onClick: value => {
+                      if (value) {
+                        setFilters({
+                          ...filters,
+                          subQuery: value,
+                        });
+                      }
+                    },
+                    items: selectedCategory.subQueries
+                      .map(query => {
+                        const severity = query.slice(-1);
+
+                        const option = riskSeverityOptions.find(
+                          o => o.value === severity
+                        );
+                        return { ...option, value: query };
+                      })
+                      .filter(Boolean)
+                      .reverse() as { label: string; value: string }[],
+                  }}
+                >
+                  <div className="flex-1 text-left">
+                    {getRiskStatusLabel(filters.subQuery.slice(-2) || '')
+                      .severityLabel || 'Filter by Severity'}
+                  </div>
+                </Dropdown>
+              )}
               {selectedCategory.alert && (
                 <AlertIcon
                   value={[filters.query]}
                   currentValue={filters.query}
                   styleType="button"
-                  onRemove={() => setFilters({ search: '', query: '' })}
+                  onRemove={() =>
+                    setFilters({ search: '', query: '', subQuery: '' })
+                  }
                 />
               )}
             </div>

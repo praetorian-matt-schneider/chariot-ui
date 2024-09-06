@@ -97,6 +97,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     defaultFilters: {
       search: '',
       query: '',
+      subQuery: '',
     },
   });
   const { invalidate: invalidateRiskData } = useGenericSearch({

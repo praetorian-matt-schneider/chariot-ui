@@ -66,7 +66,7 @@ export const riskSeverityOptions = [
   },
 ];
 
-const RISK_DROPDOWN_CLASS =
+export const RISK_DROPDOWN_CLASS =
   'border-1 min-w-28 justify-between rounded-[2px] border border-default py-1 pr-2';
 
 interface Props {
