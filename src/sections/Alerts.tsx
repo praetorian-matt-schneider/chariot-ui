@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Inbox, PlusIcon, ShieldCheck } from 'lucide-react';
@@ -187,11 +187,9 @@ export const Alerts: React.FC<Props> = ({
   }, [data]);
   const totalAlerts = alerts?.reduce((acc, alert) => acc + alert.count, 0);
 
-  const parentRef = useRef<HTMLDivElement>(null);
-
   const virtualizer = useVirtualizer({
     count: items.length,
-    getScrollElement: () => parentRef.current,
+    getScrollElement: () => document.getElementById('body'),
     estimateSize: () => 77, // Adjusted size to fit the new layout
     overscan: 5,
   });
@@ -279,7 +277,7 @@ export const Alerts: React.FC<Props> = ({
         )}
         {query && (
           <div className="flex size-full flex-col">
-            <div ref={parentRef} className="flex-1 overflow-auto">
+            <div className="flex-1 overflow-auto">
               {dataStatus === 'pending' && (
                 <>
                   {[...Array(5).keys()].map(index => (
