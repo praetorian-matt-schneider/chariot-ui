@@ -29,6 +29,7 @@ import { getAlertName } from '@/utils/alert.util';
 import { cn } from '@/utils/classname';
 import { formatDate } from '@/utils/date.util';
 import { getRiskSeverity, getRiskStatus } from '@/utils/riskStatus.util';
+import { sortBySeverityAndUpdated } from '@/utils/sortBySeverityAndUpdated.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
 import { useSearchParams as useSearchParamsUtil } from '@/utils/url.util';
 
@@ -179,7 +180,7 @@ export const Alerts: React.FC<Props> = ({
           risk => (risk as Risk).status === RiskStatus.ExposedRisks
         );
       } else {
-        return data?.risks;
+        return sortBySeverityAndUpdated(data?.risks);
       }
     }
     return [];
