@@ -148,6 +148,12 @@ const useBulkUpdateRiskHook = () => {
   const { invalidate: invalidateAlerts } = useGetAccountAlerts({
     enabled: false,
   });
+  const { invalidate: invalidateGenericSearch } = useGenericSearch(
+    { query: '' },
+    {
+      enabled: false,
+    }
+  );
 
   return useMutation<unknown, Error, RiskTemplate[]>({
     defaultErrorMessage: 'Failed to update risks',
@@ -174,7 +180,7 @@ const useBulkUpdateRiskHook = () => {
         const keys = risks.map(r => r.key);
 
         invalidateAlerts();
-
+        invalidateGenericSearch();
         keys.forEach(key => {
           queryClient.invalidateQueries({
             queryKey: getQueryKey.getMy('risk', key.split('#risk')[1]),
@@ -261,6 +267,15 @@ export function useDeleteRisk() {
       enabled: false,
     }
   );
+  const { invalidate: invalidateAlerts } = useGetAccountAlerts({
+    enabled: false,
+  });
+  const { invalidate: invalidateGenericSearch } = useGenericSearch(
+    { query: '' },
+    {
+      enabled: false,
+    }
+  );
 
   return useMutation<unknown, Error, { key: string }[]>({
     defaultErrorMessage: `Failed to close risks`,
@@ -299,6 +314,8 @@ export function useDeleteRisk() {
 
           return { ...previous, pages: updatedPages };
         });
+        invalidateAlerts();
+        invalidateGenericSearch();
       }
 
       if (validResults.length !== selectedRows.length) {
