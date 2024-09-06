@@ -9,6 +9,7 @@ import {
 import { Link } from 'react-router-dom';
 import {
   ArrowPathIcon,
+  DocumentTextIcon,
   ExclamationTriangleIcon,
   PencilSquareIcon,
 } from '@heroicons/react/24/outline';
@@ -60,7 +61,7 @@ import { getDescription, isManualORPRrovidedRisk } from '@/utils/risk.util';
 import { getRiskStatus, getStatusSeverity } from '@/utils/riskStatus.util';
 import { useQueryFilters } from '@/utils/storage/useQueryParams.util';
 import { StorageKey, useStorage } from '@/utils/storage/useStorage.util';
-import { useSearchParams } from '@/utils/url.util';
+import { generatePathWithSearch, useSearchParams } from '@/utils/url.util';
 
 interface RiskDrawerProps {
   open: boolean;
@@ -75,7 +76,7 @@ const isScannable = (attribute: Attribute) =>
 export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
   const [selectedTab, setSelectedTab] = useState('description');
   const [isWarningModalOpen, setIsWarningModalOpen] = useState(false);
-  const { removeSearchParams } = useSearchParams();
+  const { addSearchParams, removeSearchParams } = useSearchParams();
   const [riskJobsMap, setRiskJobsMap] = useStorage<
     Record<string, Record<string, string>>
   >(
@@ -347,6 +348,16 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                     >
                       {risk.name}
                     </h1>
+                    <Link
+                      to={generatePathWithSearch({
+                        appendSearch: [
+                          [StorageKey.POE, `${risk.dns}/${risk.name}`],
+                        ],
+                      })}
+                      className="cursor-pointer"
+                    >
+                      <DocumentTextIcon className="size-4 text-default" />
+                    </Link>
                     {knownExploitedThreats.includes(risk.name) && (
                       <span className="text-red-500">
                         [Known Exploited Threat]
@@ -432,7 +443,6 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                 </div>
                 <RiskDetails risk={risk} />
               </div>
-
               {/* POE and Description */}
               <Tabs
                 className="overflow-hidden pb-5"
@@ -510,7 +520,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                         )}
                         <Button
                           styleType="none"
-                          className="ml-4 mr-auto mt-4 pl-0 font-bold"
+                          className="pl-0 font-bold"
                           endIcon={<PencilSquareIcon className="size-5" />}
                           onClick={event => {
                             event.preventDefault();
