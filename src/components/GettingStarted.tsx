@@ -12,6 +12,7 @@ import { Tooltip } from '@/components/Tooltip';
 import { useModifyAccount } from '@/hooks';
 import { GetStartedStatus } from '@/types';
 import { cn } from '@/utils/classname';
+import { pluralize } from '@/utils/pluralize.util';
 
 export const GettingStartedStep: React.FC<{
   title: string;
@@ -91,10 +92,6 @@ export const GettingStarted: React.FC<{
   ].findIndex(status => status === 'notConnected');
 
   const { mutate: upgrade, status: upgradeStatus } = useModifyAccount('link');
-
-  const pluralize = (count: number, singularForm: string) => {
-    return count === 1 ? singularForm : `${singularForm}s`;
-  };
 
   return (
     <div className="z-10 flex justify-center space-x-6">

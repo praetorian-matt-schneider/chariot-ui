@@ -70,6 +70,7 @@ import { QueryStatus, useMergeStatus } from '@/utils/api';
 import { cn } from '@/utils/classname';
 import { capitalize } from '@/utils/lodash.util';
 import { useGetScreenSize } from '@/utils/misc.util';
+import { pluralize } from '@/utils/pluralize.util';
 import { Regex } from '@/utils/regex.util';
 import { getRiskSeverity, getRiskStatus } from '@/utils/riskStatus.util';
 import { useSticky } from '@/utils/sticky.util';
@@ -516,13 +517,17 @@ const Assets: React.FC = () => {
             className="m-4 h-2 w-10"
             isLoading={alertsStatus === 'pending'}
           >
-            {hasCustomAttributes ? (
+            {alerts?.length > 0 ? (
               <CheckCircleIcon className="size-10 text-green-400" />
             ) : (
               <BellIcon className="size-10 animate-bounce text-white" />
             )}
           </Loader>
-          <h1 className="text-3xl font-bold text-white">Get Exposure Alerts</h1>
+          <h1 className="text-3xl font-bold text-white">
+            {alerts?.length > 0
+              ? `${alerts?.length?.toLocaleString()} ${pluralize(alerts?.length, 'Alert')} Configured`
+              : 'Get Exposure Alerts'}
+          </h1>
           <p className="max-w-[700px] text-sm text-gray-500">
             Subscribe to changes in your attack surface and get notified when
             new assets are discovered
