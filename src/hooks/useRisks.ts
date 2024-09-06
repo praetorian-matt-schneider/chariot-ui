@@ -1,6 +1,7 @@
 import { toast } from 'sonner';
 
 import { useAxios } from '@/hooks/useAxios';
+import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
 import { useMy } from '@/hooks/useMy';
 import { getQueryKey } from '@/hooks/useQueryKeys';
@@ -19,6 +20,15 @@ export const useCreateRisk = () => {
       enabled: false,
     }
   );
+  const { invalidate: invalidateAccountAlerts } = useGetAccountAlerts({
+    enabled: false,
+  });
+  const { invalidate: invalidateGenericSearch } = useGenericSearch(
+    { query: '' },
+    {
+      enabled: false,
+    }
+  );
 
   return useMutation<Risk, Error, RiskTemplate>({
     defaultErrorMessage: `Failed to create risk`,
@@ -32,6 +42,9 @@ export const useCreateRisk = () => {
       });
       const { data } = await promise;
       const newRisk = data.risks[0];
+      invalidateAccountAlerts();
+
+      invalidateGenericSearch();
       updateAllSubQueries(previous => {
         const newPages = previous ? [...previous.pages] : [];
         newPages[0] = { ...newPages[0], data: [newRisk, ...newPages[0].data] }; // Add the new risk to the first page
@@ -64,6 +77,12 @@ export const useUpdateRisk = () => {
   const { invalidate: invalidateAlerts } = useGetAccountAlerts({
     enabled: false,
   });
+  const { invalidate: invalidateGenericSearch } = useGenericSearch(
+    { query: '' },
+    {
+      enabled: false,
+    }
+  );
 
   return useMutation<Risk, Error, RiskUpdate>({
     defaultErrorMessage: `Failed to update risk`,
@@ -83,6 +102,7 @@ export const useUpdateRisk = () => {
       const updatedRisk = data.risks[0];
 
       invalidateAlerts();
+      invalidateGenericSearch();
       queryClient.invalidateQueries({
         queryKey: getQueryKey.getCounts('risk'),
       });

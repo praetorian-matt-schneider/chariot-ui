@@ -332,6 +332,7 @@ const RisksBeta: React.FC = () => {
                 }}
                 category={[
                   {
+                    defaultOpen: true,
                     label: 'Security Alerts',
                     options: alerts.map(({ name, value }) => ({
                       label: name,
@@ -356,11 +357,13 @@ const RisksBeta: React.FC = () => {
                 }}
                 category={[
                   {
+                    defaultOpen: true,
                     label: 'Exposure Risks',
                     options: conditions.map(({ name, value }) => ({
                       label: name,
                       value,
                       count: '0',
+                      alert: false,
                     })),
                     showCount: false,
                   },

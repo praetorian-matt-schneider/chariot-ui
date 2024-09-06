@@ -252,13 +252,13 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     [attributesGenericSearch?.attributes]
   );
 
-  function handleClose() {
+  const handleClose = useCallback(() => {
     if (hasLocalChanges) {
       setIsWarningModalOpen(true);
     } else {
       removeSearchParams(StorageKey.DRAWER_COMPOSITE_KEY);
     }
-  }
+  }, [hasLocalChanges]);
 
   return (
     <Drawer

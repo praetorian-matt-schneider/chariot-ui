@@ -49,10 +49,8 @@ import { AssetStatusWarning } from '@/sections/AssetStatusWarning';
 import { RenderHeaderExtraContentSection } from '@/sections/AuthenticatedApp';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import {
-  availableAttackSurfaceIntegrationsKeys,
   availableRiskIntegrations,
   availableRiskIntegrationsKeys,
-  Integrations,
 } from '@/sections/overview/Integrations';
 import { parseKeys } from '@/sections/SearchByType';
 import { useGlobalState } from '@/state/global.state';
@@ -131,26 +129,6 @@ const Assets: React.FC = () => {
   } = useMy({
     resource: 'condition',
   });
-  const { data: accounts, status: accountsStatus } = useMy({
-    resource: 'account',
-  });
-
-  const integratedAttackSurface = useMemo(() => {
-    return [
-      ...new Set(
-        accounts
-          .filter(account => {
-            return (
-              availableAttackSurfaceIntegrationsKeys.includes(account.member) &&
-              !['waitlisted', 'setup'].includes(account.value || '')
-            );
-          })
-          .map(account => {
-            return account.member;
-          })
-      ),
-    ];
-  }, [JSON.stringify(accounts)]);
 
   const { mutateAsync: bulkReRunJob } = useBulkReRunJob();
   const { mutateAsync: addAlert } = useAddAlert();
@@ -234,6 +212,7 @@ const Assets: React.FC = () => {
       ...attributeStats.port,
       ...attributeStats.cloud,
       ...attributeStats.protocol,
+      ...attributeStats.surface,
     }).reduce(
       (acc, [attributeKey]) => {
         const [, attributeName = '', attributeValue = ''] =
@@ -241,7 +220,7 @@ const Assets: React.FC = () => {
 
         const currentATTvalue = acc[attributeName] || [];
 
-        if (!['cloud', 'port', 'protocol'].includes(attributeName)) {
+        if (!['cloud', 'port', 'protocol', 'surface'].includes(attributeName)) {
           return acc;
         }
 
@@ -293,54 +272,48 @@ const Assets: React.FC = () => {
 
     return [
       {
+        selectedLabel: 'New',
         label: 'Recently Discovered',
         options: [
           {
             label: 'Last 24 hours',
-            value: '#attribute#new#',
+            value: '#attribute#new#asset',
             count: '',
           },
         ],
       },
-      {
-        label: 'Surface',
-        options: [
-          {
-            label: 'Provided',
-            value: 'source:provided',
-            count: '',
-          },
-          ...(accountsStatus === 'pending'
-            ? [
+      ...(attributeStatsStatus !== 'pending'
+        ? [
+            {
+              label: 'Surface',
+              options: [
                 {
-                  label: '',
-                  value: '',
+                  label: 'Provided',
+                  value: '#attribute#surface#provided',
                   count: '',
-                  isLoading: true,
                 },
-              ]
-            : integratedAttackSurface.map(surface => {
-                return {
-                  label:
-                    Integrations[surface as keyof typeof Integrations].name,
-                  value: `#attribute#source##asset#${surface}`,
-                  count: '',
-                };
-              })),
-        ],
-      },
-      ...Object.entries(nonDuplicateAttributes).map(([label, value]) => {
-        return {
-          label: capitalize(label),
-          options: value,
-        };
-      }),
+                ...(nonDuplicateAttributes.surface || []),
+              ],
+            },
+          ]
+        : []),
+      ...Object.entries({
+        cloud: nonDuplicateAttributes.cloud,
+        port: nonDuplicateAttributes.port,
+        protocol: nonDuplicateAttributes.protocol,
+      })
+        .filter(([, value]) => value)
+        .map(([label, value]) => {
+          return {
+            label: capitalize(label),
+            options: value,
+          };
+        }),
     ];
   }, [
     JSON.stringify({
-      accountsStatus,
+      attributeStatsStatus,
       attributeStats,
-      integratedAttackSurface,
     }),
   ]);
 
@@ -475,12 +448,45 @@ const Assets: React.FC = () => {
   const closeCTADrawer = () => {
     setIsCTAOpen(false);
   };
-  const ports = Object.keys(attributeStats.port);
-  const protocols = Object.keys(attributeStats.protocol);
-  const clouds = Object.keys(attributeStats.cloud);
-  const surfaces = integratedAttackSurface.map(surface => {
-    return `#attribute#source##asset#${surface}`;
-  });
+
+  const { ports, protocols, clouds, surfaces } = useMemo(() => {
+    const ports = Object.keys(attributeStats.port);
+    const protocols = Object.keys(attributeStats.protocol);
+    const clouds = Object.keys(attributeStats.cloud);
+    const surfaces = Object.keys(attributeStats.surface);
+
+    const selectedAlerts = alerts.reduce(
+      (acc, alert) => {
+        const [, name, value] = alert.value.split('-');
+        return {
+          ...acc,
+          [name]: [...(acc[name] || []), `#attribute#${name}#${value}`],
+        };
+      },
+      {} as Record<string, string[]>
+    );
+
+    return {
+      ports: [...new Set([...(selectedAlerts['port'] || []), ...ports])].sort(
+        (a, b) => {
+          return parseInt(a.split('#')[3]) - parseInt(b.split('#')[3]);
+        }
+      ),
+      protocols: [
+        ...new Set([...(selectedAlerts['protocol'] || []), ...protocols]),
+      ].sort(),
+      clouds: [
+        ...new Set([...(selectedAlerts['cloud'] || []), ...clouds]),
+      ].sort(),
+      surfaces: [
+        ...new Set([
+          '#attribute#surface#provided',
+          ...(selectedAlerts['surface'] || []),
+          ...surfaces,
+        ]),
+      ].sort(),
+    };
+  }, [JSON.stringify({ attributeStats, alerts })]);
 
   // Open the drawer based on the search params
   const { searchParams, removeSearchParams } = useSearchParams();
@@ -506,7 +512,10 @@ const Assets: React.FC = () => {
           onClick={() => setIsCTAOpen(true)}
           className="m-auto flex w-full cursor-pointer flex-col items-center rounded-lg border-2 border-dashed border-header-dark bg-header p-8 text-center"
         >
-          <Loader className="w-8" isLoading={alertsStatus === 'pending'}>
+          <Loader
+            className="m-4 h-2 w-10"
+            isLoading={alertsStatus === 'pending'}
+          >
             {hasCustomAttributes ? (
               <CheckCircleIcon className="size-10 text-green-400" />
             ) : (
@@ -571,9 +580,14 @@ const Assets: React.FC = () => {
               <Button
                 styleType="primary"
                 className="-translate-x-2 text-sm font-semibold"
-                onClick={() => {
+                onClick={async () => {
+                  const promises = alerts.map(alert => {
+                    return removeAlert({ key: alert.key });
+                  });
+
+                  await Promise.all(promises);
                   Object.entries(DEFAULT_CONDITIONS).forEach(
-                    ([key, values]) => {
+                    async ([key, values]) => {
                       values.forEach(value => {
                         addAlert({
                           value: `exposure-${key}-${value}`,
@@ -582,7 +596,6 @@ const Assets: React.FC = () => {
                       });
                     }
                   );
-                  closeCTADrawer();
                 }}
               >
                 Apply Default Policy
@@ -593,7 +606,7 @@ const Assets: React.FC = () => {
             <AlertCategory
               title="Recently Discovered"
               icon={<img src="/icons/new.svg" className="size-20" />}
-              items={['#attribute#new#']}
+              items={['#attribute#new#asset']}
               alerts={alerts}
               refetch={refetch}
               addAlert={addAlert}
@@ -638,7 +651,7 @@ const Assets: React.FC = () => {
               refetch={refetch}
               addAlert={addAlert}
               removeAlert={removeAlert}
-              attributeExtractor={item => item.split('#')[5]}
+              attributeExtractor={item => item.split('#')[3]}
             />
           </div>
         </div>
@@ -657,7 +670,7 @@ const Assets: React.FC = () => {
             setFilters({ attributes, search: '' });
           },
           category,
-          status: useMergeStatus(attributeStatsStatus),
+          status: attributeStatsStatus,
           alert: {
             value: alerts.map(alert => alert.value),
           },
@@ -724,11 +737,15 @@ interface CategoryFilterProps {
     isLoading?: boolean;
     showCount?: boolean;
     label: string;
+    selectedLabel?: string;
+    defaultOpen?: boolean;
     options: {
+      selectedLabel?: string;
       label: string;
       value: string;
       count: string;
       isLoading?: boolean;
+      alert?: boolean;
     }[];
   }[];
   status: QueryStatus;
@@ -766,6 +783,7 @@ export function CategoryFilter(props: CategoryFilterProps) {
             const isOptionSelectedOnInit = Boolean(
               item.options.find(option => value.includes(option.value))
             );
+            //
 
             return (
               <li
@@ -778,7 +796,7 @@ export function CategoryFilter(props: CategoryFilterProps) {
                 }
               >
                 <Accordian
-                  defaultValue={isOptionSelectedOnInit}
+                  defaultValue={item.defaultOpen || isOptionSelectedOnInit}
                   title={item.label}
                   headerClassName="px-3"
                   contentClassName={cn('max-h-52 overflow-auto')}
@@ -819,7 +837,7 @@ export function CategoryFilter(props: CategoryFilterProps) {
                             )}
                           />
                           {item.showCount && <p>{option.count}</p>}
-                          {alert && (
+                          {(option.alert ?? true) && alert && (
                             <AlertIcon
                               {...alert}
                               currentValue={getAlertName(option.value)}
@@ -912,7 +930,7 @@ export function AlertIcon(props: AlertIconProps) {
   }
 
   return (
-    <div className="ml-auto size-4">
+    <div className="ml-auto size-4" onClick={event => event.stopPropagation()}>
       <Loader
         className="ml-auto size-4 shrink-0 cursor-not-allowed text-gray-400"
         type="spinner"
@@ -1108,41 +1126,46 @@ export function FancyTable(
             filter.value?.length > 0 &&
             !tableHeader &&
             filter.value.map((attribute, index) => {
-              const [, attributeName = '', attributeValue = ''] =
-                attribute.match(Regex.ATTIBUTE_KEY) || [];
+              const selectedOption = filter.category.reduce(
+                (acc, category) => {
+                  if (!acc.label) {
+                    const found = category.options.find(
+                      option => option.value === attribute
+                    );
 
-              let valueToDisplay = attributeValue
-                .replace('#asset#', '')
-                .replace(/#$/, '');
+                    if (found) {
+                      return {
+                        label: category.selectedLabel || category.label,
+                        value: found.selectedLabel || found.label,
+                        alert: found.alert ?? true,
+                      };
+                    }
+                  }
 
-              let labelToDisplay =
-                attributeName === 'source'
-                  ? 'Surface'
-                  : capitalize(attributeName);
+                  return acc;
+                },
+                { label: '', value: '', alert: true } as {
+                  label: string;
+                  value: string;
+                  alert: boolean;
+                }
+              );
 
-              if (attribute === '#attribute#new#') {
-                valueToDisplay = 'Last 24 hours';
-                labelToDisplay = 'New';
-              }
-
-              if (attribute === 'source:provided') {
-                valueToDisplay = 'Provided';
-                labelToDisplay = 'Surface';
-              }
+              if (!selectedOption.value) return null;
 
               return (
                 <div
                   key={index}
-                  className="flex w-full items-center justify-between"
+                  className="flex min-h-8 w-full items-center justify-between"
                 >
                   <div className="flex items-center gap-2">
-                    <p className="text-xl font-bold">{labelToDisplay}:</p>
+                    <p className="text-xl font-bold">{selectedOption.label}:</p>
                     <p className="text-lg font-semibold text-gray-500">
-                      {valueToDisplay}
+                      {selectedOption.value}
                     </p>
                   </div>
 
-                  {filter.alert && (
+                  {selectedOption.alert && filter.alert && (
                     <AlertIcon
                       {...filter.alert}
                       currentValue={getAlertName(attribute)}
@@ -1217,17 +1240,23 @@ export const useGetAttributeStats = () => {
       resource: 'statistic',
       query: '#protocol#',
     });
+  const { data: surfaceStatistics, status: surfaceStatisticsStatus } = useMy({
+    resource: 'statistic',
+    query: '#surface#',
+  });
 
   return {
     data: {
       cloud: mapStatistics(attributeCountsCloud),
       port: mapStatistics(attributeCountsPort),
       protocol: mapStatistics(attributeCountsProtocol),
+      surface: mapStatistics(surfaceStatistics),
     },
     status: useMergeStatus(
       attributesStatusCloud,
       attributesStatusPort,
-      attributesStatusProtocol
+      attributesStatusProtocol,
+      surfaceStatisticsStatus
     ),
   };
 };

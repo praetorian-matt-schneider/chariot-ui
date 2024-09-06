@@ -707,7 +707,7 @@ export const AlertCategory = ({
           addAlert={addAlert}
           removeAlert={removeAlert}
           label={
-            attributeKey === '#attribute#new#'
+            attributeKey === '#attribute#new#asset'
               ? 'Last 24 hours'
               : attributeExtractor(attributeKey)?.length > 0
                 ? attributeExtractor(attributeKey)

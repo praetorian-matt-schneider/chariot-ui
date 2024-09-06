@@ -73,7 +73,7 @@ export function Drawer({
       document.addEventListener('keydown', handleKeyDown);
       return () => document.removeEventListener('keydown', handleKeyDown);
     }
-  }, [open, domHasModal]);
+  }, [open, domHasModal, onClose]);
 
   return (
     <Transition appear show={open} as={Fragment}>

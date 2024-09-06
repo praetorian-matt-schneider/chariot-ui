@@ -278,7 +278,7 @@ export type PartialAsset = Pick<Asset, 'name' | 'dns' | 'updated' | 'key'> & {
 
 const defaultFilters: AssetFilters = {
   search: '',
-  attributes: ['#attribute#new#'],
+  attributes: ['#attribute#new#asset'],
 };
 
 // eslint-disable-next-line complexity
