@@ -391,6 +391,7 @@ const Jobs: React.FC = () => {
           status={dataStatus}
           fetchNextPage={fetchNextPage}
           isFetchingNextPage={isFetchingNextPage}
+          isTableView
           noData={{
             icon: <HorseIcon />,
             title: 'No Jobs found',
