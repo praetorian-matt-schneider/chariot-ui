@@ -584,7 +584,7 @@ const POE: React.FC<{ risk: Risk }> = ({ risk }) => {
           Request,
           Response,
         }
-      : null;
+      : proofDescription;
   }, [file]);
 
   return (
