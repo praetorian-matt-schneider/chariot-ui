@@ -52,7 +52,7 @@ import {
   availableRiskIntegrations,
   comingSoonAttackSurfaceIntegrations,
   comingSoonRiskIntegrations,
-  Integrations,
+  IntegrationBuckets,
   streamingRiskIntegrations,
   ticketingRiskIntegrations,
 } from '@/sections/overview/Integrations';
@@ -235,47 +235,50 @@ export const Overview: React.FC = () => {
     resource: 'account',
   });
 
-  const cloudIntegrations = [
-    Integrations.amazon,
-    Integrations.azure,
-    Integrations.gcp,
-  ];
-  const codeIntegrations = [Integrations.github, Integrations.gitlab];
-  const internalIntegrations = [Integrations.basAgent];
-  const vulnIntegrations = [Integrations.nessus];
-
-  const containsCloudIntegrations = connectedIntegrations.some(integration =>
-    cloudIntegrations.some(
-      cloudIntegration => cloudIntegration.id === integration.member
-    )
-  );
-  const containsCodeIntegrations = connectedIntegrations.some(integration =>
-    codeIntegrations.some(
-      codeIntegration => codeIntegration.id === integration.member
-    )
-  );
-  const containsInternalIntegrations = connectedIntegrations.some(integration =>
-    internalIntegrations.some(
-      internalIntegration => internalIntegration.id === integration.member
-    )
-  );
-  const containsVulnIntegrations = connectedIntegrations.some(integration =>
-    vulnIntegrations.some(
-      vulnIntegration => vulnIntegration.id === integration.member
-    )
-  );
-  const containsStreamingNotifications = connectedIntegrations.some(
-    integration =>
-      streamingRiskIntegrations.some(
-        streamingIntegration => streamingIntegration.id === integration.member
-      )
-  );
-  const containsTicketingNotifications = connectedIntegrations.some(
-    integration =>
-      ticketingRiskIntegrations.some(
-        ticketingIntegration => ticketingIntegration.id === integration.member
-      )
-  );
+  // code, cloud, edr, waf, siem, scanner, cti
+  const buckets = {
+    code: connectedIntegrations.some(integration =>
+      IntegrationBuckets.code.some(i => i === integration.member)
+    ),
+    cloud: connectedIntegrations.some(integration =>
+      IntegrationBuckets.cloud.some(i => i === integration.member)
+    ),
+    edr: connectedIntegrations.some(integration =>
+      IntegrationBuckets.edr.some(i => i === integration.member)
+    ),
+    waf: connectedIntegrations.some(integration =>
+      IntegrationBuckets.waf.some(i => i === integration.member)
+    ),
+    siem: connectedIntegrations.some(integration =>
+      IntegrationBuckets.siem.some(i => i === integration.member)
+    ),
+    scanner: connectedIntegrations.some(integration =>
+      IntegrationBuckets.scanner.some(i => i === integration.member)
+    ),
+    cti: connectedIntegrations.some(integration =>
+      IntegrationBuckets.cti.some(i => i === integration.member)
+    ),
+  };
+  const bucketTooltips = {
+    code: 'Code integrations allow you to connect to code repositories like GitHub and GitLab.',
+    cloud:
+      'Cloud integrations allow you to connect to cloud providers like AWS and Azure.',
+    edr: 'EDR integrations allow you to connect to endpoint detection and response tools like Carbon Black and Crowdstrike.',
+    waf: 'WAF integrations allow you to connect to web application firewalls like Cloudflare and Akamai.',
+    siem: 'SIEM integrations allow you to connect to security information and event management tools like Splunk and Elastic.',
+    scanner:
+      'Scanner integrations allow you to connect to vulnerability scanners like Nessus and Qualys.',
+    cti: 'CTI integrations allow you to connect to cyber threat intelligence tools like ThreatConnect and Anomali.',
+  };
+  const bucketLabels = {
+    code: 'Code',
+    cloud: 'Cloud',
+    edr: 'EDR',
+    waf: 'WAF',
+    siem: 'SIEM',
+    scanner: 'Scanner',
+    cti: 'CTI',
+  };
 
   const { mutateAsync: createAsset } = useCreateAsset();
   const { mutateAsync: createAttribute } = useCreateAttribute('', true);
@@ -515,92 +518,22 @@ export const Overview: React.FC = () => {
         <main className="mt-6 w-full">
           <div className="overflow-hidden rounded-lg border-2 border-header-dark bg-header shadow-md">
             <div className=" mb-0 ml-6 mr-10 mt-4 flex flex-row items-center justify-between space-x-4">
-              <Tooltip
-                title="Cloud integrations allow you to connect to cloud providers like AWS, Azure, and GCP."
-                placement="top"
-              >
-                <div className="flex gap-2 text-sm text-gray-400">
-                  {containsCloudIntegrations ? (
-                    <CheckIcon className="size-6 text-green-500" />
-                  ) : (
-                    <XMarkIcon className="size-6 text-red-500" />
-                  )}{' '}
-                  Cloud
-                </div>
-              </Tooltip>
-              <Tooltip
-                title="Code integrations allow you to connect to code repositories like GitHub and GitLab."
-                placement="top"
-              >
-                <div className="flex gap-2 text-sm text-gray-400">
-                  {containsCodeIntegrations ? (
-                    <CheckIcon className="size-6 text-green-500" />
-                  ) : (
-                    <XMarkIcon className="size-6 text-red-500" />
-                  )}{' '}
-                  Code
-                </div>
-              </Tooltip>
-              <Tooltip
-                title="Internal integrations are used for Breach and Attack simulations."
-                placement="top"
-              >
-                <div className="flex gap-2 text-sm text-gray-400">
-                  {containsInternalIntegrations ? (
-                    <CheckIcon className="size-6 text-green-500" />
-                  ) : (
-                    <XMarkIcon className="size-6 text-red-500" />
-                  )}{' '}
-                  Internal
-                </div>
-              </Tooltip>
-              <Tooltip
-                title="Vulnerability integrations allow you to connect to vulnerability scanners like Nessus."
-                placement="top"
-              >
-                <div className="flex gap-2 text-sm text-gray-400">
-                  {containsVulnIntegrations ? (
-                    <CheckIcon className="size-6 text-green-500" />
-                  ) : (
-                    <XMarkIcon className="size-6 text-red-500" />
-                  )}{' '}
-                  Vulnerability
-                </div>
-              </Tooltip>
-              <Tooltip
-                title="CTI integrations allow you to connect to threat intelligence feeds."
-                placement="top"
-              >
-                <div className="flex gap-2 text-sm text-gray-400">
-                  <CheckIcon className="size-6 text-green-500" /> CTI
-                </div>
-              </Tooltip>
-              <Tooltip
-                title="Streaming integrations allow you to connect to streaming platforms like Slack and Microsoft Teams."
-                placement="top"
-              >
-                <div className="flex gap-2 text-sm text-gray-400">
-                  {containsStreamingNotifications ? (
-                    <CheckIcon className="size-6 text-green-500" />
-                  ) : (
-                    <XMarkIcon className="size-6 text-red-500" />
-                  )}{' '}
-                  Streaming
-                </div>
-              </Tooltip>
-              <Tooltip
-                title="Ticketing integrations allow you to connect to ticketing systems like Jira and ServiceNow."
-                placement="top"
-              >
-                <div className="flex gap-2 text-sm text-gray-400">
-                  {containsTicketingNotifications ? (
-                    <CheckIcon className="size-6 text-green-500" />
-                  ) : (
-                    <XMarkIcon className="size-6 text-red-500" />
-                  )}{' '}
-                  Ticketing
-                </div>
-              </Tooltip>
+              {Object.entries(buckets).map(([key, hasCode]) => (
+                <Tooltip
+                  key={key}
+                  title={bucketTooltips[key as keyof typeof bucketTooltips]}
+                  placement="top"
+                >
+                  <div className="flex gap-2 text-sm text-gray-400">
+                    {hasCode ? (
+                      <CheckIcon className="size-6 text-green-500" />
+                    ) : (
+                      <XMarkIcon className="size-6 text-red-500" />
+                    )}{' '}
+                    {bucketLabels[key as keyof typeof bucketLabels]}
+                  </div>
+                </Tooltip>
+              ))}
             </div>
             <div className="flex w-full p-8">
               <div className="flex flex-1 flex-col">
