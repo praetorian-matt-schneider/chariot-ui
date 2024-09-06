@@ -55,6 +55,7 @@ import { cn } from '@/utils/classname';
 import { formatDate } from '@/utils/date.util';
 import { sToMs } from '@/utils/date.util';
 import { getJobStatus } from '@/utils/job';
+import { Regex } from '@/utils/regex.util';
 import { getDescription, isManualORPRrovidedRisk } from '@/utils/risk.util';
 import { getRiskStatus, getStatusSeverity } from '@/utils/riskStatus.util';
 import { useQueryFilters } from '@/utils/storage/useQueryParams.util';
@@ -229,9 +230,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
       attributesGenericSearch?.attributes
         ?.filter(attribute => attribute.value.includes('#asset'))
         .map(attribute => {
-          // remove everything before #asset
-          const newKey = attribute.value.split('#asset')[1];
-          const [, dns, name] = newKey.split('#') || [];
+          const [, dns, name] = attribute.value.match(Regex.ASSET_KEY) || [];
 
           return {
             key: `#asset#${name}#${dns}`,
