@@ -929,7 +929,7 @@ const Counter = ({ from, to }: { from: number; to: number }) => {
       {numberArray.map((digit, index) => (
         <motion.div
           key={index}
-          className="text-3xl font-extrabold text-brand"
+          className="text-3xl font-extrabold text-white"
           initial={{ rotateX: 90, opacity: 0 }}
           animate={{ rotateX: 0, opacity: 1 }}
           exit={{ rotateX: -90, opacity: 0 }}
