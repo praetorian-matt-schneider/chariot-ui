@@ -13,7 +13,7 @@ import { useUpdateAsset } from '@/hooks/useAssets';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
 import { useReRunJob } from '@/hooks/useJobs';
-import { useDeleteRisk, useUpdateRisk } from '@/hooks/useRisks';
+import { useUpdateRisk } from '@/hooks/useRisks';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { Empty } from '@/sections/Empty';
 import {
@@ -338,7 +338,6 @@ export const AlertAction = ({
   const { mutateAsync: updateAsset, status: updateAssetStatus } =
     useUpdateAsset();
   const { mutateAsync: updateRisk, status: updateRiskStatus } = useUpdateRisk();
-  const { mutateAsync: deleteRisk } = useDeleteRisk();
 
   function handleAssetChange(asset: Asset, status: AssetStatus) {
     updateAsset({
@@ -373,18 +372,12 @@ export const AlertAction = ({
   return (
     <div className="flex space-x-2">
       <ClosedStateModal
+        risk={selectedItem as Risk}
         isOpen={isClosedSubStateModalOpen}
-        onClose={() => setIsClosedSubStateModalOpen(false)}
-        onStatusChange={({ status }) => {
-          if (selectedItem) {
-            const newSelectedItem = {
-              ...selectedItem,
-              comment: selectedItem.comment || status,
-            };
-            deleteRisk([newSelectedItem]).then(handleRefetch);
-            setSelectedItem(null);
-            removeSearchParams(StorageKey.DRAWER_COMPOSITE_KEY);
-          }
+        onClose={() => {
+          setIsClosedSubStateModalOpen(false);
+          setSelectedItem(null);
+          removeSearchParams(StorageKey.DRAWER_COMPOSITE_KEY);
         }}
       />
       {isAsset && item.status === AssetStatus.ActiveLow && (

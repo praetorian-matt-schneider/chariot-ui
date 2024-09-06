@@ -14,8 +14,9 @@ import {
 } from '@heroicons/react/24/outline';
 
 import { Button } from '@/components/Button';
-import { Chip } from '@/components/Chip';
 import { Drawer } from '@/components/Drawer';
+import { Type } from '@/components/form/Input';
+import { InputText } from '@/components/form/InputText';
 import { RisksIcon } from '@/components/icons';
 import { UnionIcon } from '@/components/icons/Union.icon';
 import { Loader } from '@/components/Loader';
@@ -25,7 +26,7 @@ import { Modal } from '@/components/Modal';
 import { Tabs } from '@/components/Tab';
 import { Timeline } from '@/components/Timeline';
 import { Tooltip } from '@/components/Tooltip';
-import { RiskDropdown } from '@/components/ui/RiskDropdown';
+import { RiskDropdown, RiskLabel } from '@/components/ui/RiskDropdown';
 import { useMy } from '@/hooks';
 import { useGetKev } from '@/hooks/kev';
 import { useGetFile, useUploadFile } from '@/hooks/useFiles';
@@ -37,7 +38,6 @@ import {
   ResponsiveGrid,
   StickHeaderSection,
 } from '@/sections/detailsDrawer/AssetDrawer';
-import { Comment } from '@/sections/detailsDrawer/Comment';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { getStatusColor } from '@/sections/Jobs';
 import {
@@ -47,9 +47,7 @@ import {
   Risk,
   RiskCombinedStatus,
   RiskFilters,
-  RiskSeverity,
   RiskStatus,
-  RiskStatusLabel,
   RiskStatusWithoutSeverity,
 } from '@/types';
 import { mergeJobStatus } from '@/utils/api';
@@ -86,8 +84,8 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     {}
   );
   const [comment, setComment] = useState<string>('');
-  const [status, setStatus] = useState<RiskStatus>();
-  const [severity, setSeverity] = useState<RiskSeverity>();
+  const [localCombinedStatus, setLocalCombinedStatus] =
+    useState<RiskCombinedStatus>('');
 
   const [, dns, name] = compositeKey.split('#');
   const attributesFilter = `source:#risk#${dns}#${name}`;
@@ -107,8 +105,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
   const [markdownValue, setMarkdownValue] = useState('');
   const { mutateAsync: bulkReRunJobs, status: reRunJobStatus } =
     useBulkReRunJob();
-  const { mutateAsync: updateRisk, isPending: isRiskFetching } =
-    useUpdateRisk();
+  const { mutateAsync: updateRisk, status: updateRiskStatus } = useUpdateRisk();
   const { mutateAsync: updateFile, status: updateFileStatus } = useUploadFile();
   const { mutateAsync: reportRisk, status: reportRiskStatus } = useReportRisk();
 
@@ -157,21 +154,15 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
   const isInitialLoading = riskStatus === 'pending';
   const risk: Risk = risks[0] || {};
 
-  const { status: riskStatusKey, severity: riskSeverityKey } =
-    getStatusSeverity(risk.status);
-
   const hasLocalChanges =
-    riskStatusKey !== status ||
-    riskSeverityKey !== severity ||
-    Boolean(comment);
+    risk.status !== localCombinedStatus || Boolean(comment);
 
   useEffect(() => {
     if (risk && risk.status) {
-      setStatus(riskStatusKey as RiskStatus);
-      setSeverity(riskSeverityKey as RiskSeverity);
+      setLocalCombinedStatus(risk.status);
       setComment(risk.comment);
     }
-  }, [JSON.stringify(risk), riskStatusKey, riskSeverityKey]);
+  }, [JSON.stringify(risk)]);
 
   // This variable filters the jobs from localStorage and only keeps the jobs that are related to the current risk
   const attributeJobMap = Object.fromEntries(
@@ -223,7 +214,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     return [firstTrackedHistory, ...riskHistory];
   }, [JSON.stringify(risk.history)]);
 
-  async function handleUpdateComment(comment = '', status = '') {
+  async function handleUpdateRisk(comment = '', status = '') {
     await updateRisk({
       comment,
       key: risk.key,
@@ -260,6 +251,15 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     }
   }, [hasLocalChanges]);
 
+  const handleSaveComment = async () => {
+    try {
+      await handleUpdateRisk(comment, localCombinedStatus);
+      setComment('');
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   return (
     <Drawer
       open={open}
@@ -272,21 +272,38 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
         <ResponsiveGrid
           section1={
             <History history={history}>
-              <Comment
-                key={risk.status}
-                risk={risk}
-                isLoading={isRiskFetching}
-                onSave={handleUpdateComment}
-                value={{
-                  comment,
-                  setComment,
-                  status,
-                  setStatus,
-                  severity,
-                  setSeverity,
-                }}
-                hasLocalChanges={hasLocalChanges}
-              />
+              <div
+                className={
+                  'cursor-pointer rounded-sm bg-gray-100 p-4 transition-all'
+                }
+              >
+                {risk.status !== RiskStatus.ExposedRisks && (
+                  <RiskDropdown
+                    risk={risk}
+                    combinedStatus={localCombinedStatus}
+                    setCombinedStatus={setLocalCombinedStatus}
+                  />
+                )}
+                <InputText
+                  type={Type.TEXT_AREA}
+                  name="message"
+                  value={comment}
+                  onChange={e => setComment(e.target.value)}
+                  placeholder="Write your thoughts here..."
+                />
+                <div className="mt-2 flex justify-end space-x-2">
+                  <Button
+                    onClick={handleSaveComment}
+                    disabled={
+                      updateRiskStatus === 'pending' || !hasLocalChanges
+                    }
+                    className="py-2"
+                    styleType={hasLocalChanges ? 'primary' : 'none'}
+                  >
+                    {updateRiskStatus === 'pending' ? 'Saving...' : 'Save'}
+                  </Button>
+                </div>
+              </div>
               <Modal
                 style="dialog"
                 title={
@@ -306,12 +323,9 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                   onClick: async () => {
                     // Add api to save the changes
                     if (risk.status === RiskStatus.ExposedRisks) {
-                      await handleUpdateComment(comment, risk.status);
+                      await handleUpdateRisk(comment, risk.status);
                     } else {
-                      await handleUpdateComment(
-                        comment,
-                        `${status}${severity || ''}`
-                      );
+                      await handleUpdateRisk(comment, localCombinedStatus);
                     }
                     setIsWarningModalOpen(false);
                   },
@@ -736,24 +750,10 @@ function getHistoryDiff(
             <strong>First Tracked</strong>
             {EmptySpace}as{EmptySpace}
           </p>
-          {RiskStatusWithoutSeverity.includes(history.to as RiskStatus) ? (
-            <Chip
-              className="inline-flex min-h-[26px] whitespace-nowrap py-1"
-              style="default"
-            >
-              {RiskStatusLabel[history.to as RiskStatus] || history.to}
-            </Chip>
-          ) : (
-            <RiskDropdown
-              risk={{
-                status: history.to as RiskCombinedStatus,
-                key: '',
-                comment: '',
-              }}
-              type={'severity'}
-              styleType="chip"
-            />
-          )}
+          <RiskLabel
+            status={history.to as RiskCombinedStatus}
+            type="severity"
+          />
         </div>
       ),
       updated: formatDate(history.updated),
@@ -795,29 +795,16 @@ function getHistoryDiff(
       </p>
       {!isStatusWithoutSeverityFrom && (
         <>
-          <RiskDropdown
-            risk={{
-              status: history.from as RiskCombinedStatus,
-              key: '',
-              comment: '',
-            }}
-            type={'severity'}
-            styleType="chip"
+          <RiskLabel
+            status={history.from as RiskCombinedStatus}
+            type="severity"
           />
           <p className="inline">
             {EmptySpace}to{EmptySpace}
           </p>
         </>
       )}
-      <RiskDropdown
-        risk={{
-          status: history.to as RiskCombinedStatus,
-          key: '',
-          comment: '',
-        }}
-        type={'severity'}
-        styleType="chip"
-      />
+      <RiskLabel status={history.to as RiskCombinedStatus} type="severity" />
     </>
   );
 
@@ -845,27 +832,11 @@ function getHistoryDiff(
           </>
         )}
       </p>
-      <RiskDropdown
-        risk={{
-          status: history.from as RiskCombinedStatus,
-          key: '',
-          comment: '',
-        }}
-        type={'status'}
-        styleType="chip"
-      />
+      <RiskLabel status={history.from as RiskCombinedStatus} type="status" />
       <p className="inline-block">
         {EmptySpace}to{EmptySpace}
       </p>
-      <RiskDropdown
-        risk={{
-          status: history.to as RiskCombinedStatus,
-          key: '',
-          comment: '',
-        }}
-        type={'status'}
-        styleType="chip"
-      />
+      <RiskLabel status={history.to as RiskCombinedStatus} type="status" />
     </>
   );
 

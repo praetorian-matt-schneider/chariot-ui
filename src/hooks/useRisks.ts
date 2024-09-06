@@ -277,12 +277,12 @@ export function useDeleteRisk() {
     }
   );
 
-  return useMutation<unknown, Error, { key: string }[]>({
+  return useMutation<unknown, Error, { key: string; comment: string }[]>({
     defaultErrorMessage: `Failed to close risks`,
     mutationFn: async selectedRows => {
-      const promises = selectedRows.map(({ key }) => {
+      const promises = selectedRows.map(({ key, comment }) => {
         return axios.delete(`/risk`, {
-          data: { key }, // Send the key as part of the request body
+          data: { key, comment }, // Send the key as part of the request body
         });
       });
 
