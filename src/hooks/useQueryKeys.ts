@@ -14,7 +14,7 @@ export const getQueryKey = {
   getFile: (props: GetFilesProps) => [UniqueQueryKeys.GET_FILE, props.name],
   genericSearch: (search: string) => [
     UniqueQueryKeys.GENERIC_MY_SEARCH,
-    search,
+    ...(search ? [search] : []),
   ],
   getCounts: (resource: MyResourceKey, compositeKey?: string) => [
     UniqueQueryKeys.COUNTS,

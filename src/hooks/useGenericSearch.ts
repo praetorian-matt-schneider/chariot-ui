@@ -1,4 +1,4 @@
-import { mapAssetStataus } from '@/hooks/useAssets';
+import { mapAssetStatus } from '@/hooks/useAssets';
 import { useAxios } from '@/hooks/useAxios';
 import { getQueryKey } from '@/hooks/useQueryKeys';
 import { GenericResource } from '@/types';
@@ -34,7 +34,7 @@ export const useGenericSearch = (
             assets: data.assets.map(asset => {
               return {
                 ...asset,
-                status: mapAssetStataus(asset),
+                status: mapAssetStatus(asset),
               };
             }),
           },

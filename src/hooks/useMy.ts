@@ -1,4 +1,4 @@
-import { mapAssetStataus } from '@/hooks/useAssets';
+import { mapAssetStatus } from '@/hooks/useAssets';
 import { useAxios } from '@/hooks/useAxios';
 import { getQueryKey, useGetUserKey } from '@/hooks/useQueryKeys';
 import { Asset, MyResource, MyResourceKey } from '@/types';
@@ -41,7 +41,7 @@ export const useMy = <ResourceKey extends MyResourceKey>(
           data: resourceData.map((asset: Asset) => {
             return {
               ...asset,
-              status: mapAssetStataus(asset),
+              status: mapAssetStatus(asset),
             };
           }),
           offset: data?.offset,

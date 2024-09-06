@@ -36,7 +36,12 @@ import { Columns, TableActions } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
 import { useMy } from '@/hooks';
 import { useAddAlert, useRemoveAlert } from '@/hooks/useAlerts';
-import { PartialAsset, useGetAssets, useUpdateAsset } from '@/hooks/useAssets';
+import {
+  PartialAsset,
+  useDeleteAsset,
+  useGetAssets,
+  useUpdateAsset,
+} from '@/hooks/useAssets';
 import { useIntegration } from '@/hooks/useIntegration';
 import { useBulkReRunJob } from '@/hooks/useJobs';
 import { AlertCategory } from '@/sections/Alerts';
@@ -156,6 +161,7 @@ const Assets: React.FC = () => {
     data: { integrations },
   } = useIntegration();
   const { mutateAsync: updateAsset } = useUpdateAsset();
+  const { mutateAsync: deleteAsset } = useDeleteAsset();
 
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [showAssetStatusWarning, setShowAssetStatusWarning] =
@@ -343,18 +349,32 @@ const Assets: React.FC = () => {
     setAssetStatus('');
 
     assets.forEach(assetKey => {
-      updateAsset(
-        {
-          key: assetKey,
-          name: parseKeys.assetKey(assetKey).name,
-          status,
-        },
-        {
-          onSuccess: () => {
-            setSelectedRows([]);
+      if (status === AssetStatus.Deleted) {
+        deleteAsset(
+          {
+            key: assetKey,
+            name: parseKeys.assetKey(assetKey).name,
           },
-        }
-      );
+          {
+            onSuccess: () => {
+              setSelectedRows([]);
+            },
+          }
+        );
+      } else {
+        updateAsset(
+          {
+            key: assetKey,
+            name: parseKeys.assetKey(assetKey).name,
+            status,
+          },
+          {
+            onSuccess: () => {
+              setSelectedRows([]);
+            },
+          }
+        );
+      }
     });
   }
 

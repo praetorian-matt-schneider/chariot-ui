@@ -112,7 +112,54 @@ export const useUpdateAsset = () => {
   });
 };
 
-export function mapAssetStataus(asset: Asset) {
+export const useDeleteAsset = () => {
+  const axios = useAxios();
+
+  const { invalidate: invalidateMyAssets } = useMy(
+    {
+      resource: 'asset',
+    },
+    {
+      enabled: false,
+    }
+  );
+  const { invalidate: invalidateGeneric } = useGenericSearch(
+    {
+      query: '',
+    },
+    {
+      enabled: false,
+    }
+  );
+  const { invalidate: invalidateAlerts } = useGetAccountAlerts({
+    enabled: false,
+  });
+
+  return useMutation<void, Error, UpdateAssetProps>({
+    defaultErrorMessage: 'Failed to delete asset',
+    mutationFn: async ({ key, name }) => {
+      const promise = axios.delete(`/asset`, {
+        data: {
+          key,
+        },
+      });
+
+      toast.promise(promise, {
+        loading: `Deleting ${name}`,
+        success: `Deleted ${name}`,
+        error: `Failed to delete ${name}`,
+      });
+
+      await promise;
+
+      invalidateAlerts();
+      invalidateGeneric();
+      invalidateMyAssets();
+    },
+  });
+};
+
+export function mapAssetStatus(asset: Asset) {
   if ([AssetStatus.ActiveHigh, AssetStatus.ActiveLow].includes(asset.status)) {
     return asset.status;
   }
