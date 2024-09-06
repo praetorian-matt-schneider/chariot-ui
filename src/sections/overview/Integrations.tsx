@@ -722,7 +722,38 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
       href: 'https://docs.praetorian.com/hc/en-us/articles/25815092236443-Asset-Ingestion-Nessus-NS1-and-CrowdStrike#01J1TEBGSSDAA1KKXJQEATKJ22',
       label: 'How to: Asset Ingestion - Nessus',
     },
-    markup: <NessusInstructions />,
+    inputs: [
+      {
+        name: 'username',
+        value: 'nessus',
+        hidden: true,
+      },
+      {
+        label: 'API URL',
+        value: '',
+        placeholder: 'https://nessus.example.com',
+        name: 'url',
+        required: true,
+      },
+      {
+        label: 'Access Key',
+        value: '',
+        placeholder:
+          '15951d2dbbb1e3bf2afe638ff9c78cdf364c2f7020954529309fbc7c40f3aa02',
+        name: 'key',
+        required: true,
+        type: Input.Type.PASSWORD,
+      },
+      {
+        label: 'Secret Key',
+        value: '',
+        placeholder:
+          '0fbda7c50d239d475c72283897e644cc0606a0ceab6a4f8844a01880669e7039',
+        name: 'secret',
+        required: true,
+        type: Input.Type.PASSWORD,
+      },
+    ],
   },
   zulip: {
     id: Integration.zulip,
