@@ -341,6 +341,9 @@ const RisksBeta: React.FC = () => {
                     })),
                   },
                 ]}
+                alert={{
+                  value: (alerts || []).map(alert => alert.value),
+                }}
                 status={alertsStatus}
               />
             )}
@@ -363,13 +366,12 @@ const RisksBeta: React.FC = () => {
                       label: name,
                       value,
                       count: '0',
-                      alert: false,
                     })),
                     showCount: false,
                   },
                 ]}
                 alert={{
-                  value: (conditions || []).map(condition => condition.value),
+                  value: (conditions || []).map(alert => alert.value),
                 }}
                 status={alertsStatus}
               />
@@ -380,13 +382,12 @@ const RisksBeta: React.FC = () => {
           <div className="w-full">
             <div className="flex w-full items-center justify-between">
               <div>{getAlertDescription(query)}</div>
-              {conditions.find(({ value }) => value === filters.query) && (
-                <AlertIcon
-                  value={[filters.query]}
-                  currentValue={filters.query}
-                  styleType="button"
-                />
-              )}
+              <AlertIcon
+                value={[filters.query]}
+                currentValue={filters.query}
+                styleType="button"
+                onRemove={() => setFilters({ search: '', query: '' })}
+              />
             </div>
           </div>
         }

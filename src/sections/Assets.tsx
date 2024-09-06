@@ -439,10 +439,6 @@ const Assets: React.FC = () => {
     };
   }
 
-  const hasCustomAttributes = useMemo(() => {
-    return alerts.some(alert => alert.key.match(Regex.CUSTOM_ALERT_KEY));
-  }, [alerts]);
-
   const [isCTAOpen, setIsCTAOpen] = useState<boolean>(false);
   const [selectedConditions] = useState([]);
 
@@ -750,7 +746,6 @@ interface CategoryFilterProps {
       value: string;
       count: string;
       isLoading?: boolean;
-      alert?: boolean;
     }[];
   }[];
   status: QueryStatus;
@@ -842,7 +837,7 @@ export function CategoryFilter(props: CategoryFilterProps) {
                             )}
                           />
                           {item.showCount && <p>{option.count}</p>}
-                          {(option.alert ?? true) && alert && (
+                          {alert && (
                             <AlertIcon
                               {...alert}
                               currentValue={getAlertName(option.value)}
@@ -934,25 +929,17 @@ export function AlertIcon(props: AlertIconProps) {
     );
   }
 
-  return (
-    <div className="ml-auto size-4" onClick={event => event.stopPropagation()}>
-      <Loader
-        className="ml-auto size-4 shrink-0 cursor-not-allowed text-gray-400"
-        type="spinner"
-        isLoading={isLoading}
-      >
-        <Tooltip title={isSubscribed ? 'Unsubscribe' : 'Subscribe'}>
-          <Icon
-            className={cn(
-              'ml-auto size-4 shrink-0 stroke-[2px]',
-              !isSubscribed && 'text-gray-400'
-            )}
-            onClick={isSubscribed ? handleRemove : handleAdd}
-          />
-        </Tooltip>
-      </Loader>
-    </div>
-  );
+  if (isSubscribed) {
+    return (
+      <Tooltip title={'Subscribed'}>
+        <BellAlertIcon
+          className={'text-defult ml-auto size-4 shrink-0 stroke-[2px]'}
+        />
+      </Tooltip>
+    );
+  }
+
+  return null;
 }
 
 export function FancyTable(
@@ -1142,7 +1129,6 @@ export function FancyTable(
                       return {
                         label: category.selectedLabel || category.label,
                         value: found.selectedLabel || found.label,
-                        alert: found.alert ?? true,
                       };
                     }
                   }
@@ -1152,7 +1138,6 @@ export function FancyTable(
                 { label: '', value: '', alert: true } as {
                   label: string;
                   value: string;
-                  alert: boolean;
                 }
               );
 
@@ -1170,7 +1155,7 @@ export function FancyTable(
                     </p>
                   </div>
 
-                  {selectedOption.alert && filter.alert && (
+                  {filter.alert && (
                     <AlertIcon
                       {...filter.alert}
                       currentValue={getAlertName(attribute)}
