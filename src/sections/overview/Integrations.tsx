@@ -74,6 +74,34 @@ const AWSInstructions = () => {
   );
 };
 
+const GithubInstructions = () => {
+  const url = 'https://github.com/apps/praetorian-chariot/installations/new';
+
+  return (
+    <div>
+      <p className="mb-4 block text-sm leading-6">
+        Install Chariot directly on your github account
+      </p>
+      <div>
+        <Button
+          styleType="primary"
+          startIcon={<RocketIcon />}
+          onClick={() => {
+            window.open(url)?.focus();
+          }}
+          className="p-1! rounded-sm"
+        >
+          Connect Github
+        </Button>
+      </div>
+      <div className="relative mt-4">
+        <span className="sticky left-[200px] z-10 bg-layer0 px-4">OR</span>
+        <hr className="absolute top-3 w-full border-gray-300" />
+      </div>
+    </div>
+  );
+};
+
 const defaultPin = generateUuid();
 const uuid = generateUuid();
 
@@ -445,6 +473,7 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
         },
       },
     ],
+    markup: <GithubInstructions />,
   },
   amazon: {
     id: Integration.amazon,

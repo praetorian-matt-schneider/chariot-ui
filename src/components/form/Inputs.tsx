@@ -12,6 +12,7 @@ interface Props {
   inputs: InputsT;
   onChange: (values: Values) => void;
   values?: Values;
+  defaultValues?: Values;
 }
 
 export const getFormValues = (inputs: InputsT): Values => {
@@ -36,7 +37,9 @@ export const getFormValues = (inputs: InputsT): Values => {
 export const Inputs: React.FC<Props> = (props: Props) => {
   const { className, inputs } = props;
 
-  const [values, setValues] = useState<Values>(getFormValues(inputs));
+  const [values, setValues] = useState<Values>(
+    props.defaultValues || getFormValues(inputs)
+  );
 
   useEffect(() => {
     props.onChange(values);

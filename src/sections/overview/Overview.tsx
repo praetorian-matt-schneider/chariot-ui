@@ -31,7 +31,6 @@ import PushNotificationDrawer from '@/components/PushNotificationDrawer';
 import { Table } from '@/components/table/Table';
 import { Tooltip } from '@/components/Tooltip';
 import UpgradeMenu from '@/components/UpgradeMenu';
-import { useMy } from '@/hooks';
 import { useModifyAccount } from '@/hooks/useAccounts';
 import { useCreateAsset } from '@/hooks/useAssets';
 import {
@@ -180,7 +179,11 @@ export const Overview: React.FC = () => {
   ] = useState<string[]>([]);
 
   // Open the drawer based on the search params
-  const { searchParams, removeSearchParams } = useSearchParams();
+  const { searchParams, removeSearchParams, getAllSearchParams } =
+    useSearchParams();
+  const allSearchParams = getAllSearchParams();
+  const { id: integrationId, ...integrationFormData } = allSearchParams;
+
   useEffect(() => {
     if (searchParams) {
       const params = new URLSearchParams(searchParams);
@@ -212,8 +215,19 @@ export const Overview: React.FC = () => {
       connectedIntegrations,
       riskNotificationStatus,
       attackSurfaceStatus,
+      accounts,
+      invalidateAccounts,
     },
   } = useIntegration();
+
+  useEffect(() => {
+    if (accounts.length > 0 && integrationId) {
+      const integration = accounts.find(
+        ({ member }) => member === integrationId
+      );
+      setSetupIntegration(integration);
+    }
+  }, [JSON.stringify(accounts), integrationId]);
 
   const integrationCounts = useIntegrationCounts(connectedIntegrations);
   const { data: jobs } = useJobsStatus(jobKeys);
@@ -226,14 +240,6 @@ export const Overview: React.FC = () => {
     status: providedAssetsStatus,
     hasNextPage: hasNextPageProvidedAssets,
   } = useGenericSearch({ query: `source:provided` });
-
-  const {
-    data: accounts,
-
-    invalidate: invalidateAccounts,
-  } = useMy({
-    resource: 'account',
-  });
 
   // code, cloud, edr, waf, siem, scanner, cti
   const buckets = {
@@ -483,6 +489,11 @@ export const Overview: React.FC = () => {
     );
   }, [stringifiedConnectedIntegrations]);
 
+  const handleCloseSetupModal = () => {
+    setSetupIntegration(undefined);
+    Object.keys(allSearchParams).forEach(key => removeSearchParams(key));
+  };
+
   const isFreemiumMaxed =
     currentPlan === 'freemium' && usedAssets >= FREEMIUM_ASSETS_LIMIT;
   return (
@@ -703,7 +714,9 @@ export const Overview: React.FC = () => {
                         {row.actions === 'Setup' && (
                           <div className="flex items-center gap-4">
                             <button
-                              onClick={() => setSetupIntegration(row.account)}
+                              onClick={() => {
+                                setSetupIntegration(row.account);
+                              }}
                               className="w-[100px] rounded-sm bg-[#FFD700] px-3 py-1 text-sm font-medium text-black"
                             >
                               Setup
@@ -789,11 +802,10 @@ export const Overview: React.FC = () => {
         </Modal>
         <SetupModal
           isOpen={Boolean(setupIntegration)}
-          onClose={() => setSetupIntegration(undefined)}
-          onComplete={async () => {
-            setSetupIntegration(undefined);
-          }}
+          onClose={handleCloseSetupModal}
+          onComplete={handleCloseSetupModal}
           selectedIntegration={setupIntegration}
+          formData={integrationFormData}
         />
         <Drawer
           open={isAttackSurfaceDrawerOpen}

@@ -13,7 +13,11 @@ import { Account, GetStartedStatus } from '@/types';
 type AccountWithType = Account & { type: string; displayName: string };
 
 export const useIntegration = () => {
-  const { data: accounts, status } = useMy(
+  const {
+    data: accounts,
+    status,
+    invalidate: invalidateAccounts,
+  } = useMy(
     {
       resource: 'account',
     },
@@ -195,6 +199,8 @@ export const useIntegration = () => {
     data: {
       ...restProps,
       integrations,
+      accounts,
+      invalidateAccounts,
     },
   };
 };

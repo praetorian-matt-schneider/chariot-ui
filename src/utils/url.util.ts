@@ -15,7 +15,21 @@ export const useSearchParams = () => {
     setSearchParams(searchParams, { replace: true });
   }
 
-  return { searchParams, addSearchParams, removeSearchParams };
+  function getAllSearchParams(): Record<string, string> {
+    const paramsObj = Array.from(searchParams.keys()).reduce(
+      (acc, val) => ({ ...acc, [val]: searchParams.get(val) }),
+      {}
+    );
+
+    return paramsObj;
+  }
+
+  return {
+    searchParams,
+    addSearchParams,
+    removeSearchParams,
+    getAllSearchParams,
+  };
 };
 
 export function getCurrentSearchParam() {

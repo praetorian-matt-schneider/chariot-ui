@@ -1,29 +1,50 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Fragment } from 'react/jsx-runtime';
 import { InformationCircleIcon } from '@heroicons/react/24/outline';
 import { Dialog, Transition } from '@headlessui/react';
 
 import { Button } from '@/components/Button';
-import { Inputs, Values } from '@/components/form/Inputs';
+import { getFormValues, Inputs, Values } from '@/components/form/Inputs';
 import { Link } from '@/components/Link';
 import { useModifyAccount } from '@/hooks';
 import { Integrations } from '@/sections/overview/Integrations';
-import { Account, LinkAccount } from '@/types';
+import { Account, IntegrationMeta, LinkAccount } from '@/types';
 
 const SetupModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
   onComplete: () => void;
   selectedIntegration?: Account;
-  account?: Account;
-}> = ({ isOpen, onClose, onComplete, selectedIntegration }) => {
+  formData: Values;
+}> = ({
+  isOpen,
+  onClose,
+  onComplete,
+  selectedIntegration,
+  formData: formDataParent,
+}) => {
   const { mutateAsync: link, status: linkStatus } = useModifyAccount('link');
   const { mutateAsync: unLink, status: unLinkStatus } =
     useModifyAccount('unlink');
 
-  const integration =
-    Integrations[selectedIntegration?.member as keyof typeof Integrations];
+  const integration = Integrations[
+    selectedIntegration?.member as keyof typeof Integrations
+  ] as IntegrationMeta;
+  const defaultValues =
+    integration?.inputs && formDataParent
+      ? {
+          ...getFormValues(integration.inputs),
+          ...formDataParent,
+        }
+      : undefined;
+
   const [formData, setFormData] = useState<Values>();
+
+  useEffect(() => {
+    if (Object.keys(formDataParent).length > 0 && formData) {
+      handleLinkIntegration();
+    }
+  }, [JSON.stringify({ formData, formDataParent })]);
 
   if (!selectedIntegration) return null;
 
@@ -31,7 +52,7 @@ const SetupModal: React.FC<{
     setFormData(newValues);
   };
 
-  const handleLinkIntegration = async () => {
+  async function handleLinkIntegration() {
     if (selectedIntegration) {
       await unLink({
         username: selectedIntegration.member,
@@ -42,7 +63,7 @@ const SetupModal: React.FC<{
 
     await link(formData as unknown as LinkAccount);
     onComplete();
-  };
+  }
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -107,6 +128,7 @@ const SetupModal: React.FC<{
                 <div className="mt-4 space-y-4">
                   {integration.markup}
                   <Inputs
+                    defaultValues={defaultValues}
                     inputs={integration.inputs || []}
                     onChange={handleInputsChange}
                   />
