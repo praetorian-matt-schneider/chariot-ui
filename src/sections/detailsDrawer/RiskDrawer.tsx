@@ -425,7 +425,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                     label: 'Description & Remediation',
                     id: 'description',
                     tabClassName: 'bg-transparent',
-                    Content: () => (
+                    content: (
                       <Loader
                         className="my-4 h-96"
                         isLoading={
@@ -510,7 +510,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                     label: 'Proof of Exploit',
                     id: 'poe',
                     tabClassName: 'bg-transparent',
-                    Content: () => <POE risk={risk} />,
+                    content: <POE risk={risk} />,
                   },
                 ]}
                 defaultValue={'description'}
