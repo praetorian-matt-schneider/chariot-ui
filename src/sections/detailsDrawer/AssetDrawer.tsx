@@ -29,7 +29,7 @@ import { AlertAction } from '@/sections/Alerts';
 import { buildOpenRiskDataset, RiskSummary } from '@/sections/Assets';
 import { AddAttribute } from '@/sections/detailsDrawer/AddAttribute';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
-import { Asset, Attribute, Risk, RiskStatusLabel } from '@/types';
+import { Asset, Risk, RiskStatusLabel } from '@/types';
 import { cn } from '@/utils/classname';
 import { formatDate } from '@/utils/date.util';
 import { getSeverityClass } from '@/utils/getSeverityClass.util';
@@ -251,10 +251,18 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
             </>
           }
           section3={
-            <AttributeList
-              attributes={attributesGenericSearch?.attributes || []}
-              resourceKey={asset.key}
-            />
+            <StickHeaderSection
+              label={
+                <>
+                  <p>Attributes</p>
+                  <AddAttribute resourceKey={asset.key} />
+                </>
+              }
+            >
+              <AttributeList
+                attributes={attributesGenericSearch?.attributes || []}
+              />
+            </StickHeaderSection>
           }
         />
       </Loader>
@@ -313,24 +321,30 @@ function RiskList(props: RiskListProps) {
 }
 
 interface AttributeListProps {
-  attributes: Attribute[];
-  resourceKey: string;
+  attributes: {
+    name: string;
+    value: string;
+    updated: string;
+  }[];
+  className?: string;
 }
-function AttributeList(props: AttributeListProps) {
+export function AttributeList(props: AttributeListProps) {
   return (
-    <StickHeaderSection
-      label={
-        <>
-          <p>Attributes</p>
-          <AddAttribute resourceKey={props.resourceKey} />
-        </>
-      }
-    >
+    <>
+      {props.attributes?.length === 0 && (
+        <div className="p-4 text-center text-gray-500">
+          <p>No attributes found.</p>
+        </div>
+      )}
       {props.attributes.map((attribute, index) => {
         return (
           <div
             key={index}
-            className={cn('gap-3 px-10 py-3', 'border-b border-gray-300')}
+            className={cn(
+              'gap-3 px-10 py-3',
+              'border-b border-gray-300',
+              props.className
+            )}
           >
             <div className="flex w-full items-center gap-2">
               <p className="text-sm font-medium text-slate-600">
@@ -349,7 +363,7 @@ function AttributeList(props: AttributeListProps) {
           </div>
         );
       })}
-    </StickHeaderSection>
+    </>
   );
 }
 
@@ -840,9 +854,10 @@ export function StickHeaderSection(props: {
 }) {
   return (
     <div className="flex h-full flex-col">
-      <h1 className="sticky top-0 border-b border-gray-300 bg-white px-9 py-5 text-2xl font-bold">
-        {props.label}
-      </h1>
+      <div className="sticky top-0 flex w-full justify-between border-b border-gray-300 bg-white px-9 py-5">
+        <h1 className="text-2xl font-bold">{props.label}</h1>
+      </div>
+
       <div className="size-full overflow-auto">{props.children}</div>
     </div>
   );

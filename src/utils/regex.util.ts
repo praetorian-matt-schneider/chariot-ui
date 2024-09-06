@@ -22,6 +22,7 @@ export const Regex = {
   ATTIBUTE_KEY: /^#attribute#([^#]+)(?:#(.*))?/,
   ASSET_KEY: /#asset#([^#]+)#([^#]+)/,
   CUSTOM_ALERT_KEY: /^#condition##attribute#/,
+  RISK_ATTRIBUTE_VALUE: /^#attribute#([^#]+)#([^#]+)#/,
 };
 
 export const AllowedSeedRegex = new RegExp(

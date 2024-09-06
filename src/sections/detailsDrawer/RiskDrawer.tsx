@@ -36,6 +36,7 @@ import { useBulkReRunJob, useJobsStatus } from '@/hooks/useJobs';
 import { useReportRisk, useUpdateRisk } from '@/hooks/useRisks';
 import { AlertAction } from '@/sections/Alerts';
 import {
+  AttributeList,
   ResponsiveGrid,
   StickHeaderSection,
 } from '@/sections/detailsDrawer/AssetDrawer';
@@ -548,7 +549,12 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
               />
             </div>
           }
-          section3={<AffectedAssets assets={assetsOnRisk} />}
+          section3={
+            <AffectedAssets
+              assets={assetsOnRisk}
+              attributes={attributesGenericSearch?.attributes ?? []}
+            />
+          }
         />
       </Loader>
     </Drawer>
@@ -632,45 +638,86 @@ const AffectedAssets: React.FC<{
     name: string;
     updated: string;
   }[];
-}> = ({ assets }) => {
+  attributes: Attribute[];
+}> = ({ assets, attributes }) => {
   const { getAssetDrawerLink } = getDrawerLink();
+  const [showAttributes, setShowAttributes] = useState(false);
+
+  function renderShowAttribute() {
+    return (
+      <div className="sticky bottom-0 w-full border-y border-gray-300 bg-layer0">
+        <Button
+          onClick={() => setShowAttributes(!showAttributes)}
+          className="w-full text-xs"
+          styleType="none"
+        >
+          {showAttributes ? 'Hide Attributes' : 'Show Attributes'}
+        </Button>
+      </div>
+    );
+  }
+
+  console.log('attributes', attributes);
 
   return (
-    <StickHeaderSection label="Affected Assets">
-      {assets?.length === 0 && (
-        <div className="p-4 text-center text-gray-500">
-          <p>No assets found.</p>
-        </div>
-      )}
-      {assets.length > 0 &&
-        assets.map(asset => (
-          <div
-            className="flex flex-col items-start justify-between gap-4 border-b border-gray-300 p-4 md:flex-row"
-            key={asset.key}
-          >
-            <div>
-              <Link
-                to={getAssetDrawerLink({
-                  dns: asset.dns,
-                  name: asset.name,
-                })}
-                className="hover:text-indigo-600 hover:underline"
-              >
-                <h2 className="font-semibold text-indigo-500">{asset.name}</h2>
-              </Link>
-              <p
-                className="text-sm text-gray-500"
-                style={{ wordBreak: 'break-word' }}
-              >
-                {asset.dns}
-              </p>
+    <>
+      {!showAttributes && (
+        <StickHeaderSection label="Affected Assets">
+          {assets?.length === 0 && (
+            <div className="p-4 text-center text-gray-500">
+              <p>No assets found.</p>
             </div>
-            <span className="text-sm text-gray-500">
-              {formatDate(asset.updated)}
-            </span>
-          </div>
-        ))}
-    </StickHeaderSection>
+          )}
+          {assets.length > 0 &&
+            assets.map(asset => (
+              <div
+                className="flex flex-col items-start justify-between gap-4 border-b border-gray-300 p-4 md:flex-row"
+                key={asset.key}
+              >
+                <div>
+                  <Link
+                    to={getAssetDrawerLink({
+                      dns: asset.dns,
+                      name: asset.name,
+                    })}
+                    className="hover:text-indigo-600 hover:underline"
+                  >
+                    <h2 className="font-semibold text-indigo-500">
+                      {asset.name}
+                    </h2>
+                  </Link>
+                  <p
+                    className="text-sm text-gray-500"
+                    style={{ wordBreak: 'break-word' }}
+                  >
+                    {asset.dns}
+                  </p>
+                </div>
+                <span className="text-sm text-gray-500">
+                  {formatDate(asset.updated)}
+                </span>
+              </div>
+            ))}
+          {renderShowAttribute()}
+        </StickHeaderSection>
+      )}
+
+      {showAttributes && (
+        <StickHeaderSection label="Attributes">
+          <AttributeList
+            attributes={attributes.map(attribute => {
+              return {
+                updated: attribute.updated,
+                name: attribute.name,
+                value: attribute.value,
+              };
+            })}
+            className={'px-4 last:border-0'}
+          />
+          {renderShowAttribute()}
+        </StickHeaderSection>
+      )}
+    </>
   );
 };
 
