@@ -149,17 +149,16 @@ const Jobs: React.FC = () => {
   }, [JSON.stringify(jobs)]);
 
   const filteredJobs: Job[] = useMemo(() => {
-    let filteredJobs = jobs;
-
-    if (filters.failedReason && !query) {
-      filteredJobs = filteredJobs.filter(job => {
+    if (filters.failedReason && filters.status === JobStatus.Fail) {
+      return jobs.filter(job => {
         const comment = getFailedComment(job);
+
         return comment ? filters.failedReason === comment : false;
       });
     }
 
-    return filteredJobs;
-  }, [JSON.stringify({ jobs }), filters.failedReason]);
+    return jobs;
+  }, [JSON.stringify({ jobs, filters })]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -360,7 +359,7 @@ const Jobs: React.FC = () => {
                   setFilters({
                     failedReason: failedReasons[0],
                     search: '',
-                    status: '',
+                    status: filters.status,
                   });
                 }}
                 category={[
