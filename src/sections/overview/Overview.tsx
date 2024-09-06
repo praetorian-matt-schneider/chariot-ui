@@ -268,7 +268,7 @@ export const Overview: React.FC = () => {
     siem: 'SIEM integrations allow you to connect to security information and event management tools like Splunk and Elastic.',
     scanner:
       'Scanner integrations allow you to connect to vulnerability scanners like Nessus and Qualys.',
-    cti: 'CTI integrations allow you to connect to cyber threat intelligence tools like ThreatConnect and Anomali.',
+    cti: 'CTI integrations allow you to connect to cyber threat intelligence tools like VulnDB and GreyNoise.',
   };
   const bucketLabels = {
     code: 'Code',
