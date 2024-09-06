@@ -1,11 +1,13 @@
 import { Modal } from '@/components/Modal';
 import { useDeleteRisk, useUpdateRisk } from '@/hooks/useRisks';
 import { Risk, RiskStatus } from '@/types';
+import { getStatusSeverity } from '@/utils/riskStatus.util';
 
 interface ClosedStateModal {
   risk: Risk;
   isOpen: boolean;
   onClose: () => void;
+  onSuccess: () => void;
 }
 
 const riskClosedStatusList = [
@@ -33,7 +35,8 @@ const riskClosedStatusList = [
 ];
 
 export const ClosedStateModal = (props: ClosedStateModal) => {
-  const { isOpen, onClose, risk } = props;
+  const { isOpen, onClose, onSuccess, risk } = props;
+  const { severity } = getStatusSeverity(risk?.status);
   const { mutate: updateRisk } = useUpdateRisk();
   const { mutate: deleteRisk } = useDeleteRisk();
 
@@ -45,11 +48,16 @@ export const ClosedStateModal = (props: ClosedStateModal) => {
     comment: string;
   }) => {
     if (status === RiskStatus.Remediated) {
-      await updateRisk({ key: risk.key, name: risk.name, status, comment });
+      await updateRisk({
+        key: risk.key,
+        name: risk.name,
+        status: `${status}${severity}`,
+        comment,
+      });
     } else {
       await deleteRisk([{ ...risk, comment }]);
     }
-    onClose();
+    onSuccess();
   };
 
   return (

@@ -374,6 +374,9 @@ export const AlertAction = ({
         isOpen={isClosedSubStateModalOpen}
         onClose={() => {
           setIsClosedSubStateModalOpen(false);
+        }}
+        onSuccess={() => {
+          setIsClosedSubStateModalOpen(false);
           setSelectedItem(null);
           removeSearchParams(StorageKey.DRAWER_COMPOSITE_KEY);
         }}

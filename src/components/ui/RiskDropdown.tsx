@@ -136,6 +136,9 @@ export const RiskDropdown = ({
         isOpen={isClosedSubStateModalOpen}
         onClose={() => {
           setIsClosedSubStateModalOpen(false);
+        }}
+        onSuccess={() => {
+          setIsClosedSubStateModalOpen(false);
           removeSearchParams(StorageKey.DRAWER_COMPOSITE_KEY);
         }}
       />
