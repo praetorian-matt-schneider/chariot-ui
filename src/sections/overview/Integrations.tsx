@@ -80,23 +80,26 @@ const GithubInstructions = () => {
   return (
     <div>
       <p className="mb-4 block text-sm leading-6">
-        Install Chariot directly on your github account
+        Install the Chariot GitHub App in your organization:
       </p>
       <div>
         <Button
           styleType="primary"
           startIcon={<RocketIcon />}
           onClick={() => {
-            window.open(url)?.focus();
+            window.document.location = url;
           }}
           className="p-1! rounded-sm"
         >
-          Connect Github
+          Install GitHub App
         </Button>
       </div>
       <div className="relative mt-4">
         <span className="sticky left-[200px] z-10 bg-layer0 px-4">OR</span>
         <hr className="absolute top-3 w-full border-gray-300" />
+        <p className="mb-4 block text-sm leading-6">
+          Provide a PAT and your organization name
+        </p>
       </div>
     </div>
   );
