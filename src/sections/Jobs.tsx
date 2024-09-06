@@ -168,65 +168,67 @@ const Jobs: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const columns: Columns<Job> = [
-    {
-      label: '',
-      id: 'status',
-      cell: (job: Job) => {
-        return (
-          <Tooltip title={job.comment || ''}>
-            <div
-              className={cn(
-                'flex items-center gap-2',
-                job.comment && 'cursor-pointer'
-              )}
-            >
-              {getJobStatusIcon(getJobStatus(job), 'size-6')}
-              {job.source} <span className="text-gray-500">(job)</span>
-              <span>
-                {job.name} <span className="text-gray-500">(source)</span>
-              </span>
-              <ArrowLongRightIcon className="size-4 text-default-light" />
-              <span>
-                {job.dns} <span className="text-gray-500">(target)</span>
-              </span>
-            </div>
-          </Tooltip>
-        );
+  const columns: Columns<Job> = useMemo(() => {
+    return [
+      {
+        label: '',
+        id: 'status',
+        cell: (job: Job) => {
+          return (
+            <Tooltip title={job.comment || ''}>
+              <div
+                className={cn(
+                  'flex items-center gap-2',
+                  job.comment && 'cursor-pointer'
+                )}
+              >
+                {getJobStatusIcon(getJobStatus(job), 'size-6')}
+                {job.source} <span className="text-gray-500">(job)</span>
+                <span>
+                  {job.name} <span className="text-gray-500">(source)</span>
+                </span>
+                <ArrowLongRightIcon className="size-4 text-default-light" />
+                <span>
+                  {job.dns} <span className="text-gray-500">(target)</span>
+                </span>
+              </div>
+            </Tooltip>
+          );
+        },
       },
-    },
-    {
-      label: '',
-      id: 'updated',
-      className: 'text-default-light',
-      cell: 'date',
-    },
-    {
-      label: 'Rerun',
-      id: '',
-      fixedWidth: 75,
-      align: 'center',
-      cell: (job: Job) => {
-        const jobStatus = getJobStatus(job);
-        const isRunning =
-          jobStatus === JobStatus.Running || jobStatus === JobStatus.Queued;
+      {
+        label: '',
+        id: 'updated',
+        className: 'text-default-light',
+        cell: 'date',
+      },
+      {
+        label: 'Rerun',
+        id: '',
+        fixedWidth: 75,
+        align: 'center',
+        cell: (job: Job) => {
+          const jobStatus = getJobStatus(job);
+          const isRunning =
+            jobStatus === JobStatus.Running || jobStatus === JobStatus.Queued;
 
-        return (
-          <ArrowPathIcon
-            className={cn(
-              'size-4 cursor-pointer',
-              isRunning && 'text-gray-300 cursor-not-allowed'
-            )}
-            onClick={() => {
-              if (!isRunning) {
-                reRunJob({ capability: job.source, jobKey: job.key });
-              }
-            }}
-          />
-        );
+          return (
+            <ArrowPathIcon
+              className={cn(
+                'size-4 cursor-pointer',
+                isRunning && 'text-gray-300 cursor-not-allowed'
+              )}
+              onClick={() => {
+                if (!isRunning) {
+                  reRunJob({ capability: job.source, jobKey: job.key });
+                }
+              }}
+            />
+          );
+        },
       },
-    },
-  ];
+    ];
+  }, []);
 
   useEffect(() => {
     if (!isFetching) {
@@ -391,6 +393,7 @@ const Jobs: React.FC = () => {
           status={dataStatus}
           fetchNextPage={fetchNextPage}
           isFetchingNextPage={isFetchingNextPage}
+          isTableView
           noData={{
             icon: <HorseIcon />,
             title: 'No Jobs found',
