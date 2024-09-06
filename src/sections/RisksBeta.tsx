@@ -4,7 +4,11 @@ import {
   DocumentTextIcon,
   QuestionMarkCircleIcon,
 } from '@heroicons/react/24/outline';
-import { BellIcon, CheckCircleIcon } from '@heroicons/react/24/solid';
+import {
+  BellIcon,
+  CheckCircleIcon,
+  ShieldExclamationIcon,
+} from '@heroicons/react/24/solid';
 
 import { Drawer } from '@/components/Drawer';
 import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
@@ -13,12 +17,15 @@ import { Loader } from '@/components/Loader';
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
+import { useMy } from '@/hooks';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
 import { Alerts } from '@/sections/Alerts';
 import { AlertIcon, CategoryFilter, FancyTable } from '@/sections/Assets';
 import { RenderHeaderExtraContentSection } from '@/sections/AuthenticatedApp';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
+import { getCurrentPlan } from '@/sections/overview/Overview';
+import { useAuth } from '@/state/auth';
 import { useGlobalState } from '@/state/global.state';
 import {
   AssetStatus,
@@ -79,6 +86,13 @@ const RisksBeta: React.FC = () => {
   );
 
   const query = filters.search || filters.query || '';
+
+  const { friend } = useAuth();
+  const { data: accounts } = useMy({
+    resource: 'account',
+  });
+
+  const currentPlan = getCurrentPlan({ accounts, friend });
 
   // Add default filter if none is selected
   useEffect(() => {
@@ -272,8 +286,8 @@ const RisksBeta: React.FC = () => {
     <>
       <RenderHeaderExtraContentSection>
         <div
-          role={hasRemediatedRisk ? 'button' : 'none'}
-          onClick={() => (hasRemediatedRisk ? setIsCTAOpen(true) : {})}
+          role="button"
+          onClick={() => setIsCTAOpen(true)}
           className="m-auto flex w-full flex-col items-center rounded-lg border-2 border-dashed border-header-dark bg-header p-8 text-center"
         >
           <Loader className="w-8" isLoading={risksStatus === 'pending'}>
@@ -397,16 +411,63 @@ const RisksBeta: React.FC = () => {
           <div className="flex w-full flex-row items-center justify-between">
             <h1 className="mb-4 text-4xl font-extrabold">Remediated Risks</h1>
           </div>
-          <Table
-            name={'remediated-risks'}
-            resize={true}
-            columns={columns}
-            data={risksGeneric?.risks || []}
-            status={risksStatus}
-            error={risksError}
-            isFetchingNextPage={isFetchingNextPage}
-            fetchNextPage={fetchNextPage}
-          />
+
+          {risksGeneric?.risks?.length === 0 ? (
+            <div className="flex h-full flex-col items-center justify-center rounded-lg bg-zinc-50 p-8">
+              <div className="mb-4">
+                {/* Icon for illustration */}
+                <ShieldExclamationIcon className="size-16 text-gray-400" />
+              </div>
+              <h2 className="mb-2 text-2xl font-bold text-gray-700">
+                No Remediated Risks Yet
+              </h2>
+              <p className="mb-6 text-center text-lg text-gray-500">
+                A risk is a potential security issue that affects your system.
+                You can view the risk details, including the description and
+                remediation steps, for guidance on resolving it.
+              </p>
+              <ul className="mb-6 text-left text-gray-600">
+                <li className="mb-2">
+                  1. Open the risk to review its description and suggested
+                  remediation. If a remediation isn't available, you can
+                  generate one directly.
+                </li>
+                <li className="mb-2">
+                  2. Review the proof of exploit, showing the detection details
+                  and impacted assets.
+                </li>
+                <li className="mb-2">
+                  3. We automatically recheck every 30 minutes. If it's fixed,
+                  we'll close it for you, or you can manually close it if you're
+                  certain it's no longer a risk.
+                </li>
+              </ul>
+              <div className="text-gray-500">
+                {currentPlan === 'managed' ? (
+                  <p className="mt-4 text-center text-lg text-gray-500">
+                    As a managed service customer, we can assist you with this
+                    process.
+                  </p>
+                ) : (
+                  <p className="mt-4 text-center text-lg text-gray-500">
+                    Need help? Reach out to us about upgrading to our managed
+                    service plan.
+                  </p>
+                )}
+              </div>
+            </div>
+          ) : (
+            <Table
+              name={'remediated-risks'}
+              resize={true}
+              columns={columns}
+              data={risksGeneric?.risks || []}
+              status={risksStatus}
+              error={risksError}
+              isFetchingNextPage={isFetchingNextPage}
+              fetchNextPage={fetchNextPage}
+            />
+          )}
         </div>
       </Drawer>
     </>
