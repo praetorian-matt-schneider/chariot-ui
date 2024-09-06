@@ -389,6 +389,19 @@ export const Overview: React.FC = () => {
     });
   }
 
+  // check jobs for any failing integrations so we can show a warning if any integrations are failing
+  const failingJobs = useMemo(() => {
+    return Object.values(jobs ?? {}).filter(job => job?.failedJobsCount > 0);
+  }, [JSON.stringify(jobs)]);
+
+  const failingIntegrations = useMemo(() => {
+    return failingJobs.some(job => {
+      return connectedIntegrations.some(
+        integration => integration.member === job.source
+      );
+    });
+  }, [JSON.stringify(failingJobs)]);
+
   const data = useMemo(() => {
     const tableData = [
       ...requiresSetupIntegrations.map(integration => {
@@ -527,6 +540,24 @@ export const Overview: React.FC = () => {
           notifications={connectedNotifications.length}
         />
         <main className="mt-6 w-full">
+          {failingIntegrations && (
+            <div className="mb-6 overflow-hidden rounded-lg border-2 border-header-dark bg-header shadow-md">
+              <div className="text-md my-4 ml-6 mr-10 flex flex-row items-center justify-between space-x-4 font-medium text-white">
+                <ExclamationTriangleIcon className="size-16 text-yellow-500" />
+                <div className="w-full">
+                  <p>
+                    Some of your integrations are reporting failed scans. This
+                    will occur naturally as Chariot scans for risks
+                    continuously.
+                  </p>
+                  <p className="text-default-light">
+                    If an issue is persistent, a developer will reach out to
+                    resolve the issue.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
           <div className="overflow-hidden rounded-lg border-2 border-header-dark bg-header shadow-md">
             <div className=" mb-0 ml-6 mr-10 mt-4 flex flex-row items-center justify-between space-x-4">
               {Object.entries(buckets).map(([key, hasCode]) => (
