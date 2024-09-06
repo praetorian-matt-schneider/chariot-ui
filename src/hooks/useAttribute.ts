@@ -48,7 +48,7 @@ export const useSetRootDomain = () => {
   return useMutation({
     defaultErrorMessage: `Failed to set root domain`,
     mutationFn: async (domain: string) => {
-      const promise = axios.post(`/attribute`, {
+      const promise = axios.put(`/attribute`, {
         key: 'root',
         name: 'Root Domain',
         value: domain,
@@ -87,7 +87,7 @@ export const useCreateAttribute = (resourceKey = '', skipToast = false) => {
   return useMutation({
     defaultErrorMessage: `Failed to add attribute`,
     mutationFn: async (attribute: CreateAttribute) => {
-      const promise = axios.post(`/attribute`, {
+      const promise = axios.put(`/attribute`, {
         key: attribute.key,
         name: attribute.name,
         value: attribute.value,
@@ -128,7 +128,7 @@ export const useBulkAddAttributes = () => {
       const promise = Promise.all<Attribute>(
         attributes
           .map(attribute => {
-            return axios.post(`/attribute`, {
+            return axios.put(`/attribute`, {
               key: attribute.key,
               name: attribute.name,
               value: attribute.value,

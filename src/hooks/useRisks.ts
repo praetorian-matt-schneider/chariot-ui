@@ -33,7 +33,7 @@ export const useCreateRisk = () => {
   return useMutation<Risk, Error, RiskTemplate>({
     defaultErrorMessage: `Failed to create risk`,
     mutationFn: async riskTemplate => {
-      const promise = axios.post('/risk', riskTemplate);
+      const promise = axios.put('/risk', riskTemplate);
 
       toast.promise(promise, {
         loading: 'Creating risk...',
