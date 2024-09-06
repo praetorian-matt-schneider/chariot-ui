@@ -136,7 +136,7 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
         rootDomain={rootDomain}
         attackSurfacesConfigured={attackSurfaceStatus}
         notificationsConfigured={riskNotificationStatus}
-        exposureAlertsConfigured={hasCustomAttributes}
+        exposureAlertsConfigured={alerts?.length > 0}
         risksRemediated={hasRemediatedRisk}
       />
     </div>
