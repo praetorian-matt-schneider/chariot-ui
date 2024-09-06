@@ -382,24 +382,31 @@ const RisksBeta: React.FC = () => {
                   menu={{
                     value: filters.subQuery,
                     onClick: value => {
-                      if (value) {
+                      if (value || value === '') {
                         setFilters({
                           ...filters,
                           subQuery: value,
                         });
                       }
                     },
-                    items: selectedCategory.subQueries
-                      .map(query => {
-                        const severity = query.slice(-1);
+                    items: [
+                      {
+                        label: `All Severities`,
 
-                        const option = riskSeverityOptions.find(
-                          o => o.value === severity
-                        );
-                        return { ...option, value: query };
-                      })
-                      .filter(Boolean)
-                      .reverse() as { label: string; value: string }[],
+                        value: '',
+                      },
+                      ...(selectedCategory.subQueries
+                        .map(query => {
+                          const severity = query.slice(-1);
+
+                          const option = riskSeverityOptions.find(
+                            o => o.value === severity
+                          );
+                          return { ...option, value: query };
+                        })
+                        .filter(Boolean)
+                        .reverse() as { label: string; value: string }[]),
+                    ],
                   }}
                 >
                   <div className="flex-1 text-left">
