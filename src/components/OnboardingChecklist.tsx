@@ -7,7 +7,7 @@ import {
 import confetti from 'canvas-confetti';
 
 import { useAuth } from '@/state/auth';
-import { GetStartedStatus } from '@/types';
+import { GetStartedStatus, Plan } from '@/types';
 import { cn } from '@/utils/classname';
 import { getRoute } from '@/utils/route.util';
 import { useStorage } from '@/utils/storage/useStorage.util';
@@ -19,6 +19,7 @@ interface OnboardingChecklistProps {
   notificationsConfigured: GetStartedStatus;
   exposureAlertsConfigured: boolean;
   risksRemediated: boolean;
+  plan: Plan;
 }
 
 const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
@@ -27,6 +28,7 @@ const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
   notificationsConfigured,
   exposureAlertsConfigured,
   risksRemediated,
+  plan,
 }) => {
   const { friend, me } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
@@ -204,7 +206,11 @@ const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
           </div>
         ) : (
           <>
-            <p className="text-xl font-bold">Hands-free Pilot</p>
+            <p className="text-xl font-bold">
+              {plan !== 'managed'
+                ? 'Hands-free Pilot'
+                : 'Chariot Setup Checklist'}
+            </p>
             {ctaItems.map((cta, index) => (
               <div
                 key={index}

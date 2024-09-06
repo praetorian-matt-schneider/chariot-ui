@@ -15,6 +15,7 @@ import { AddRisks } from '@/sections/add/AddRisks';
 import { DetailsDrawer } from '@/sections/detailsDrawer';
 import { LinkAWS } from '@/sections/LinkAWS';
 import { NewUserSeedModal } from '@/sections/NewUserSeedModal';
+import { getCurrentPlan } from '@/sections/overview/Overview';
 import { ProofOfExploit } from '@/sections/ProofOfExploit';
 import { TopNavBar } from '@/sections/topNavBar/TopNavBar';
 import { UpgradeModal } from '@/sections/Upgrade';
@@ -43,6 +44,7 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
     resource: 'account',
   });
 
+  const currentPlan = getCurrentPlan({ accounts, friend });
   const { name: displayName } = useGetAccountDetails(accounts);
 
   const navigate = useNavigate();
@@ -138,6 +140,7 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
         notificationsConfigured={riskNotificationStatus}
         exposureAlertsConfigured={alerts?.length > 0}
         risksRemediated={hasRemediatedRisk}
+        plan={currentPlan}
       />
     </div>
   );
