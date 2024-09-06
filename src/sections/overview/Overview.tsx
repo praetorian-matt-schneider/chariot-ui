@@ -15,6 +15,7 @@ import {
   WrenchScrewdriverIcon,
 } from '@heroicons/react/24/solid';
 import confetti from 'canvas-confetti';
+import { motion } from 'framer-motion';
 import { Hourglass, TriangleAlertIcon, Unplug } from 'lucide-react';
 
 import { Button } from '@/components/Button';
@@ -480,9 +481,8 @@ export const Overview: React.FC = () => {
                     isLoading={assetCountStatus === 'pending'}
                     className="inline-block w-5"
                   >
-                    {usedAssets?.toLocaleString()}
-                  </Loader>{' '}
-                  Assets being monitored
+                    <Counter from={0} to={usedAssets} />
+                  </Loader>
                 </p>
               </div>
               <Button
@@ -894,4 +894,63 @@ export const getCurrentPlan = ({
     return 'unmanaged';
   }
   return 'freemium';
+};
+
+const Counter = ({ from, to }: { from: number; to: number }) => {
+  const [currentValue, setCurrentValue] = useState(from);
+
+  useEffect(() => {
+    let frameId: number;
+    let start: number;
+
+    const updateCounter = (timestamp: number) => {
+      if (!start) start = timestamp;
+      const progress = timestamp - start;
+      const duration = 500; // 0.5 seconds
+
+      const currentNumber =
+        from + (to - from) * Math.min(progress / duration, 1);
+      setCurrentValue(Math.floor(currentNumber));
+
+      if (progress < duration) {
+        frameId = requestAnimationFrame(updateCounter);
+      }
+    };
+
+    frameId = requestAnimationFrame(updateCounter);
+
+    return () => cancelAnimationFrame(frameId);
+  }, [from, to]);
+
+  const numberArray = currentValue.toLocaleString().split(''); // Convert number to string array
+
+  return (
+    <div className="flex items-baseline ">
+      {numberArray.map((digit, index) => (
+        <motion.div
+          key={index}
+          className="text-3xl font-extrabold text-brand"
+          initial={{ rotateX: 90, opacity: 0 }}
+          animate={{ rotateX: 0, opacity: 1 }}
+          exit={{ rotateX: -90, opacity: 0 }}
+          transition={{ duration: 0.3, ease: 'easeInOut' }}
+          style={{
+            textShadow:
+              '1px 1px 2px rgba(255, 255, 255, 0.1), -1px -1px 3px rgba(0, 0, 0, 0.4)',
+          }}
+        >
+          {digit}
+        </motion.div>
+      ))}
+      <span
+        className="text-md ml-2 font-medium text-gray-600"
+        style={{
+          textShadow:
+            '1px 1px 2px rgba(255, 255, 255, 0.1), -1px -1px 3px rgba(0, 0, 0, 0.4)',
+        }}
+      >
+        Assets Monitored
+      </span>
+    </div>
+  );
 };
