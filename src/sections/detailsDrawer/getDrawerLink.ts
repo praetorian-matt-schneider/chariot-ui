@@ -6,7 +6,14 @@ import { generatePathWithSearch } from '@/utils/url.util';
 
 export function getDrawerLink() {
   return {
-    getAssetDrawerLink: (asset: Pick<Asset, 'dns' | 'name'>): To => {
+    getAssetDrawerLink: (
+      asset: Pick<Asset, 'dns' | 'name'> & Partial<Pick<Asset, 'key'>>
+    ): To => {
+      if (!asset.dns && !asset.dns && asset.key) {
+        return generatePathWithSearch({
+          appendSearch: [[StorageKey.DRAWER_COMPOSITE_KEY, asset.key]],
+        });
+      }
       return generatePathWithSearch({
         appendSearch: [
           [

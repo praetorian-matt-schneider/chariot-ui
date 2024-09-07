@@ -36,10 +36,10 @@ import { useSearchParams as useSearchParamsUtil } from '@/utils/url.util';
 type AlertType = Asset | Risk | Attribute;
 
 const isAssetFn = (item: AlertType): item is Asset =>
-  item.key.startsWith('#asset#');
+  item.key?.startsWith('#asset#');
 
 const isRiskFn = (item: AlertType): item is Risk =>
-  item.key.startsWith('#risk#');
+  item.key?.startsWith('#risk#');
 
 const AlertsWrapper: React.FC = () => {
   const [query, setQuery] = useState<string | null>(null);

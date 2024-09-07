@@ -77,7 +77,7 @@ const isScannable = (attribute: Attribute) =>
 export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
   const [selectedTab, setSelectedTab] = useState('description');
   const [isWarningModalOpen, setIsWarningModalOpen] = useState(false);
-  const { addSearchParams, removeSearchParams } = useSearchParams();
+  const { removeSearchParams } = useSearchParams();
   const [riskJobsMap, setRiskJobsMap] = useStorage<
     Record<string, Record<string, string>>
   >(

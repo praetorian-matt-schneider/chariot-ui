@@ -168,6 +168,11 @@ const Assets: React.FC = () => {
 
           return (
             <div className="flex items-center gap-2 overflow-hidden text-black">
+              {asset.name === undefined && asset.dns === undefined && (
+                <p className="shrink truncate font-medium text-indigo-500">
+                  {asset.key.replace('#asset##', '')}
+                </p>
+              )}
               <p className="shrink truncate font-semibold text-indigo-500">
                 {asset.name}
               </p>
