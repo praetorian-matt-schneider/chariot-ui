@@ -90,7 +90,10 @@ export function useBulkReRunJob() {
   });
 }
 
-export type JobWithFailedCount = Job & { failedJobsCount: number };
+export type JobWithFailedCount = Job & {
+  failedJobsCount: number;
+  failedJobSource: string[];
+};
 
 export const useJobsStatus = (
   attributeJobMap: Record<string, string>,
@@ -123,6 +126,7 @@ export const useJobsStatus = (
             : {
                 ...res.data.jobs[0],
                 failedJobsCount: failedJobs.length,
+                failedJobSource: failedJobs.map((job: Job) => job.source),
               };
         },
       };

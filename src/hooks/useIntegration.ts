@@ -171,7 +171,7 @@ export const useIntegration = () => {
 
     const updatedJobKeys = connectedIntegrations.reduce(
       (acc, integration) => {
-        acc[integration.member] =
+        acc[`${integration.member}#${integration.value}`] =
           `#job#${integration.member}#${integration.value}${integration.member === 'amazon' ? '' : '#'}`;
         return acc;
       },

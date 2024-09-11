@@ -587,7 +587,7 @@ export const Overview: React.FC = () => {
                     fixedWidth: 100,
                     align: 'center',
                     cell: row => {
-                      const job = jobs[row.id];
+                      const job = jobs[`${row.id}#${row.identifier}`];
                       return row.connected ? (
                         <Button
                           styleType="text"
@@ -600,7 +600,8 @@ export const Overview: React.FC = () => {
                                   [
                                     'jobsFilters',
                                     JSON.stringify({
-                                      search: row.id,
+                                      search:
+                                        job?.failedJobSource?.[0] || row?.id,
                                       status: job.failedJobsCount
                                         ? JobStatus.Fail
                                         : getJobStatus(job),
