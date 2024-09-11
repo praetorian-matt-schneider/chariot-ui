@@ -1,4 +1,3 @@
-import React from 'react';
 import { RocketIcon } from 'lucide-react';
 
 import { Button } from '@/components/Button';
@@ -887,6 +886,26 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
       },
     ],
   },
+  digitalocean: {
+    id: Integration.digitalocean,
+    name: 'DigitalOcean',
+    description: 'Discover and scan assets managed within your DigitalOcean',
+    logo: '/icons/digitalocean.svg',
+    inputs: [
+      {
+        label: 'Personal Access Token (PAT)',
+        value: '',
+        placeholder: 'dop_v1_',
+        name: 'token',
+        required: true,
+        type: Input.Type.PASSWORD,
+        info: {
+          url: 'https://www.digitalocean.com/docs/apis-clis/api/create-personal-access-token/',
+          text: 'Learn more',
+        },
+      },
+    ],
+  },
   godaddy: {
     id: Integration.godaddy,
     logo: '/icons/GoDaddy.svg',
@@ -1076,11 +1095,6 @@ export const Integrations: Record<Integration, IntegrationMeta> = {
     id: Integration.wiz,
     logo: '/icons/wiz.png',
     name: 'Wiz',
-  },
-  digitalocean: {
-    id: Integration.digitalocean,
-    logo: '/icons/digitalocean.svg',
-    name: 'DigitalOcean',
   },
 };
 
