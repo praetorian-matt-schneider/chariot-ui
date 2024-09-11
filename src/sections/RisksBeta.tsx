@@ -27,12 +27,7 @@ import { useMy } from '@/hooks';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
 import { Alerts } from '@/sections/Alerts';
-import {
-  AlertIcon,
-  CategoryFilter,
-  CategoryFilterProps,
-  FancyTable,
-} from '@/sections/Assets';
+import { AlertIcon, CategoryFilterProps, FancyTable } from '@/sections/Assets';
 import { RenderHeaderExtraContentSection } from '@/sections/AuthenticatedApp';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { getCurrentPlan } from '@/sections/overview/Overview';
@@ -49,6 +44,7 @@ import {
 import { partition } from '@/utils/array.util';
 import { cn } from '@/utils/classname';
 import { getSeverityClass } from '@/utils/getSeverityClass.util';
+import { Regex } from '@/utils/regex.util';
 import {
   getRiskSeverity,
   getRiskStatus,
@@ -238,6 +234,22 @@ const RisksBeta: React.FC = () => {
     : (filters.query.split(':')[1] as AssetStatus | RiskStatus);
 
   const category = useMemo((): CategoryFilterProps['category'] => {
+    const ports = conditions.filter(({ key }) =>
+      key.match(Regex.CONDITION_PORT)
+    );
+    const surfaces = conditions.filter(({ key }) =>
+      key.match(Regex.CONDITION_SURFACE)
+    );
+    const protocols = conditions.filter(({ key }) =>
+      key.match(Regex.CONDITION_PROTOCOL)
+    );
+    const rest = conditions.filter(
+      ({ key }) =>
+        !key.match(Regex.CONDITION_PORT) &&
+        !key.match(Regex.CONDITION_SURFACE) &&
+        !key.match(Regex.CONDITION_PROTOCOL)
+    );
+
     return [
       ...(alerts.length > 0
         ? [
@@ -254,12 +266,54 @@ const RisksBeta: React.FC = () => {
             },
           ]
         : []),
-      ...(conditions.length > 0
+      ...(surfaces.length > 0
         ? [
             {
               defaultOpen: true,
-              label: 'Exposure Risks',
-              options: conditions.map(({ name, value }) => ({
+              label: 'Exporure Risks: Surface',
+              options: surfaces.map(({ key, name, value }) => ({
+                label: key.match(Regex.CONDITION_SURFACE)?.[1] || name,
+                value,
+                count: '0',
+              })),
+              showCount: false,
+            },
+          ]
+        : []),
+      ...(ports.length > 0
+        ? [
+            {
+              defaultOpen: true,
+              label: 'Exporure Risks: Port',
+              options: ports.map(({ key, name, value }) => ({
+                label: key.match(Regex.CONDITION_PORT)?.[1] || name,
+                value,
+                count: '0',
+              })),
+              showCount: false,
+            },
+          ]
+        : []),
+      ...(protocols.length > 0
+        ? [
+            {
+              defaultOpen: true,
+              label: 'Exporure Risks: Protocol',
+              options: protocols.map(({ key, name, value }) => ({
+                label: key.match(Regex.CONDITION_PROTOCOL)?.[1] || name,
+                value,
+                count: '0',
+              })),
+              showCount: false,
+            },
+          ]
+        : []),
+      ...(rest.length > 0
+        ? [
+            {
+              defaultOpen: true,
+              label: 'Exporure Risks',
+              options: rest.map(({ name, value }) => ({
                 label: name,
                 value,
                 count: '0',
@@ -339,26 +393,22 @@ const RisksBeta: React.FC = () => {
         }}
         className="h-0 min-h-0"
         name="risk"
-        otherFilters={
-          <CategoryFilter
-            value={filters.query ? [filters.query] : []}
-            hideHeader={true}
-            onChange={alerts => {
-              console.log('alerts', alerts);
-              setFilters({
-                ...filters,
-                search: '',
-                subQuery: '',
-                query: alerts[0] || '',
-              });
-            }}
-            category={category}
-            alert={{
-              value: (alertsWithoutAttributes || []).map(alert => alert.value),
-            }}
-            status={alertsStatus}
-          />
-        }
+        filter={{
+          value: filters.query ? [filters.query] : [],
+          onChange: alerts => {
+            setFilters({
+              ...filters,
+              search: '',
+              subQuery: '',
+              query: alerts[0] || '',
+            });
+          },
+          category,
+          status: alertsStatus,
+          alert: {
+            value: (alertsWithoutAttributes || []).map(alert => alert.value),
+          },
+        }}
         tableHeader={
           <div className="w-full">
             <div className="flex w-full items-center justify-between">

@@ -657,8 +657,6 @@ const AffectedAssets: React.FC<{
     );
   }
 
-  console.log('attributes', attributes);
-
   return (
     <>
       {!showAttributes && (

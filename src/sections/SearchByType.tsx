@@ -138,7 +138,7 @@ function Select<IsMultiSelect extends boolean>(
 
   return (
     <Dropdown
-      focusType="focus"
+      focusType="click"
       menu={{
         items: props.options,
         multiSelect: props.multiSelect,

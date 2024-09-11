@@ -10,6 +10,7 @@ import {
   BellSlashIcon,
   CheckIcon,
   ChevronDownIcon,
+  ExclamationTriangleIcon,
   FunnelIcon,
   MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
@@ -31,6 +32,7 @@ import { RisksIcon } from '@/components/icons';
 import { getAssetStatusIcon } from '@/components/icons/AssetStatus.icon';
 import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
 import { Loader } from '@/components/Loader';
+import { Modal } from '@/components/Modal';
 import { Table } from '@/components/table/Table';
 import { Columns, TableActions } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
@@ -886,6 +888,7 @@ interface AlertIconProps {
 
 export function AlertIcon(props: AlertIconProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const isSubscribed = props.value.includes(props.currentValue);
   const Icon = isSubscribed ? BellSlashIcon : BellAlertIcon;
   const { mutateAsync: addAlert } = useAddAlert();
@@ -923,16 +926,56 @@ export function AlertIcon(props: AlertIconProps) {
 
   if (props.styleType === 'button') {
     return (
-      <Button
-        isLoading={isLoading}
-        className="border border-default py-1"
-        startIcon={
-          <Icon className="size-6 shrink-0 rounded-full stroke-[2px] p-1" />
-        }
-        onClick={isSubscribed ? handleRemove : handleAdd}
-      >
-        {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
-      </Button>
+      <>
+        <Button
+          isLoading={isLoading}
+          className="border border-default py-1"
+          startIcon={
+            <Icon className="size-6 shrink-0 rounded-full stroke-[2px] p-1" />
+          }
+          onClick={
+            isSubscribed
+              ? () => {
+                  setShowConfirmModal(true);
+                }
+              : handleAdd
+          }
+        >
+          {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
+        </Button>
+        <Modal
+          size="xl"
+          style="dialog"
+          title={
+            <div className="flex items-center gap-1">
+              <ExclamationTriangleIcon className="size-5 text-yellow-600" />
+              Unsubscribe Alert
+            </div>
+          }
+          open={showConfirmModal}
+          onClose={() => {
+            setShowConfirmModal(false);
+          }}
+          footer={{
+            text: 'Unsubscribe',
+            onClick: async () => {
+              handleRemove();
+              // Call api to delete account
+              setShowConfirmModal(false);
+            },
+          }}
+        >
+          <div className="space-y-2 text-sm text-default-light">
+            <div>
+              Are you sure you want to unsubscribe from alert:{' '}
+              <b>{props.currentValue}</b> ?
+            </div>
+            <div className="mt-4">
+              You can always re-subscribe it from the Assets page
+            </div>
+          </div>
+        </Modal>
+      </>
     );
   }
 

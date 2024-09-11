@@ -23,6 +23,9 @@ export const Regex = {
   ASSET_KEY: /#asset#([^#]+)#([^#]+)/,
   CUSTOM_ALERT_KEY: /^#condition##attribute#/,
   RISK_ATTRIBUTE_VALUE: /^#attribute#([^#]+)#([^#]+)#/,
+  CONDITION_PORT: /^#condition#exposure-port-([^#]+)/,
+  CONDITION_SURFACE: /^#condition#exposure-surface-([^#]+)/,
+  CONDITION_PROTOCOL: /^#condition#exposure-protocol-([^#]+)/,
 };
 
 export const AllowedSeedRegex = new RegExp(
