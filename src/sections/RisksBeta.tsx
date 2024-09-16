@@ -1,10 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  ChevronDownIcon,
-  DocumentTextIcon,
-  QuestionMarkCircleIcon,
-} from '@heroicons/react/24/outline';
+import { ChevronDownIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
 import {
   BellIcon,
   CheckCircleIcon,
@@ -30,6 +26,7 @@ import { Alerts } from '@/sections/Alerts';
 import { AlertIcon, CategoryFilterProps, FancyTable } from '@/sections/Assets';
 import { RenderHeaderExtraContentSection } from '@/sections/AuthenticatedApp';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
+import { Empty } from '@/sections/Empty';
 import { getCurrentPlan } from '@/sections/overview/Overview';
 import { useAuth } from '@/state/auth';
 import { useGlobalState } from '@/state/global.state';
@@ -479,14 +476,7 @@ const RisksBeta: React.FC = () => {
         {query && (
           <Alerts query={query} setQuery={() => {}} hideFilters={true} />
         )}
-        {!query && (
-          <div className="mt-12 flex flex-col items-center justify-center">
-            <QuestionMarkCircleIcon className="mb-4 size-16 text-gray-400" />
-            <p className="text-2xl font-bold">
-              Your search returned no results.
-            </p>
-          </div>
-        )}
+        {!query && <Empty />}
       </FancyTable>
       <Drawer
         open={isCTAOpen}
