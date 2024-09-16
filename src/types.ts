@@ -48,6 +48,9 @@ export enum RiskStatus {
   MachineOpen = 'MO',
   MachineDeleted = 'MD',
   ExposedRisks = 'E',
+
+  Machine = 'M',
+  Closed = 'C',
 }
 
 export const RiskStatusWithSeverity = [
@@ -94,6 +97,8 @@ export const RiskStatusLabel: Record<RiskStatus, string> = {
   MO: 'Recommended Opened',
   MD: 'Recommended Deleted',
   E: 'Exposed Risks',
+  M: 'Machine',
+  C: 'Closed',
 };
 
 export const SeverityDef: Record<RiskSeverity, string> = {
