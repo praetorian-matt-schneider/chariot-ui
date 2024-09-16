@@ -210,7 +210,7 @@ export const useCreateAsset = () => {
     },
     onError: error => {
       toast.error('Failed to add asset', {
-        description: `${error.name}. ${error.message}`,
+        description: `${error.name} ${error.message}`,
       });
     },
   });
