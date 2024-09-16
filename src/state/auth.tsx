@@ -12,6 +12,7 @@ import {
 import { Hub } from 'aws-amplify/utils';
 import { toast } from 'sonner';
 
+import TransitionScreen from '@/components/TransitionScreen';
 import { queryClient } from '@/queryclient';
 import { AuthContextType, AuthState, BackendStack } from '@/types';
 import { Regex } from '@/utils/regex.util';
@@ -54,25 +55,31 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [signupStepIndex, setSignupStepIndex] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
   const [isTokenFetching, setIsTokenFetching] = useState(true);
+  const [isSwitching, setIsSwitching] = useState(false);
 
   function startImpersonation(memberId: string) {
+    setIsSwitching(true);
     setAuth(prevAuth => {
       return {
         ...prevAuth,
         friend: memberId,
       };
     });
-    window.location.assign('/app/overview');
+    navigate(getRoute(['app', 'overview']));
+    // Clear react-query cache
+    queryClient.clear();
   }
 
   function stopImpersonation() {
+    setIsSwitching(true);
     setAuth(prevAuth => {
       return {
         ...prevAuth,
         friend: '',
       };
     });
-    window.location.assign('/app/overview');
+    navigate(getRoute(['app', 'overview']));
+    queryClient.clear();
   }
 
   async function resendEmail(username: string) {
@@ -289,6 +296,12 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }}
     >
       {children}
+      {isSwitching && (
+        <TransitionScreen
+          message="Switching accounts, please wait..."
+          onComplete={() => setIsSwitching(false)}
+        />
+      )}
     </AuthContext.Provider>
   );
 };
