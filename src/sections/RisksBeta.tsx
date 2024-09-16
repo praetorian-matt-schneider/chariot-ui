@@ -266,7 +266,7 @@ const RisksBeta: React.FC = () => {
         ? [
             {
               defaultOpen: true,
-              label: 'Exporure Risks: Surface',
+              label: 'Exposure Risks: Surface',
               options: surfaces.map(({ key, name, value }) => ({
                 label: key.match(Regex.CONDITION_SURFACE)?.[1] || name,
                 value,
@@ -280,7 +280,7 @@ const RisksBeta: React.FC = () => {
         ? [
             {
               defaultOpen: true,
-              label: 'Exporure Risks: Port',
+              label: 'Exposure Risks: Port',
               options: ports.map(({ key, name, value }) => ({
                 label: key.match(Regex.CONDITION_PORT)?.[1] || name,
                 value,
@@ -294,7 +294,7 @@ const RisksBeta: React.FC = () => {
         ? [
             {
               defaultOpen: true,
-              label: 'Exporure Risks: Protocol',
+              label: 'Exposure Risks: Protocol',
               options: protocols.map(({ key, name, value }) => ({
                 label: key.match(Regex.CONDITION_PROTOCOL)?.[1] || name,
                 value,
@@ -308,7 +308,7 @@ const RisksBeta: React.FC = () => {
         ? [
             {
               defaultOpen: true,
-              label: 'Exporure Risks',
+              label: 'Exposure Risks',
               options: rest.map(({ name, value }) => ({
                 label: name,
                 value,
