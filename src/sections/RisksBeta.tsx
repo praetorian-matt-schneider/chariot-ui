@@ -555,14 +555,15 @@ const RisksBeta: React.FC = () => {
 export default RisksBeta;
 
 export const AlertDescriptions: Record<string, string> = {
-  [RiskStatus.Opened]: 'Should these risks be closed?',
+  [RiskStatus.Opened]: 'Remediated a risk and want to close it early?',
+
   [RiskStatus.MachineOpen]:
     'Chariot A.I. thinks these risks are valid. Should they be opened?',
   [RiskStatus.Triaged]: 'Are these risks valid?',
   [RiskStatus.MachineDeleted]:
     'Chariot A.I. thinks these risks are invalid. Should they be closed?',
   [AssetStatus.ActiveLow]: 'Should these assets be scanned for risks?',
-  [RiskStatus.ExposedRisks]: 'Are these exposures valid?',
+  [RiskStatus.ExposedRisks]: 'Are these exposures risks?',
 };
 
 export const SingularAlertDescriptions: Record<string, string> = {
