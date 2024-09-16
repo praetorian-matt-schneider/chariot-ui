@@ -45,11 +45,7 @@ import { partition } from '@/utils/array.util';
 import { cn } from '@/utils/classname';
 import { getSeverityClass } from '@/utils/getSeverityClass.util';
 import { Regex } from '@/utils/regex.util';
-import {
-  getRiskSeverity,
-  getRiskStatus,
-  getRiskStatusLabel,
-} from '@/utils/riskStatus.util';
+import { getRiskStatusLabel } from '@/utils/riskStatus.util';
 import { useQueryFilters } from '@/utils/storage/useQueryParams.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
 import { generatePathWithSearch, useSearchParams } from '@/utils/url.util';
@@ -150,8 +146,8 @@ const RisksBeta: React.FC = () => {
         id: 'status',
         fixedWidth: 80,
         cell: (risk: Risk) => {
-          const riskStatusKey = getRiskStatus(risk.status);
-          const riskSeverityKey = getRiskSeverity(risk.status);
+          const { status: riskStatusKey, severity: riskSeverityKey } =
+            getRiskStatusLabel(risk.status);
 
           const statusIcon = getRiskStatusIcon(riskStatusKey);
           const severityIcon = getRiskSeverityIcon(riskSeverityKey);
@@ -185,7 +181,7 @@ const RisksBeta: React.FC = () => {
         id: 'status',
         className: 'text-left',
         cell: (risk: Risk) => {
-          const riskStatusKey = getRiskStatus(risk.status);
+          const riskStatusKey = getRiskStatusLabel(risk.status).status;
           return <span>{RiskStatusLabel[riskStatusKey]}</span>;
         },
       },

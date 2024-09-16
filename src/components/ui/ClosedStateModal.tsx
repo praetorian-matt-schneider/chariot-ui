@@ -1,7 +1,7 @@
 import { Modal } from '@/components/Modal';
 import { useDeleteRisk, useUpdateRisk } from '@/hooks/useRisks';
 import { Risk, RiskStatus } from '@/types';
-import { getStatusSeverity } from '@/utils/riskStatus.util';
+import { getRiskStatusLabel } from '@/utils/riskStatus.util';
 
 interface ClosedStateModal {
   risk: Risk;
@@ -36,7 +36,7 @@ const riskClosedStatusList = [
 
 export const ClosedStateModal = (props: ClosedStateModal) => {
   const { isOpen, onClose, onSuccess, risk } = props;
-  const { severity } = getStatusSeverity(risk?.status);
+  const { severity } = getRiskStatusLabel(risk?.status);
   const { mutate: updateRisk } = useUpdateRisk();
   const { mutate: deleteRisk } = useDeleteRisk();
 

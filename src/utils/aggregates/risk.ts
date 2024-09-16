@@ -3,7 +3,7 @@ import {
   AggregateCollection,
   defineAggregate,
 } from '@/utils/aggregates/aggregate';
-import { getRiskStatus } from '@/utils/riskStatus.util';
+import { getRiskStatusLabel } from '@/utils/riskStatus.util';
 
 const getDateFromISO = (isoDate: string): string => {
   const date = new Date(isoDate);
@@ -15,7 +15,7 @@ const getDateFromISO = (isoDate: string): string => {
   https://github.com/praetorian-inc/chariot-ui?tab=readme-ov-file#adding-new-charts
 */
 const riskStatus = (statusAndSeverity: string): string => {
-  const status = getRiskStatus(statusAndSeverity);
+  const status = getRiskStatusLabel(statusAndSeverity).status;
   return RiskStatusLabel[status];
 };
 

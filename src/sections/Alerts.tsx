@@ -28,7 +28,7 @@ import {
 import { getAlertName } from '@/utils/alert.util';
 import { cn } from '@/utils/classname';
 import { formatDate } from '@/utils/date.util';
-import { getRiskSeverity, getRiskStatus } from '@/utils/riskStatus.util';
+import { getRiskStatusLabel } from '@/utils/riskStatus.util';
 import { sortBySeverityAndUpdated } from '@/utils/sortBySeverityAndUpdated.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
 import { useSearchParams as useSearchParamsUtil } from '@/utils/url.util';
@@ -129,7 +129,8 @@ export const Alerts: React.FC<Props> = ({
         }}
       >
         <div className="flex flex-1 items-center space-x-3 overflow-hidden">
-          {isRisk && getSeverityButton(getRiskSeverity(item.status))}
+          {isRisk &&
+            getSeverityButton(getRiskStatusLabel(item.status).severity)}
           {(isAsset || isRisk) && (
             <div className="flex flex-1 items-center space-x-3 overflow-hidden">
               <div className="flex w-full flex-col overflow-hidden">
@@ -331,6 +332,8 @@ export const AlertAction = ({
 }) => {
   const isAsset = isAssetFn(item);
   const isRisk = isRiskFn(item);
+  const riskStatus = getRiskStatusLabel((item as Risk)?.status).status;
+
   const { removeSearchParams } = useSearchParamsUtil();
   const [isClosedSubStateModalOpen, setIsClosedSubStateModalOpen] =
     useState(false);
@@ -376,7 +379,7 @@ export const AlertAction = ({
   const description =
     showQuestionTooltip &&
     (isAsset || isRisk) &&
-    SingularAlertDescriptions[getRiskStatus(item.status || '')];
+    SingularAlertDescriptions[riskStatus];
 
   return (
     <div className="flex flex-col gap-1">
@@ -431,7 +434,7 @@ export const AlertAction = ({
             </Tooltip>
           </>
         )}
-        {isRisk && getRiskStatus(item.status) === RiskStatus.Triaged && (
+        {isRisk && riskStatus === RiskStatus.Triaged && (
           <>
             <Tooltip placement="top" title="Open the Risk">
               <Button
@@ -443,7 +446,7 @@ export const AlertAction = ({
                   handleRiskChange(
                     item,
                     RiskStatus.Opened,
-                    getRiskSeverity(item.status)
+                    getRiskStatusLabel(item.status).severity
                   );
                 }}
                 disabled={updateRiskStatus === 'pending'}
@@ -467,7 +470,7 @@ export const AlertAction = ({
             </Tooltip>
           </>
         )}
-        {isRisk && getRiskStatus(item.status) === RiskStatus.MachineDeleted && (
+        {isRisk && riskStatus === RiskStatus.MachineDeleted && (
           <>
             <Tooltip placement="top" title="Close the Risk">
               <Button
@@ -493,7 +496,7 @@ export const AlertAction = ({
                   handleRiskChange(
                     item,
                     RiskStatus.Opened,
-                    getRiskSeverity(item.status)
+                    getRiskStatusLabel(item.status).severity
                   );
                 }}
                 disabled={updateRiskStatus === 'pending'}
@@ -503,7 +506,7 @@ export const AlertAction = ({
             </Tooltip>
           </>
         )}
-        {isRisk && getRiskStatus(item.status) === RiskStatus.MachineOpen && (
+        {isRisk && riskStatus === RiskStatus.MachineOpen && (
           <>
             <Tooltip placement="top" title="Open the Risk">
               <Button
@@ -515,7 +518,7 @@ export const AlertAction = ({
                   handleRiskChange(
                     item,
                     RiskStatus.Opened,
-                    getRiskSeverity(item.status)
+                    getRiskStatusLabel(item.status).severity
                   );
                 }}
                 disabled={updateRiskStatus === 'pending'}
@@ -539,7 +542,7 @@ export const AlertAction = ({
             </Tooltip>
           </>
         )}
-        {isRisk && getRiskStatus(item.status) === RiskStatus.Opened && (
+        {isRisk && riskStatus === RiskStatus.Opened && (
           <>
             <Tooltip placement="top" title="Close the Risk">
               <Button
@@ -558,7 +561,7 @@ export const AlertAction = ({
           </>
         )}
         {/* Exposure Risks */}
-        {isRisk && getRiskStatus(item.status) === RiskStatus.ExposedRisks && (
+        {isRisk && riskStatus === RiskStatus.ExposedRisks && (
           <>
             <Tooltip placement="top" title="Open the Risk">
               <Button

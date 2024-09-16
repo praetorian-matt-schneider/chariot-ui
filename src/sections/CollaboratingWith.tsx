@@ -9,7 +9,7 @@ import { useGetCollaborators } from '@/hooks/collaborators';
 import useRiskDetails from '@/hooks/useRiskDetails';
 import { useAuth } from '@/state/auth';
 import { RiskSeverity, RiskStatus } from '@/types';
-import { getRiskSeverity, getRiskStatus } from '@/utils/riskStatus.util';
+import { getRiskStatusLabel } from '@/utils/riskStatus.util';
 
 interface TableData {
   displayName: string;
@@ -41,8 +41,7 @@ export const CollaboratingWith = () => {
 
           // Hide non-open status and info severity risks
           // These were deemed not important enough to show in the table
-          const status = getRiskStatus(key);
-          const severity = getRiskSeverity(key);
+          const { status, severity } = getRiskStatusLabel(key);
           if (status !== RiskStatus.Opened || severity === RiskSeverity.Info)
             return;
 

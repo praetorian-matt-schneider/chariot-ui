@@ -74,7 +74,7 @@ import { capitalize } from '@/utils/lodash.util';
 import { useGetScreenSize } from '@/utils/misc.util';
 import { pluralize } from '@/utils/pluralize.util';
 import { Regex } from '@/utils/regex.util';
-import { getRiskSeverity, getRiskStatus } from '@/utils/riskStatus.util';
+import { getRiskStatusLabel } from '@/utils/riskStatus.util';
 import { useSticky } from '@/utils/sticky.util';
 import { useSearchParams } from '@/utils/url.util';
 
@@ -83,8 +83,7 @@ export function buildOpenRiskDataset(
 ): Record<string, SeverityOpenCounts> {
   return risks.reduce(
     (acc, risk) => {
-      const status = getRiskStatus(risk.status);
-      const severity = getRiskSeverity(risk.status);
+      const { status, severity } = getRiskStatusLabel(risk.status);
       if (status !== RiskStatus.Opened) {
         return acc; // Skip this risk if is not in 'Open' status
       }

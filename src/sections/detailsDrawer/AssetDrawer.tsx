@@ -37,7 +37,7 @@ import { useGetScreenSize } from '@/utils/misc.util';
 import { createVerticalContainer } from '@/utils/reactFlor.util';
 import { useComponentDidUpdate } from '@/utils/reactHooks.util';
 import { Regex } from '@/utils/regex.util';
-import { getRiskSeverity, getRiskStatus } from '@/utils/riskStatus.util';
+import { getRiskStatusLabel } from '@/utils/riskStatus.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
 import { useSearchParams } from '@/utils/url.util';
 
@@ -284,19 +284,20 @@ function RiskList(props: RiskListProps) {
         </div>
       )}
       {props.risks.map((risk, index) => {
-        const riskStatusKey = getRiskStatus(risk.status);
+        const { status: riskStatusKey, severity: riskSeverityKey } =
+          getRiskStatusLabel(risk.status);
 
         return (
           <div
             key={index}
             className={cn(
               'gap-3 px-10 py-3',
-              getSeverityClass(getRiskSeverity(risk.status)),
+              getSeverityClass(riskSeverityKey),
               'border-b border-gray-300'
             )}
           >
             <div className="flex w-full items-center gap-2">
-              {getRiskSeverityIcon(getRiskSeverity(risk.status), 'size-5')}
+              {getRiskSeverityIcon(riskSeverityKey, 'size-5')}
               <p className="text-sm font-medium text-slate-900">
                 {RiskStatusLabel[riskStatusKey]}
               </p>

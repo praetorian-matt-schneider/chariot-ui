@@ -59,7 +59,7 @@ import { sToMs } from '@/utils/date.util';
 import { getJobStatus } from '@/utils/job';
 import { Regex } from '@/utils/regex.util';
 import { getDescription, isManualORPRrovidedRisk } from '@/utils/risk.util';
-import { getRiskStatus, getStatusSeverity } from '@/utils/riskStatus.util';
+import { getRiskStatusLabel } from '@/utils/riskStatus.util';
 import { useQueryFilters } from '@/utils/storage/useQueryParams.util';
 import { StorageKey, useStorage } from '@/utils/storage/useStorage.util';
 import { generatePathWithSearch, useSearchParams } from '@/utils/url.util';
@@ -380,8 +380,9 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                         invalidateRiskData();
                       }}
                       extraAction={
-                        getRiskStatus(risk.status) !== RiskStatus.Opened &&
-                        getRiskStatus(risk.status) !==
+                        getRiskStatusLabel(risk.status).status !==
+                          RiskStatus.Opened &&
+                        getRiskStatusLabel(risk.status).status !==
                           RiskStatus.MachineOpen && (
                           <Tooltip
                             placement="top"
@@ -809,20 +810,17 @@ function getHistoryDiff(
             <strong>First Tracked</strong>
             {EmptySpace}as{EmptySpace}
           </p>
-          <RiskLabel
-            status={history.to as RiskCombinedStatus}
-            type="severity"
-          />
+          <RiskLabel status={history.to as RiskCombinedStatus} type="status" />
         </div>
       ),
       updated: formatDate(history.updated),
     };
   }
 
-  const { status: statusFrom, severity: severityFrom } = getStatusSeverity(
+  const { status: statusFrom, severity: severityFrom } = getRiskStatusLabel(
     history.from
   );
-  const { status: statusTo, severity: severityTo } = getStatusSeverity(
+  const { status: statusTo, severity: severityTo } = getRiskStatusLabel(
     history.to
   );
   const isStatusWithoutSeverityFrom = RiskStatusWithoutSeverity.includes(
