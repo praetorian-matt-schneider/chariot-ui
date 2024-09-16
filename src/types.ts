@@ -44,11 +44,9 @@ export enum RiskStatus {
   Triaged = 'T',
   Opened = 'O',
   Remediated = 'R',
-
   MachineOpen = 'MO',
   MachineDeleted = 'MD',
   ExposedRisks = 'E',
-  
   Machine = 'M',
   Closed = 'C',
   DeletedRisks = 'D',
