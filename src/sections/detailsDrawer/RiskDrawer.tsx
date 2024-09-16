@@ -904,13 +904,13 @@ function getHistoryDiff(
       <p className="inline">
         {` with `}
         <span className="font-semibold">Comment</span>
-        <i>{` "${history.comment}"`}</i>
+        <i style={{ wordBreak: 'break-word' }}>{` "${history.comment}"`}</i>
       </p>
     ) : (
       <p className="inline">
         <span>
           {by} added the <span className="font-semibold">Comment</span>
-          <i>{` "${history.comment}"`}</i>
+          <i style={{ wordBreak: 'break-word' }}>{` "${history.comment}"`}</i>
         </span>
       </p>
     );
