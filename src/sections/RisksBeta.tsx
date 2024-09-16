@@ -391,6 +391,7 @@ const RisksBeta: React.FC = () => {
         name="risk"
         filter={{
           value: filters.query ? [filters.query] : [],
+          hideHeader: true,
           onChange: alerts => {
             setFilters({
               ...filters,
