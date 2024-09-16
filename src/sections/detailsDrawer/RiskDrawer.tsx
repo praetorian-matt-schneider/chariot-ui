@@ -449,7 +449,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
               {/* POE and Description */}
               <Tabs
                 className="overflow-hidden pb-5"
-                contentWrapperClassName="overflow-auto"
+                contentWrapperClassName="overflow-auto pb-10"
                 tabs={[
                   {
                     label: 'Description & Remediation',
