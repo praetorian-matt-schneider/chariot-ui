@@ -1,10 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  ChevronDownIcon,
-  DocumentTextIcon,
-  QuestionMarkCircleIcon,
-} from '@heroicons/react/24/outline';
+import { ChevronDownIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
 import {
   BellIcon,
   CheckCircleIcon,
@@ -30,6 +26,7 @@ import { Alerts } from '@/sections/Alerts';
 import { AlertIcon, CategoryFilterProps, FancyTable } from '@/sections/Assets';
 import { RenderHeaderExtraContentSection } from '@/sections/AuthenticatedApp';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
+import { Empty } from '@/sections/Empty';
 import { getCurrentPlan } from '@/sections/overview/Overview';
 import { useAuth } from '@/state/auth';
 import { useGlobalState } from '@/state/global.state';
@@ -45,11 +42,7 @@ import { partition } from '@/utils/array.util';
 import { cn } from '@/utils/classname';
 import { getSeverityClass } from '@/utils/getSeverityClass.util';
 import { Regex } from '@/utils/regex.util';
-import {
-  getRiskSeverity,
-  getRiskStatus,
-  getRiskStatusLabel,
-} from '@/utils/riskStatus.util';
+import { getRiskStatusLabel } from '@/utils/riskStatus.util';
 import { useQueryFilters } from '@/utils/storage/useQueryParams.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
 import { generatePathWithSearch, useSearchParams } from '@/utils/url.util';
@@ -150,8 +143,8 @@ const RisksBeta: React.FC = () => {
         id: 'status',
         fixedWidth: 80,
         cell: (risk: Risk) => {
-          const riskStatusKey = getRiskStatus(risk.status);
-          const riskSeverityKey = getRiskSeverity(risk.status);
+          const { status: riskStatusKey, severity: riskSeverityKey } =
+            getRiskStatusLabel(risk.status);
 
           const statusIcon = getRiskStatusIcon(riskStatusKey);
           const severityIcon = getRiskSeverityIcon(riskSeverityKey);
@@ -185,7 +178,7 @@ const RisksBeta: React.FC = () => {
         id: 'status',
         className: 'text-left',
         cell: (risk: Risk) => {
-          const riskStatusKey = getRiskStatus(risk.status);
+          const riskStatusKey = getRiskStatusLabel(risk.status).status;
           return <span>{RiskStatusLabel[riskStatusKey]}</span>;
         },
       },
@@ -270,7 +263,7 @@ const RisksBeta: React.FC = () => {
         ? [
             {
               defaultOpen: true,
-              label: 'Exporure Risks: Surface',
+              label: 'Exposure Risks: Surface',
               options: surfaces.map(({ key, name, value }) => ({
                 label: key.match(Regex.CONDITION_SURFACE)?.[1] || name,
                 value,
@@ -284,7 +277,7 @@ const RisksBeta: React.FC = () => {
         ? [
             {
               defaultOpen: true,
-              label: 'Exporure Risks: Port',
+              label: 'Exposure Risks: Port',
               options: ports.map(({ key, name, value }) => ({
                 label: key.match(Regex.CONDITION_PORT)?.[1] || name,
                 value,
@@ -298,7 +291,7 @@ const RisksBeta: React.FC = () => {
         ? [
             {
               defaultOpen: true,
-              label: 'Exporure Risks: Protocol',
+              label: 'Exposure Risks: Protocol',
               options: protocols.map(({ key, name, value }) => ({
                 label: key.match(Regex.CONDITION_PROTOCOL)?.[1] || name,
                 value,
@@ -312,7 +305,7 @@ const RisksBeta: React.FC = () => {
         ? [
             {
               defaultOpen: true,
-              label: 'Exporure Risks',
+              label: 'Exposure Risks',
               options: rest.map(({ name, value }) => ({
                 label: name,
                 value,
@@ -395,6 +388,7 @@ const RisksBeta: React.FC = () => {
         name="risk"
         filter={{
           value: filters.query ? [filters.query] : [],
+          hideHeader: true,
           onChange: alerts => {
             setFilters({
               ...filters,
@@ -482,14 +476,7 @@ const RisksBeta: React.FC = () => {
         {query && (
           <Alerts query={query} setQuery={() => {}} hideFilters={true} />
         )}
-        {!query && (
-          <div className="mt-12 flex flex-col items-center justify-center">
-            <QuestionMarkCircleIcon className="mb-4 size-16 text-gray-400" />
-            <p className="text-2xl font-bold">
-              Your search returned no results.
-            </p>
-          </div>
-        )}
+        {!query && <Empty />}
       </FancyTable>
       <Drawer
         open={isCTAOpen}
@@ -568,14 +555,15 @@ const RisksBeta: React.FC = () => {
 export default RisksBeta;
 
 export const AlertDescriptions: Record<string, string> = {
-  [RiskStatus.Opened]: 'Should these risks be closed?',
+  [RiskStatus.Opened]: 'Remediated a risk and want to close it early?',
+
   [RiskStatus.MachineOpen]:
     'Chariot A.I. thinks these risks are valid. Should they be opened?',
   [RiskStatus.Triaged]: 'Are these risks valid?',
   [RiskStatus.MachineDeleted]:
     'Chariot A.I. thinks these risks are invalid. Should they be closed?',
   [AssetStatus.ActiveLow]: 'Should these assets be scanned for risks?',
-  [RiskStatus.ExposedRisks]: 'Are these exposures valid?',
+  [RiskStatus.ExposedRisks]: 'Are these exposures risks?',
 };
 
 export const SingularAlertDescriptions: Record<string, string> = {

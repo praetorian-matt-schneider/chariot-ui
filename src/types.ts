@@ -48,9 +48,10 @@ export enum RiskStatus {
   MachineOpen = 'MO',
   MachineDeleted = 'MD',
   ExposedRisks = 'E',
-
+  
   Machine = 'M',
   Closed = 'C',
+  DeletedRisks = 'D',
 }
 
 export const RiskStatusWithSeverity = [
@@ -63,6 +64,7 @@ export const RiskStatusWithoutSeverity = [
   RiskStatus.MachineOpen,
   RiskStatus.MachineDeleted,
   RiskStatus.ExposedRisks,
+  RiskStatus.DeletedRisks,
 ];
 
 export type RiskCombinedStatus = string;
@@ -99,6 +101,7 @@ export const RiskStatusLabel: Record<RiskStatus, string> = {
   E: 'Exposed Risks',
   M: 'Machine',
   C: 'Closed',
+  D: 'Deleted Risks',
 };
 
 export const SeverityDef: Record<RiskSeverity, string> = {

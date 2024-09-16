@@ -6,9 +6,8 @@ import { useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
 import { useMy } from '@/hooks/useMy';
 import { getQueryKey } from '@/hooks/useQueryKeys';
 import { queryClient } from '@/queryclient';
-import { Risk, RiskStatus, RiskTemplate } from '@/types';
+import { Risk, RiskTemplate } from '@/types';
 import { useMutation } from '@/utils/api';
-import { getRiskSeverity, getRiskStatus } from '@/utils/riskStatus.util';
 
 export const useCreateRisk = () => {
   const axios = useAxios();
@@ -134,128 +133,6 @@ export const useUpdateRisk = () => {
     },
   });
 };
-
-const useBulkUpdateRiskHook = () => {
-  const axios = useAxios();
-  const { updateAllSubQueries } = useMy(
-    {
-      resource: 'risk',
-    },
-    {
-      enabled: false,
-    }
-  );
-  const { invalidate: invalidateAlerts } = useGetAccountAlerts({
-    enabled: false,
-  });
-  const { invalidate: invalidateGenericSearch } = useGenericSearch(
-    { query: '' },
-    {
-      enabled: false,
-    }
-  );
-
-  return useMutation<unknown, Error, RiskTemplate[]>({
-    defaultErrorMessage: 'Failed to update risks',
-    mutationFn: async (risks: RiskTemplate[]) => {
-      const promise = Promise.all(
-        risks
-          .map(async risk => await axios.put(`/risk`, risk))
-          // Note: Catch error so we can continue updating risk even if some fail
-          .map(p => p.catch(e => e))
-      );
-
-      toast.promise(promise, {
-        loading: 'Updating risks...',
-        success: 'Risks updated',
-        error: 'Failed to update risks',
-      });
-      const response = await promise;
-
-      const validResults = response.filter(
-        result => !(result instanceof Error)
-      );
-
-      if (validResults.length > 0) {
-        const keys = risks.map(r => r.key);
-
-        invalidateAlerts();
-        invalidateGenericSearch();
-        keys.forEach(key => {
-          queryClient.invalidateQueries({
-            queryKey: getQueryKey.getMy('risk', key.split('#risk')[1]),
-          });
-        });
-
-        updateAllSubQueries(previous => {
-          const updatedPages = previous.pages.map(page => {
-            return {
-              ...page,
-              data: page.data.map(risk =>
-                keys.includes(risk.key)
-                  ? {
-                      ...risk,
-                      ...risks.find(r => r.key === risk.key),
-                    }
-                  : risk
-              ),
-            };
-          });
-
-          return { ...previous, pages: updatedPages };
-        });
-      }
-
-      if (validResults.length !== risks.length) {
-        const firstError = response.find(result => result instanceof Error);
-
-        throw firstError;
-      }
-
-      return;
-    },
-  });
-};
-
-export function useBulkUpdateRisk() {
-  const { mutate: updateRisk, status } = useBulkUpdateRiskHook();
-
-  function handleUpdate({
-    selectedRows,
-    status,
-    severity,
-    comment: newComment,
-  }: {
-    selectedRows: Risk[];
-    status?: RiskStatus;
-    severity?: string;
-    comment?: string;
-  }) {
-    return updateRisk(
-      selectedRows.map(item => {
-        const riskComposite = item.key.split('#');
-        const finding = riskComposite[3];
-        let newStatus = item.status;
-        const oldSeverity = getRiskSeverity(item.status);
-        const oldStatus = getRiskStatus(item.status);
-        if (status) {
-          newStatus = `${status}${oldSeverity}`;
-        }
-        if (severity) {
-          newStatus = `${oldStatus}${severity}`;
-        }
-        return {
-          key: item.key,
-          name: finding,
-          status: newStatus,
-          comment: newComment || item.comment,
-        };
-      })
-    );
-  }
-
-  return { handleUpdate, status };
-}
 
 export function useDeleteRisk() {
   const axios = useAxios();
