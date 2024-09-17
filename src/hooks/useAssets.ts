@@ -184,6 +184,9 @@ export const useCreateAsset = () => {
   const { invalidate: invalidateCounts } = useCounts({
     resource: 'asset',
   });
+  const { invalidate: invalidateProvidedAssets } = useGenericSearch({
+    query: 'source:provided',
+  });
 
   return useMutation<Asset, Error, Pick<Asset, 'name' | 'status'>>({
     defaultErrorMessage: `Failed to add asset`,
@@ -205,6 +208,7 @@ export const useCreateAsset = () => {
       invalidateJob();
       invalidateAssets();
       invalidateCounts();
+      invalidateProvidedAssets();
 
       return data;
     },
