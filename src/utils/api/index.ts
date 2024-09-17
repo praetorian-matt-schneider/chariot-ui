@@ -34,7 +34,7 @@ export function useMutation<
   TContext = unknown,
 >(
   options: UseMutationOptions<TData, TError, TVariables, TContext> &
-    CustomOptions &
+    CustomOptions<TVariables> &
     Required<
       Pick<
         UseMutationOptions<TData, TError, TVariables, TContext>,
@@ -48,7 +48,7 @@ export function useMutation<
       try {
         return await options.mutationFn(...args);
       } catch (error) {
-        throw getQueryError(options, error);
+        throw getQueryError(options, error, ...args);
       }
     },
   });
@@ -61,7 +61,9 @@ export function useQuery<
   TQueryKey extends QueryKey = QueryKey,
 >(
   options: UseQueryOptions<TQueryFnData, TError, TData, TQueryKey> &
-    CustomOptions & { queryFn: QueryFunction<TQueryFnData, TQueryKey, never> }
+    CustomOptions<void> & {
+      queryFn: QueryFunction<TQueryFnData, TQueryKey, never>;
+    }
 ) {
   const query = useReactQuery({
     ...options,
@@ -69,7 +71,7 @@ export function useQuery<
       try {
         return await options.queryFn(...args);
       } catch (error) {
-        throw getQueryError(options, error);
+        throw getQueryError(options, error, undefined);
       }
     },
   });
@@ -99,7 +101,7 @@ export function useInfiniteQuery<
     TQueryKey,
     TPageParam
   > &
-    CustomOptions & {
+    CustomOptions<void> & {
       queryFn: QueryFunction<InfinityData<TQueryFnData>, TQueryKey, TPageParam>;
     }
 ) {
@@ -109,7 +111,7 @@ export function useInfiniteQuery<
       try {
         return await options.queryFn(...args);
       } catch (error) {
-        throw getQueryError(options, error);
+        throw getQueryError(options, error, undefined);
       }
     },
   });
@@ -153,19 +155,29 @@ function updateAllQueryCache<T>(key: QueryKey, data: (currentValue: T) => T) {
   });
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getQueryError(options: CustomOptions, error: any) {
+function getQueryError<TVariable>(
+  options: CustomOptions<TVariable>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  error: any,
+  variable: TVariable
+) {
   const isLicenseError = error?.response?.status === 402;
   const errorFromResponse = options.getErrorFromResponse
     ? error.response?.data
     : '';
   const errorMessageByStatusCode =
-    options.errorByStatusCode?.[error?.response?.status];
+    options.errorByStatusCode &&
+    (typeof options.errorByStatusCode === 'function'
+      ? options.errorByStatusCode(variable)[error?.response?.status]
+      : options.errorByStatusCode[error?.response?.status]);
+
+  const defaultError =
+    typeof options.defaultErrorMessage === 'function'
+      ? options.defaultErrorMessage(variable)
+      : options.defaultErrorMessage;
 
   const queryErrorTitle =
-    errorFromResponse ||
-    errorMessageByStatusCode ||
-    options.defaultErrorMessage;
+    errorFromResponse || errorMessageByStatusCode || defaultError;
   let queryErrorMessage = '';
 
   if (isLicenseError && !errorMessageByStatusCode) {
@@ -185,9 +197,11 @@ function appendContactSupport(error: string) {
   );
 }
 
-interface CustomOptions {
-  defaultErrorMessage: string;
-  errorByStatusCode?: Record<number, string>;
+interface CustomOptions<TVariables> {
+  defaultErrorMessage: string | ((variable: TVariables) => string);
+  errorByStatusCode?:
+    | Record<number, string>
+    | ((variable: TVariables) => Record<number, string>);
   getErrorFromResponse?: boolean;
 }
 

@@ -7,18 +7,22 @@ import {
 } from '@heroicons/react/24/outline';
 import { useDebounce } from 'use-debounce';
 
+import { Button } from '@/components/Button';
 import { HorseIcon } from '@/components/icons/Horse.icon';
 import { Modal } from '@/components/Modal';
 import { Table } from '@/components/table/Table';
 import { Columns } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
-import { useModifyAccount, useMy } from '@/hooks';
+import {
+  useDeleteUserAttributes,
+  useUpdateUserAttributes,
+  useUserAttributes,
+} from '@/hooks/useAccounts';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useJobStats, useReRunJob } from '@/hooks/useJobs';
 import { CategoryFilter, FancyTable } from '@/sections/Assets';
 import { getJobStatusIcon } from '@/sections/overview/Overview';
 import {
-  FROZEN_ACCOUNT,
   Job,
   JobFilters,
   JobLabels,
@@ -99,12 +103,17 @@ const Jobs: React.FC = () => {
   });
   const jobs = data?.jobs || [];
 
-  const { data: accounts, status: accountStatus } = useMy({
-    resource: 'account',
-  });
   const { mutateAsync: reRunJob } = useReRunJob();
-  const { mutate: resume, status: resumeStatus } = useModifyAccount('link');
-  const { mutate: pause, status: pauseStatus } = useModifyAccount('unlink');
+  const { data: userAttributes = {}, status: userAttributesStatus } =
+    useUserAttributes();
+  const {
+    mutateAsync: updateUserAttributes,
+    status: updateUserAttributesStatus,
+  } = useUpdateUserAttributes();
+  const {
+    mutateAsync: deleteUserAttributes,
+    status: deleteUserAttributesStatus,
+  } = useDeleteUserAttributes();
 
   const [nextRun, setNextRun] = useState<{ hours: number; minutes: number }>(
     getCronRelativeTime(JOBS_CRON)
@@ -121,9 +130,7 @@ const Jobs: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const isFrozen = Boolean(
-    accounts.find(account => account.member === FROZEN_ACCOUNT)
-  );
+  const isFrozen = 'custom:frozen' in userAttributes;
 
   const failedJobStats = useMemo(() => {
     const failedJobs = jobs.filter(job => getJobStatus(job) === JobStatus.Fail);
@@ -201,7 +208,7 @@ const Jobs: React.FC = () => {
       cell: 'date',
     },
     {
-      label: 'Rerun',
+      label: '',
       id: '',
       fixedWidth: 75,
       align: 'center',
@@ -240,6 +247,7 @@ const Jobs: React.FC = () => {
 
   const JobIcon = isFrozen ? PlayCircleIcon : PauseCircleIcon;
   const dataStatus = isFilteredDataFetching ? 'pending' : status;
+  const nextRunText = `Next run in ${nextRun.hours} hours ${nextRun.minutes ? `and ${nextRun.minutes} minutes` : ''}`;
 
   return (
     <div className="flex w-full flex-col">
@@ -255,9 +263,12 @@ const Jobs: React.FC = () => {
           onClick: async () => {
             setShowUpdateJobStatus(false);
             if (isFrozen) {
-              await pause({ username: 'frozen', config: {} });
+              await deleteUserAttributes({ key: 'custom:frozen' });
             } else {
-              await resume({ username: 'frozen', config: {} });
+              await updateUserAttributes({
+                key: 'custom:frozen',
+                value: 'true',
+              });
             }
             refetch();
           },
@@ -268,20 +279,6 @@ const Jobs: React.FC = () => {
         </p>
       </Modal>
       <FancyTable
-        addNew={{
-          isLoading: [resumeStatus, pauseStatus, accountStatus].includes(
-            'pending'
-          ),
-          label: (
-            <div className="flex justify-between gap-2">
-              <JobIcon className="size-5 text-white" />
-              <span className="ml-2">
-                {isFrozen ? 'Resume Jobs' : 'Pause Jobs'}
-              </span>
-            </div>
-          ),
-          onClick: () => setShowUpdateJobStatus(true),
-        }}
         search={{
           value: filters.search,
           onChange: search => {
@@ -293,7 +290,7 @@ const Jobs: React.FC = () => {
           },
         }}
         tableHeader={
-          <div className="m-2 flex w-full items-start justify-between">
+          <div className="flex w-full items-center gap-2">
             <div>
               <div className="flex items-center gap-2">
                 <p className="text-lg font-bold">Search:</p>
@@ -318,9 +315,36 @@ const Jobs: React.FC = () => {
                 </div>
               )}
             </div>
-            {nextRun && (
-              <h1 className="text-lg font-bold">{`Next run in ${nextRun.hours} hours ${nextRun.minutes ? `and ${nextRun.minutes} minutes` : ''}`}</h1>
+
+            {nextRun && !isFrozen && (
+              <h1 className="ml-auto text-lg font-bold">{nextRunText}</h1>
             )}
+            <Tooltip
+              placement="top"
+              title={
+                isFrozen
+                  ? `Resume the creation of new automatic scans. ${nextRunText}`
+                  : 'Pause the creation of new automatic scans. Existing scans will run to completion. Manually initiated scans will still be available.'
+              }
+            >
+              <Button
+                isLoading={[
+                  userAttributesStatus,
+                  updateUserAttributesStatus,
+                  deleteUserAttributesStatus,
+                ].includes('pending')}
+                onClick={() => setShowUpdateJobStatus(true)}
+                styleType="primary"
+                className={cn('py-2', isFrozen ? 'ml-auto' : '')}
+              >
+                <div className="flex justify-between gap-2">
+                  <JobIcon className="size-5 text-white" />
+                  <span className="ml-2">
+                    {isFrozen ? 'Resume Jobs' : 'Pause Jobs'}
+                  </span>
+                </div>
+              </Button>
+            </Tooltip>
           </div>
         }
         otherFilters={
@@ -391,6 +415,7 @@ const Jobs: React.FC = () => {
           fetchNextPage={fetchNextPage}
           isFetchingNextPage={isFetchingNextPage}
           isTableView
+          hideTableHeader
           noData={{
             icon: <HorseIcon />,
             title: 'No Jobs found',

@@ -62,6 +62,7 @@ export function Table<TData>(props: TableProps<TData>) {
     resize = false,
     search: controlledSearch,
     rowClassName,
+    hideTableHeader,
   } = props;
 
   const { getSticky, useCreateSticky } = useSticky();
@@ -408,8 +409,9 @@ export function Table<TData>(props: TableProps<TData>) {
                   fixedWidth={CELL_WIDTHS.checkbox}
                   align="center"
                   storageKey={`${tableName}-checkbox`}
+                  className={hideTableHeader ? 'p-0' : ''}
                 >
-                  {showSelectAllCheckbox && (
+                  {!hideTableHeader && showSelectAllCheckbox && (
                     <label className={'cursor-pointer'}>
                       <input
                         type="checkbox"
@@ -426,7 +428,10 @@ export function Table<TData>(props: TableProps<TData>) {
                 return (
                   <Th
                     key={`${String(column.id)}-${colIdx}`}
-                    className={column.className}
+                    className={cn(
+                      column.className,
+                      hideTableHeader ? 'p-0' : ''
+                    )}
                     fixedWidth={
                       column.cell === 'date'
                         ? column.fixedWidth || CELL_WIDTHS.date
@@ -436,7 +441,7 @@ export function Table<TData>(props: TableProps<TData>) {
                     resize={resize}
                     storageKey={`${tableName}-${column.label}`}
                   >
-                    {column.label}
+                    {!hideTableHeader && column.label}
                   </Th>
                 );
               })}
@@ -444,8 +449,9 @@ export function Table<TData>(props: TableProps<TData>) {
                 <Th
                   fixedWidth={CELL_WIDTHS.actions}
                   storageKey={`${tableName}-actions`}
+                  className={hideTableHeader ? 'p-0' : ''}
                 >
-                  {''}
+                  {!hideTableHeader && ''}
                 </Th>
               )}
             </tr>

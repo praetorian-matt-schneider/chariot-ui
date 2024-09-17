@@ -8,6 +8,7 @@ import { NoDataProps } from '@/components/ui/NoData';
 export type CellAlignment = 'center' | 'left' | 'right';
 
 export interface TableProps<TData> {
+  hideTableHeader?: boolean;
   tableClassName?: string;
   name: string;
   columns: Columns<TData>;

@@ -26,6 +26,7 @@ export const getQueryKey = {
     email,
   ],
   getKev: () => [UniqueQueryKeys.KEV],
+  userAttributes: () => [UniqueQueryKeys.USER_ATTRIBUTES],
 };
 
 export function useGetUserKey(

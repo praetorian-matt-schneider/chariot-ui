@@ -24,6 +24,7 @@ export enum UniqueQueryKeys {
   COUNTS = 'COUNTS',
   GAVATAR_PROFILE_PICTURE = 'GAVATAR_PROFILE_PICTURE',
   KEV = 'KEV',
+  USER_ATTRIBUTES = 'USER_ATTRIBUTES',
 }
 
 export enum JobStatus {
