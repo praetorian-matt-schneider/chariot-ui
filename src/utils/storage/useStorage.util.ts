@@ -1,9 +1,10 @@
 import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
+import { safeExecute } from '@/utils/function.util';
 import { isEqual, PropertyPath } from '@/utils/lodash.util';
 import { useGetComponentDidMount } from '@/utils/reactHooks.util';
 import { appStorage, appStorageKey } from '@/utils/storage/appStorage.util';
-import { queryStorge } from '@/utils/storage/queryStorage.util';
 
 export enum StorageKey {
   ALERT_COUNT = 'alertCount',
@@ -58,12 +59,16 @@ export function useStorage<S>(
   },
   initialState?: S | (() => S)
 ) {
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const {
     key: localStorageKey,
     queryKey,
     parentState,
     onParentStateChange,
   } = options;
+
+  const queryValue = queryKey ? searchParams.get(queryKey) : '';
 
   const componentDidMount = useGetComponentDidMount();
 
@@ -84,14 +89,22 @@ export function useStorage<S>(
           appStorage.removeItem(localStorageKey);
         }
         if (queryKey) {
-          queryStorge.removeItem(queryKey);
+          setSearchParams(prevParam => {
+            prevParam.delete(queryKey);
+
+            return prevParam;
+          });
         }
       } else {
         if (localStorageKey) {
           appStorage.setItem(localStorageKey, value);
         }
         if (queryKey) {
-          queryStorge.setItem(queryKey, value);
+          setSearchParams(prevParam => {
+            prevParam.set(queryKey, JSON.stringify(value));
+
+            return prevParam;
+          });
         }
       }
     }
@@ -115,8 +128,9 @@ export function useStorage<S>(
       }
 
       if (queryKey) {
-        localDefaultValue =
-          queryStorge.getItem<S>(queryKey) ?? localDefaultValue;
+        localDefaultValue = queryValue
+          ? safeExecute<S>(() => JSON.parse(queryValue), localDefaultValue)
+          : localDefaultValue;
       }
 
       return localDefaultValue;
@@ -161,6 +175,15 @@ export function useStorage<S>(
     window.addEventListener('storage', reload);
     return () => window.removeEventListener('storage', reload);
   }, []);
+
+  useEffect(() => {
+    if (queryKey) {
+      const currentValue = getDefaultValue();
+      if (!isEqual(currentValue, localValue)) {
+        setLocalValue(currentValue);
+      }
+    }
+  }, [queryKey, queryValue, localValue]);
 
   useEffect(() => {
     if (parentState !== undefined) {

@@ -673,7 +673,7 @@ export const Overview: React.FC = () => {
                                           search: '',
                                           attributes:
                                             row.identifier === 'Provided'
-                                              ? ['source:provided']
+                                              ? ['#attribute#surface#provided']
                                               : [
                                                   `#attribute#source##asset#${row.id}`,
                                                 ],

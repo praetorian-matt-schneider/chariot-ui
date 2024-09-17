@@ -112,6 +112,8 @@ const Assets: React.FC = () => {
     },
   } = useGlobalState();
 
+  const [isExporting, setIsExporting] = useState<boolean>(false);
+
   const {
     data: assets,
     status: assetsStatus,
@@ -120,9 +122,67 @@ const Assets: React.FC = () => {
     isFetchingNextPage,
     filters,
     setFilters,
-  } = useGetAssets();
+  } = useGetAssets({ setQuery: true });
   const { data: attributeStats, status: attributeStatsStatus } =
     useGetAttributeStats();
+
+  const {
+    data: exportAssets,
+    fetchNextPage: exportAssetsFetchNextPage,
+    isFetching: exportAssetsIsFetching,
+    filters: exportAssetsFilters,
+    setFilters: setExportAssetsFilters,
+    hasNextPage: exportAssetsHasNextPage,
+  } = useGetAssets({ enabled: isExporting });
+
+  useEffect(() => {
+    if (isExporting && !exportAssetsIsFetching) {
+      if (exportAssetsHasNextPage) {
+        exportAssetsFetchNextPage();
+      } else {
+        // End of all assets
+
+        setExportAssetsFilters({ search: '', attributes: [] });
+        setIsExporting(false);
+
+        const [, attributeName = '', attributeValue = ''] =
+          exportAssetsFilters.attributes[0].match(Regex.ATTIBUTE_KEY) || [];
+
+        const name = exportAssetsFilters.search ? 'search' : attributeName;
+
+        const value = exportAssetsFilters.search
+          ? exportAssetsFilters.search
+          : attributeValue.endsWith('#')
+            ? attributeValue.slice(0, -1)
+            : attributeValue;
+
+        // create file in browser
+        const fileName = `Assets with ${name} ${value}`;
+        const exportAssetsJsonData = JSON.stringify(exportAssets, null, 2);
+        const blob = new Blob([exportAssetsJsonData], {
+          type: 'application/json',
+        });
+        const href = URL.createObjectURL(blob);
+
+        // create "a" HTLM element with href to file
+        const link = document.createElement('a');
+        link.href = href;
+        link.download = fileName + '.json';
+        document.body.appendChild(link);
+        link.click();
+
+        // clean up "a" element & remove ObjectURL
+        document.body.removeChild(link);
+        URL.revokeObjectURL(href);
+      }
+    }
+  }, [
+    isExporting,
+    JSON.stringify({
+      exportAssetsIsFetching,
+      exportAssetsHasNextPage,
+    }),
+  ]);
 
   const {
     data: alerts,
@@ -671,6 +731,13 @@ const Assets: React.FC = () => {
             setFilters({ search, attributes: [] });
           },
         }}
+        export={{
+          onClick: () => {
+            setExportAssetsFilters(filters);
+            setIsExporting(true);
+          },
+          isExporting,
+        }}
         filter={{
           value: filters.attributes,
           onChange: attributes => {
@@ -1002,6 +1069,7 @@ export function FancyTable(
     };
     search?: { value: string; onChange: (value: string) => void };
     filter?: CategoryFilterProps;
+    export?: { onClick: () => void; isExporting: boolean };
     otherFilters?: ReactNode;
     belowTitleContainer?: ReactNode;
     tableHeader?: ReactNode;
@@ -1195,7 +1263,7 @@ export function FancyTable(
               return (
                 <div
                   key={index}
-                  className="flex min-h-8 w-full items-center justify-between"
+                  className="flex min-h-8 w-full items-center gap-2"
                 >
                   <div className="flex items-center gap-2">
                     <p className="text-xl font-bold">{selectedOption.label}:</p>
@@ -1205,11 +1273,22 @@ export function FancyTable(
                   </div>
 
                   {filter.alert && (
-                    <AlertIcon
-                      {...filter.alert}
-                      currentValue={getAlertName(attribute)}
-                      styleType="button"
-                    />
+                    <div className="ml-auto">
+                      <AlertIcon
+                        {...filter.alert}
+                        currentValue={getAlertName(attribute)}
+                        styleType="button"
+                      />
+                    </div>
+                  )}
+                  {props.export && (
+                    <Button
+                      className="border border-default py-1"
+                      isLoading={props.export.isExporting}
+                      onClick={props.export.onClick}
+                    >
+                      Export
+                    </Button>
                   )}
                 </div>
               );

@@ -20,7 +20,7 @@ import {
 import { useMutation } from '@/utils/api';
 import { useMergeStatus } from '@/utils/api';
 import { Regex } from '@/utils/regex.util';
-import { useQueryFilters } from '@/utils/storage/useQueryParams.util';
+import { useStorage } from '@/utils/storage/useStorage.util';
 
 interface UpdateAssetProps {
   key: string;
@@ -286,19 +286,24 @@ const defaultFilters: AssetFilters = {
 };
 
 // eslint-disable-next-line complexity
-export function useGetAssets() {
-  const [filters, setFilters] = useQueryFilters<AssetFilters>({
-    key: 'assetFilters',
-    defaultFilters,
-  });
+export function useGetAssets(options?: {
+  enabled?: boolean;
+  setQuery?: boolean;
+}) {
+  const isEnabled = options?.enabled ?? true;
+
+  const [filters, setFilters] = useStorage<AssetFilters>(
+    {
+      queryKey: options?.setQuery ? 'assetFilters' : '',
+    },
+    defaultFilters
+  );
 
   const [isFilteredDataFetching, setIsFilteredDataFetching] = useState(false);
 
   const [debouncedSearch] = useDebounce(filters.search, 500);
   const isSearched = Boolean(filters.search);
-  const isProvidedFilter = filters.attributes[0] === 'source:provided';
-  const isAttributesFilter =
-    !isProvidedFilter && Boolean(filters.attributes[0]);
+  const isAttributesFilter = Boolean(filters.attributes[0]);
 
   const {
     data: assetSearchByName,
@@ -310,7 +315,7 @@ export function useGetAssets() {
     hasNextPage: assetSearchByNameHasNextPage,
   } = useGenericSearch(
     { query: `name:${debouncedSearch}` },
-    { enabled: isSearched }
+    { enabled: isEnabled && isSearched }
   );
   const {
     data: assetSearchByDns,
@@ -322,19 +327,7 @@ export function useGetAssets() {
     hasNextPage: assetSearchByDnsHasNextPage,
   } = useGenericSearch(
     { query: `dns:${debouncedSearch}` },
-    { enabled: isSearched }
-  );
-  const {
-    data: assetsProvided,
-    status: assetProvidedStatus,
-    error: assetProvidedError,
-    isFetching: isFetchingAssetProvided,
-    fetchNextPage: assetProvidedFetchNextPage,
-    isFetchingNextPage: assetProvidedIsFetchingNextPage,
-    hasNextPage: assetProvidedHasNextPage,
-  } = useGenericSearch(
-    { query: `source:provided` },
-    { enabled: isProvidedFilter }
+    { enabled: isEnabled && isSearched }
   );
 
   const {
@@ -349,7 +342,7 @@ export function useGetAssets() {
     {
       resource: 'asset',
     },
-    { enabled: !isSearched }
+    { enabled: isEnabled && !isSearched }
   );
 
   const {
@@ -357,7 +350,7 @@ export function useGetAssets() {
     status: riskStatus,
     error: risksError,
     isFetching: isFetchingRisks,
-  } = useMy({ resource: 'risk' });
+  } = useMy({ resource: 'risk' }, { enabled: isEnabled });
 
   const {
     data: attributes,
@@ -374,7 +367,7 @@ export function useGetAssets() {
         ? `${filters.attributes[0].replace('#attribute', '')}`
         : '',
     },
-    { enabled: isAttributesFilter }
+    { enabled: isEnabled && isAttributesFilter }
   );
 
   const apiStatus = useMergeStatus(
@@ -382,25 +375,19 @@ export function useGetAssets() {
       ? [assetByNameStatus, assetSearchByDnsStatus, riskStatus]
       : isAttributesFilter
         ? [attributesStatus, riskStatus]
-        : isProvidedFilter
-          ? [assetProvidedStatus, riskStatus]
-          : [myAssetsStatus, riskStatus])
+        : [myAssetsStatus, riskStatus])
   );
   const isFetchingNextPage = debouncedSearch
     ? assetSearchByNameIsFetchingNextPage || assetSearchByDnsIsFetchingNextPage
     : isAttributesFilter
       ? isFetchingAttributesNextPage
-      : isProvidedFilter
-        ? assetProvidedIsFetchingNextPage
-        : myAssetsIsFetchingNextPage;
+      : myAssetsIsFetchingNextPage;
 
   const error = debouncedSearch
     ? assetSearchByNameError || assetSearchByDnsError || risksError
     : isAttributesFilter
       ? attributesError || risksError
-      : isProvidedFilter
-        ? assetProvidedError || risksError
-        : myAssetsError || risksError;
+      : myAssetsError || risksError;
   const fetchNextPage = debouncedSearch
     ? () => {
         assetSearchByNameFetchNextPage();
@@ -408,25 +395,19 @@ export function useGetAssets() {
       }
     : isAttributesFilter
       ? attributesFetchNextpage
-      : isProvidedFilter
-        ? assetProvidedFetchNextPage
-        : myAssetsFetchNextPage;
+      : myAssetsFetchNextPage;
   const isFetching = debouncedSearch
     ? isFetchingAssetSearchByName ||
       isFetchingAssetSearchByDns ||
       isFetchingRisks
     : isAttributesFilter
       ? isFetchingAttributes || isFetchingRisks
-      : isProvidedFilter
-        ? isFetchingAssetProvided || isFetchingRisks
-        : isFetchingMyAssets || isFetchingRisks;
+      : isFetchingMyAssets || isFetchingRisks;
   const hasNextPage = debouncedSearch
     ? assetSearchByNameHasNextPage || assetSearchByDnsHasNextPage
     : isAttributesFilter
       ? isAttributesHasNextPage
-      : isProvidedFilter
-        ? assetProvidedHasNextPage
-        : myAssetsHasNextPage;
+      : myAssetsHasNextPage;
 
   const status = isFilteredDataFetching ? 'pending' : apiStatus;
 
@@ -454,26 +435,15 @@ export function useGetAssets() {
                 updated: attribute.updated,
               };
             })
-          : isProvidedFilter
-            ? (assetsProvided?.assets ?? [])?.map(asset => {
-                return {
-                  key: asset.key,
-                  name: asset.name,
-                  dns: asset.dns,
-                  updated: asset.updated,
-                };
-              })
-            : myAssets,
+          : myAssets,
     [
       debouncedSearch,
       isAttributesFilter,
-      isProvidedFilter,
       JSON.stringify({
         assetSearchByName,
         assetSearchByDns,
         myAssets,
         attributes,
-        assetsProvided,
       }),
     ]
   );
@@ -497,23 +467,17 @@ export function useGetAssets() {
   }, [
     JSON.stringify({
       assets,
-      assetsProvided,
       filters,
     }),
   ]);
 
   useEffect(() => {
     if (!isFetching) {
-      if (filters.search) {
-        setIsFilteredDataFetching(false);
-        // If search is enabled, we need to fetch the search data
+      if (hasNextPage && data.length < 50) {
+        setIsFilteredDataFetching(true);
+        fetchNextPage();
       } else {
-        if (hasNextPage && data.length < 50) {
-          setIsFilteredDataFetching(true);
-          myAssetsFetchNextPage();
-        } else {
-          setIsFilteredDataFetching(false);
-        }
+        setIsFilteredDataFetching(false);
       }
     }
   }, [JSON.stringify({ data }), filters.search, isFetching, hasNextPage]);
@@ -526,6 +490,13 @@ export function useGetAssets() {
     isFetchingNextPage,
     isFetching,
     filters,
-    setFilters,
+    setFilters: (filters: AssetFilters) => {
+      if (filters.search === '' && filters.attributes.length === 0) {
+        setFilters(defaultFilters);
+      } else {
+        setFilters(filters);
+      }
+    },
+    hasNextPage,
   };
 }
