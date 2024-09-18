@@ -333,16 +333,6 @@ function initAmplify(stack: BackendStack = defaultStack) {
           oauth: {
             domain: `praetorian-${backend}.auth.${region}.amazoncognito.com`,
             scopes: ['email', 'openid'],
-            redirectSignIn: [
-              'https://localhost:3000/hello',
-              'https://chariot.praetorian.com/hello',
-              'http://future.chariot.praetorian.com.s3-website.us-east-2.amazonaws.com/',
-            ],
-            redirectSignOut: [
-              'https://localhost:3000/goodbye',
-              'https://chariot.praetorian.com/goodbye',
-              'http://future.chariot.praetorian.com.s3-website.us-east-2.amazonaws.com/goodbye',
-            ],
             responseType: 'code',
           },
         },
