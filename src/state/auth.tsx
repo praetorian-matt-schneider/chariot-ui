@@ -336,10 +336,12 @@ function initAmplify(stack: BackendStack = defaultStack) {
             redirectSignIn: [
               'https://localhost:3000/hello',
               'https://chariot.praetorian.com/hello',
+              'http://future.chariot.praetorian.com.s3-website.us-east-2.amazonaws.com/',
             ],
             redirectSignOut: [
               'https://localhost:3000/goodbye',
               'https://chariot.praetorian.com/goodbye',
+              'http://future.chariot.praetorian.com.s3-website.us-east-2.amazonaws.com/goodbye',
             ],
             responseType: 'code',
           },
