@@ -179,6 +179,12 @@ const Jobs: React.FC = () => {
       label: '',
       id: 'status',
       cell: (job: Job) => {
+        let target = job.dns;
+        const name = job.key.split('#')[3];
+        if (name !== target) {
+          target = target + ' - ' + name;
+        }
+
         return (
           <Tooltip title={job.comment || ''}>
             <div
@@ -189,12 +195,14 @@ const Jobs: React.FC = () => {
             >
               {getJobStatusIcon(getJobStatus(job), 'size-6')}
               {job.source} <span className="text-gray-500">(job)</span>
-              <span>
-                {job.name} <span className="text-gray-500">(source)</span>
-              </span>
+              {job.name && (
+                <span>
+                  {job.name} <span className="text-gray-500">(source)</span>
+                </span>
+              )}
               <ArrowLongRightIcon className="size-4 text-default-light" />
               <span>
-                {job.dns} <span className="text-gray-500">(target)</span>
+                {target} <span className="text-gray-500">(target)</span>
               </span>
             </div>
           </Tooltip>
