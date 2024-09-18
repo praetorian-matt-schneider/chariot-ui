@@ -1,6 +1,8 @@
 import cronParser from 'cron-parser';
 import {
   addDays as addDaysDateFns,
+  differenceInDays,
+  differenceInHours,
   differenceInMinutes,
   format,
   formatDistanceToNow,
@@ -29,20 +31,16 @@ export function formatDate(utcTimestamp: string, formatType = 'MMM d, yyyy') {
   // Convert the UTC string to a Date object
   const date = parseISO(utcTimestamp);
 
-  // Calculate the date 30 days ago from now
+  // Get the current datetime
   const currentDate = new Date();
-  const thirtyDaysAgo = subDays(currentDate, 30);
-  const oneDaysAgo = subDays(currentDate, 1);
 
   // If the date is more recent than 30 days ago, use relative formatting
-  if (date > thirtyDaysAgo) {
-    if (date > oneDaysAgo) {
-      const hoursAgo = Math.abs(date.getHours() - currentDate.getHours());
+  if (differenceInDays(currentDate, date) < 30) {
+    if (differenceInDays(currentDate, date) < 1) {
+      const hoursAgo = differenceInHours(currentDate, date);
 
       if (hoursAgo === 0) {
-        const minutesAgo = Math.abs(
-          currentDate.getMinutes() - date.getMinutes()
-        );
+        const minutesAgo = differenceInMinutes(currentDate, date);
 
         if (minutesAgo === 0) {
           return 'now';
