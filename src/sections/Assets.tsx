@@ -145,6 +145,9 @@ const Assets: React.FC = () => {
         setExportAssetsFilters({ search: '', attributes: [] });
         setIsExporting(false);
 
+        const isLast24HoursFilter =
+          exportAssetsFilters.attributes[0] === '#attribute#new#asset';
+
         const [, attributeName = '', attributeValue = ''] =
           exportAssetsFilters.attributes[0].match(Regex.ATTIBUTE_KEY) || [];
 
@@ -157,7 +160,9 @@ const Assets: React.FC = () => {
             : attributeValue;
 
         // create file in browser
-        const fileName = `Assets with ${name} ${value}`;
+        const fileName = isLast24HoursFilter
+          ? 'Assets discovered in last 24hours'
+          : `Assets with ${name} ${value}`;
         const exportAssetsJsonData = JSON.stringify(exportAssets, null, 2);
         const blob = new Blob([exportAssetsJsonData], {
           type: 'application/json',
@@ -176,13 +181,7 @@ const Assets: React.FC = () => {
         URL.revokeObjectURL(href);
       }
     }
-  }, [
-    isExporting,
-    JSON.stringify({
-      exportAssetsIsFetching,
-      exportAssetsHasNextPage,
-    }),
-  ]);
+  }, [isExporting, exportAssetsIsFetching, exportAssetsHasNextPage]);
 
   const {
     data: alerts,
@@ -737,6 +736,7 @@ const Assets: React.FC = () => {
             setIsExporting(true);
           },
           isExporting,
+          disbled: assets.length === 0,
         }}
         filter={{
           value: filters.attributes,
@@ -997,7 +997,7 @@ export function AlertIcon(props: AlertIconProps) {
           isLoading={isLoading}
           className="border border-default py-1"
           startIcon={
-            <Icon className="size-6 shrink-0 rounded-full stroke-[2px] p-1" />
+            <Icon className="size-5 shrink-0 scale-125 rounded-full stroke-[2px] p-1" />
           }
           onClick={
             isSubscribed
@@ -1069,7 +1069,7 @@ export function FancyTable(
     };
     search?: { value: string; onChange: (value: string) => void };
     filter?: CategoryFilterProps;
-    export?: { onClick: () => void; isExporting: boolean };
+    export?: { onClick: () => void; isExporting: boolean; disbled?: boolean };
     otherFilters?: ReactNode;
     belowTitleContainer?: ReactNode;
     tableHeader?: ReactNode;
@@ -1216,7 +1216,7 @@ export function FancyTable(
       <div className={cn('flex w-full flex-col bg-white')}>
         <div
           ref={rightStickyRef}
-          className={cn('sticky flex items-center bg-white px-4 py-2')}
+          className={cn('sticky flex gap-2 items-center bg-white px-4 py-2')}
           style={{
             top: headerHeight,
             zIndex: 1,
@@ -1281,19 +1281,19 @@ export function FancyTable(
                       />
                     </div>
                   )}
-                  {props.export && (
-                    <Button
-                      className="border border-default py-1"
-                      isLoading={props.export.isExporting}
-                      onClick={props.export.onClick}
-                    >
-                      Export
-                    </Button>
-                  )}
                 </div>
               );
             })}
-
+          {props.export && (
+            <Button
+              className="border border-default py-1"
+              isLoading={props.export.isExporting}
+              onClick={props.export.onClick}
+              disabled={props.export.disbled}
+            >
+              Export
+            </Button>
+          )}
           {filter && filter.value?.length === 0 && !tableHeader && (
             <div className="text-blueGray-500flex w-full items-start justify-between">
               <div>

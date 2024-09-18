@@ -1,7 +1,7 @@
-import React, { ReactNode, useEffect, useMemo, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import React, { ReactNode, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { Inbox, PlusIcon, ShieldCheck } from 'lucide-react';
+import { PlusIcon } from 'lucide-react';
 
 import { Button } from '@/components/Button';
 import { Input } from '@/components/form/Input';
@@ -10,8 +10,6 @@ import { Loader } from '@/components/Loader';
 import { Tooltip } from '@/components/Tooltip';
 import { ClosedStateModal } from '@/components/ui/ClosedStateModal';
 import { useDeleteAsset, useUpdateAsset } from '@/hooks/useAssets';
-import { useGenericSearch } from '@/hooks/useGenericSearch';
-import { useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
 import { useUpdateRisk } from '@/hooks/useRisks';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { Empty } from '@/sections/Empty';
@@ -27,10 +25,10 @@ import {
   RiskStatus,
 } from '@/types';
 import { getAlertName } from '@/utils/alert.util';
+import { QueryStatus } from '@/utils/api';
 import { cn } from '@/utils/classname';
 import { formatDate } from '@/utils/date.util';
 import { getRiskStatusLabel } from '@/utils/riskStatus.util';
-import { sortBySeverityAndUpdated } from '@/utils/sortBySeverityAndUpdated.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
 import { useSearchParams as useSearchParamsUtil } from '@/utils/url.util';
 
@@ -42,69 +40,22 @@ const isAssetFn = (item: AlertType): item is Asset =>
 const isRiskFn = (item: AlertType): item is Risk =>
   item.key?.startsWith('#risk#');
 
-const AlertsWrapper: React.FC = () => {
-  const [query, setQuery] = useState<string | null>(null);
-
-  return <Alerts query={query} setQuery={setQuery} />;
-};
-
 interface Props {
-  query: string | null;
-  setQuery: (query: string) => void;
-  hideFilters?: boolean;
-  refetch?: (message?: string) => void;
+  items: AlertType[];
+  status: QueryStatus;
+  refetch: (message?: string) => void;
 }
 
 export const Alerts: React.FC<Props> = ({
-  query,
-  setQuery,
-  hideFilters,
   refetch,
+  status: dataStatus,
+  items,
 }: Props) => {
-  const { data: alertsWithUpdatedQueries, refetch: refetchAlerts } =
-    useGetAccountAlerts();
   const { getRiskDrawerLink, getAssetDrawerLink } = getDrawerLink();
-  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  // TODO - Refactor this on BE instead
-  const alerts = (alertsWithUpdatedQueries || []).map(alert => ({
-    ...alert,
-    value: alert.value.startsWith('#attribute')
-      ? `name:${alert.name}`
-      : alert.value,
-  }));
-
-  useEffect(() => {
-    const initialQuery = searchParams.get('query');
-    if (initialQuery) {
-      setQuery(initialQuery);
-    } else if (alerts && alerts.length > 0) {
-      setQuery(alerts[0].value);
-    }
-  }, [alerts, searchParams]);
-
-  const handleCategoryClick = (query: string) => {
-    setQuery(query);
-  };
-
-  const {
-    data,
-    refetch: refetchData,
-    status: dataStatus,
-  } = useGenericSearch(
-    {
-      query: query ?? '',
-    },
-    {
-      enabled: !!query,
-    }
-  );
-
   function handleRefetch(message?: string) {
-    refetchData();
-    refetchAlerts();
-    refetch && refetch(message);
+    refetch(message);
   }
 
   const renderItemDetails = (item: AlertType) => {
@@ -168,27 +119,6 @@ export const Alerts: React.FC<Props> = ({
     );
   };
 
-  const items = useMemo(() => {
-    if (data?.assets && data?.assets.length > 0) {
-      return data?.assets;
-    }
-    if (data?.attributes && data?.attributes.length > 0) {
-      return data?.attributes;
-    }
-    if (data?.risks && data?.risks.length > 0) {
-      // Exposed Risks
-      if (query?.startsWith('name:')) {
-        return (data?.risks || []).filter(
-          risk => (risk as Risk).status === RiskStatus.ExposedRisks
-        );
-      } else {
-        return sortBySeverityAndUpdated(data?.risks);
-      }
-    }
-    return [];
-  }, [data]);
-  const totalAlerts = alerts?.reduce((acc, alert) => acc + alert.count, 0);
-
   const virtualizer = useVirtualizer({
     count: items.length,
     getScrollElement: () => document.getElementById('body'),
@@ -198,123 +128,41 @@ export const Alerts: React.FC<Props> = ({
 
   return (
     <div className="flex size-full bg-white">
-      {/* Sidebar */}
-      {!hideFilters && (
-        <div className="w-1/4 overflow-auto border-r border-gray-200 bg-zinc-50 bg-gradient-to-l px-2 py-4">
-          <h2 className="mb-4 flex items-center py-2 text-lg font-medium text-gray-800">
-            <Inbox className="ml-3 mr-2 size-8 stroke-[2px] " />
-            <span className="mr-2 text-xl font-bold">
-              All Alerts{' '}
-              {alerts && alerts.length && (
-                <span>({totalAlerts?.toLocaleString()})</span>
-              )}
-            </span>
-          </h2>
-          {alerts === null && (
-            <div className="flex items-center justify-between px-3 italic text-gray-500">
-              <p className="text-md select-none font-medium">No alerts found</p>
-            </div>
+      <div className="flex size-full flex-col">
+        <div className="flex-1 overflow-auto">
+          {dataStatus === 'pending' && (
+            <>
+              {[...Array(5).keys()].map(index => (
+                <Loader
+                  key={index}
+                  className="mb-2 h-[77px] w-full"
+                  isLoading={true}
+                />
+              ))}
+            </>
           )}
-          <div>
-            {(alerts ?? []).map((alert, index) => (
-              <div
-                key={index}
-                className={cn(
-                  'flex cursor-pointer items-start p-4 ',
-                  query === alert.value
-                    ? 'bg-highlight/10 '
-                    : ' hover:bg-gray-100'
-                )}
-                onClick={e => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  searchParams.set('query', alert.value);
-                  setSearchParams(searchParams);
-                  handleCategoryClick(alert.value);
-                }}
-              >
-                <div className="flex flex-col space-y-1">
-                  <p className="text-md select-none font-medium">
-                    {alert.name}
-                  </p>
-
-                  <span className="text-xs font-normal text-gray-500">
-                    {alert.count} {alert.name.split(' ')[0].toLowerCase()}
-                  </span>
-                </div>
-              </div>
-            ))}
-            {alerts?.length === 0 && (
-              <div
-                className="flex cursor-pointer items-center justify-between space-x-2 border-l-[3px] border-brand bg-highlight/10 p-3"
-                onClick={() => {
-                  searchParams.set('query', '');
-                  setSearchParams(searchParams);
-                }}
-              >
-                <p className="text-md select-none font-medium">
-                  No alerts found
-                </p>
-                <span className="text-md font-medium">View Alerts</span>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Main Content */}
-      <div className="size-full">
-        {alerts === null && (
-          <div className="mt-16 flex flex-1 items-center justify-center">
-            <div className="text-center">
-              <ShieldCheck className="mx-auto mb-4 size-52 stroke-[1px] text-gray-900" />
-              <h3 className="mt-10 text-5xl font-bold text-gray-900">
-                {`You're all caught up!`}
-              </h3>
-              <p className="mt-4 text-lg text-gray-600">
-                No alerts to show. Enjoy your peace of mind.
-              </p>
-            </div>
-          </div>
-        )}
-        {query && (
-          <div className="flex size-full flex-col">
-            <div className="flex-1 overflow-auto">
-              {dataStatus === 'pending' && (
-                <>
-                  {[...Array(5).keys()].map(index => (
-                    <Loader
-                      key={index}
-                      className="mb-2 h-[77px] w-full"
-                      isLoading={true}
-                    />
-                  ))}
-                </>
-              )}
-              {dataStatus !== 'pending' && items.length > 0 && (
+          {dataStatus !== 'pending' && items.length > 0 && (
+            <div
+              className="relative"
+              style={{
+                height: `${virtualizer.getTotalSize()}px`,
+              }}
+            >
+              {virtualizer.getVirtualItems().map(virtualItem => (
                 <div
-                  className="relative"
+                  key={virtualItem.key}
+                  className="absolute left-0 top-0 w-full"
                   style={{
-                    height: `${virtualizer.getTotalSize()}px`,
+                    transform: `translateY(${virtualItem.start}px)`,
                   }}
                 >
-                  {virtualizer.getVirtualItems().map(virtualItem => (
-                    <div
-                      key={virtualItem.key}
-                      className="absolute left-0 top-0 w-full"
-                      style={{
-                        transform: `translateY(${virtualItem.start}px)`,
-                      }}
-                    >
-                      {renderItemDetails(items[virtualItem.index])}
-                    </div>
-                  ))}
+                  {renderItemDetails(items[virtualItem.index])}
                 </div>
-              )}
-              {dataStatus !== 'pending' && items.length === 0 && <Empty />}
+              ))}
             </div>
-          </div>
-        )}
+          )}
+          {dataStatus !== 'pending' && items.length === 0 && <Empty />}
+        </div>
       </div>
     </div>
   );
@@ -618,8 +466,6 @@ export const AlertAction = ({
     </div>
   );
 };
-
-export default AlertsWrapper;
 
 const spinnerStyle = {
   width: '20px',

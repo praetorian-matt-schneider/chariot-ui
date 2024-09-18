@@ -33,6 +33,7 @@ import { useAuth } from '@/state/auth';
 import { useGlobalState } from '@/state/global.state';
 import {
   AssetStatus,
+  GenericResource,
   Risk,
   RiskFilters,
   RiskStatus,
@@ -42,8 +43,10 @@ import {
 import { partition } from '@/utils/array.util';
 import { cn } from '@/utils/classname';
 import { getSeverityClass } from '@/utils/getSeverityClass.util';
+import { capitalize } from '@/utils/lodash.util';
 import { Regex } from '@/utils/regex.util';
 import { getRiskStatusLabel } from '@/utils/riskStatus.util';
+import { sortBySeverityAndUpdated } from '@/utils/sortBySeverityAndUpdated.util';
 import { useQueryFilters } from '@/utils/storage/useQueryParams.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
 import { generatePathWithSearch, useSearchParams } from '@/utils/url.util';
@@ -94,8 +97,11 @@ const RisksBeta: React.FC = () => {
   const { getRiskDrawerLink } = getDrawerLink();
 
   //   Security alert options
-  const { data: alertsWithConditions, status: alertsStatus } =
-    useGetAccountAlerts();
+  const {
+    data: alertsWithConditions,
+    status: alertsStatus,
+    refetch: refetchAlerts,
+  } = useGetAccountAlerts();
   const alertsWithoutAttributes = (alertsWithConditions || []).filter(
     alert => !alert.value.startsWith('#attribute')
   );
@@ -106,6 +112,107 @@ const RisksBeta: React.FC = () => {
   );
 
   const query = filters.search || filters.subQuery || filters.query || '';
+
+  const [exportingFilter, setExportingFilter] = useState<RiskFilters>();
+  const exportingQuery = exportingFilter
+    ? exportingFilter.search ||
+      exportingFilter.subQuery ||
+      exportingFilter.query ||
+      ''
+    : '';
+
+  const {
+    data,
+    refetch: refetchData,
+    status: dataStatus,
+  } = useGenericSearch(
+    {
+      query: query ?? '',
+    },
+    {
+      enabled: !!query,
+    }
+  );
+
+  const {
+    data: exportingData,
+    isFetching: isFetchingExportingData,
+    hasNextPage: exportingDataHasNextPage,
+    fetchNextPage: exportingDataFetchNextPage,
+  } = useGenericSearch(
+    {
+      query: exportingQuery,
+    },
+    {
+      enabled: Boolean(exportingFilter),
+    }
+  );
+  const { items } = useMemo(
+    () => getAlertItems(data, filters),
+    [JSON.stringify({ data, filters })]
+  );
+
+  const selectedCondition = useMemo(() => {
+    return alertsWithoutAttributes.find(({ value }) => value === filters.query);
+  }, [JSON.stringify({ alertsWithoutAttributes, filters })]);
+
+  useEffect(() => {
+    if (exportingFilter && !isFetchingExportingData) {
+      if (exportingDataHasNextPage) {
+        exportingDataFetchNextPage();
+      } else {
+        // End of all assets
+
+        setExportingFilter(undefined);
+
+        const { exportingData: filteredExportingData, type } = getAlertItems(
+          exportingData,
+          exportingFilter
+        );
+
+        const riskStatus = exportingFilter.subQuery;
+
+        let fileName = '';
+
+        if (filters.search) {
+          fileName = `Risks with search ${filters.search}`;
+        } else if (filters.query.startsWith('exposure')) {
+          const [, name, value] = filters.query.split('-');
+
+          fileName = `Exposure risk with ${name} ${value}`;
+        } else {
+          const { severityLabel } = getRiskStatusLabel(riskStatus);
+          const prefix = riskStatus ? `${severityLabel} ` : '';
+
+          fileName = `${prefix}${capitalize(type)}s in ${selectedCondition?.name}`;
+        }
+
+        const exportingDataString = exportingData
+          ? JSON.stringify(filteredExportingData, null, 2)
+          : '';
+        const blob = new Blob([exportingDataString], {
+          type: 'application/json',
+        });
+        const href = URL.createObjectURL(blob);
+
+        // create "a" HTLM element with href to file
+        const link = document.createElement('a');
+        link.href = href;
+        link.download = fileName + '.json';
+        document.body.appendChild(link);
+        link.click();
+
+        // clean up "a" element & remove ObjectURL
+        document.body.removeChild(link);
+        URL.revokeObjectURL(href);
+      }
+    }
+  }, [
+    exportingQuery,
+    isFetchingExportingData,
+    exportingDataHasNextPage,
+    JSON.stringify({ exportingFilter, selectedCondition }),
+  ]);
 
   const { friend } = useAuth();
   const { data: accounts } = useMy({
@@ -365,6 +472,8 @@ const RisksBeta: React.FC = () => {
   }, [JSON.stringify({ subQuery: filters.subQuery })]);
 
   const showHelper = (message?: string) => {
+    refetchData();
+    refetchAlerts();
     if (message) {
       handleRiskAction(message);
     }
@@ -431,6 +540,13 @@ const RisksBeta: React.FC = () => {
           alert: {
             value: (alertsWithoutAttributes || []).map(alert => alert.value),
           },
+        }}
+        export={{
+          onClick: () => {
+            setExportingFilter(filters);
+          },
+          isExporting: exportingQuery !== '',
+          disbled: items.length === 0,
         }}
         tableHeader={
           <div className="w-full">
@@ -503,12 +619,7 @@ const RisksBeta: React.FC = () => {
         }
       >
         {query && (
-          <Alerts
-            query={query}
-            setQuery={() => {}}
-            hideFilters={true}
-            refetch={showHelper}
-          />
+          <Alerts items={items} status={dataStatus} refetch={showHelper} />
         )}
         {!query && <Empty />}
       </FancyTable>
@@ -610,3 +721,31 @@ export const SingularAlertDescriptions: Record<string, string> = {
   [AssetStatus.ActiveLow]: 'Should this asset be scanned for risks?',
   [RiskStatus.ExposedRisks]: 'Is this exposure valid?',
 };
+
+function getAlertItems(
+  data: GenericResource | undefined,
+  filters: RiskFilters
+) {
+  if (data?.assets && data?.assets.length > 0 && !filters.search) {
+    const assets = data?.assets || [];
+    return {
+      items: assets,
+      exportingData: {
+        assets: assets,
+      },
+      type: 'asset',
+    };
+  }
+  if (data?.risks && data?.risks.length > 0) {
+    const sortedRisks = sortBySeverityAndUpdated(data?.risks);
+
+    return {
+      items: sortedRisks,
+      exportingData: {
+        risks: sortedRisks,
+      },
+      type: 'risk',
+    };
+  }
+  return { items: [], exportingData: {}, type: '' };
+}
