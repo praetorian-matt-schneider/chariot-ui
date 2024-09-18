@@ -19,6 +19,7 @@ import { SingularAlertDescriptions } from '@/sections/RisksBeta';
 import {
   Asset,
   AssetStatus,
+  AssetStatusLabel,
   Attribute,
   Condition,
   Risk,
@@ -51,7 +52,7 @@ interface Props {
   query: string | null;
   setQuery: (query: string) => void;
   hideFilters?: boolean;
-  refetch?: () => void;
+  refetch?: (message?: string) => void;
 }
 
 export const Alerts: React.FC<Props> = ({
@@ -100,10 +101,10 @@ export const Alerts: React.FC<Props> = ({
     }
   );
 
-  function handleRefetch() {
+  function handleRefetch(message?: string) {
     refetchData();
     refetchAlerts();
-    refetch && refetch();
+    refetch && refetch(message);
   }
 
   const renderItemDetails = (item: AlertType) => {
@@ -326,7 +327,7 @@ export const AlertAction = ({
   extraAction,
 }: {
   item: AlertType;
-  handleRefetch: () => void;
+  handleRefetch: (message?: string) => void;
   showQuestionTooltip?: boolean;
   extraAction?: ReactNode;
 }) => {
@@ -352,8 +353,25 @@ export const AlertAction = ({
       name: asset.name,
       status,
       showSnackbar: true,
-    }).then(handleRefetch);
+    }).then(() =>
+      handleRefetch(
+        `Asset ${asset.name} status updated to ${AssetStatusLabel[status]}.`
+      )
+    );
   }
+
+  const securityAlertLookup = (status: string) => {
+    switch (status) {
+      case 'O':
+        return 'Requires Remediation';
+      case 'R':
+        return 'Remediated';
+      case 'T':
+        return 'Pending Triage';
+      default:
+        return status;
+    }
+  };
 
   function handleRiskChange(
     risk: Risk,
@@ -367,7 +385,8 @@ export const AlertAction = ({
       showSnackbar: true,
       comment: risk.comment,
     }).then(() => {
-      handleRefetch();
+      const sentence = `${risk.name} has been moved to ${securityAlertLookup(status)}.`;
+      handleRefetch(sentence);
     });
   }
 
@@ -393,10 +412,11 @@ export const AlertAction = ({
           onClose={() => {
             setIsClosedSubStateModalOpen(false);
           }}
-          onSuccess={() => {
+          onSuccess={message => {
             setIsClosedSubStateModalOpen(false);
             setSelectedItem(null);
             removeSearchParams(StorageKey.DRAWER_COMPOSITE_KEY);
+            handleRefetch(message);
           }}
         />
         {isAsset && item.status === AssetStatus.ActiveLow && (
@@ -425,7 +445,7 @@ export const AlertAction = ({
                   deleteAsset({
                     key: item.key,
                     name: item.name,
-                  }).then(handleRefetch);
+                  }).then(() => handleRefetch(`Asset ${item.name} deleted.`));
                 }}
                 disabled={deleteAssetStatus === 'pending'}
               >

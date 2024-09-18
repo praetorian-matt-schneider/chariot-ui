@@ -28,6 +28,7 @@ import { RenderHeaderExtraContentSection } from '@/sections/AuthenticatedApp';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
 import { Empty } from '@/sections/Empty';
 import { getCurrentPlan } from '@/sections/overview/Overview';
+import RiskNotificationBar from '@/sections/RiskNotificationBar';
 import { useAuth } from '@/state/auth';
 import { useGlobalState } from '@/state/global.state';
 import {
@@ -61,6 +62,18 @@ const RisksBeta: React.FC = () => {
       subQuery: '',
     },
   });
+  const [notification, setNotification] = useState<{
+    message: string;
+  } | null>(null);
+
+  const handleRiskAction = (message: string) => {
+    setNotification({ message });
+
+    // Automatically close the notification after 3 seconds (optional)
+    setTimeout(() => {
+      setNotification(null);
+    }, 3000);
+  };
 
   const [isCTAOpen, setIsCTAOpen] = useState<boolean>(false);
   const closeCTADrawer = () => {
@@ -351,6 +364,12 @@ const RisksBeta: React.FC = () => {
     return filters.subQuery ? filters.subQuery.slice(-1) : '';
   }, [JSON.stringify({ subQuery: filters.subQuery })]);
 
+  const showHelper = (message?: string) => {
+    if (message) {
+      handleRiskAction(message);
+    }
+  };
+
   return (
     <>
       <RenderHeaderExtraContentSection>
@@ -376,6 +395,16 @@ const RisksBeta: React.FC = () => {
           </p>
         </div>
       </RenderHeaderExtraContentSection>
+
+      <div className="relative">
+        {/* The RiskNotificationBar appears on top of the list */}
+        {notification && (
+          <RiskNotificationBar
+            message={notification.message}
+            onClose={() => setNotification(null)}
+          />
+        )}
+      </div>
       <FancyTable
         addNew={{ onClick: () => onOpenRiskChange(true) }}
         search={{
@@ -474,7 +503,12 @@ const RisksBeta: React.FC = () => {
         }
       >
         {query && (
-          <Alerts query={query} setQuery={() => {}} hideFilters={true} />
+          <Alerts
+            query={query}
+            setQuery={() => {}}
+            hideFilters={true}
+            refetch={showHelper}
+          />
         )}
         {!query && <Empty />}
       </FancyTable>

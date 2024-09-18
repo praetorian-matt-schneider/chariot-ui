@@ -7,7 +7,7 @@ interface ClosedStateModal {
   risk: Risk;
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: (message: string) => void;
 }
 
 const riskClosedStatusList = [
@@ -54,10 +54,11 @@ export const ClosedStateModal = (props: ClosedStateModal) => {
         status: `${status}${severity}`,
         comment,
       });
+      onSuccess(`Great work! ${risk.name} has been remediated.`);
     } else {
       await deleteRisk([{ ...risk, comment }]);
+      onSuccess(`${risk.name} has been closed.`);
     }
-    onSuccess();
   };
 
   return (
