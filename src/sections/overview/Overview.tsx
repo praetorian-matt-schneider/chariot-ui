@@ -100,14 +100,22 @@ const getStatusIcon = (status: string) => {
 export const getJobStatusIcon = (status: JobStatus, className?: string) => {
   switch (status) {
     case JobStatus.Fail:
-      return <XCircleIcon className={cn('size-7 text-[#F87171]', className)} />;
+      return (
+        <XCircleIcon
+          className={cn('size-7 text-[#F87171] shrink-0', className)}
+        />
+      );
     case JobStatus.Running:
-      return <ArrowPathIcon className={cn('size-7 animate-spin', className)} />;
+      return (
+        <ArrowPathIcon
+          className={cn('size-7 animate-spin shrink-0', className)}
+        />
+      );
     case JobStatus.Queued:
       return (
         <div
           className={cn(
-            'flex size-7 items-center justify-center rounded-full bg-gray-300',
+            'flex size-7 items-center justify-center rounded-full bg-gray-300 shrink-0',
             className
           )}
         >
@@ -117,7 +125,10 @@ export const getJobStatusIcon = (status: JobStatus, className?: string) => {
     default:
       return (
         <CheckCircleIcon
-          className={cn('size-8 text-center text-[#10B981]', className)}
+          className={cn(
+            'size-8 text-center text-[#10B981] shrink-0',
+            className
+          )}
         />
       );
   }
