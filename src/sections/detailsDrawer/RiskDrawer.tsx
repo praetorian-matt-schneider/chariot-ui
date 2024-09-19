@@ -6,7 +6,7 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   ArrowPathIcon,
   DocumentTextIcon,
@@ -75,6 +75,7 @@ const isScannable = (attribute: Attribute) =>
     attribute.value.startsWith('#asset'));
 
 export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
+  const navigate = useNavigate();
   const [selectedTab, setSelectedTab] = useState('description');
   const [isWarningModalOpen, setIsWarningModalOpen] = useState(false);
   const { removeSearchParams } = useSearchParams();
@@ -266,7 +267,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     <Drawer
       open={open}
       onClose={handleClose}
-      onBack={handleClose}
+      onBack={() => navigate(-1)}
       className={cn('w-full rounded-t-lg pb-0 shadow-lg')}
       contentClassName="flex rounded-t-lg"
     >
@@ -414,7 +415,6 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                               onClick={async () => {
                                 const [response] = await bulkReRunJobs(
                                   sourceKeys.map(jobKey => ({
-                                    capability: risk.source,
                                     jobKey,
                                     config: {
                                       test: risk.name,

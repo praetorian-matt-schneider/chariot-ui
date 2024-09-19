@@ -210,8 +210,7 @@ export const AssetDrawer: React.FC<Props> = ({ compositeKey, open }) => {
                           endIcon={<ArrowPathIcon className="size-4" />}
                           onClick={() => {
                             runJob({
-                              capability: 'nuclei',
-                              jobKey: `#asset#${asset.name}#${asset.dns}`,
+                              jobKey: `#asset#${asset.dns}#${asset.name}`,
                             });
                           }}
                         >

@@ -233,7 +233,7 @@ const Jobs: React.FC = () => {
             )}
             onClick={() => {
               if (!isRunning) {
-                reRunJob({ capability: job.source, jobKey: job.key });
+                reRunJob({ jobKey: job.key });
               }
             }}
           />
