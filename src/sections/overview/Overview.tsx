@@ -902,7 +902,7 @@ export const RiskStats = () => {
               title=""
               subTitle=""
               accept={{
-                'application/xml': ['.xml'],
+                'application/xml': ['.nessus'],
               }}
             >
               <div className="flex max-w-xs items-center justify-between gap-2">
@@ -911,8 +911,7 @@ export const RiskStats = () => {
                     Want a dry run?
                   </h2>
                   <p className="text-xs text-white/70">
-                    Test our noise reduction by quickly uploading a Nessus XML
-                    file.
+                    Test our noise reduction by uploading a .nessus file.
                   </p>
                 </div>
                 <ArrowUpTrayIcon className="size-12 text-white/60" />
