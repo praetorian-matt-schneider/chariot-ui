@@ -102,7 +102,7 @@ export const Stepper = () => {
   return (
     <AnimatePresence>
       {isVisible && (
-        <div className="sticky bottom-0">
+        <div className="sticky bottom-0 z-10">
           <motion.div
             initial={{ y: 300, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -110,7 +110,7 @@ export const Stepper = () => {
             transition={{ duration: 0.5, type: 'tween' }}
           >
             <div className="m-auto my-4 max-w-screen-xl px-4">
-              <ul className="flex w-full list-none rounded border-2 border-brand/40 bg-brand/20 p-0 text-sm">
+              <ul className="flex w-full list-none rounded border-2 border-brand/40 bg-[#c5bce5] p-0 text-sm">
                 {steps.map(({ label, Icon, status, onClick }, index) => (
                   <li
                     key={index}
