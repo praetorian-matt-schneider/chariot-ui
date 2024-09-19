@@ -847,8 +847,6 @@ export const RiskStats = () => {
     }
   }
 
-  const getFilesBeingScanned = files.map(file => file.name).join(', ');
-
   return (
     <Loader
       isLoading={riskCountStatus === 'pending'}
@@ -859,11 +857,11 @@ export const RiskStats = () => {
         <div className="flex flex-1 flex-col gap-2">
           <h2 className="text-lg font-bold text-white">{title}</h2>
           {Subtitle && (
-            <p className="max-w-xl text-xs text-white/70">
+            <p className="text-xs text-white/70">
               <Subtitle />
             </p>
           )}
-          <p className="max-w-xl text-xs text-white">
+          <p className="text-xs text-white">
             Chariot runs continuous security scans across your attack surface,
             looking for everything from policy misconfigurations to material
             risks. We then filter out the noise.
@@ -874,33 +872,52 @@ export const RiskStats = () => {
           isLoading={filesStatus === 'pending' || isUploading}
           className="h-24 w-[356px] bg-header-dark"
         >
-          <Dropzone
-            type="arrayBuffer"
-            className="mt-1 h-auto border-header bg-header"
-            onFilesDrop={handleNessusFileDrop}
-            title=""
-            subTitle=""
-            accept={{
-              'application/xml': ['.nessus'],
-            }}
-          >
-            <div className="flex max-w-xs items-center justify-between gap-2">
-              <div>
-                <h2 className="text-lg font-bold text-white">
-                  Want a dry run?
-                  {files.length > 0 && (
-                    <Tooltip title={`Scanning: ${getFilesBeingScanned}`}>
-                      <div className="ml-2 inline-block size-3 animate-pulse items-center justify-center rounded-full bg-green-400" />
-                    </Tooltip>
-                  )}
-                </h2>
-                <p className="text-xs text-white/70">
-                  Test our noise reduction by uploading a .nessus file.
-                </p>
+          {files.length > 0 && (
+            <div className="mt-1 h-auto rounded border-2 border-header-dark p-4 ">
+              <div className="flex max-w-xs items-center justify-between gap-2">
+                <div>
+                  <h2 className="text-lg font-bold text-white">
+                    Vulnerabilities Scanning
+                  </h2>
+                  <p className="text-xs text-white/70">
+                    {`We're testing the noise reduction from your uploaded Nessus
+                    XML file.`}
+                  </p>
+                </div>
+                <ArrowPathIcon
+                  className="spin-slow duration-2000 size-12 text-white/60"
+                  style={{
+                    animation: isScanning ? 'spin 2s linear infinite' : 'none',
+                  }}
+                />
               </div>
-              <ArrowUpTrayIcon className="size-12 text-white/60" />
             </div>
-          </Dropzone>
+          )}
+
+          {files.length === 0 && (
+            <Dropzone
+              type="arrayBuffer"
+              className="mt-1 h-auto border-header bg-header"
+              onFilesDrop={handleNessusFileDrop}
+              title=""
+              subTitle=""
+              accept={{
+                'application/xml': ['.nessus'],
+              }}
+            >
+              <div className="flex max-w-xs items-center justify-between gap-2">
+                <div>
+                  <h2 className="text-lg font-bold text-white">
+                    Want a dry run?
+                  </h2>
+                  <p className="text-xs text-white/70">
+                    Test our noise reduction by uploading a .nessus file.
+                  </p>
+                </div>
+                <ArrowUpTrayIcon className="size-12 text-white/60" />
+              </div>
+            </Dropzone>
+          )}
         </Loader>
       </section>
     </Loader>
