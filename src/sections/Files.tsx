@@ -439,7 +439,7 @@ const FileItem: React.FC<FileItemProps> = ({
               setFilename(file.name);
             }}
           >
-            {file.name.replace(`${currentFolder.query}/` ?? '/', '')}
+            {file.name.replace(`${currentFolder.query}/`, '')}
           </button>
           <p className="mt-1 text-xs text-gray-400">
             Added {formatDate(file.updated)}
