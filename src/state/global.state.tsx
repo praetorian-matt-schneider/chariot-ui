@@ -19,6 +19,8 @@ interface GlobalState {
     asset: UseModalState;
     file: UseModalState;
     upgrade: UseModalState;
+    pushNotification: UseModalState;
+    surfaceSetup: UseModalState;
   };
   awsMarketplaceConfig: {
     value?: Record<string, string>;
@@ -45,6 +47,8 @@ export const GlobalStateProvider: React.FC<{ children: React.ReactNode }> = ({
   const [riskOpen, setRiskOpen] = useState(false);
   const [assetOpen, setAssetOpen] = useState(false);
   const [fileOpen, setFileOpen] = useState(false);
+  const [pushNotificationOpen, setPushNotificationOpen] = useState(false);
+  const [surfaceSetupOpen, setSurfaceSetupOpen] = useState(false);
 
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
@@ -80,6 +84,14 @@ export const GlobalStateProvider: React.FC<{ children: React.ReactNode }> = ({
           },
           asset: { open: assetOpen, onOpenChange: setAssetOpen },
           file: { open: fileOpen, onOpenChange: setFileOpen },
+          pushNotification: {
+            open: pushNotificationOpen,
+            onOpenChange: setPushNotificationOpen,
+          },
+          surfaceSetup: {
+            open: surfaceSetupOpen,
+            onOpenChange: setSurfaceSetupOpen,
+          },
         },
         awsMarketplaceConfig: {
           value: awsMarketplaceConfig,

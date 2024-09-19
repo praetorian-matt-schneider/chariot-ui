@@ -1,5 +1,9 @@
 import { ComponentType } from 'react';
-import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import {
+  ExclamationTriangleIcon,
+  PencilIcon,
+  PlusIcon,
+} from '@heroicons/react/24/outline';
 import {
   BellIcon,
   CheckCircleIcon,
@@ -10,21 +14,42 @@ import {
 import { Button } from '@/components/Button';
 import { Tooltip } from '@/components/Tooltip';
 import { useModifyAccount } from '@/hooks';
-import { GetStartedStatus } from '@/types';
+import { AccountWithType } from '@/hooks/useIntegration';
+import { Integrations } from '@/sections/overview/Integrations';
+import { GetStartedStatus, Integration, IntegrationMeta } from '@/types';
 import { cn } from '@/utils/classname';
 import { pluralize } from '@/utils/pluralize.util';
 
 export const GettingStartedStep: React.FC<{
+  className?: string;
   title: string;
   description: string;
   status: GetStartedStatus;
   focusedStep: boolean;
   Icon: ComponentType<React.SVGProps<SVGSVGElement>>;
   onClick: () => void;
-}> = ({ title, description, status, focusedStep, Icon, onClick }) => {
+  button: {
+    text: string;
+    Icon: ComponentType<React.SVGProps<SVGSVGElement>>;
+  };
+  connectedIntegrations?: IntegrationMeta[];
+}> = ({
+  className,
+  title,
+  description,
+  status,
+  focusedStep,
+  Icon,
+  onClick,
+  button,
+  connectedIntegrations,
+}) => {
   return (
     <div
-      className="flex flex-1 cursor-pointer flex-col items-center rounded-lg border-2 border-dashed border-header-dark bg-header p-4 pt-0"
+      className={cn(
+        'flex flex-1 cursor-pointer items-start bg-header p-4 gap-2',
+        className
+      )}
       onClick={onClick}
     >
       <Tooltip
@@ -33,7 +58,7 @@ export const GettingStartedStep: React.FC<{
       >
         <div
           className={cn(
-            'flex size-14 items-center justify-center text-lg font-bold text-header',
+            'flex size-14 justify-center text-lg font-bold text-header',
             focusedStep && 'animate-bounce'
           )}
         >
@@ -53,8 +78,33 @@ export const GettingStartedStep: React.FC<{
           )}
         </div>
       </Tooltip>
-      <h3 className="mb-2 text-lg font-semibold text-header">{title}</h3>
-      <p className="text-center text-xs text-default-light">{description}</p>
+      <div className="flex flex-col gap-2">
+        <div className="flex justify-between">
+          <h3 className="flex-1 text-lg font-semibold text-header">{title}</h3>
+
+          <div className="flex">
+            {(connectedIntegrations || []).map(({ logo, name }, index) => (
+              <div
+                key={name}
+                className={cn(
+                  'justify-items flex size-6 items-center rounded border border-brand bg-white p-1',
+                  index > 0 && '-ml-1'
+                )}
+              >
+                <img className="mx-auto" src={logo} />
+              </div>
+            ))}
+          </div>
+        </div>
+        <p className="text-xs text-default-light">{description}</p>
+        <Button
+          className="flex w-fit rounded-full border border-brand px-3 py-1 text-xs text-white/60"
+          styleType="textPrimary"
+          startIcon={<button.Icon className="size-4" />}
+        >
+          {button.text}
+        </Button>
+      </div>
     </div>
   );
 };
@@ -73,7 +123,7 @@ export const GettingStarted: React.FC<{
   isFreemiumMaxed: boolean;
   domain?: string;
   surfaces?: number;
-  notifications?: number;
+  connectedNotifications: AccountWithType[];
 }> = ({
   completedSteps,
   onRootDomainClick,
@@ -83,7 +133,7 @@ export const GettingStarted: React.FC<{
   isFreemiumMaxed,
   domain,
   surfaces,
-  notifications,
+  connectedNotifications,
 }) => {
   const focusedStepIndex = [
     completedSteps.rootDomain,
@@ -117,16 +167,22 @@ export const GettingStarted: React.FC<{
         )}
         {!isFreemiumMaxed && (
           <>
-            <div className="mb-6 flex w-full justify-between gap-6">
+            <div className="mb-6 flex w-full justify-between overflow-hidden rounded-lg border-2 border-header-dark">
               <GettingStartedStep
+                className={'border-r-2 border-header-dark'}
                 title={domain ?? 'Confirm Your Root Domain'}
                 description="Start by defining your root domain. This helps us identify the core assets you need to monitor."
                 status={completedSteps.rootDomain}
                 focusedStep={focusedStepIndex === 0}
                 Icon={GlobeAltIcon}
                 onClick={onRootDomainClick}
+                button={{
+                  text: 'Edit Root Domain',
+                  Icon: PencilIcon,
+                }}
               />
               <GettingStartedStep
+                className={'border-r-2 border-header-dark'}
                 title={
                   surfaces && surfaces > 0
                     ? `${surfaces?.toLocaleString()} ${pluralize(surfaces, 'Surface')} Configured`
@@ -137,11 +193,15 @@ export const GettingStarted: React.FC<{
                 focusedStep={focusedStepIndex === 1}
                 Icon={CloudIcon}
                 onClick={onAttackSurfaceClick}
+                button={{
+                  text: 'Surface',
+                  Icon: PlusIcon,
+                }}
               />
               <GettingStartedStep
                 title={
-                  notifications && notifications > 0
-                    ? `${notifications?.toLocaleString()} ${pluralize(notifications, 'Notification')} Configured`
+                  connectedNotifications.length > 0
+                    ? `${connectedNotifications.length?.toLocaleString()} ${pluralize(connectedNotifications.length, 'Notification')} Configured`
                     : 'Add Push Notifications'
                 }
                 description="Configure notifications to stay informed about potential risks and vulnerabilities."
@@ -149,6 +209,13 @@ export const GettingStarted: React.FC<{
                 focusedStep={focusedStepIndex === 2}
                 Icon={BellIcon}
                 onClick={onRiskNotificationsClick}
+                button={{
+                  text: 'Notification Method',
+                  Icon: PlusIcon,
+                }}
+                connectedIntegrations={connectedNotifications.map(
+                  ({ member }) => Integrations[member as Integration]
+                )}
               />
             </div>
           </>

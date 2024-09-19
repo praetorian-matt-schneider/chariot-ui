@@ -1,4 +1,8 @@
+import confetti from 'canvas-confetti';
+import { toast } from 'sonner';
+
 import { Modal } from '@/components/Modal';
+import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useDeleteRisk, useUpdateRisk } from '@/hooks/useRisks';
 import { Risk, RiskStatus } from '@/types';
 import { getRiskStatusLabel } from '@/utils/riskStatus.util';
@@ -39,6 +43,9 @@ export const ClosedStateModal = (props: ClosedStateModal) => {
   const { severity } = getRiskStatusLabel(risk?.status);
   const { mutate: updateRisk } = useUpdateRisk();
   const { mutate: deleteRisk } = useDeleteRisk();
+  const { data: risksGeneric } = useGenericSearch({
+    query: 'status:R',
+  });
 
   const handleStatusChange = async ({
     status,
@@ -48,6 +55,7 @@ export const ClosedStateModal = (props: ClosedStateModal) => {
     comment: string;
   }) => {
     if (status === RiskStatus.Remediated) {
+      const isFirstRemediatedRisk = (risksGeneric?.risks || []).length === 0;
       await updateRisk({
         key: risk.key,
         name: risk.name,
@@ -55,6 +63,16 @@ export const ClosedStateModal = (props: ClosedStateModal) => {
         comment,
       });
       onSuccess(`Great work! ${risk.name} has been remediated.`);
+      if (isFirstRemediatedRisk) {
+        confetti({
+          particleCount: 150,
+          spread: 60,
+        });
+        toast.success('Onboarding complete', {
+          description:
+            'All the onboarding steps have successfully been completed.',
+        });
+      }
     } else {
       await deleteRisk([{ ...risk, comment }]);
       onSuccess(`${risk.name} has been closed.`);

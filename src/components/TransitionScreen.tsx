@@ -23,7 +23,7 @@ const TransitionScreen: React.FC<TransitionScreenProps> = ({
 
   return (
     <div
-      className={`fixed inset-0 flex flex-col items-center justify-center bg-black bg-opacity-70 transition-opacity duration-500 ${
+      className={`fixed inset-0 flex flex-col items-center justify-center bg-black/70 transition-opacity duration-500 ${
         show ? 'opacity-100' : 'opacity-0'
       }`}
       style={{

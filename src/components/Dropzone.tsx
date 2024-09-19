@@ -1,5 +1,5 @@
 import { PropsWithChildren } from 'react';
-import { useDropzone } from 'react-dropzone';
+import { DropzoneOptions, useDropzone } from 'react-dropzone';
 import { PlusCircleIcon } from '@heroicons/react/24/solid';
 import { toast } from 'sonner';
 
@@ -24,6 +24,7 @@ interface Props<T extends FileReadType> extends PropsWithChildren {
   className?: string;
   type: T;
   multiple?: boolean;
+  accept?: DropzoneOptions['accept'];
 }
 
 export function Dropzone<T extends FileReadType>(props: Props<T>) {
@@ -35,6 +36,7 @@ export function Dropzone<T extends FileReadType>(props: Props<T>) {
     children,
     className,
     multiple = true,
+    accept,
   } = props;
 
   const handleDrop = (files: File[]): void => {
@@ -75,6 +77,7 @@ export function Dropzone<T extends FileReadType>(props: Props<T>) {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: handleDrop,
     multiple,
+    accept,
   });
 
   return (

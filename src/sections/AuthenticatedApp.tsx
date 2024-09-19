@@ -1,21 +1,16 @@
-import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import React, { ReactNode, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import OnboardingChecklist from '@/components/OnboardingChecklist';
 import { ShortcutsHelper } from '@/components/ui/Shortcuts';
 import { useMy } from '@/hooks';
 import { useGetAccountDetails } from '@/hooks/useAccounts';
-import { useGetRootDomain } from '@/hooks/useAttribute';
-import { useGenericSearch } from '@/hooks/useGenericSearch';
-import { useIntegration } from '@/hooks/useIntegration';
 import { AddAsset } from '@/sections/add/AddAsset';
 import { AddFile } from '@/sections/add/AddFile';
 import { AddRisks } from '@/sections/add/AddRisks';
 import { DetailsDrawer } from '@/sections/detailsDrawer';
 import { LinkAWS } from '@/sections/LinkAWS';
 import { NewUserSeedModal } from '@/sections/NewUserSeedModal';
-import { getCurrentPlan } from '@/sections/overview/Overview';
 import { ProofOfExploit } from '@/sections/ProofOfExploit';
 import { TopNavBar } from '@/sections/topNavBar/TopNavBar';
 import { UpgradeModal } from '@/sections/Upgrade';
@@ -23,7 +18,6 @@ import { useAuth } from '@/state/auth';
 import { useBreadCrumbsContext } from '@/state/breadcrumbs';
 import { cn } from '@/utils/classname';
 import { useGetScreenSize } from '@/utils/misc.util';
-import { Regex } from '@/utils/regex.util';
 import { getRoute } from '@/utils/route.util';
 import { useSticky } from '@/utils/sticky.util';
 
@@ -44,7 +38,6 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
     resource: 'account',
   });
 
-  const currentPlan = getCurrentPlan({ accounts, friend });
   const { name: displayName } = useGetAccountDetails(accounts);
 
   const navigate = useNavigate();
@@ -96,21 +89,6 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
     order: 1,
   });
 
-  const {
-    data: { riskNotificationStatus, attackSurfaceStatus },
-  } = useIntegration();
-  const { data: alerts } = useMy({
-    resource: 'condition',
-  });
-  const { data: rootDomain } = useGetRootDomain();
-  const hasCustomAttributes = useMemo(() => {
-    return alerts.some(alert => alert.key.match(Regex.CUSTOM_ALERT_KEY));
-  }, [alerts]);
-  const { data: risksGeneric } = useGenericSearch({
-    query: 'status:R',
-  });
-  const hasRemediatedRisk = (risksGeneric?.risks || [])?.length > 0;
-
   return (
     <div
       className={'flex h-full flex-col items-center overflow-hidden bg-layer1'}
@@ -134,14 +112,6 @@ function AuthenticatedAppComponent(props: AuthenticatedApp) {
       <AddFile />
       <UpgradeModal />
       <LinkAWS />
-      <OnboardingChecklist
-        rootDomain={rootDomain}
-        attackSurfacesConfigured={attackSurfaceStatus}
-        notificationsConfigured={riskNotificationStatus}
-        exposureAlertsConfigured={alerts?.length > 0}
-        risksRemediated={hasRemediatedRisk}
-        plan={currentPlan}
-      />
     </div>
   );
 }

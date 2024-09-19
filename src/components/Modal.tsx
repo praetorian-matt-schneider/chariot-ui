@@ -12,7 +12,7 @@ import { Button, ButtonProps } from '@/components/Button';
 import { cn } from '@/utils/classname';
 import { getTransitionSettings } from '@/utils/transition.util';
 
-type Size = 'xs' | 'lg' | 'xl' | '3xl' | '6xl';
+type Size = 'xs' | 'lg' | 'xl' | '3xl' | '4xl' | '5xl' | '6xl';
 interface Props extends PropsWithChildren {
   className?: string;
   footer?: {
@@ -248,6 +248,8 @@ export const ModalWrapper: React.FC<ModalWrapperProps> = props => {
     lg: 'max-w-lg',
     xl: 'max-w-xl',
     '3xl': 'max-w-3xl',
+    '4xl': 'max-w-4xl',
+    '5xl': 'max-w-5xl',
     '6xl': 'max-w-6xl',
   };
 
