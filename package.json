@@ -48,6 +48,7 @@
   "scripts": {
     "start": "vite",
     "build": "tsc && vite build",
+    "future": "npm run tag-future && npm run build && aws s3 sync ./build s3://future.chariot.praetorian.com",
     "lint": "npm run ts:check && npm run prettier:fix && npm run eslint:fix",
     "serve": "vite preview",
     "prettier": "prettier . --config .prettierrc.json --check",
@@ -55,7 +56,9 @@
     "eslint": "eslint . --ext .ts,.tsx",
     "eslint:fix": "npm run eslint -- --fix",
     "ts": "tsc --noemit",
-    "ts:watch": "npm run ts:check -w"
+    "ts:watch": "npm run ts:check -w",
+    "tag-future": "git tag -d future; git push origin --delete future; git tag future && git push origin future",
+    "reinstall": "rm -rf ./node_modules && rm -f package-lock.json && npm install"
   },
   "eslintConfig": {
     "extends": [
