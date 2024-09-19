@@ -857,11 +857,11 @@ export const RiskStats = () => {
         <div className="flex flex-1 flex-col gap-2">
           <h2 className="text-lg font-bold text-white">{title}</h2>
           {Subtitle && (
-            <p className="text-xs text-white/70">
+            <p className="max-w-xl text-xs text-white/70">
               <Subtitle />
             </p>
           )}
-          <p className="text-xs text-white">
+          <p className="max-w-xl text-xs text-white">
             Chariot runs continuous security scans across your attack surface,
             looking for everything from policy misconfigurations to material
             risks. We then filter out the noise.
