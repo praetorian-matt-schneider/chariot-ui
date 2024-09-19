@@ -414,7 +414,6 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                               onClick={async () => {
                                 const [response] = await bulkReRunJobs(
                                   sourceKeys.map(jobKey => ({
-                                    capability: risk.source,
                                     jobKey,
                                     config: {
                                       test: risk.name,

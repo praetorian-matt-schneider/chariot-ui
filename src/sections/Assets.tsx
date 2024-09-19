@@ -492,7 +492,6 @@ const Assets: React.FC = () => {
               bulkReRunJob(
                 assets.map(asset => {
                   return {
-                    capability: 'nuclei',
                     jobKey: `#asset#${asset.name}#${asset.dns}`,
                   };
                 })

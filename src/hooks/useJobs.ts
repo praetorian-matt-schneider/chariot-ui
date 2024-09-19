@@ -22,15 +22,8 @@ export function useReRunJob() {
 
   return useMutation({
     defaultErrorMessage: 'Failed to re run job',
-    mutationFn: ({
-      capability,
-      jobKey,
-    }: {
-      capability: string;
-      jobKey?: string;
-    }) => {
+    mutationFn: ({ jobKey }: { jobKey: string }) => {
       return axios.post(`/job/`, {
-        name: capability,
         key: jobKey,
       });
     },
@@ -55,16 +48,14 @@ export function useBulkReRunJob() {
     defaultErrorMessage: 'Failed to re run job',
     mutationFn: async (
       jobs: {
-        capability: string;
         dns?: string;
         jobKey?: string;
         config?: { test: string };
       }[]
     ) => {
       const promises = jobs
-        .map(async ({ capability, dns, jobKey, config }) => {
+        .map(async ({ dns, jobKey, config }) => {
           const { data } = await axios.post(`/job/`, {
-            name: capability,
             key: jobKey || `#asset#${dns}`,
             config,
           });
