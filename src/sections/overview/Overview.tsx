@@ -868,57 +868,74 @@ export const RiskStats = () => {
           </p>
         </div>
 
-        <Loader
-          isLoading={filesStatus === 'pending' || isUploading}
-          className="h-24 w-[356px] bg-header-dark"
-        >
-          {files.length > 0 && (
-            <div className="mt-1 h-auto rounded border-2 border-header-dark p-4 ">
-              <div className="flex max-w-xs items-center justify-between gap-2">
-                <div>
-                  <h2 className="text-lg font-bold text-white">
-                    Vulnerabilities Scanning
-                  </h2>
-                  <p className="text-xs text-white/70">
-                    {`We're testing the noise reduction from your uploaded Nessus
-                    XML file.`}
-                  </p>
-                </div>
-                <ArrowPathIcon
-                  className="spin-slow duration-2000 size-12 text-white/60"
-                  style={{
-                    animation: isScanning ? 'spin 2s linear infinite' : 'none',
-                  }}
-                />
+        {(filesStatus === 'pending' || isUploading) && (
+          <div className="mt-1 h-auto rounded border-2 border-header-dark p-4 ">
+            <div className="flex max-w-xs items-center justify-between gap-2">
+              <div>
+                <h2 className="text-lg font-bold text-white">
+                  File Uploading...
+                </h2>
+                <p className="text-xs text-white/70">
+                  {`We're testing the noise reduction from your uploaded Nessus
+                XML file.`}
+                </p>
               </div>
+              <ArrowPathIcon
+                className="spin-slow duration-2000 size-12 text-white/60"
+                style={{
+                  animation: isScanning ? 'spin 2s linear infinite' : 'none',
+                }}
+              />
             </div>
-          )}
+          </div>
+        )}
 
-          {files.length === 0 && (
-            <Dropzone
-              type="arrayBuffer"
-              className="mt-1 h-auto border-header bg-header"
-              onFilesDrop={handleNessusFileDrop}
-              title=""
-              subTitle=""
-              accept={{
-                'application/xml': ['.nessus'],
-              }}
-            >
-              <div className="flex max-w-xs items-center justify-between gap-2">
-                <div>
-                  <h2 className="text-lg font-bold text-white">
-                    Want a dry run?
-                  </h2>
-                  <p className="text-xs text-white/70">
-                    Test our noise reduction by uploading a .nessus file.
-                  </p>
-                </div>
-                <ArrowUpTrayIcon className="size-12 text-white/60" />
+        {filesStatus === 'success' && files.length > 0 && (
+          <div className="mt-1 h-auto rounded border-2 border-header-dark p-4 ">
+            <div className="flex max-w-xs items-center justify-between gap-2">
+              <div>
+                <h2 className="text-lg font-bold text-white">
+                  Vulnerabilities Scanning
+                </h2>
+                <p className="text-xs text-white/70">
+                  {`We're testing the noise reduction from your uploaded Nessus
+                    XML file.`}
+                </p>
               </div>
-            </Dropzone>
-          )}
-        </Loader>
+              <ArrowPathIcon
+                className="spin-slow duration-2000 size-12 text-white/60"
+                style={{
+                  animation: isScanning ? 'spin 2s linear infinite' : 'none',
+                }}
+              />
+            </div>
+          </div>
+        )}
+
+        {files.length === 0 && (
+          <Dropzone
+            type="arrayBuffer"
+            className="mt-1 h-auto border-header bg-header"
+            onFilesDrop={handleNessusFileDrop}
+            title=""
+            subTitle=""
+            accept={{
+              'application/xml': ['.nessus'],
+            }}
+          >
+            <div className="flex max-w-xs items-center justify-between gap-2">
+              <div>
+                <h2 className="text-lg font-bold text-white">
+                  Want a dry run?
+                </h2>
+                <p className="text-xs text-white/70">
+                  Test our noise reduction by uploading a .nessus file.
+                </p>
+              </div>
+              <ArrowUpTrayIcon className="size-12 text-white/60" />
+            </div>
+          </Dropzone>
+        )}
       </section>
     </Loader>
   );
