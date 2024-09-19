@@ -895,7 +895,7 @@ export const RiskStats = () => {
             <div className="flex max-w-xs items-center justify-between gap-2">
               <div>
                 <h2 className="text-lg font-bold text-white">
-                  Vulnerabilities Scanning
+                  Assessing risks
                 </h2>
                 <p className="text-xs text-white/70">
                   {`We're testing the noise reduction from your uploaded Nessus
