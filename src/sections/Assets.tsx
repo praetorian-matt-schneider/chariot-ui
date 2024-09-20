@@ -571,7 +571,7 @@ const Assets: React.FC = () => {
         <div
           role="button"
           onClick={() => setIsCTAOpen(true)}
-          className="m-auto flex w-full cursor-pointer flex-col items-center rounded-lg border-2 border-dashed border-header-dark bg-header p-8 text-center"
+          className="m-auto flex w-full cursor-pointer flex-col items-center rounded-lg border-2 border-dashed border-header-dark bg-header p-4 pb-6 text-center"
         >
           <Loader
             className="m-4 h-2 w-10"
@@ -583,12 +583,12 @@ const Assets: React.FC = () => {
               <BellIcon className="size-10 animate-bounce text-white" />
             )}
           </Loader>
-          <h1 className="text-3xl font-bold text-white">
+          <h1 className="text-2xl font-bold text-white">
             {alerts?.length > 0
               ? `${alerts?.length?.toLocaleString()} ${pluralize(alerts?.length, 'Alert')} Configured`
               : 'Get Exposure Alerts'}
           </h1>
-          <p className="max-w-[700px] text-sm text-gray-500">
+          <p className="max-w-[700px] text-sm text-white/70">
             Subscribe to changes in your attack surface and get notified when
             new assets are discovered
           </p>
