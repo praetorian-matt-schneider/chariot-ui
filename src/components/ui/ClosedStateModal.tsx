@@ -18,8 +18,8 @@ const riskClosedStatusList = [
     status: RiskStatus.Remediated,
   },
   {
-    value: 'rejected',
-    label: 'Reject the Risk',
+    value: 'accepted_risk',
+    label: 'Accept the Risk',
     desc: 'We acknowledge the presence of this risk and accept it, understanding the potential impact.',
   },
   {
