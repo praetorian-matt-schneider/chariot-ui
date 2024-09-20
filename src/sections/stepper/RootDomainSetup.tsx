@@ -135,7 +135,7 @@ export const RootDomainSetup: React.FC<RootDomainSetupProps> = ({
           </div>
         </section>
       </div>
-      <div className="flex w-full justify-center">
+      <div className="flex w-full justify-end">
         <Button
           styleType="primary"
           className="rounded"
