@@ -28,7 +28,6 @@ import { Tooltip } from '@/components/Tooltip';
 import { useMy, useUploadFile } from '@/hooks';
 import { useModifyAccount } from '@/hooks/useAccounts';
 import { useCounts } from '@/hooks/useCounts';
-import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useIntegration } from '@/hooks/useIntegration';
 import useIntegrationCounts from '@/hooks/useIntegrationCounts';
 import { JobWithFailedCount, useJobsStatus } from '@/hooks/useJobs';
@@ -205,11 +204,15 @@ export const Overview: React.FC = () => {
   const { data: assetCount, status: assetCountStatus } = useCounts({
     resource: 'asset',
   });
+
   const {
     data: providedAssets,
     status: providedAssetsStatus,
     hasNextPage: hasNextPageProvidedAssets,
-  } = useGenericSearch({ query: `source:provided` });
+  } = useMy({
+    resource: 'attribute',
+    query: '#surface#provided',
+  });
 
   // code, cloud, edr, waf, siem, scanner, cti
   const buckets = {
@@ -348,7 +351,7 @@ export const Overview: React.FC = () => {
         status: 'success',
         surface: 'Manually Added',
         identifier: 'Provided',
-        discoveredAssets: providedAssets?.assets?.length,
+        discoveredAssets: providedAssets.length,
         discoveredAssetsStatus: providedAssetsStatus,
         actions: 'AddAsset',
         connected: false,
