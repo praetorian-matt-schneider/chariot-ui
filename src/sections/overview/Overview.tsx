@@ -805,7 +805,7 @@ export const RiskStats = () => {
                 )
               }
             >
-              Remediate the Risks
+              Remediation
             </Button>
           </>
         ),

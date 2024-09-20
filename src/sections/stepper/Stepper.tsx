@@ -16,6 +16,7 @@ import { useIntegration } from '@/hooks/useIntegration';
 import { RootDomainSetup } from '@/sections/stepper/RootDomainSetup';
 import { SurfaceSetup } from '@/sections/stepper/SurfaceSetup';
 import { useGlobalState } from '@/state/global.state';
+import { RiskStatus } from '@/types';
 import { mergeStatus } from '@/utils/api';
 import { cn } from '@/utils/classname';
 import { getRoute } from '@/utils/route.util';
@@ -87,7 +88,16 @@ export const Stepper = () => {
         navigate(
           generatePathWithSearch({
             pathname: getRoute(['app', 'risks']),
-            appendSearch: [['action', 'remediate-a-risk']],
+            appendSearch: [
+              [
+                'riskFilters',
+                JSON.stringify({
+                  search: '',
+                  query: `status:${RiskStatus.Opened}`,
+                  subQuery: '',
+                }),
+              ],
+            ],
           })
         ),
     },
