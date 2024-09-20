@@ -423,7 +423,7 @@ const RisksBeta: React.FC = () => {
       {
         label: 'Action',
         id: '',
-        fixedWidth: 50,
+        fixedWidth: 90,
         align: 'center',
         cell: risk => (
           <Button
@@ -808,16 +808,16 @@ const RisksBeta: React.FC = () => {
           <div className="w-full">
             <div className="flex w-full items-center justify-between">
               <h1 className="text-xl font-bold text-gray-900">
-                {filters.search ? (
+                {riskType === 'Search' ? (
                   <div className="flex items-center gap-2">
                     Search:
                     <p className="text-lg font-semibold text-gray-500">
                       {filters.search}
                     </p>
                   </div>
-                ) : filters.query.startsWith('exposure') ? (
+                ) : riskType === 'Exposure' ? (
                   'Are these exposures risks?'
-                ) : (
+                ) : riskType === 'Severity' ? (
                   <div className="flex items-center gap-2">
                     Open Risks:
                     <p className="text-lg font-semibold text-gray-500">
@@ -828,6 +828,8 @@ const RisksBeta: React.FC = () => {
                       }
                     </p>
                   </div>
+                ) : (
+                  'Material Risks'
                 )}
               </h1>
               {selectedCategory.alert && (
@@ -870,11 +872,8 @@ const RisksBeta: React.FC = () => {
         skipBack={true}
         zIndex={11}
       >
-        <div className="mx-12 mt-6">
-          <div className="flex w-full flex-row items-center justify-between">
-            <h1 className="mb-4 text-xl font-extrabold">
-              Review Non-Open Risks
-            </h1>
+        <div className="px-12 pt-6 size-full flex flex-col">
+          <div className="flex w-full flex-col items-start gap-2 shrink-0">
             <div className="flex gap-2">
               <SelectableTab
                 isSelected={drawerFilter.query === 'status:T'}
@@ -902,66 +901,77 @@ const RisksBeta: React.FC = () => {
                 Noise
               </SelectableTab>
             </div>
+            <div className="text-gray-500 pb-4">
+              {drawerFilter.query === 'status:T'
+                ? `These risks are awaiting review. Take action by opening or rejecting them to keep your security posture strong.`
+                : drawerFilter.query === 'status:R'
+                  ? 'Great work! These security vulnerabilities have been fixed and no longer pose a threat.'
+                  : 'These risks have been filtered out due to being false positives or deemed unimportant for your environment.'}
+            </div>
           </div>
-          <Table
-            name={'remediated-risks'}
-            resize={true}
-            columns={columns}
-            data={risksGeneric?.risks || []}
-            status={risksStatus}
-            error={risksError}
-            isFetchingNextPage={isFetchingNextPage}
-            fetchNextPage={fetchNextPage}
-            noData={{
-              icon: <ShieldExclamationIcon className="size-16 text-gray-400" />,
-              title:
-                drawerFilter.query === 'status:R'
-                  ? 'No Remediated Risks Yet'
-                  : drawerFilter.query === 'status:T'
-                    ? 'No Pending Risks'
-                    : 'No Noisy Risks',
-              description: drawerFilter.query === 'status:R' && (
-                <>
-                  <p className="mb-6 text-center text-lg text-gray-500">
-                    A risk is a potential security issue that affects your
-                    system. You can view the risk details, including the
-                    description and remediation steps, for guidance on resolving
-                    it.
-                  </p>
-                  <ul className="mb-6 text-left text-gray-600">
-                    <li className="mb-2">
-                      1. Open the risk to review its description and suggested
-                      remediation. If a remediation isn&apos;t available, you
-                      can generate one directly.
-                    </li>
-                    <li className="mb-2">
-                      2. Review the proof of exploit, showing the detection
-                      details and impacted assets.
-                    </li>
-                    <li className="mb-2">
-                      3. We automatically recheck every 30 minutes. If it&apos;s
-                      fixed, we&apos;ll close it for you, or you can manually
-                      close it if you&apos;re certain it&apos;s no longer a
-                      risk.
-                    </li>
-                  </ul>
-                  <div className="text-gray-500">
-                    {currentPlan === 'managed' ? (
-                      <p className="mt-4 text-center text-lg text-gray-500">
-                        As a managed service customer, we can assist you with
-                        this process.
-                      </p>
-                    ) : (
-                      <p className="mt-4 text-center text-lg text-gray-500">
-                        Need help? Reach out to us about upgrading to our
-                        managed service plan.
-                      </p>
-                    )}
-                  </div>
-                </>
-              ),
-            }}
-          />
+          <div className="overflow-auto h-full">
+            <Table
+              name={'remediated-risks'}
+              resize={true}
+              columns={columns}
+              data={risksGeneric?.risks || []}
+              status={risksStatus}
+              error={risksError}
+              isFetchingNextPage={isFetchingNextPage}
+              fetchNextPage={fetchNextPage}
+              noData={{
+                icon: (
+                  <ShieldExclamationIcon className="size-16 text-gray-400" />
+                ),
+                title:
+                  drawerFilter.query === 'status:R'
+                    ? 'No Remediated Risks Yet'
+                    : drawerFilter.query === 'status:T'
+                      ? 'No Pending Risks'
+                      : 'No Noisy Risks',
+                description: drawerFilter.query === 'status:R' && (
+                  <>
+                    <p className="mb-6 text-center text-lg text-gray-500">
+                      A risk is a potential security issue that affects your
+                      system. You can view the risk details, including the
+                      description and remediation steps, for guidance on
+                      resolving it.
+                    </p>
+                    <ul className="mb-6 text-left text-gray-600">
+                      <li className="mb-2">
+                        1. Open the risk to review its description and suggested
+                        remediation. If a remediation isn&apos;t available, you
+                        can generate one directly.
+                      </li>
+                      <li className="mb-2">
+                        2. Review the proof of exploit, showing the detection
+                        details and impacted assets.
+                      </li>
+                      <li className="mb-2">
+                        3. We automatically recheck every 30 minutes. If
+                        it&apos;s fixed, we&apos;ll close it for you, or you can
+                        manually close it if you&apos;re certain it&apos;s no
+                        longer a risk.
+                      </li>
+                    </ul>
+                    <div className="text-gray-500">
+                      {currentPlan === 'managed' ? (
+                        <p className="mt-4 text-center text-lg text-gray-500">
+                          As a managed service customer, we can assist you with
+                          this process.
+                        </p>
+                      ) : (
+                        <p className="mt-4 text-center text-lg text-gray-500">
+                          Need help? Reach out to us about upgrading to our
+                          managed service plan.
+                        </p>
+                      )}
+                    </div>
+                  </>
+                ),
+              }}
+            />
+          </div>
         </div>
       </Drawer>
     </>
