@@ -735,6 +735,14 @@ export const RiskStats = () => {
     return { totalRisks, openRisks, deletedRisks };
   }, [JSON.stringify(riskCountData)]);
 
+  const openPercent = ((openRisks * 100) / (openRisks + deletedRisks)).toFixed(
+    2
+  );
+  const noisePercent = (
+    (deletedRisks * 100) /
+    (openRisks + deletedRisks)
+  ).toFixed(2);
+
   const getMessage = () => {
     // When there are no risks
     if (totalRisks === 0) {
@@ -817,8 +825,11 @@ export const RiskStats = () => {
       Icon: () => (
         <div className="flex h-[92px] gap-2">
           <div className="flex flex-col justify-end gap-1">
-            <p className="text-center text-xs font-bold text-brand">1.3%</p>
-            <div className="rounded bg-brand" style={{ height: '10%' }} />
+            <p className="text-center text-xs font-bold text-brand">{`${openPercent}%`}</p>
+            <div
+              className="rounded bg-brand"
+              style={{ height: `${openPercent}%` }}
+            />
             <p className="text-xs text-header-light">Risks</p>
           </div>
           <div className="flex flex-col justify-end gap-1">
@@ -829,7 +840,7 @@ export const RiskStats = () => {
       ),
       title: 'Risks vs noise',
       Subtitle: () =>
-        `${openRisks + deletedRisks} risks identified (${(deletedRisks * 100) / (openRisks + deletedRisks)}% noise)`,
+        `${openRisks + deletedRisks} risks identified (${noisePercent}%) noise`,
     };
   };
 
