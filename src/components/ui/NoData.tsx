@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 
 import { HorseIcon } from '@/components/icons/Horse.icon';
 import { cn } from '@/utils/classname';
+import { QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
 
 export interface NoDataProps {
   icon?: ReactNode;
@@ -11,7 +12,7 @@ export interface NoDataProps {
 }
 
 export const NoData = ({
-  icon = <HorseIcon />,
+  icon = <QuestionMarkCircleIcon className="mb-4 size-16 text-gray-400" />,
   title,
   description,
   styleType = 'textWithIcon',

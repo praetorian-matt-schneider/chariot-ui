@@ -63,6 +63,7 @@ export function Table<TData>(props: TableProps<TData>) {
     search: controlledSearch,
     rowClassName,
     hideTableHeader,
+    noData,
   } = props;
 
   const { getSticky, useCreateSticky } = useSticky();
@@ -387,7 +388,15 @@ export function Table<TData>(props: TableProps<TData>) {
           icon={<ExclamationCircleIcon className={`size-20 text-red-400`} />}
         />
       )}
-      {(isLoadingOrHaveData || isEmpty) && (
+      {isEmpty && (
+        <NoData
+          title={noData?.title || `No ${tableName} found`}
+          description={noData?.description}
+          icon={noData?.icon}
+          styleType={noData?.styleType}
+        />
+      )}
+      {isLoadingOrHaveData && (
         <table
           className={cn(
             'w-full relative border-default border border-t-0 bg-layer0 table-fixed',
@@ -457,21 +466,6 @@ export function Table<TData>(props: TableProps<TData>) {
             </tr>
           </thead>
           <tbody>
-            {isEmpty && (
-              <tr>
-                <td
-                  colSpan={columnsLength}
-                  className="relative size-full text-center"
-                >
-                  <div className="mt-12 flex flex-col items-center justify-center">
-                    <QuestionMarkCircleIcon className="mb-4 size-16 text-gray-400" />
-                    <p className="text-2xl font-bold">
-                      Your search returned no results.
-                    </p>
-                  </div>
-                </td>
-              </tr>
-            )}
             {before > 0 && (
               <tr>
                 <td colSpan={columnsLength} style={{ height: before }} />

@@ -104,7 +104,7 @@ const Assets: React.FC = () => {
   const {
     modal: {
       risk: {
-        onOpenChange: setShowAddRisk,
+        onChange: setShowAddRisk,
         selectedAssets,
         onSelectedAssetsChange: setSelectedAssets,
       },
@@ -121,6 +121,7 @@ const Assets: React.FC = () => {
     fetchNextPage,
     isFetchingNextPage,
     filters,
+    debouncedSearch,
     setFilters,
   } = useGetAssets({ setQuery: true });
   const { data: attributeStats, status: attributeStatsStatus } =
@@ -426,7 +427,7 @@ const Assets: React.FC = () => {
             icon: <RisksIcon />,
             onClick: () => {
               setSelectedAssets(assets.map(asset => asset.key));
-              setShowAddRisk(true);
+              setShowAddRisk(true, 'risk');
             },
           },
           { type: 'divider', label: 'Divider' },
@@ -738,6 +739,7 @@ const Assets: React.FC = () => {
           disbled: assets.length === 0,
         }}
         filter={{
+          allowEmpty: false,
           value: filters.attributes,
           onChange: attributes => {
             setFilters({ attributes, search: '' });
@@ -779,10 +781,9 @@ const Assets: React.FC = () => {
           fetchNextPage={fetchNextPage}
           isFetchingNextPage={isFetchingNextPage}
           noData={{
-            title: 'No Assets found',
-            description: filters.search
-              ? 'Add an asset now to get started'
-              : 'No assets found with this filter',
+            title: debouncedSearch
+              ? 'Your search returned no result'
+              : 'No Assets found',
           }}
         />
       </FancyTable>
@@ -806,6 +807,7 @@ export interface CategoryFilterProps {
   alert?: Omit<AlertIconProps, 'currentValue'>;
   value: string[];
   onChange: (value: string[]) => void;
+  allowEmpty?: boolean;
   category: {
     isLoading?: boolean;
     showCount?: boolean;
@@ -824,7 +826,6 @@ export interface CategoryFilterProps {
   }[];
   status: QueryStatus;
   className?: string;
-  hideHeader?: boolean;
 }
 
 export function CategoryFilter(props: CategoryFilterProps) {
@@ -835,29 +836,17 @@ export function CategoryFilter(props: CategoryFilterProps) {
     onChange,
     className,
     alert,
-    hideHeader,
+    allowEmpty = true,
   } = props;
 
   return (
     <div className={cn('flex flex-col gap-1 p-4', className)}>
-      {hideHeader ? null : (
-        <h1 className="flex items-center space-x-1 text-sm font-semibold">
-          Configure Alerts
-          <Tooltip
-            title="Click the notification bell to get notified whenever a new asset with this attribute is detected."
-            placement="top"
-          >
-            <QuestionMarkCircleIcon className="size-4 stroke-[2px] text-gray-400" />
-          </Tooltip>
-        </h1>
-      )}
       {category.length > 0 && (
-        <ul className="flex flex-col gap-3">
+        <ul className="flex flex-col gap-4">
           {category.map((item, index) => {
             const isOptionSelectedOnInit = Boolean(
               item.options.find(option => value.includes(option.value))
             );
-            //
 
             return (
               <li
@@ -891,7 +880,9 @@ export function CategoryFilter(props: CategoryFilterProps) {
                           )}
                           onClick={() => {
                             if (value.includes(option.value)) {
-                              onChange(value.filter(v => v !== option.value));
+                              if (allowEmpty) {
+                                onChange(value.filter(v => v !== option.value));
+                              }
                             } else {
                               onChange([option.value]);
                               ``;
@@ -1198,6 +1189,7 @@ export function FancyTable(
                 height: `calc( 100vh - ${headerHeight + LHeaderHeight + 64}px)`,
               }}
             >
+              {otherFilters}
               {filter && (
                 <CategoryFilter
                   {...filter}
@@ -1207,7 +1199,6 @@ export function FancyTable(
                   }}
                 />
               )}
-              {otherFilters}
             </div>
           )}
         </div>

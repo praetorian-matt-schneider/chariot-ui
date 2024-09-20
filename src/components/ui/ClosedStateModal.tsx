@@ -6,15 +6,19 @@ import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useDeleteRisk, useUpdateRisk } from '@/hooks/useRisks';
 import { Risk, RiskStatus } from '@/types';
 import { getRiskStatusLabel } from '@/utils/riskStatus.util';
+import { Dropdown } from '@/components/Dropdown';
+import { EllipsisVerticalIcon } from '@heroicons/react/24/solid';
+import { Tooltip } from '@/components/Tooltip';
 
 interface ClosedStateModal {
   risk: Risk;
   isOpen: boolean;
   onClose: () => void;
   onSuccess: (message: string) => void;
+  type?: 'dropdown' | 'dropdownWithNoButton';
 }
 
-const riskClosedStatusList = [
+export const riskClosedStatusList = [
   {
     value: 'resolved',
     label: 'Mark as Resolved',
@@ -25,16 +29,19 @@ const riskClosedStatusList = [
     value: 'rejected',
     label: 'Reject the Risk',
     desc: 'We acknowledge the presence of this risk and accept it, understanding the potential impact.',
+    status: RiskStatus.DeletedRisks,
   },
   {
     value: 'false_positive',
     label: 'False Positive',
     desc: 'This risk is deemed to be a false positive or not valid, and no further action will be taken.',
+    status: RiskStatus.DeletedRisks,
   },
   {
     value: 'out_of_scope',
     label: 'Out of Scope',
     desc: 'This risk is out of scope and will not be addressed or mitigated.',
+    status: RiskStatus.DeletedRisks,
   },
 ];
 
@@ -79,6 +86,48 @@ export const ClosedStateModal = (props: ClosedStateModal) => {
     }
   };
 
+  if (props.type === 'dropdown' || props.type === 'dropdownWithNoButton') {
+    return (
+      <Tooltip placement="top" title="Close the Risk">
+        <div>
+          <Dropdown
+            menu={{
+              items: [
+                { label: 'Select Reason for Closing', type: 'label' },
+                { label: '', type: 'divider' },
+                ...riskClosedStatusList.map(riskClosedStatus => {
+                  return {
+                    label: riskClosedStatus.label,
+                    value: riskClosedStatus.value,
+                    tooltip: riskClosedStatus.desc,
+                    onClick: () => {
+                      handleStatusChange({
+                        status: riskClosedStatus.status,
+                        comment: riskClosedStatus.label,
+                      });
+                    },
+                  };
+                }),
+              ],
+            }}
+            styleType={
+              props.type === 'dropdownWithNoButton' ? 'secondary' : 'none'
+            }
+            className={props.type === 'dropdownWithNoButton' ? 'h-8' : 'p-2'}
+            onClick={event => {
+              event?.stopPropagation();
+            }}
+            label={props.type === 'dropdownWithNoButton' ? 'No' : ''}
+            endIcon={
+              props.type === 'dropdown' && (
+                <EllipsisVerticalIcon className="size-5" />
+              )
+            }
+          />
+        </div>
+      </Tooltip>
+    );
+  }
   return (
     <Modal title="Select Reason" open={isOpen} onClose={onClose}>
       <div className="space-y-4">

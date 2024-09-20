@@ -15,6 +15,7 @@ import { getTransitionSettings } from '@/utils/transition.util';
 type Size = 'xs' | 'lg' | 'xl' | '3xl' | '4xl' | '5xl' | '6xl';
 interface Props extends PropsWithChildren {
   className?: string;
+  hideFooter?: boolean;
   footer?: {
     styleType?: ButtonProps['styleType'];
     text?: string;
@@ -63,6 +64,7 @@ export const Modal: React.FC<Props> = props => {
     icon,
     style = 'default',
     closeOnOutsideClick = true,
+    hideFooter,
   } = props;
   const isDialog = style === 'dialog';
   const [confirmDisconnect, setConfirmDisconnect] = useState(false);
@@ -130,96 +132,98 @@ export const Modal: React.FC<Props> = props => {
         >
           {children}
         </div>
-        <div
-          className={cn(
-            'flex justify-between rounded-b-lg',
-            !isDialog && 'border-t border-t-default bg-layer1 px-6 py-3',
-            isDialog && 'pt-6'
-          )}
-        >
+        {!hideFooter && (
           <div
             className={cn(
-              'ml-auto',
-              confirmDisconnect
-                ? 'w-[460px]'
-                : title == 'Proof of Exploit'
-                  ? 'w-full'
-                  : 'w-[260px]'
+              'flex justify-between rounded-b-lg',
+              !isDialog && 'border-t border-t-default bg-layer1 px-6 py-3',
+              isDialog && 'pt-6'
             )}
           >
-            {footer?.left}
-            {confirmDisconnect ? (
-              <div className="flex items-center space-x-2">
-                <span className="flex-1">
-                  Are you sure you want to disconnect?
-                </span>
+            <div
+              className={cn(
+                'ml-auto',
+                confirmDisconnect
+                  ? 'w-[460px]'
+                  : title == 'Proof of Exploit'
+                    ? 'w-full'
+                    : 'w-[260px]'
+              )}
+            >
+              {footer?.left}
+              {confirmDisconnect ? (
+                <div className="flex items-center space-x-2">
+                  <span className="flex-1">
+                    Are you sure you want to disconnect?
+                  </span>
 
+                  <Button
+                    onClick={() => setConfirmDisconnect(false)}
+                    styleType="secondary"
+                    className={cn(footer?.className)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      footer?.disconnect?.onClick &&
+                        footer?.disconnect?.onClick();
+                      setConfirmDisconnect(false);
+                    }}
+                    styleType="secondary"
+                    className={cn(
+                      'text-red-700 hover:bg-layer0 border-red-700',
+                      footer?.className
+                    )}
+                  >
+                    Yes
+                  </Button>
+                </div>
+              ) : (
+                footer?.disconnect && (
+                  <Button
+                    onClick={() => setConfirmDisconnect(true)}
+                    styleType="secondary"
+                    className={cn(
+                      'text-red-700 hover:bg-layer0',
+                      footer?.className
+                    )}
+                    isLoading={footer?.disconnect?.isLoading}
+                    disabled={footer?.disconnect?.disabled}
+                  >
+                    {footer?.disconnect?.text}
+                  </Button>
+                )
+              )}
+            </div>
+            {!confirmDisconnect && (
+              <div className="flex gap-2">
                 <Button
-                  onClick={() => setConfirmDisconnect(false)}
+                  onClick={onClose}
                   styleType="secondary"
-                  className={cn(footer?.className)}
+                  className="!m-0 w-24 bg-layer0 hover:bg-layer0"
                 >
                   Cancel
                 </Button>
-                <Button
-                  onClick={() => {
-                    footer?.disconnect?.onClick &&
-                      footer?.disconnect?.onClick();
-                    setConfirmDisconnect(false);
-                  }}
-                  styleType="secondary"
-                  className={cn(
-                    'text-red-700 hover:bg-layer0 border-red-700',
-                    footer?.className
-                  )}
-                >
-                  Yes
-                </Button>
+
+                {footer?.text && (
+                  <Button
+                    onClick={footer?.onClick}
+                    startIcon={footer?.startIcon}
+                    styleType={footer.styleType || 'primary'}
+                    className={cn('ml-2 w-24', footer?.className)}
+                    form={footer?.form}
+                    type={footer?.form ? 'submit' : undefined}
+                    isLoading={footer?.isLoading}
+                    disabled={footer?.disabled}
+                  >
+                    {footer.text}
+                  </Button>
+                )}
               </div>
-            ) : (
-              footer?.disconnect && (
-                <Button
-                  onClick={() => setConfirmDisconnect(true)}
-                  styleType="secondary"
-                  className={cn(
-                    'text-red-700 hover:bg-layer0',
-                    footer?.className
-                  )}
-                  isLoading={footer?.disconnect?.isLoading}
-                  disabled={footer?.disconnect?.disabled}
-                >
-                  {footer?.disconnect?.text}
-                </Button>
-              )
             )}
           </div>
-          {!confirmDisconnect && (
-            <div className="flex gap-2">
-              <Button
-                onClick={onClose}
-                styleType="secondary"
-                className="!m-0 w-24 bg-layer0 hover:bg-layer0"
-              >
-                Cancel
-              </Button>
-
-              {footer?.text && (
-                <Button
-                  onClick={footer?.onClick}
-                  startIcon={footer?.startIcon}
-                  styleType={footer.styleType || 'primary'}
-                  className={cn('ml-2 w-24', footer?.className)}
-                  form={footer?.form}
-                  type={footer?.form ? 'submit' : undefined}
-                  isLoading={footer?.isLoading}
-                  disabled={footer?.disabled}
-                >
-                  {footer.text}
-                </Button>
-              )}
-            </div>
-          )}
-        </div>
+        )}
       </div>
     </ModalWrapper>
   );

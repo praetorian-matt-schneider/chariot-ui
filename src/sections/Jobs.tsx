@@ -358,7 +358,6 @@ const Jobs: React.FC = () => {
         otherFilters={
           <>
             <CategoryFilter
-              hideHeader={true}
               value={filters.status ? [filters.status] : []}
               status={dataStatus}
               onChange={statuses => {
@@ -384,7 +383,6 @@ const Jobs: React.FC = () => {
             />
             {Object.keys(failedJobStats).length > 0 ? (
               <CategoryFilter
-                hideHeader={true}
                 value={[filters.failedReason]}
                 status={dataStatus}
                 onChange={failedReasons => {

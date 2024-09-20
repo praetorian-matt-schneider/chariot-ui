@@ -23,6 +23,7 @@ interface TableBodyProps<TData> {
   rowData: InternalTData<TData>;
   rowIndex: number;
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore-error
   virtualRow: VirtualItem<Element>;
   isChecked: boolean;
   handleRowClick: (

@@ -63,6 +63,7 @@ import { getRiskStatusLabel } from '@/utils/riskStatus.util';
 import { useQueryFilters } from '@/utils/storage/useQueryParams.util';
 import { StorageKey, useStorage } from '@/utils/storage/useStorage.util';
 import { generatePathWithSearch, useSearchParams } from '@/utils/url.util';
+import { MATERIAL_RISK_DNS } from '@/sections/add/AddRisks';
 
 interface RiskDrawerProps {
   open: boolean;
@@ -92,6 +93,9 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     useState<RiskCombinedStatus>('');
 
   const [, dns, name] = compositeKey.split('#');
+
+  const isMaterialRisk = dns === MATERIAL_RISK_DNS;
+
   const attributesFilter = `source:#risk#${dns}#${name}`;
 
   const [riskFilters] = useQueryFilters<RiskFilters>({
@@ -99,7 +103,6 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     defaultFilters: {
       search: '',
       query: '',
-      subQuery: '',
     },
   });
   const { invalidate: invalidateRiskData } = useGenericSearch({
