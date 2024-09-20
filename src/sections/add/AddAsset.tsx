@@ -1,6 +1,9 @@
 import { useMemo, useState } from 'react';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-import { CheckCircleIcon } from '@heroicons/react/24/solid';
+import {
+  CheckCircleIcon,
+  InformationCircleIcon,
+} from '@heroicons/react/24/solid';
 import { ArrowUpRight, CheckCircle, LoaderCircle } from 'lucide-react';
 
 import { Inputs, Values } from '@/components/form/Inputs';
@@ -12,7 +15,7 @@ import { useGlobalState } from '@/state/global.state';
 import { AssetStatus } from '@/types';
 import { cn } from '@/utils/classname';
 
-// Regex patterns for asset types
+// Asset type regex patterns
 const assetTypePatterns = {
   IPAddress: /^(\d{1,3}\.){3}\d{1,3}$/,
   CIDRRange: /^(\d{1,3}\.){3}\d{1,3}\/\d{1,2}$/,
@@ -20,7 +23,7 @@ const assetTypePatterns = {
   Domain: /^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/,
 };
 
-// Labels for asset types
+// Asset labels
 const assetLabels: { [key: string]: string } = {
   IPAddress: 'IP Address',
   CIDRRange: 'CIDR Range',
@@ -35,6 +38,19 @@ const AddAssetExamples = () => (
       Chariot defines an asset as anything that can transport data. You may be
       asked to provide ownership of an asset before adding it to your attack
       surface.
+    </p>
+  </div>
+);
+
+const GithubWarning = () => (
+  <div className="mt-4 rounded-md bg-indigo-100 p-3 text-sm text-indigo-700">
+    <p className="font-medium">
+      <InformationCircleIcon className="mr-1 inline size-5 text-indigo-500" />{' '}
+      GitHub Organization
+    </p>
+    <p>
+      GitHub organizations are valid assets, but they must be added as an attack
+      surface integration.
     </p>
   </div>
 );
@@ -68,14 +84,18 @@ export function AddAsset() {
     return null;
   }, [formData.asset]) as keyof typeof assetTypePatterns;
 
-  const isAddButtonDisabled = useMemo(() => !assetType, [assetType]);
+  // Disable "Add" button if GitHubOrg is detected or no asset type is matched
+  const isAddButtonDisabled = useMemo(
+    () => !assetType || assetType === 'GitHubOrg',
+    [assetType]
+  );
 
   function onClose() {
     onOpenChange(false);
   }
 
   async function handleAddAsset() {
-    if (assetType) {
+    if (assetType && assetType !== 'GitHubOrg') {
       await createAsset({
         name: String(formData.asset),
         status: AssetStatus.Active,
@@ -110,7 +130,7 @@ export function AddAsset() {
             {
               label: 'Asset',
               value: '',
-              placeholder: 'e.g., 192.168.1.1',
+              placeholder: 'e.g., https://gladiator.systems',
               name: 'asset',
               required: true,
               className: 'h-10 w-full p-3 rounded-md border border-gray-300',
@@ -127,21 +147,31 @@ export function AddAsset() {
                   'flex items-center px-4 py-2 rounded-md border',
                   assetType === type
                     ? 'bg-green-100 border-green-400'
-                    : 'bg-gray-100 border-gray-300'
+                    : 'bg-gray-100 border-gray-300',
+                  assetType === type &&
+                    assetType === 'GitHubOrg' &&
+                    'bg-indigo-100 border-indigo-400'
                 )}
               >
-                <CheckCircleIcon
-                  className={cn(
-                    'size-5 mr-2',
-                    assetType === type ? 'text-green-500' : 'text-gray-300'
-                  )}
-                />
+                {assetType === type && assetType === 'GitHubOrg' ? (
+                  <InformationCircleIcon
+                    className={cn('size-5 mr-2', 'text-indigo-500')}
+                  />
+                ) : (
+                  <CheckCircleIcon
+                    className={cn(
+                      'size-5 mr-2',
+                      assetType === type ? 'text-green-500' : 'text-gray-300'
+                    )}
+                  />
+                )}
                 <p className="text-sm">{assetLabels[type]}</p>
               </div>
             ))}
           </div>
         </div>
-        {!licenseHit && <AddAssetExamples />}
+        {!licenseHit && assetType !== 'GitHubOrg' && <AddAssetExamples />}
+        {!licenseHit && assetType === 'GitHubOrg' && <GithubWarning />}
         {licenseHit && (
           <div
             className={cn(
