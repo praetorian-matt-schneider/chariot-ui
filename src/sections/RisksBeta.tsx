@@ -870,7 +870,6 @@ const RisksBeta: React.FC = () => {
         onBack={closeCTADrawer}
         className={'w-full rounded-t-sm bg-zinc-100 p-0 shadow-lg'}
         skipBack={true}
-        zIndex={11}
       >
         <div className="px-12 pt-6 size-full flex flex-col">
           <div className="flex w-full flex-col items-start gap-2 shrink-0">
