@@ -92,6 +92,9 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     useState<RiskCombinedStatus>('');
 
   const [, dns, name] = compositeKey.split('#');
+
+  // const isMaterialRisk = dns === MATERIAL_RISK_DNS;
+
   const attributesFilter = `source:#risk#${dns}#${name}`;
 
   const [riskFilters] = useQueryFilters<RiskFilters>({
@@ -99,7 +102,6 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
     defaultFilters: {
       search: '',
       query: '',
-      subQuery: '',
     },
   });
   const { invalidate: invalidateRiskData } = useGenericSearch({

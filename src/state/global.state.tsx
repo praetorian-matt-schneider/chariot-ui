@@ -7,15 +7,21 @@ interface UseModalState {
   onOpenChange: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-interface SelectedAssets {
-  selectedAssets: string[];
-  onSelectedAssetsChange: React.Dispatch<React.SetStateAction<string[]>>;
-}
-
 interface GlobalState {
   modal: {
     seed: UseModalState;
-    risk: UseModalState & SelectedAssets;
+    risk: {
+      open: boolean;
+      type: 'risk' | 'material' | 'selectorScreen';
+      onChange: (
+        open: boolean,
+        type: GlobalState['modal']['risk']['type']
+      ) => void;
+      selectedAssets: string[];
+      onSelectedAssetsChange: React.Dispatch<React.SetStateAction<string[]>>;
+      selectedRisks: string[];
+      onSelectedRisksChange: React.Dispatch<React.SetStateAction<string[]>>;
+    };
     asset: UseModalState;
     file: UseModalState;
     upgrade: UseModalState;
@@ -27,6 +33,10 @@ interface GlobalState {
     onChange: React.Dispatch<GlobalState['awsMarketplaceConfig']['value']>;
     verifyLinking: boolean;
     onVerifyLinkingChange: React.Dispatch<React.SetStateAction<boolean>>;
+  };
+  riskNotification: {
+    value: { message: string } | null;
+    onChange: (value: { message: string } | null) => void;
   };
 }
 
@@ -45,14 +55,21 @@ export const GlobalStateProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [seedOpen, setSeedOpen] = useState(false);
   const [riskOpen, setRiskOpen] = useState(false);
+  const [riskType, setRiskType] =
+    useState<GlobalState['modal']['risk']['type']>('selectorScreen');
+
   const [assetOpen, setAssetOpen] = useState(false);
   const [fileOpen, setFileOpen] = useState(false);
   const [pushNotificationOpen, setPushNotificationOpen] = useState(false);
   const [surfaceSetupOpen, setSurfaceSetupOpen] = useState(false);
-
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
+  const [riskNotification, setRiskNotification] = useState<{
+    message: string;
+  } | null>(null);
+
   const [selectedAssets, setSelectedAssets] = useState<string[]>([]);
+  const [selectedRisks, setSelectedRisks] = useState<string[]>([]);
   const [awsMarketplaceConfig, setAwsMarketplaceConfig] = useStorage<
     GlobalState['awsMarketplaceConfig']['value']
   >({
@@ -67,6 +84,17 @@ export const GlobalStateProvider: React.FC<{ children: React.ReactNode }> = ({
     false
   );
 
+  const handleRiskNotification = (
+    value: GlobalState['riskNotification']['value']
+  ) => {
+    setRiskNotification(value);
+
+    // Automatically close the notification after 3 seconds (optional)
+    setTimeout(() => {
+      setRiskNotification(null);
+    }, 3000);
+  };
+
   return (
     <GlobalStateContext.Provider
       value={{
@@ -78,9 +106,15 @@ export const GlobalStateProvider: React.FC<{ children: React.ReactNode }> = ({
           seed: { open: seedOpen, onOpenChange: setSeedOpen },
           risk: {
             open: riskOpen,
-            onOpenChange: setRiskOpen,
+            type: riskType,
+            onChange: (open, type) => {
+              setRiskOpen(open);
+              setRiskType(type);
+            },
             selectedAssets,
             onSelectedAssetsChange: setSelectedAssets,
+            selectedRisks,
+            onSelectedRisksChange: setSelectedRisks,
           },
           asset: { open: assetOpen, onOpenChange: setAssetOpen },
           file: { open: fileOpen, onOpenChange: setFileOpen },
@@ -98,6 +132,10 @@ export const GlobalStateProvider: React.FC<{ children: React.ReactNode }> = ({
           onChange: setAwsMarketplaceConfig,
           verifyLinking,
           onVerifyLinkingChange: setVerifyLinking,
+        },
+        riskNotification: {
+          value: riskNotification,
+          onChange: handleRiskNotification,
         },
       }}
     >

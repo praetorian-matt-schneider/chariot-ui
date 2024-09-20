@@ -18,7 +18,6 @@ import {
   Asset,
   AssetStatus,
   AssetStatusLabel,
-  Attribute,
   Condition,
   Risk,
   RiskSeverity,
@@ -32,7 +31,7 @@ import { getRiskStatusLabel } from '@/utils/riskStatus.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
 import { useSearchParams as useSearchParamsUtil } from '@/utils/url.util';
 
-type AlertType = Asset | Risk | Attribute;
+type AlertType = Risk;
 
 const isAssetFn = (item: AlertType): item is Asset =>
   item.key?.startsWith('#asset#');
@@ -51,69 +50,48 @@ export const Alerts: React.FC<Props> = ({
   status: dataStatus,
   items,
 }: Props) => {
-  const { getRiskDrawerLink, getAssetDrawerLink } = getDrawerLink();
+  const { getRiskDrawerLink } = getDrawerLink();
   const navigate = useNavigate();
 
   function handleRefetch(message?: string) {
     refetch(message);
   }
 
-  const renderItemDetails = (item: AlertType) => {
-    const isAsset = isAssetFn(item);
-    const isRisk = isRiskFn(item);
-
-    const handleViewLink = () => {
-      if (isAsset) {
-        return getAssetDrawerLink(item as Asset);
-      } else if (isRisk) {
-        return getRiskDrawerLink(item as Risk);
-      }
-    };
-
+  const renderItemDetails = (item: Risk) => {
     return (
       <div
         className="flex w-full cursor-pointer items-center space-x-4 border-b border-gray-200 bg-white p-4 hover:bg-gray-100"
         onClick={e => {
           e.preventDefault();
           e.stopPropagation();
-          const link = handleViewLink();
+          const link = getRiskDrawerLink(item as Risk);
           link && navigate(link);
         }}
       >
         <div className="flex flex-1 items-center space-x-3 overflow-hidden">
-          {isRisk &&
-            getSeverityButton(getRiskStatusLabel(item.status).severity)}
-          {(isAsset || isRisk) && (
-            <div className="flex flex-1 items-center space-x-3 overflow-hidden">
-              <div className="flex w-full flex-col overflow-hidden">
-                <Tooltip title={item.name ?? (isAsset ? item.dns : item.key)}>
-                  <span className="truncate text-base font-semibold text-indigo-500">
-                    {item.name}
-                  </span>
-                </Tooltip>
-                <span className="text-sm text-gray-500">{item.dns}</span>
-              </div>
-            </div>
-          )}
-        </div>
-        {(isAsset || isRisk) && (
-          <span className="text-xs text-gray-500">
-            {item.created !== item.updated ? (
-              <Tooltip title={`Created ${formatDate(item.created)}`}>
-                Identified {formatDate(item.updated)}
+          {getSeverityButton(getRiskStatusLabel(item.status).severity)}
+          <div className="flex flex-1 items-center space-x-3 overflow-hidden">
+            <div className="flex w-full flex-col overflow-hidden">
+              <Tooltip title={item.name ?? item.key}>
+                <span className="truncate text-base font-semibold text-indigo-500">
+                  {item.name}
+                </span>
               </Tooltip>
-            ) : (
-              <span>
-                {isAsset
-                  ? item.source === 'provided'
-                    ? 'Added'
-                    : 'Discovered'
-                  : 'Identified'}{' '}
-                {formatDate(item.created)}
-              </span>
-            )}
-          </span>
-        )}
+              <span className="text-sm text-gray-500">{item.dns}</span>
+            </div>
+          </div>
+        </div>
+        <span className="text-xs text-gray-500">
+          {item.created !== item.updated ? (
+            <Tooltip title={`Created ${formatDate(item.created)}`}>
+              Identified {formatDate(item.updated)}
+            </Tooltip>
+          ) : (
+            <span>
+              {'Identified'} {formatDate(item.created)}
+            </span>
+          )}
+        </span>
         <AlertAction item={item} handleRefetch={handleRefetch} />
       </div>
     );

@@ -26,6 +26,8 @@ export const Regex = {
   CONDITION_PORT: /^#condition#exposure-port-([^#]+)/,
   CONDITION_SURFACE: /^#condition#exposure-surface-([^#]+)/,
   CONDITION_PROTOCOL: /^#condition#exposure-protocol-([^#]+)/,
+  RISK: /^#risk#([^#]+)#([^#]+)/,
+  MATERIAL_RISK: /^#risk#-#([^#]+)/,
 };
 
 export const AllowedSeedRegex = new RegExp(

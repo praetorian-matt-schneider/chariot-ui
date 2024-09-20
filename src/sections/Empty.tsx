@@ -11,7 +11,6 @@ export const Empty = () => {
     defaultFilters: {
       search: '',
       query: '',
-      subQuery: '',
     },
   });
 

@@ -35,7 +35,11 @@ const getRiskStatus = (status: string = '') => {
 const getRiskSeverity = (status: string = '') => {
   const slicedSeverity = status.slice(-1);
 
-  if (Object.values(RiskSeverity).includes(slicedSeverity as RiskSeverity)) {
+  if (
+    [...Object.values(RiskSeverity), 'X'].includes(
+      slicedSeverity as RiskSeverity
+    )
+  ) {
     return slicedSeverity as RiskSeverity;
   }
 

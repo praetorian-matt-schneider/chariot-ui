@@ -284,6 +284,22 @@ function getTypeOptionFromKey<T extends keyof GenericResource>(
       };
     }
 
+    case 'risks': {
+      const asset = parseKeys.riskKey(key);
+
+      return {
+        label: (
+          <div className="flex items-center gap-2 overflow-hidden">
+            <AssetsIcon className="size-4 flex-none text-gray-400" />
+            <span className="text-nowrap">{asset.name}</span>
+            <ChevronRightIcon className="size-2 flex-none shrink-0" />
+            <span className="truncate text-nowrap">{asset.dns}</span>
+          </div>
+        ),
+        value: key,
+      };
+    }
+
     case 'attributes': {
       const attribute = parseKeys.attributeKey(key);
 
@@ -324,6 +340,15 @@ export const parseKeys = {
     return { name, value, attributeType: attributeType as AttributeType, dns };
   },
   assetKey(key: string): {
+    dns: string;
+    name: string;
+  } {
+    // #asset#{asset.dns}#{asset.name}
+    const [, , dns, name] = key.split('#');
+
+    return { dns, name };
+  },
+  riskKey(key: string): {
     dns: string;
     name: string;
   } {

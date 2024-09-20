@@ -1,49 +1,56 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ChevronDownIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import {
-  BellIcon,
-  CheckCircleIcon,
+  DocumentTextIcon,
   ShieldExclamationIcon,
-} from '@heroicons/react/24/solid';
+} from '@heroicons/react/24/outline';
+import { BellIcon, CheckCircleIcon } from '@heroicons/react/24/solid';
 
+import { Button } from '@/components/Button';
 import { Drawer } from '@/components/Drawer';
-import { Dropdown } from '@/components/Dropdown';
-import { getRiskSeverityIcon } from '@/components/icons/RiskSeverity.icon';
+import {
+  getRiskSeverityIcon,
+  getSeverityButton,
+} from '@/components/icons/RiskSeverity.icon';
 import { getRiskStatusIcon } from '@/components/icons/RiskStatus.icon';
 import { Loader } from '@/components/Loader';
 import { Table } from '@/components/table/Table';
-import { Columns } from '@/components/table/types';
+import { Columns, TableProps } from '@/components/table/types';
 import { Tooltip } from '@/components/Tooltip';
-import {
-  RISK_DROPDOWN_CLASS,
-  riskSeverityOptions,
-} from '@/components/ui/RiskDropdown';
+import { ClosedStateModal } from '@/components/ui/ClosedStateModal';
 import { useMy } from '@/hooks';
+import { useAxios } from '@/hooks/useAxios';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useGetAccountAlerts } from '@/hooks/useGetAccountAlerts';
-import { Alerts } from '@/sections/Alerts';
-import { AlertIcon, CategoryFilterProps, FancyTable } from '@/sections/Assets';
+import { useUpdateRisk } from '@/hooks/useRisks';
+import {
+  AlertIcon,
+  buildOpenRiskDataset,
+  CategoryFilterProps,
+  FancyTable,
+} from '@/sections/Assets';
 import { RenderHeaderExtraContentSection } from '@/sections/AuthenticatedApp';
 import { getDrawerLink } from '@/sections/detailsDrawer/getDrawerLink';
-import { Empty } from '@/sections/Empty';
 import { getCurrentPlan } from '@/sections/overview/Overview';
 import RiskNotificationBar from '@/sections/RiskNotificationBar';
+import { parseKeys } from '@/sections/SearchByType';
 import { useAuth } from '@/state/auth';
 import { useGlobalState } from '@/state/global.state';
 import {
   AssetStatus,
+  Attribute,
   GenericResource,
   Risk,
   RiskFilters,
+  RiskSeverity,
   RiskStatus,
   RiskStatusLabel,
   SeverityDef,
 } from '@/types';
+import { mergeStatus, useMergeStatus, useQueries } from '@/utils/api';
 import { partition } from '@/utils/array.util';
 import { cn } from '@/utils/classname';
-import { getSeverityClass } from '@/utils/getSeverityClass.util';
-import { capitalize } from '@/utils/lodash.util';
+import { formatDate } from '@/utils/date.util';
 import { Regex } from '@/utils/regex.util';
 import { getRiskStatusLabel } from '@/utils/riskStatus.util';
 import { sortBySeverityAndUpdated } from '@/utils/sortBySeverityAndUpdated.util';
@@ -51,48 +58,55 @@ import { useQueryFilters } from '@/utils/storage/useQueryParams.util';
 import { StorageKey } from '@/utils/storage/useStorage.util';
 import { generatePathWithSearch, useSearchParams } from '@/utils/url.util';
 
+const DefaultFilter = {
+  search: '',
+  query: 'status:OC',
+};
 const RisksBeta: React.FC = () => {
   const {
     modal: {
-      risk: { onOpenChange: onOpenRiskChange },
+      risk: { onChange: onOpenRiskChange },
     },
   } = useGlobalState();
-  const [filters, setFilters] = useQueryFilters<RiskFilters>({
+  const [filters, setFiltersFn] = useQueryFilters<RiskFilters>({
     key: StorageKey.RISK_FILTERS,
-    defaultFilters: {
-      search: '',
-      query: '',
-      subQuery: '',
-    },
+    defaultFilters: DefaultFilter,
   });
-  const [notification, setNotification] = useState<{
-    message: string;
-  } | null>(null);
 
-  const handleRiskAction = (message: string) => {
-    setNotification({ message });
+  function setFilters(filters: RiskFilters) {
+    if (!filters.query && !filters.search) {
+      setFiltersFn(DefaultFilter);
+    } else {
+      setFiltersFn(filters);
+    }
+  }
 
-    // Automatically close the notification after 3 seconds (optional)
-    setTimeout(() => {
-      setNotification(null);
-    }, 3000);
-  };
+  const { riskNotification: riskNotificationGlobal } = useGlobalState();
+  const { value: riskNotification, onChange: setRiskNotification } =
+    riskNotificationGlobal;
 
   const [isCTAOpen, setIsCTAOpen] = useState<boolean>(false);
   const closeCTADrawer = () => {
     setIsCTAOpen(false);
   };
 
-  // Check for remediated risks to update the CTA
+  const [drawerFilter, setDrawerFilter] = useState<RiskFilters>({
+    query: 'status:R',
+    search: '',
+  });
+
   const {
     data: risksGeneric,
     status: risksStatus,
     error: risksError,
     isFetchingNextPage,
     fetchNextPage,
-  } = useGenericSearch({
-    query: 'status:R',
-  });
+  } = useGenericSearch(
+    {
+      query: drawerFilter.query,
+    },
+    { enabled: isCTAOpen }
+  );
   const hasRemediatedRisk = (risksGeneric?.risks || [])?.length > 0;
   const { getRiskDrawerLink } = getDrawerLink();
 
@@ -111,20 +125,27 @@ const RisksBeta: React.FC = () => {
     ({ source }) => source === 'system'
   );
 
-  const query = filters.search || filters.subQuery || filters.query || '';
+  const query = filters.search || filters.query || '';
 
   const [exportingFilter, setExportingFilter] = useState<RiskFilters>();
   const exportingQuery = exportingFilter
-    ? exportingFilter.search ||
-      exportingFilter.subQuery ||
-      exportingFilter.query ||
-      ''
+    ? exportingFilter.search || exportingFilter.query || ''
     : '';
 
+  const riskType = filters.search
+    ? 'Search'
+    : filters.query.startsWith('status:')
+      ? filters.query.startsWith('status:OX')
+        ? 'Material'
+        : 'Severity'
+      : 'Exposure';
+
   const {
-    data,
+    data: queryData,
     refetch: refetchData,
-    status: dataStatus,
+    status: queryDataStatus,
+    error: error,
+    fetchNextPage: fetchRisksNextPage,
   } = useGenericSearch(
     {
       query: query ?? '',
@@ -147,14 +168,107 @@ const RisksBeta: React.FC = () => {
       enabled: Boolean(exportingFilter),
     }
   );
-  const { items } = useMemo(
-    () => getAlertItems(data, filters),
-    [JSON.stringify({ data, filters })]
+
+  const { data: openRisks, status: openRisksStatus } = useGenericSearch({
+    query: 'status:O',
+  });
+
+  const { data: risksMaterial, status: risksMaterialStatus } = useGenericSearch(
+    {
+      query: 'status:OX',
+    }
   );
 
-  const selectedCondition = useMemo(() => {
-    return alertsWithoutAttributes.find(({ value }) => value === filters.query);
-  }, [JSON.stringify({ alertsWithoutAttributes, filters })]);
+  const risksMaterialExist =
+    risksMaterial?.risks.length && risksMaterial?.risks.length > 0;
+
+  const openRiskDataset = useMemo(() => {
+    return (openRisks?.risks || []).reduce(
+      (acc, risk) => {
+        return {
+          ...acc,
+          [risk.key]: true,
+        };
+      },
+      {} as Record<string, boolean>
+    );
+  }, [JSON.stringify({ risks: openRisks?.risks })]);
+
+  const riskItems = useMemo(
+    () => getRisks(queryData, riskType),
+    [riskType, JSON.stringify({ queryData })]
+  );
+
+  const axios = useAxios();
+
+  const materialRisks = riskItems.filter(risk => risk.status.endsWith('X'));
+  const materialRisksExists = materialRisks.length > 0;
+
+  const { status: materialRiskAttributesStatus, data: materialRiskAttributes } =
+    useQueries({
+      queries: materialRisks.map(risk => {
+        return {
+          queryKey: ['MaterialRiskAttributes', risk.key],
+          queryFn: async () => {
+            const { dns, name } = parseKeys.riskKey(risk.key);
+
+            const { data } = await axios.get<GenericResource>(`/my`, {
+              params: {
+                key: `source:#risk#${dns}#${name}`,
+                exact: true,
+              },
+            });
+
+            return data?.attributes || [];
+          },
+        };
+      }),
+      combine: results => {
+        return {
+          data: results.reduce(
+            (acc, result, index) => {
+              return {
+                ...acc,
+                [materialRisks[index].key]:
+                  result.data?.filter(att => att.value.startsWith('#risk')) ||
+                  [],
+              };
+            },
+            {} as Record<string, Attribute[]>
+          ),
+          status: mergeStatus(...results.map(result => result.status)),
+        };
+      },
+    });
+
+  const dataStatus = useMergeStatus(
+    queryDataStatus,
+    openRisksStatus,
+    materialRisksExists ? materialRiskAttributesStatus : 'success'
+  );
+
+  type LocalRisk = Risk & { remediatedText?: string };
+
+  const items = useMemo(() => {
+    return riskItems.map((risk): LocalRisk => {
+      if (risk.status.endsWith('X')) {
+        const attributes = materialRiskAttributes?.[risk.key] || [];
+
+        const openRisk = attributes.filter(
+          att => openRiskDataset[att.value]
+        ).length;
+
+        const remediatedRiskCount = attributes.length - openRisk;
+
+        return {
+          ...risk,
+          remediatedText: `${remediatedRiskCount} of ${attributes.length} risks remediated`,
+        };
+      }
+
+      return risk;
+    });
+  }, [riskItems, JSON.stringify({ materialRiskAttributes, openRiskDataset })]);
 
   useEffect(() => {
     if (exportingFilter && !isFetchingExportingData) {
@@ -165,14 +279,9 @@ const RisksBeta: React.FC = () => {
 
         setExportingFilter(undefined);
 
-        const { exportingData: filteredExportingData, type } = getAlertItems(
-          exportingData,
-          exportingFilter
-        );
-
-        const riskStatus = exportingFilter.subQuery;
-
         let fileName = '';
+
+        const filteredExportingData = getRisks(exportingData, riskType);
 
         if (filters.search) {
           fileName = `Risks with search ${filters.search}`;
@@ -181,10 +290,10 @@ const RisksBeta: React.FC = () => {
 
           fileName = `Exposure risk with ${name} ${value}`;
         } else {
-          const { severityLabel } = getRiskStatusLabel(riskStatus);
-          const prefix = riskStatus ? `${severityLabel} ` : '';
-
-          fileName = `${prefix}${capitalize(type)}s in ${selectedCondition?.name}`;
+          const { severityLabel } = getRiskStatusLabel(
+            exportingQuery.split(':')[1]
+          );
+          fileName = `Risks with severity ${severityLabel}`;
         }
 
         const exportingDataString = exportingData
@@ -211,7 +320,8 @@ const RisksBeta: React.FC = () => {
     exportingQuery,
     isFetchingExportingData,
     exportingDataHasNextPage,
-    JSON.stringify({ exportingFilter, selectedCondition }),
+    riskType,
+    JSON.stringify({ exportingFilter }),
   ]);
 
   const { friend } = useAuth();
@@ -220,25 +330,6 @@ const RisksBeta: React.FC = () => {
   });
 
   const currentPlan = getCurrentPlan({ accounts, friend });
-
-  // Add default filter if none is selected
-  useEffect(() => {
-    if (!filters.search && !filters.query) {
-      if (alerts && alerts.length > 0) {
-        setFilters({
-          search: '',
-          query: alerts[0].value,
-          subQuery: '',
-        });
-      } else if (conditions && conditions.length > 0) {
-        setFilters({
-          search: '',
-          query: conditions[0].value,
-          subQuery: '',
-        });
-      }
-    }
-  }, [JSON.stringify({ alerts, filters, conditions })]);
 
   // Open the drawer based on the search params
   const { searchParams, removeSearchParams } = useSearchParams();
@@ -256,7 +347,7 @@ const RisksBeta: React.FC = () => {
     }
   }, [searchParams]);
 
-  const columns: Columns<Risk> = useMemo(
+  const columns: Columns<LocalRisk> = useMemo(
     () => [
       {
         label: 'Priority',
@@ -294,15 +385,6 @@ const RisksBeta: React.FC = () => {
         copy: true,
       },
       {
-        label: 'Status',
-        id: 'status',
-        className: 'text-left',
-        cell: (risk: Risk) => {
-          const riskStatusKey = getRiskStatusLabel(risk.status).status;
-          return <span>{RiskStatusLabel[riskStatusKey]}</span>;
-        },
-      },
-      {
         label: 'DNS',
         id: 'dns',
         className: 'hidden md:table-cell',
@@ -338,13 +420,30 @@ const RisksBeta: React.FC = () => {
         align: 'center',
         fixedWidth: 70,
       },
+      {
+        label: 'Action',
+        id: '',
+        fixedWidth: 50,
+        align: 'center',
+        cell: risk => (
+          <Button
+            styleType="primary"
+            className="py-2"
+            onClick={() => {
+              handleRiskChange(
+                risk,
+                RiskStatus.Opened,
+                getRiskStatusLabel(risk.status).severity
+              );
+            }}
+          >
+            {drawerFilter.query === 'status:T' ? 'Open' : 'Re open'}
+          </Button>
+        ),
+      },
     ],
-    []
+    [drawerFilter.query]
   );
-
-  const statusCode = filters.query.startsWith('exposure')
-    ? 'E'
-    : (filters.query.split(':')[1] as AssetStatus | RiskStatus);
 
   const category = useMemo((): CategoryFilterProps['category'] => {
     const ports = conditions.filter(({ key }) =>
@@ -364,21 +463,19 @@ const RisksBeta: React.FC = () => {
     );
 
     return [
-      ...(alerts.length > 0
-        ? [
-            {
-              defaultOpen: true,
-              label: 'Security Alerts',
-              options: alerts.map(({ name, value, sort }) => ({
-                label: name,
-                value,
-                count: '0', // No need to show count
-                alert: false,
-                subQueries: sort,
-              })),
-            },
-          ]
-        : []),
+      {
+        defaultOpen: true,
+        label: 'Severity',
+        selectedLabel: 'asd',
+        options: Object.entries(RiskSeverity)
+          .reverse()
+          .map(([name, value]) => ({
+            label: name,
+            value: `status:O${value}`,
+            count: '0', // No need to show count
+            alert: false,
+          })),
+      },
       ...(surfaces.length > 0
         ? [
             {
@@ -451,33 +548,161 @@ const RisksBeta: React.FC = () => {
               label: category.selectedLabel || category.label,
               value: found.selectedLabel || found.label,
               alert: found.alert ?? true,
-              subQueries: found.subQueries || [],
             };
           }
         }
 
         return acc;
       },
-      { label: '', value: '', alert: true, subQueries: [] } as {
+      { label: '', value: '', alert: true } as {
         label: string;
         value: string;
         alert: boolean;
-        subQueries: string[];
       }
     );
-  }, [JSON.stringify({ category, query: filters.query })]);
-
-  const selectedSeverity = useMemo(() => {
-    return filters.subQuery ? filters.subQuery.slice(-1) : '';
-  }, [JSON.stringify({ subQuery: filters.subQuery })]);
+  }, [category, JSON.stringify({ query: filters.query })]);
 
   const showHelper = (message?: string) => {
     refetchData();
     refetchAlerts();
     if (message) {
-      handleRiskAction(message);
+      setRiskNotification({ message });
     }
   };
+
+  const navigate = useNavigate();
+
+  const { mutateAsync: updateRisk, status: updateRiskStatus } = useUpdateRisk();
+
+  function handleRiskChange(
+    risk: Risk,
+    status: RiskStatus,
+    severity?: RiskSeverity
+  ) {
+    updateRisk({
+      key: risk.key,
+      name: risk.name,
+      status: `${status}${severity ? severity : ''}`,
+      showSnackbar: true,
+      comment: risk.comment,
+    }).then(() => {
+      if (status === RiskStatus.Remediated) {
+        showHelper(`Great work! ${risk.name} has been remediated.`);
+      } else if (status === RiskStatus.DeletedRisks) {
+        showHelper(`${risk.name} has been closed.`);
+      } else {
+        const { severityLabel } = getRiskStatusLabel(
+          `${status}${severity ? severity : ''}`
+        );
+
+        const sentence = `${risk.name} has been moved to Severity ${severityLabel}.`;
+        showHelper(sentence);
+      }
+    });
+  }
+
+  const renderItemDetails = useCallback((item: LocalRisk) => {
+    const { severity, status } = getRiskStatusLabel(item.status);
+    return (
+      <div
+        className="flex w-full cursor-pointer items-center gap-2 p-4 hover:bg-gray-100"
+        onClick={e => {
+          e.preventDefault();
+          e.stopPropagation();
+          const link = getRiskDrawerLink(item as Risk);
+          link && navigate(link);
+        }}
+      >
+        <div className="flex flex-1 items-center space-x-3 overflow-hidden">
+          {getSeverityButton(severity)}
+          <div className="flex flex-1 items-center space-x-3 overflow-hidden">
+            <div className="flex w-full flex-col overflow-hidden">
+              <Tooltip title={item.name ?? item.key}>
+                <span className="truncate text-base font-semibold text-indigo-500">
+                  {item.name}
+                </span>
+              </Tooltip>
+              <span className="text-sm text-gray-500">
+                {item.remediatedText || item.dns}
+              </span>
+            </div>
+          </div>
+        </div>
+        <span className="text-xs text-gray-500">
+          {item.created !== item.updated ? (
+            <Tooltip title={`Created ${formatDate(item.created)}`}>
+              Identified {formatDate(item.updated)}
+            </Tooltip>
+          ) : (
+            <span>
+              {'Identified'} {formatDate(item.created)}
+            </span>
+          )}
+        </span>
+        {severity.toString() === 'X' && (
+          <Tooltip placement="top" title="Remediate the Risk">
+            <Button
+              styleType="primary"
+              className="h-8"
+              onClick={e => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleRiskChange(item, RiskStatus.Remediated, severity);
+              }}
+              disabled={updateRiskStatus === 'pending'}
+            >
+              Yes
+            </Button>
+          </Tooltip>
+        )}
+        {severity.toString() !== 'X' && status === RiskStatus.Opened && (
+          <ClosedStateModal
+            type="dropdown"
+            risk={item}
+            isOpen
+            onClose={() => {}}
+            onSuccess={showHelper}
+          />
+        )}
+        {status === RiskStatus.ExposedRisks && (
+          <>
+            <Tooltip placement="top" title="Open the Risk">
+              <Button
+                styleType="primary"
+                className="h-8"
+                onClick={e => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleRiskChange(item, RiskStatus.Opened, RiskSeverity.Low);
+                }}
+                disabled={updateRiskStatus === 'pending'}
+              >
+                Yes
+              </Button>
+            </Tooltip>
+            <ClosedStateModal
+              type="dropdownWithNoButton"
+              risk={item}
+              isOpen
+              onClose={() => {}}
+              onSuccess={showHelper}
+            />
+          </>
+        )}
+      </div>
+    );
+  }, []);
+
+  const riskPageColumns = useMemo((): TableProps<Risk>['columns'] => {
+    return [
+      {
+        id: '',
+        label: '',
+        cell: renderItemDetails,
+        className: cn(dataStatus === 'success' && 'p-0'),
+      },
+    ];
+  }, [renderItemDetails, dataStatus]);
 
   return (
     <>
@@ -507,34 +732,65 @@ const RisksBeta: React.FC = () => {
 
       <div className="relative">
         {/* The RiskNotificationBar appears on top of the list */}
-        {notification && (
+        {riskNotification && (
           <RiskNotificationBar
-            message={notification.message}
-            onClose={() => setNotification(null)}
+            message={riskNotification.message}
+            onClose={() => setRiskNotification(null)}
           />
         )}
       </div>
       <FancyTable
-        addNew={{ onClick: () => onOpenRiskChange(true) }}
+        addNew={{ onClick: () => onOpenRiskChange(true, 'selectorScreen') }}
         search={{
           value: filters.search,
           onChange: search => {
-            setFilters({ search, query: '', subQuery: '' });
+            setFilters({ search, query: '' });
           },
         }}
         className="h-0 min-h-0"
         name="risk"
+        otherFilters={
+          <div
+            className={cn(
+              'flex flex-col gap-2 m-4 mb-0 bg-white border border-gray-300 py-2 px-5 rounded-sm',
+              filters.query === 'status:OX' && 'border-[3px] border-brand/20'
+            )}
+          >
+            <div className="flex items-center justify-between gap-2 py-1 ">
+              <h1 className="font-semibold">Material Risks</h1>
+              {risksMaterialExist ? (
+                <ShieldExclamationIcon className="size-5" />
+              ) : (
+                <CheckCircleIcon className="size-5 text-green-500" />
+              )}
+            </div>
+            <p className="px-2 text-center text-xs font-medium text-gray-500">
+              “The determination of whether an error is material is an objective
+              assessment focused on whether there is a substantial likelihood it
+              is important to the reasonable investor.”
+            </p>
+            {risksMaterialExist ? (
+              <Button
+                className="m-auto mb-2 bg-red-600 text-white"
+                onClick={() => {
+                  setFilters({ search: '', query: 'status:OX' });
+                }}
+              >
+                View Material Risks
+              </Button>
+            ) : null}
+          </div>
+        }
         filter={{
           value: filters.query ? [filters.query] : [],
-          hideHeader: true,
           onChange: alerts => {
             setFilters({
               ...filters,
               search: '',
-              subQuery: '',
               query: alerts[0] || '',
             });
           },
+          allowEmpty: false,
           category,
           status: alertsStatus,
           alert: {
@@ -552,76 +808,59 @@ const RisksBeta: React.FC = () => {
           <div className="w-full">
             <div className="flex w-full items-center justify-between">
               <h1 className="text-xl font-bold text-gray-900">
-                {AlertDescriptions[statusCode]}
-              </h1>
-              {selectedCategory.subQueries.length > 0 && (
-                <Dropdown
-                  className={cn(
-                    RISK_DROPDOWN_CLASS,
-                    getSeverityClass(selectedSeverity)
-                  )}
-                  startIcon={
-                    riskSeverityOptions.find(
-                      option => option.value === selectedSeverity
-                    )?.icon
-                  }
-                  endIcon={
-                    <ChevronDownIcon className="size-3 text-default-light" />
-                  }
-                  menu={{
-                    value: filters.subQuery,
-                    onClick: value => {
-                      if (value || value === '') {
-                        setFilters({
-                          ...filters,
-                          subQuery: value,
-                        });
-                      }
-                    },
-                    items: [
-                      {
-                        label: `All Severities`,
-
-                        value: '',
-                      },
-                      ...(selectedCategory.subQueries
-                        .map(query => {
-                          const severity = query.slice(-1);
-
-                          const option = riskSeverityOptions.find(
-                            o => o.value === severity
-                          );
-                          return { ...option, value: query };
-                        })
-                        .filter(Boolean)
-                        .reverse() as { label: string; value: string }[]),
-                    ],
-                  }}
-                >
-                  <div className="flex-1 text-left">
-                    {getRiskStatusLabel(filters.subQuery.slice(-2) || '')
-                      .severityLabel || 'Filter by Severity'}
+                {filters.search ? (
+                  <div className="flex items-center gap-2">
+                    Search:
+                    <p className="text-lg font-semibold text-gray-500">
+                      {filters.search}
+                    </p>
                   </div>
-                </Dropdown>
-              )}
+                ) : filters.query.startsWith('exposure') ? (
+                  'Are these exposures risks?'
+                ) : (
+                  <div className="flex items-center gap-2">
+                    Open Risks:
+                    <p className="text-lg font-semibold text-gray-500">
+                      {
+                        SeverityDef[
+                          filters.query.split(':')[1].slice(-1) as RiskSeverity
+                        ]
+                      }
+                    </p>
+                  </div>
+                )}
+              </h1>
               {selectedCategory.alert && (
                 <AlertIcon
                   value={[filters.query]}
                   currentValue={filters.query}
                   styleType="button"
-                  onRemove={() =>
-                    setFilters({ search: '', query: '', subQuery: '' })
-                  }
+                  onRemove={() => setFilters({ search: '', query: '' })}
                 />
               )}
             </div>
           </div>
         }
       >
-        {query && (
-          <Alerts items={items} status={dataStatus} refetch={showHelper} />
-        )}
-        {!query && <Empty />}
+        <Table
+          tableClassName="border-none"
+          isTableView
+          hideTableHeader
+          data={items}
+          status={dataStatus}
+          columns={riskPageColumns}
+          error={error}
+          name="risk"
+          fetchNextPage={fetchRisksNextPage}
+          noData={{
+            title: filters.search
+              ? 'Your search returned no result'
+              : 'All Clear!',
+            description: filters.search
+              ? ''
+              : 'Great job! No risks have been detected in your environment.\nKeep monitoring to stay secure.',
+          }}
+        />
       </FancyTable>
       <Drawer
         open={isCTAOpen}
@@ -629,68 +868,100 @@ const RisksBeta: React.FC = () => {
         onBack={closeCTADrawer}
         className={'w-full rounded-t-sm bg-zinc-100 p-0 shadow-lg'}
         skipBack={true}
+        zIndex={11}
       >
         <div className="mx-12 mt-6">
           <div className="flex w-full flex-row items-center justify-between">
-            <h1 className="mb-4 text-4xl font-extrabold">Remediated Risks</h1>
-          </div>
-
-          {risksGeneric?.risks?.length === 0 ? (
-            <div className="flex h-full flex-col items-center justify-center rounded-lg bg-zinc-50 p-8">
-              <div className="mb-4">
-                {/* Icon for illustration */}
-                <ShieldExclamationIcon className="size-16 text-gray-400" />
-              </div>
-              <h2 className="mb-2 text-2xl font-bold text-gray-700">
-                No Remediated Risks Yet
-              </h2>
-              <p className="mb-6 text-center text-lg text-gray-500">
-                A risk is a potential security issue that affects your system.
-                You can view the risk details, including the description and
-                remediation steps, for guidance on resolving it.
-              </p>
-              <ul className="mb-6 text-left text-gray-600">
-                <li className="mb-2">
-                  1. Open the risk to review its description and suggested
-                  remediation. If a remediation isn&apos;t available, you can
-                  generate one directly.
-                </li>
-                <li className="mb-2">
-                  2. Review the proof of exploit, showing the detection details
-                  and impacted assets.
-                </li>
-                <li className="mb-2">
-                  3. We automatically recheck every 30 minutes. If it&apos;s
-                  fixed, we&apos;ll close it for you, or you can manually close
-                  it if you&apos;re certain it&apos;s no longer a risk.
-                </li>
-              </ul>
-              <div className="text-gray-500">
-                {currentPlan === 'managed' ? (
-                  <p className="mt-4 text-center text-lg text-gray-500">
-                    As a managed service customer, we can assist you with this
-                    process.
-                  </p>
-                ) : (
-                  <p className="mt-4 text-center text-lg text-gray-500">
-                    Need help? Reach out to us about upgrading to our managed
-                    service plan.
-                  </p>
-                )}
-              </div>
+            <h1 className="mb-4 text-xl font-extrabold">
+              Review Non-Open Risks
+            </h1>
+            <div className="flex gap-2">
+              <SelectableTab
+                isSelected={drawerFilter.query === 'status:T'}
+                onClick={() => {
+                  setDrawerFilter({ query: 'status:T', search: '' });
+                }}
+              >
+                Pending
+              </SelectableTab>
+              <div className="m-1 h-auto border-l border-dashed border-gray-500" />
+              <SelectableTab
+                isSelected={drawerFilter.query === 'status:R'}
+                onClick={() => {
+                  setDrawerFilter({ query: 'status:R', search: '' });
+                }}
+              >
+                Remediated
+              </SelectableTab>
+              <SelectableTab
+                isSelected={drawerFilter.query === 'status:D'}
+                onClick={() => {
+                  setDrawerFilter({ query: 'status:D', search: '' });
+                }}
+              >
+                Noise
+              </SelectableTab>
             </div>
-          ) : (
-            <Table
-              name={'remediated-risks'}
-              resize={true}
-              columns={columns}
-              data={risksGeneric?.risks || []}
-              status={risksStatus}
-              error={risksError}
-              isFetchingNextPage={isFetchingNextPage}
-              fetchNextPage={fetchNextPage}
-            />
-          )}
+          </div>
+          <Table
+            name={'remediated-risks'}
+            resize={true}
+            columns={columns}
+            data={risksGeneric?.risks || []}
+            status={risksStatus}
+            error={risksError}
+            isFetchingNextPage={isFetchingNextPage}
+            fetchNextPage={fetchNextPage}
+            noData={{
+              icon: <ShieldExclamationIcon className="size-16 text-gray-400" />,
+              title:
+                drawerFilter.query === 'status:R'
+                  ? 'No Remediated Risks Yet'
+                  : drawerFilter.query === 'status:T'
+                    ? 'No Pending Risks'
+                    : 'No Noisy Risks',
+              description: drawerFilter.query === 'status:R' && (
+                <>
+                  <p className="mb-6 text-center text-lg text-gray-500">
+                    A risk is a potential security issue that affects your
+                    system. You can view the risk details, including the
+                    description and remediation steps, for guidance on resolving
+                    it.
+                  </p>
+                  <ul className="mb-6 text-left text-gray-600">
+                    <li className="mb-2">
+                      1. Open the risk to review its description and suggested
+                      remediation. If a remediation isn&apos;t available, you
+                      can generate one directly.
+                    </li>
+                    <li className="mb-2">
+                      2. Review the proof of exploit, showing the detection
+                      details and impacted assets.
+                    </li>
+                    <li className="mb-2">
+                      3. We automatically recheck every 30 minutes. If it&apos;s
+                      fixed, we&apos;ll close it for you, or you can manually
+                      close it if you&apos;re certain it&apos;s no longer a
+                      risk.
+                    </li>
+                  </ul>
+                  <div className="text-gray-500">
+                    {currentPlan === 'managed' ? (
+                      <p className="mt-4 text-center text-lg text-gray-500">
+                        As a managed service customer, we can assist you with
+                        this process.
+                      </p>
+                    ) : (
+                      <p className="mt-4 text-center text-lg text-gray-500">
+                        Need help? Reach out to us about upgrading to our
+                        managed service plan.
+                      </p>
+                    )}
+                  </div>
+                </>
+              ),
+            }}
+          />
         </div>
       </Drawer>
     </>
@@ -699,12 +970,45 @@ const RisksBeta: React.FC = () => {
 
 export default RisksBeta;
 
-export const AlertDescriptions: Record<string, string> = {
-  [RiskStatus.Opened]: 'Remediated a risk and want to close it early?',
-  [RiskStatus.Triaged]: 'Are these risks valid?',
-  [AssetStatus.ActiveLow]: 'Should these assets be scanned for risks?',
-  [RiskStatus.ExposedRisks]: 'Are these exposures risks?',
-};
+function getRisks(
+  data: GenericResource | undefined,
+  riskType: 'Material' | 'Severity' | 'Exposure' | 'Search'
+) {
+  const queryRisks = data?.risks || [];
+
+  const filteredRisks =
+    riskType === 'Exposure'
+      ? queryRisks.filter(risk => {
+          return risk.status.includes(RiskStatus.ExposedRisks);
+        })
+      : queryRisks;
+
+  return riskType === 'Exposure' || riskType === 'Search'
+    ? sortBySeverityAndUpdated(filteredRisks)
+    : queryRisks;
+}
+
+function SelectableTab({
+  children,
+  isSelected,
+  onClick,
+}: {
+  children: string;
+  isSelected?: boolean;
+  onClick?: () => void;
+}) {
+  return (
+    <div
+      onClick={onClick}
+      className={cn(
+        'font-semibold px-2 cursor-pointer',
+        isSelected && 'text-brand border-b-[2px] border-brand'
+      )}
+    >
+      {children}
+    </div>
+  );
+}
 
 export const SingularAlertDescriptions: Record<string, string> = {
   [RiskStatus.Opened]: 'Should this risk be closed?',
@@ -712,31 +1016,3 @@ export const SingularAlertDescriptions: Record<string, string> = {
   [AssetStatus.ActiveLow]: 'Should this asset be scanned for risks?',
   [RiskStatus.ExposedRisks]: 'Is this exposure valid?',
 };
-
-function getAlertItems(
-  data: GenericResource | undefined,
-  filters: RiskFilters
-) {
-  if (data?.assets && data?.assets.length > 0 && !filters.search) {
-    const assets = data?.assets || [];
-    return {
-      items: assets,
-      exportingData: {
-        assets: assets,
-      },
-      type: 'asset',
-    };
-  }
-  if (data?.risks && data?.risks.length > 0) {
-    const sortedRisks = sortBySeverityAndUpdated(data?.risks);
-
-    return {
-      items: sortedRisks,
-      exportingData: {
-        risks: sortedRisks,
-      },
-      type: 'risk',
-    };
-  }
-  return { items: [], exportingData: {}, type: '' };
-}

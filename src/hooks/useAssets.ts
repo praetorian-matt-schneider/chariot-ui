@@ -490,6 +490,7 @@ export function useGetAssets(options?: {
     isFetchingNextPage,
     isFetching,
     filters,
+    debouncedSearch,
     setFilters: (filters: AssetFilters) => {
       if (filters.search === '' && filters.attributes.length === 0) {
         setFilters(defaultFilters);
