@@ -30,9 +30,11 @@ import { useMy } from '@/hooks/useMy';
 import { CollaboratingWith } from '@/sections/CollaboratingWith';
 import { Integrations } from '@/sections/overview/Integrations';
 import { SSOSetupForm } from '@/sections/SSOSetupForm';
+import { ConnectedPushNotifications } from '@/sections/stepper/PushNotificationSetup';
 import Avatar from '@/sections/topNavBar/Avatar';
 import { Users } from '@/sections/Users';
 import { useAuth } from '@/state/auth';
+import { useGlobalState } from '@/state/global.state';
 import { getChariotWebhookURL } from '@/utils/integration.util';
 import { generateUuid } from '@/utils/uuid.util';
 
@@ -45,7 +47,9 @@ const Account: React.FC = () => {
   const { mutate: updateAccount } = useModifyAccount('updateSetting');
   const { mutateAsync: purgeAccount } = usePurgeAccount();
   const { mutate: unlink } = useModifyAccount('unlink');
-  const { mutate: link, data: linkedHook } = useModifyAccount('link');
+  const { mutate: link } = useModifyAccount('link');
+  const { modal } = useGlobalState();
+  const { onOpenChange: onOpenChangePushNotification } = modal.pushNotification;
 
   const { name: accountDisplayName } = useGetAccountDetails(data);
   const isDirty = status === 'success' && accountDisplayName !== displayName;
@@ -166,6 +170,22 @@ const Account: React.FC = () => {
             Save
           </Button>
         </form>
+      </Section>
+
+      <Section
+        title="Push Notifications"
+        description="Receive alerts via different integration channels"
+      >
+        <ConnectedPushNotifications />
+        <Button
+          className="mt-4"
+          styleType="primary"
+          onClick={() => {
+            onOpenChangePushNotification(true);
+          }}
+        >
+          Add Push Notification
+        </Button>
       </Section>
 
       <Section title="Webhook URL" description={hook.description as string}>
@@ -320,11 +340,12 @@ const Account: React.FC = () => {
 interface SectionProps extends PropsWithChildren {
   title: string;
   description?: string | JSX.Element;
+  id?: string;
 }
 
-const Section = ({ title, description, children }: SectionProps) => {
+const Section = ({ title, description, children, id }: SectionProps) => {
   return (
-    <Paper className="flex gap-28 p-8">
+    <Paper className="flex gap-28 p-8" id={id}>
       <div className="w-[260px] shrink-0">
         <h3 className="mb-1 text-lg font-bold">{title}</h3>
         <p className="text-sm text-default-light">{description}</p>

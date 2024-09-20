@@ -20,3 +20,11 @@ export const useUpgrade = () => {
     },
   });
 };
+
+export const contactUs = () => {
+  window.open(
+    'https://www.praetorian.com/contact-us',
+    '_blank',
+    'noopener noreferrer'
+  );
+};

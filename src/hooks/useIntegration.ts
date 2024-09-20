@@ -10,7 +10,7 @@ import {
 } from '@/sections/overview/Integrations';
 import { Account, GetStartedStatus } from '@/types';
 
-type AccountWithType = Account & { type: string; displayName: string };
+export type AccountWithType = Account & { type: string; displayName: string };
 
 export const useIntegration = () => {
   const {

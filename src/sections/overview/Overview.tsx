@@ -2,11 +2,12 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowPathIcon,
-  CheckIcon,
+  ArrowUpTrayIcon,
   ExclamationTriangleIcon as ExclamationTriangleIconOutline,
-  MagnifyingGlassIcon,
   PlusCircleIcon,
   PlusIcon,
+  ShieldCheckIcon,
+  ShieldExclamationIcon,
   XCircleIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
@@ -15,63 +16,37 @@ import {
   ExclamationTriangleIcon,
   WrenchScrewdriverIcon,
 } from '@heroicons/react/24/solid';
-import confetti from 'canvas-confetti';
 import { motion } from 'framer-motion';
 import { Hourglass, TriangleAlertIcon, Unplug } from 'lucide-react';
 
 import { Button } from '@/components/Button';
-import { DomainDrawerContent } from '@/components/DomainDrawerContent';
-import { Drawer } from '@/components/Drawer';
-import { Input } from '@/components/form/Input';
-import { Values } from '@/components/form/Inputs';
-import { GettingStarted } from '@/components/GettingStarted';
+import { Dropzone, Files } from '@/components/Dropzone';
 import { Loader } from '@/components/Loader';
 import { Modal } from '@/components/Modal';
-import PushNotificationDrawer from '@/components/PushNotificationDrawer';
 import { Table } from '@/components/table/Table';
 import { Tooltip } from '@/components/Tooltip';
-import UpgradeMenu from '@/components/UpgradeMenu';
+import { useMy, useUploadFile } from '@/hooks';
 import { useModifyAccount } from '@/hooks/useAccounts';
-import { useCreateAsset } from '@/hooks/useAssets';
-import {
-  useBulkDeleteAttributes,
-  useCreateAttribute,
-  useGetRootDomain,
-} from '@/hooks/useAttribute';
 import { useCounts } from '@/hooks/useCounts';
 import { useGenericSearch } from '@/hooks/useGenericSearch';
 import { useIntegration } from '@/hooks/useIntegration';
 import useIntegrationCounts from '@/hooks/useIntegrationCounts';
 import { JobWithFailedCount, useJobsStatus } from '@/hooks/useJobs';
 import { RenderHeaderExtraContentSection } from '@/sections/AuthenticatedApp';
-import { AttackSurfaceCard } from '@/sections/overview/IntegrationCards';
-import {
-  availableAttackSurfaceIntegrations,
-  availableAttackSurfaceIntegrationsKeys,
-  availableRiskIntegrations,
-  comingSoonAttackSurfaceIntegrations,
-  comingSoonRiskIntegrations,
-  IntegrationBuckets,
-  streamingRiskIntegrations,
-  ticketingRiskIntegrations,
-} from '@/sections/overview/Integrations';
+import { IntegrationBuckets } from '@/sections/overview/Integrations';
 import SetupModal from '@/sections/SetupModal';
+import PushNotificationSetup from '@/sections/stepper/PushNotificationSetup';
+import { RootDomainSetup } from '@/sections/stepper/RootDomainSetup';
+import { SurfaceSetup } from '@/sections/stepper/SurfaceSetup';
 import { useAuth } from '@/state/auth';
 import { useGlobalState } from '@/state/global.state';
-import {
-  Account,
-  AssetStatus,
-  FREEMIUM_ASSETS_LIMIT,
-  Job,
-  LinkAccount,
-  Plan,
-} from '@/types';
+import { Account, FREEMIUM_ASSETS_LIMIT, Job, Plan, RiskStatus } from '@/types';
 import { JobStatus, JobStatusLabel } from '@/types';
 import { partition } from '@/utils/array.util';
 import { cn } from '@/utils/classname';
+import { sToMs } from '@/utils/date.util';
 import { getJobStatus } from '@/utils/job';
 import { getRoute } from '@/utils/route.util';
-import { useStorage } from '@/utils/storage/useStorage.util';
 import { generatePathWithSearch, useSearchParams } from '@/utils/url.util';
 
 const getStatusIcon = (status: string) => {
@@ -89,7 +64,7 @@ const getStatusIcon = (status: string) => {
     case 'waitlist':
       return (
         <div className="flex size-7 items-center justify-center rounded-full bg-gray-600">
-          <Hourglass className="size-4 text-[#2D3748]" />
+          <Hourglass className="size-4 text-white dark:text-[#2D3748]" />
         </div>
       );
     default:
@@ -167,27 +142,14 @@ export const Overview: React.FC = () => {
   const { friend } = useAuth();
   const navigate = useNavigate();
 
-  const [isAttackSurfaceDrawerOpen, setIsAttackSurfaceDrawerOpen] = useStorage(
-    { queryKey: 'attackSurfaceDrawer' },
-    false
-  );
-  const [isRiskNotificationsDrawerOpen, setIsRiskNotificationsDrawerOpen] =
-    useStorage({ queryKey: 'riskNotificationDrawer' }, false);
+  const { modal } = useGlobalState();
+  const { onOpenChange: onOpenChangePushNotification } = modal.pushNotification;
+  const { onOpenChange: onOpenChangeSurfaceSetup } = modal.surfaceSetup;
 
   const [isDomainDrawerOpen, setIsDomainDrawerOpen] = useState(false);
   const [disconnectIntegrationKey, setDisconnectIntegrationKey] =
     useState<string>('');
-  const [isUpgradePlanOpen, setIsUpgradePlanOpen] = useState(false);
-  const [search, setSearch] = useState('');
   const [setupIntegration, setSetupIntegration] = useState<Account>();
-  const [updatedRootDomain, setUpdatedRootDomain] = useState<{
-    domain: string;
-    scanOption: AssetStatus;
-  }>();
-  const [
-    selectedAttackSurfaceIntegrations,
-    setSelectedAttackSurfaceIntegrations,
-  ] = useState<string[]>([]);
 
   // Open the drawer based on the search params
   const { searchParams, removeSearchParams, getAllSearchParams } =
@@ -203,9 +165,9 @@ export const Overview: React.FC = () => {
         if (action === 'set-root-domain') {
           setIsDomainDrawerOpen(true);
         } else if (action === 'build-attack-surface') {
-          setIsAttackSurfaceDrawerOpen(true);
+          onOpenChangeSurfaceSetup(true);
         } else if (action === 'set-risk-notifications') {
-          setIsRiskNotificationsDrawerOpen(true);
+          onOpenChangePushNotification(true);
         }
       }
       // clear the search params
@@ -224,10 +186,7 @@ export const Overview: React.FC = () => {
       requiresSetupIntegrations,
       waitlistedIntegrations,
       connectedIntegrations,
-      riskNotificationStatus,
-      attackSurfaceStatus,
       accounts,
-      invalidateAccounts,
     },
   } = useIntegration();
 
@@ -242,7 +201,7 @@ export const Overview: React.FC = () => {
 
   const integrationCounts = useIntegrationCounts(connectedIntegrations);
   const { data: jobs } = useJobsStatus(jobKeys);
-  const { data: rootDomain, refetch } = useGetRootDomain();
+
   const { data: assetCount, status: assetCountStatus } = useCounts({
     resource: 'asset',
   });
@@ -297,16 +256,7 @@ export const Overview: React.FC = () => {
     cti: 'CTI',
   };
 
-  const { mutateAsync: createAsset } = useCreateAsset();
-  const { mutateAsync: createAttribute } = useCreateAttribute('', true);
-  const { mutateAsync: deleteAttribute } = useBulkDeleteAttributes({
-    showToast: false,
-  });
   const { mutate: unlink } = useModifyAccount('unlink');
-  const { mutateAsync: link, status: linkStatus } = useModifyAccount(
-    'link',
-    true
-  );
 
   const stringifiedConnectedIntegrations = JSON.stringify(
     connectedIntegrations
@@ -332,73 +282,6 @@ export const Overview: React.FC = () => {
       ? Object.values(assetCount).reduce((acc, val) => acc + val, 0)
       : 0;
   }, [JSON.stringify(assetCount)]);
-  const { filteredAttackSurfaceIntegrations } = useMemo(() => {
-    const filteredAttackSurfaceIntegrations = [
-      ...availableAttackSurfaceIntegrations,
-      ...comingSoonAttackSurfaceIntegrations,
-    ].filter(integration =>
-      integration.name.toLowerCase().includes(search?.toLowerCase())
-    );
-
-    filteredAttackSurfaceIntegrations.sort((a, b) =>
-      a.name.localeCompare(b.name)
-    );
-
-    const filteredRiskNotificationIntegrations = [
-      ...availableRiskIntegrations,
-      ...comingSoonRiskIntegrations,
-    ].filter(integration =>
-      integration.name.toLowerCase().includes(search?.toLowerCase())
-    );
-
-    return {
-      filteredRiskNotificationIntegrations,
-      filteredAttackSurfaceIntegrations,
-    };
-  }, [search]);
-
-  useEffect(() => {
-    if (!isAttackSurfaceDrawerOpen && !isRiskNotificationsDrawerOpen) {
-      setSearch('');
-    }
-  }, [isAttackSurfaceDrawerOpen, isRiskNotificationsDrawerOpen]);
-
-  function closeAttackSurfaceDrawer() {
-    setSelectedAttackSurfaceIntegrations([]);
-
-    setIsAttackSurfaceDrawerOpen(false);
-  }
-
-  function closeRiskNotificationDrawer() {
-    setIsRiskNotificationsDrawerOpen(false);
-  }
-
-  async function handleUpdateRootDomain() {
-    if (!updatedRootDomain) return;
-
-    await createAsset({
-      name: updatedRootDomain?.domain,
-      status: updatedRootDomain?.scanOption,
-    });
-
-    if (rootDomain?.key) {
-      await deleteAttribute([rootDomain]);
-    }
-    await createAttribute({
-      key: `#asset#${updatedRootDomain?.domain}#${updatedRootDomain?.domain}`,
-      name: 'CHARIOT__ROOT_DOMAIN',
-      value: updatedRootDomain?.domain,
-    });
-
-    refetch();
-    setIsDomainDrawerOpen(false);
-
-    // Trigger the confetti effect
-    confetti({
-      particleCount: 150,
-      spread: 60,
-    });
-  }
 
   const data = useMemo(() => {
     const tableData = [
@@ -494,12 +377,6 @@ export const Overview: React.FC = () => {
     return '';
   };
 
-  const connectedNotifications = useMemo(() => {
-    return connectedIntegrations.filter(
-      integration => integration.type === 'riskNotification'
-    );
-  }, [stringifiedConnectedIntegrations]);
-
   const handleCloseSetupModal = () => {
     setSetupIntegration(undefined);
     Object.keys(allSearchParams).forEach(key => removeSearchParams(key));
@@ -507,60 +384,45 @@ export const Overview: React.FC = () => {
 
   const isFreemiumMaxed =
     currentPlan === 'freemium' && usedAssets >= FREEMIUM_ASSETS_LIMIT;
+
   return (
-    <div>
+    <>
       <RenderHeaderExtraContentSection>
-        <div>{/* Retained for consitent spacing */}</div>
+        <div className="dark:hidden">
+          <RiskStats />
+        </div>
       </RenderHeaderExtraContentSection>
-      <div className="flex w-full flex-col text-gray-200">
-        <GettingStarted
-          completedSteps={{
-            rootDomain:
-              rootDomain?.value !== undefined ? 'connected' : 'notConnected',
-            attackSurface: attackSurfaceStatus,
-            riskNotifications: riskNotificationStatus,
-          }}
-          onRootDomainClick={() => setIsDomainDrawerOpen(true)}
-          onAttackSurfaceClick={() => setIsAttackSurfaceDrawerOpen(true)}
-          onRiskNotificationsClick={() =>
-            setIsRiskNotificationsDrawerOpen(true)
-          }
-          total={FREEMIUM_ASSETS_LIMIT}
-          isFreemiumMaxed={isFreemiumMaxed}
-          domain={rootDomain?.value}
-          surfaces={
-            connectedIntegrations?.filter(integration =>
-              availableAttackSurfaceIntegrationsKeys.includes(
-                integration.member
-              )
-            )?.length
-          }
-          notifications={connectedNotifications.length}
-        />
-        <main className="mt-6 w-full">
-          <div className="overflow-hidden rounded-lg border-2 border-header-dark bg-header shadow-md">
-            <div className=" mb-0 ml-6 mr-10 mt-4 flex flex-row items-center justify-between space-x-4">
+      <div className="z-10 flex w-full flex-col bg-layer1 dark:bg-transparent dark:text-gray-200">
+        <div className="hidden dark:block">
+          <RiskStats />
+        </div>
+        <main className="w-full">
+          <div className="overflow-hidden rounded-lg border-2 border-default dark:border-header-dark dark:bg-header dark:shadow-md">
+            <div className="my-4 ml-6 mr-10 flex flex-row items-center justify-between space-x-4 bg-layer1 dark:mb-0 dark:bg-header">
               {Object.entries(buckets).map(([key, hasCode]) => (
                 <Tooltip
                   key={key}
                   title={bucketTooltips[key as keyof typeof bucketTooltips]}
                   placement="top"
                 >
-                  <div className="flex gap-2 text-sm text-gray-400">
-                    {hasCode ? (
-                      <CheckIcon className="size-6 text-green-500" />
-                    ) : (
-                      <XMarkIcon className="size-6 text-red-500" />
-                    )}{' '}
+                  <div className="flex items-center gap-2 text-sm dark:text-gray-400">
+                    <div
+                      className={cn(
+                        'size-3 rounded-full bg-gray-400',
+                        hasCode && 'bg-green-500'
+                      )}
+                    />
                     {bucketLabels[key as keyof typeof bucketLabels]}
                   </div>
                 </Tooltip>
               ))}
             </div>
-            <div className="flex w-full p-8">
+            <div className="flex w-full bg-white p-8 dark:bg-header">
               <div className="flex flex-1 flex-col">
-                <p className="text-xl font-bold text-white">Attack Surface</p>
-                <p className="flex items-center space-x-2 text-sm font-normal text-gray-500">
+                <p className="text-xl font-bold dark:text-white">
+                  Attack Surface
+                </p>
+                <p className="flex items-center space-x-2 text-sm font-normal dark:text-gray-500">
                   {isFreemiumMaxed && (
                     <TriangleAlertIcon className="mr-1 block size-4 text-yellow-500" />
                   )}
@@ -575,7 +437,7 @@ export const Overview: React.FC = () => {
               <Button
                 styleType="primary"
                 startIcon={<PlusIcon className="size-4" />}
-                onClick={() => setIsAttackSurfaceDrawerOpen(true)}
+                onClick={() => onOpenChangeSurfaceSetup(true)}
                 className="mt-6 h-10 rounded-md py-0"
               >
                 New Attack Surface
@@ -584,12 +446,14 @@ export const Overview: React.FC = () => {
 
             <div>
               <Table
-                tableClassName="bg-header border-0 [&_thead_tr]:bg-header [&_tr_td]:text-layer0 [&__tr_td_div:first]:border-t-4 [&_td_div]:border-header-dark [&_th_div]:border-0"
+                tableClassName="bg-layer0 dark:bg-header dark:border-0 dark:[&_thead_tr]:bg-header dark:[&_tr_td]:text-layer0 dark:[&__tr_td_div:first]:border-t-4 dark:[&_td_div]:border-header-dark dark:[&_th_div]:border-0"
                 name="attack-surface"
                 status="success"
                 error={null}
                 rowClassName={row => {
-                  return row.identifier === 'Provided' ? 'bg-header-dark' : '';
+                  return row.identifier === 'Provided'
+                    ? 'dark:bg-header-dark'
+                    : '';
                 }}
                 columns={[
                   {
@@ -645,7 +509,7 @@ export const Overview: React.FC = () => {
                       <div
                         className={
                           row.identifier === 'Requires Setup'
-                            ? 'text-[#FFD700]'
+                            ? 'text-yellow-600 dark:text-[#FFD700]'
                             : 'text-gray-500'
                         }
                       >
@@ -670,7 +534,7 @@ export const Overview: React.FC = () => {
                                 'flex items-center justify-between gap-4',
                                 row.status === 'success' &&
                                   Number(row.discoveredAssets) > 0
-                                  ? 'cursor-pointer text-white'
+                                  ? 'cursor-pointer dark:text-white'
                                   : 'pointer-events-none'
                               )}
                               onClick={() => {
@@ -718,7 +582,7 @@ export const Overview: React.FC = () => {
                                 onAddAssetOpenChange(true);
                               }}
                               startIcon={
-                                <PlusCircleIcon className="size-6 text-white" />
+                                <PlusCircleIcon className="size-6 dark:text-white" />
                               }
                             />
                           </Tooltip>
@@ -740,7 +604,7 @@ export const Overview: React.FC = () => {
                                   setDisconnectIntegrationKey(row.key);
                                 }}
                                 startIcon={
-                                  <XMarkIcon className="size-4 text-layer0" />
+                                  <XMarkIcon className="size-4 dark:text-layer0" />
                                 }
                                 styleType="textPrimary"
                               />
@@ -761,7 +625,7 @@ export const Overview: React.FC = () => {
                                 setDisconnectIntegrationKey(row.key);
                               }}
                             >
-                              <Unplug className="mr-2 size-6 text-white" />
+                              <Unplug className="mr-2 size-6 dark:text-white" />
                             </Button>
                           </Tooltip>
                         )}
@@ -774,15 +638,6 @@ export const Overview: React.FC = () => {
             </div>
           </div>
         </main>
-        {isUpgradePlanOpen && (
-          <UpgradeMenu
-            open={isUpgradePlanOpen}
-            onClose={() => setIsUpgradePlanOpen(false)}
-            currentPlan={currentPlan}
-            used={usedAssets}
-            total={FREEMIUM_ASSETS_LIMIT}
-          />
-        )}
         <Modal
           icon={
             <ExclamationTriangleIconOutline className="size-7 text-yellow-600" />
@@ -819,141 +674,270 @@ export const Overview: React.FC = () => {
           selectedIntegration={setupIntegration}
           formData={integrationFormData}
         />
-        <Drawer
-          open={isAttackSurfaceDrawerOpen}
-          onClose={closeAttackSurfaceDrawer}
-          onBack={closeAttackSurfaceDrawer}
-          className={cn('w-full rounded-t-sm shadow-lg p-0 bg-zinc-100')}
-          skipBack={true}
-          footer={
-            selectedAttackSurfaceIntegrations.length > 0 && (
-              <Button
-                styleType="primary"
-                className="mx-20 mb-10 h-20 w-full text-xl font-bold"
-                isLoading={linkStatus === 'pending'}
-                onClick={async () => {
-                  // add integration   accounts
-                  const promises = selectedAttackSurfaceIntegrations
-                    .map((integration: string) => {
-                      const isWaitlisted =
-                        comingSoonAttackSurfaceIntegrations.find(
-                          i => i.id === integration
-                        );
+        <PushNotificationSetup />
 
-                      return link({
-                        username: integration,
-                        value: isWaitlisted ? 'waitlisted' : 'setup',
-                        config: {},
-                      });
-                    })
-                    .map(promise => promise.catch(error => error));
+        <RootDomainSetup
+          open={isDomainDrawerOpen}
+          setOpen={setIsDomainDrawerOpen}
+        />
+        <SurfaceSetup />
+      </div>
+    </>
+  );
+};
 
-                  const response = await Promise.all(promises);
+export const RiskStats = () => {
+  const navigate = useNavigate();
+  const { modal } = useGlobalState();
+  const { onOpenChange: onOpenChangeSurfaceSetup } = modal.surfaceSetup;
+  const { data: riskCountData, status: riskCountStatus } = useCounts({
+    resource: 'risk',
+  });
+  const { mutateAsync: uploadFile } = useUploadFile();
+  const { mutate: link } = useModifyAccount('link');
+  const [isUploading, setIsUploading] = useState(false);
+  const [isScanning, setIsScanning] = useState(true);
 
-                  const validResults = response.filter(
-                    result => !(result instanceof Error)
-                  );
+  const {
+    data: files = [],
+    refetch: refetchFiles,
+    status: filesStatus,
+  } = useMy({
+    resource: 'file',
+    query: '#scans',
+  });
 
-                  if (validResults.length > 0) {
-                    invalidateAccounts();
-                  }
+  useEffect(() => {
+    if (files.length > 0) {
+      const refetchInterval = setInterval(() => {
+        refetchFiles();
+      }, sToMs(10));
 
-                  closeAttackSurfaceDrawer();
-                }}
-              >
-                Build Attack Surface ({selectedAttackSurfaceIntegrations.length}{' '}
-                selected)
-              </Button>
-            )
-          }
-        >
-          <div className="mx-12 mt-6 pb-10">
-            <div className=" flex flex-col items-start justify-between md:flex-row">
-              <div className="flex flex-col space-y-1">
-                <h1 className=" text-4xl font-extrabold">
-                  Which surfaces are you in?
-                </h1>
+      // Stop refetching if the files have been removed
+      return () => clearInterval(refetchInterval);
+    }
+  }, [files.length]);
+
+  const { totalRisks, machineOpen, machineClosed } = useMemo(() => {
+    const totalRisks = Object.values(riskCountData ?? {}).reduce(
+      (acc, val) => acc + val,
+      0
+    );
+    const machineOpen = Object.entries(riskCountData ?? {})
+      .filter(([key]) => key.startsWith(RiskStatus.MachineOpen))
+      .reduce((acc, [, val]) => acc + val, 0);
+    const machineClosed = Object.entries(riskCountData ?? {})
+      .filter(([key]) => key.startsWith(RiskStatus.MachineClosed))
+      .reduce((acc, [, val]) => acc + val, 0);
+    return { totalRisks, machineOpen, machineClosed };
+  }, [JSON.stringify(riskCountData)]);
+
+  const getMessage = () => {
+    // When there are no risks
+    if (totalRisks === 0) {
+      return {
+        Icon: () => <ShieldExclamationIcon className="size-20 text-white/60" />,
+        title: 'No risks detected yet!',
+        Subtitle: () => (
+          <>
+            <Button
+              styleType="textPrimary"
+              className="p-0  text-xs text-white/70 underline"
+              onClick={() => onOpenChangeSurfaceSetup(true)}
+            >
+              Build your attack surface
+            </Button>
+            {files.length === 0 && (
+              <>{' or upload a Nessus XML file to get started.'}</>
+            )}{' '}
+          </>
+        ),
+      };
+    }
+
+    // When there are risks, however no MachineOpen or MachineClosed
+    if (machineOpen === 0 && machineClosed === 0) {
+      return {
+        Icon: () => <ShieldCheckIcon className="size-20 text-white/60" />,
+        title: 'Congrats, your environment is all signal, no noise!',
+      };
+    }
+
+    // When there are just MachineClosed risks
+    if (machineOpen === 0 && machineClosed > 0) {
+      return {
+        Icon: () => <ShieldCheckIcon className="size-20 text-white/60" />,
+        title: 'No open risks detected!',
+        Subtitle: () =>
+          'Great news! All risks have been currently closed, and there are no open risks to report.',
+      };
+    }
+
+    // When there are just MachineOpen risks
+    if (machineOpen > 0 && machineClosed === 0) {
+      return {
+        Icon: () => <ShieldExclamationIcon className="size-20 text-white/60" />,
+        title: `${machineOpen} Open Risks Detected!`,
+        Subtitle: () => (
+          <>
+            {`Recommended Action: `}
+            <Button
+              styleType="textPrimary"
+              className="p-0  text-xs text-white/70 underline"
+              onClick={() =>
+                navigate(
+                  generatePathWithSearch({
+                    pathname: getRoute(['app', 'risks']),
+                  })
+                )
+              }
+            >
+              Remediate the Risks
+            </Button>
+          </>
+        ),
+      };
+    }
+
+    // When there are both MachineOpen and MachineClosed risks
+    return {
+      Icon: () => (
+        <div className="flex h-[92px] gap-2">
+          <div className="flex flex-col justify-end gap-1">
+            <p className="text-center text-xs font-bold text-brand">1.3%</p>
+            <div className="rounded bg-brand" style={{ height: '10%' }} />
+            <p className="text-xs text-header-light">Risks</p>
+          </div>
+          <div className="flex flex-col justify-end gap-1">
+            <div className="h-full w-8 flex-1 rounded bg-header-light" />
+            <p className="text-xs text-header-light">Noise</p>
+          </div>
+        </div>
+      ),
+      title: 'Risks vs noise',
+      Subtitle: () =>
+        `${machineOpen + machineClosed} risks identified (${(machineClosed * 100) / (machineOpen + machineClosed)}% noise)`,
+    };
+  };
+
+  const { Icon, title, Subtitle } = useMemo(
+    () => getMessage(),
+    [totalRisks, machineOpen, machineClosed]
+  );
+
+  async function handleNessusFileDrop(files: Files<'arrayBuffer'>) {
+    if (files.length === 1) {
+      const content = files[0].content;
+      const file = files[0].file;
+      setIsUploading(true);
+
+      await uploadFile({
+        name: `scans/${file.name}`,
+        content,
+      });
+
+      await link({
+        value: `scans/${file.name}`,
+        config: {},
+        username: 'nessus',
+      });
+
+      setIsScanning(true);
+      setIsUploading(false);
+    }
+  }
+
+  return (
+    <Loader
+      isLoading={riskCountStatus === 'pending'}
+      className="h-32 w-full bg-header-dark"
+    >
+      <section className="flex items-center gap-4 rounded-md border-2 border-header-dark bg-[#191933] p-4">
+        <Icon />
+        <div className="flex flex-1 flex-col gap-2">
+          <h2 className="text-lg font-bold text-white">{title}</h2>
+          {Subtitle && (
+            <p className="max-w-xl text-xs text-white/70">
+              <Subtitle />
+            </p>
+          )}
+          <p className="max-w-xl text-xs text-white">
+            Chariot runs continuous security scans across your attack surface,
+            looking for everything from policy misconfigurations to material
+            risks. We then filter out the noise.
+          </p>
+        </div>
+
+        {(filesStatus === 'pending' || isUploading) && (
+          <div className="mt-1 h-auto rounded border-2 border-header-dark p-4 ">
+            <div className="flex max-w-xs items-center justify-between gap-2">
+              <div>
+                <h2 className="text-lg font-bold text-white">
+                  File Uploading...
+                </h2>
+                <p className="text-xs text-white/70">
+                  {`We're testing the noise reduction from your uploaded Nessus
+                XML file.`}
+                </p>
               </div>
-              <Input
-                name="search"
-                startIcon={<MagnifyingGlassIcon className="size-6" />}
-                placeholder="Search integrations..."
-                className="w-[400px] rounded-sm  bg-gray-200 text-lg"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
+              <ArrowPathIcon
+                className="spin-slow duration-2000 size-12 text-white/60"
+                style={{
+                  animation: isScanning ? 'spin 2s linear infinite' : 'none',
+                }}
               />
             </div>
-            <p className="mb-4 mt-2 text-lg text-gray-700">
-              Once added, they’ll appear in your attack surface, ready for setup
-              later.
-            </p>
-            <div
-              className="grid gap-4"
-              style={{
-                gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-              }}
-            >
-              {filteredAttackSurfaceIntegrations.map((integration, index) => {
-                return (
-                  <AttackSurfaceCard
-                    key={index}
-                    integration={integration}
-                    selectedIntegrations={selectedAttackSurfaceIntegrations}
-                    setSelectedIntegrations={
-                      setSelectedAttackSurfaceIntegrations
-                    }
-                  />
-                );
-              })}
-            </div>
-            <p className="mt-4 text-sm italic">
-              {`Contact us for more integrations support: `}
-              <a className="text-brand" href="mailto:support@praetorian.com">
-                support@praetorian.com
-              </a>
-            </p>
           </div>
-        </Drawer>
-        <PushNotificationDrawer
-          isOpen={isRiskNotificationsDrawerOpen}
-          onClose={closeRiskNotificationDrawer}
-          onDisconnect={(account: Account) => {
-            setDisconnectIntegrationKey(account.key);
-          }}
-          onConnect={async (formData: Values) => {
-            await link(formData as unknown as LinkAccount);
-          }}
-          streamingIntegrations={streamingRiskIntegrations}
-          ticketingIntegrations={ticketingRiskIntegrations}
-          connectedIntegrations={connectedNotifications}
-        />
+        )}
 
-        <Drawer
-          open={isDomainDrawerOpen}
-          onClose={() => setIsDomainDrawerOpen(false)}
-          onBack={() => setIsDomainDrawerOpen(false)}
-          className={cn('w-full rounded-t-sm shadow-lg pb-0 bg-zinc-100')}
-          footerClassname=""
-          skipBack={true}
-          footer={
-            <Button
-              styleType="primary"
-              className="mx-20 mb-10 h-20 w-full text-xl font-bold"
-              onClick={handleUpdateRootDomain}
-            >
-              Update Root Domain
-            </Button>
-          }
-        >
-          <DomainDrawerContent
-            domain={rootDomain?.value}
-            onChange={(domain, scanOption) => {
-              setUpdatedRootDomain({ domain, scanOption });
+        {filesStatus === 'success' && files.length > 0 && (
+          <div className="mt-1 h-auto rounded border-2 border-header-dark p-4 ">
+            <div className="flex max-w-xs items-center justify-between gap-2">
+              <div>
+                <h2 className="text-lg font-bold text-white">
+                  Assessing risks
+                </h2>
+                <p className="text-xs text-white/70">
+                  {`We're testing the noise reduction from your uploaded Nessus
+                    XML file.`}
+                </p>
+              </div>
+              <ArrowPathIcon
+                className="spin-slow duration-2000 size-12 text-white/60"
+                style={{
+                  animation: isScanning ? 'spin 2s linear infinite' : 'none',
+                }}
+              />
+            </div>
+          </div>
+        )}
+
+        {files.length === 0 && (
+          <Dropzone
+            type="arrayBuffer"
+            className="mt-1 h-auto border-header bg-header"
+            onFilesDrop={handleNessusFileDrop}
+            title=""
+            subTitle=""
+            accept={{
+              'application/xml': ['.nessus'],
             }}
-          />
-        </Drawer>
-      </div>
-    </div>
+          >
+            <div className="flex max-w-xs items-center justify-between gap-2">
+              <div>
+                <h2 className="text-lg font-bold text-white">
+                  Want a dry run?
+                </h2>
+                <p className="text-xs text-white/70">
+                  Test our noise reduction by uploading a .nessus file.
+                </p>
+              </div>
+              <ArrowUpTrayIcon className="size-12 text-white/60" />
+            </div>
+          </Dropzone>
+        )}
+      </section>
+    </Loader>
   );
 };
 
@@ -1018,26 +1002,16 @@ const Counter = ({ from, to }: { from: number; to: number }) => {
       {numberArray.map((digit, index) => (
         <motion.div
           key={index}
-          className="text-3xl font-extrabold text-white"
+          className="text-3xl font-extrabold dark:text-white"
           initial={{ rotateX: 90, opacity: 0 }}
           animate={{ rotateX: 0, opacity: 1 }}
           exit={{ rotateX: -90, opacity: 0 }}
           transition={{ duration: 0.3, ease: 'easeInOut' }}
-          style={{
-            textShadow:
-              '1px 1px 2px rgba(255, 255, 255, 0.1), -1px -1px 3px rgba(0, 0, 0, 0.4)',
-          }}
         >
           {digit}
         </motion.div>
       ))}
-      <span
-        className="text-md ml-2 font-medium text-gray-600"
-        style={{
-          textShadow:
-            '1px 1px 2px rgba(255, 255, 255, 0.1), -1px -1px 3px rgba(0, 0, 0, 0.4)',
-        }}
-      >
+      <span className="text-md ml-2 font-medium text-gray-600">
         Assets Monitored
       </span>
     </div>

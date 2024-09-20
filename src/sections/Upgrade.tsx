@@ -1,13 +1,11 @@
 import { Modal } from '@/components/Modal';
-import { useUpgrade } from '@/hooks/useUpgrade';
+import { contactUs } from '@/hooks/useUpgrade';
 import { useGlobalState } from '@/state/global.state';
 
 export const UpgradeModal = () => {
   const {
     modal: { upgrade: upgradeState },
   } = useGlobalState();
-
-  const { mutate: upgrade } = useUpgrade();
 
   return (
     <Modal
@@ -19,7 +17,7 @@ export const UpgradeModal = () => {
         className: 'w-32',
         text: 'Free Upgrade',
         onClick: () => {
-          upgrade();
+          contactUs();
           upgradeState.onOpenChange(false);
         },
       }}
@@ -54,11 +52,7 @@ export const UpgradeModal = () => {
             <button
               onClick={e => {
                 e.preventDefault();
-                window.open(
-                  'https://www.praetorian.com/contact-us',
-                  '_blank',
-                  'noopener noreferrer'
-                );
+                contactUs();
               }}
               className="mt-4 h-1/4 rounded-sm border border-brand-light px-4 py-2 text-brand"
             >
@@ -74,11 +68,7 @@ export const UpgradeModal = () => {
             <button
               onClick={e => {
                 e.preventDefault();
-                window.open(
-                  'https://www.praetorian.com/contact-us',
-                  '_blank',
-                  'noopener noreferrer'
-                );
+                contactUs();
               }}
               className="mt-4 h-1/4 rounded-sm border border-brand-light px-4 py-2 text-brand"
             >
