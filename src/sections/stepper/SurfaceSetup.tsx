@@ -73,7 +73,7 @@ export const SurfaceSetup: React.FC = () => {
   return (
     <ModalWrapper
       size="5xl"
-      className="relative max-h-[90vh] overflow-auto rounded-lg pb-0 pl-6 pt-4"
+      className="relative max-h-[90vh] overflow-auto rounded-lg pb-0 pl-6 pr-2 pt-4"
       open={open}
       onClose={() => onOpenChange(false)}
     >
@@ -85,7 +85,7 @@ export const SurfaceSetup: React.FC = () => {
               name="search"
               startIcon={<MagnifyingGlassIcon className="size-6" />}
               placeholder="Search integrations..."
-              className="w-[250px] rounded-sm  bg-gray-200 text-lg"
+              className="mr-2 w-[250px] rounded-sm bg-gray-200 text-lg"
               value={search}
               onChange={e => setSearch(e.target.value)}
             />
@@ -140,7 +140,7 @@ export const SurfaceSetup: React.FC = () => {
       </div>
 
       {selectedAttackSurfaceIntegrations.length > 0 && (
-        <div className="sticky bottom-0 flex w-full justify-end bg-layer0 px-10 py-4">
+        <div className="sticky bottom-0 flex w-full justify-end bg-layer0 p-4 pr-8">
           <Button
             styleType="primary"
             className="rounded"
