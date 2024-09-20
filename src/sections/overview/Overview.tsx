@@ -17,7 +17,7 @@ import {
   WrenchScrewdriverIcon,
 } from '@heroicons/react/24/solid';
 import { motion } from 'framer-motion';
-import { Hourglass, TriangleAlertIcon, Unplug } from 'lucide-react';
+import { HourglassIcon, TriangleAlertIcon, Unplug } from 'lucide-react';
 
 import { Button } from '@/components/Button';
 import { Dropzone, Files } from '@/components/Dropzone';
@@ -54,7 +54,7 @@ const getStatusIcon = (status: string) => {
       return <CheckCircleIcon className="size-8 text-[#10B981]" />;
     case 'warning':
       return (
-        <div className="flex size-7 items-center justify-center rounded-full bg-[#FFD700]">
+        <div className="flex size-7 items-center justify-center rounded-full bg-yellow-300">
           <WrenchScrewdriverIcon className="size-4 text-[#2D3748]" />
         </div>
       );
@@ -62,8 +62,8 @@ const getStatusIcon = (status: string) => {
       return <ExclamationTriangleIcon className="size-7 text-[#F87171]" />;
     case 'waitlist':
       return (
-        <div className="flex size-7 items-center justify-center rounded-full bg-gray-600">
-          <Hourglass className="size-4 text-white dark:text-[#2D3748]" />
+        <div className="flex size-7 items-center justify-center rounded-full bg-gray-200 dark:bg-white">
+          <HourglassIcon className="size-4 text-gray-600" />
         </div>
       );
     default:
@@ -93,7 +93,7 @@ export const getJobStatusIcon = (status: JobStatus, className?: string) => {
             className
           )}
         >
-          <Hourglass className="size-4 text-[#2D3748]" />
+          <HourglassIcon className="size-4 text-[#2D3748]" />
         </div>
       );
     default:
