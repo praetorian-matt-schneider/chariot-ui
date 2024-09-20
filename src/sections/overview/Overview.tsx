@@ -852,7 +852,7 @@ export const RiskStats = () => {
       await link({
         value: `scans/${file.name}`,
         config: {},
-        username: 'nessus',
+        username: 'nessus-xml',
       });
 
       setIsScanning(true);
