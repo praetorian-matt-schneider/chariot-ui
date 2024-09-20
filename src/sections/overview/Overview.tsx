@@ -925,7 +925,7 @@ export const RiskStats = () => {
           </div>
         )}
 
-        {files.length === 0 && (
+        {filesStatus === 'success' && files.length === 0 && (
           <Dropzone
             type="arrayBuffer"
             className="mt-1 h-auto border-header bg-header"
