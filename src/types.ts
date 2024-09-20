@@ -45,11 +45,6 @@ export enum RiskStatus {
   Triaged = 'T',
   Opened = 'O',
   Remediated = 'R',
-
-  MachineOpen = 'MO',
-  MachineDeleted = 'MD',
-  MachineClosed = 'MC',
-
   ExposedRisks = 'E',
   DeletedRisks = 'D',
 }
@@ -61,8 +56,6 @@ export const RiskStatusWithSeverity = [
 ];
 
 export const RiskStatusWithoutSeverity = [
-  RiskStatus.MachineOpen,
-  RiskStatus.MachineDeleted,
   RiskStatus.ExposedRisks,
   RiskStatus.DeletedRisks,
 ];
@@ -96,9 +89,6 @@ export const RiskStatusLabel: Record<RiskStatus, string> = {
   T: 'Pending Triage',
   O: 'Open',
   R: 'Remediated',
-  MO: 'Recommended Opened',
-  MD: 'Recommended Deleted',
-  MC: 'Recommended Closed',
   E: 'Exposed Risks',
   D: 'Deleted Risks',
 };

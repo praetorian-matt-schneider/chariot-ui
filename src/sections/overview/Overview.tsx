@@ -718,18 +718,18 @@ export const RiskStats = () => {
     }
   }, [files.length]);
 
-  const { totalRisks, machineOpen, machineClosed } = useMemo(() => {
+  const { totalRisks, openRisks, deletedRisks } = useMemo(() => {
     const totalRisks = Object.values(riskCountData ?? {}).reduce(
       (acc, val) => acc + val,
       0
     );
-    const machineOpen = Object.entries(riskCountData ?? {})
-      .filter(([key]) => key.startsWith(RiskStatus.MachineOpen))
+    const openRisks = Object.entries(riskCountData ?? {})
+      .filter(([key]) => key.startsWith(RiskStatus.Opened))
       .reduce((acc, [, val]) => acc + val, 0);
-    const machineClosed = Object.entries(riskCountData ?? {})
-      .filter(([key]) => key.startsWith(RiskStatus.MachineClosed))
+    const deletedRisks = Object.entries(riskCountData ?? {})
+      .filter(([key]) => key.startsWith(RiskStatus.DeletedRisks))
       .reduce((acc, [, val]) => acc + val, 0);
-    return { totalRisks, machineOpen, machineClosed };
+    return { totalRisks, openRisks, deletedRisks };
   }, [JSON.stringify(riskCountData)]);
 
   const getMessage = () => {
@@ -755,16 +755,16 @@ export const RiskStats = () => {
       };
     }
 
-    // When there are risks, however no MachineOpen or MachineClosed
-    if (machineOpen === 0 && machineClosed === 0) {
+    // When there are risks, however no Open or Deleted
+    if (openRisks === 0 && deletedRisks === 0) {
       return {
         Icon: () => <ShieldCheckIcon className="size-20 text-white/60" />,
         title: 'Congrats, your environment is all signal, no noise!',
       };
     }
 
-    // When there are just MachineClosed risks
-    if (machineOpen === 0 && machineClosed > 0) {
+    // When there are just Deleted risks
+    if (openRisks === 0 && deletedRisks > 0) {
       return {
         Icon: () => <ShieldCheckIcon className="size-20 text-white/60" />,
         title: 'No open risks detected!',
@@ -773,11 +773,11 @@ export const RiskStats = () => {
       };
     }
 
-    // When there are just MachineOpen risks
-    if (machineOpen > 0 && machineClosed === 0) {
+    // When there are just Open risks
+    if (openRisks > 0 && deletedRisks === 0) {
       return {
         Icon: () => <ShieldExclamationIcon className="size-20 text-white/60" />,
-        title: `${machineOpen} Open Risks Detected!`,
+        title: `${openRisks} Open Risks Detected!`,
         Subtitle: () => (
           <>
             {`Recommended Action: `}
@@ -788,6 +788,16 @@ export const RiskStats = () => {
                 navigate(
                   generatePathWithSearch({
                     pathname: getRoute(['app', 'risks']),
+                    appendSearch: [
+                      [
+                        'riskFilters',
+                        JSON.stringify({
+                          search: '',
+                          query: `status:${RiskStatus.Opened}`,
+                          subQuery: '',
+                        }),
+                      ],
+                    ],
                   })
                 )
               }
@@ -799,7 +809,7 @@ export const RiskStats = () => {
       };
     }
 
-    // When there are both MachineOpen and MachineClosed risks
+    // When there are both Open and Deleted risks
     return {
       Icon: () => (
         <div className="flex h-[92px] gap-2">
@@ -816,13 +826,13 @@ export const RiskStats = () => {
       ),
       title: 'Risks vs noise',
       Subtitle: () =>
-        `${machineOpen + machineClosed} risks identified (${(machineClosed * 100) / (machineOpen + machineClosed)}% noise)`,
+        `${openRisks + deletedRisks} risks identified (${(deletedRisks * 100) / (openRisks + deletedRisks)}% noise)`,
     };
   };
 
   const { Icon, title, Subtitle } = useMemo(
     () => getMessage(),
-    [totalRisks, machineOpen, machineClosed]
+    [totalRisks, openRisks, deletedRisks]
   );
 
   async function handleNessusFileDrop(files: Files<'arrayBuffer'>) {

@@ -701,23 +701,14 @@ export default RisksBeta;
 
 export const AlertDescriptions: Record<string, string> = {
   [RiskStatus.Opened]: 'Remediated a risk and want to close it early?',
-
-  [RiskStatus.MachineOpen]:
-    'Chariot A.I. thinks these risks are valid. Should they be opened?',
   [RiskStatus.Triaged]: 'Are these risks valid?',
-  [RiskStatus.MachineDeleted]:
-    'Chariot A.I. thinks these risks are invalid. Should they be closed?',
   [AssetStatus.ActiveLow]: 'Should these assets be scanned for risks?',
   [RiskStatus.ExposedRisks]: 'Are these exposures risks?',
 };
 
 export const SingularAlertDescriptions: Record<string, string> = {
   [RiskStatus.Opened]: 'Should this risk be closed?',
-  [RiskStatus.MachineOpen]:
-    'Chariot A.I. thinks this risk is valid. Should it be opened?',
   [RiskStatus.Triaged]: 'Is this risk valid?',
-  [RiskStatus.MachineDeleted]:
-    'Chariot A.I. thinks this risk is invalid. Should it be closed?',
   [AssetStatus.ActiveLow]: 'Should this asset be scanned for risks?',
   [RiskStatus.ExposedRisks]: 'Is this exposure valid?',
 };

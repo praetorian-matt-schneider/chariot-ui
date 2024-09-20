@@ -338,7 +338,7 @@ export const AlertAction = ({
             </Tooltip>
           </>
         )}
-        {isRisk && riskStatus === RiskStatus.MachineDeleted && (
+        {isRisk && riskStatus === RiskStatus.DeletedRisks && (
           <>
             <Tooltip placement="top" title="Close the Risk">
               <Button
@@ -366,42 +366,6 @@ export const AlertAction = ({
                     RiskStatus.Opened,
                     getRiskStatusLabel(item.status).severity
                   );
-                }}
-                disabled={updateRiskStatus === 'pending'}
-              >
-                No
-              </Button>
-            </Tooltip>
-          </>
-        )}
-        {isRisk && riskStatus === RiskStatus.MachineOpen && (
-          <>
-            <Tooltip placement="top" title="Open the Risk">
-              <Button
-                styleType="primary"
-                className="h-8"
-                onClick={e => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleRiskChange(
-                    item,
-                    RiskStatus.Opened,
-                    getRiskStatusLabel(item.status).severity
-                  );
-                }}
-                disabled={updateRiskStatus === 'pending'}
-              >
-                Yes
-              </Button>
-            </Tooltip>
-            <Tooltip placement="top" title="Close the Risk">
-              <Button
-                styleType="secondary"
-                className="h-8"
-                onClick={e => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleOpenModal(item);
                 }}
                 disabled={updateRiskStatus === 'pending'}
               >

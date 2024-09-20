@@ -382,9 +382,7 @@ export function RiskDrawer({ compositeKey, open }: RiskDrawerProps) {
                       }}
                       extraAction={
                         getRiskStatusLabel(risk.status).status !==
-                          RiskStatus.Opened &&
-                        getRiskStatusLabel(risk.status).status !==
-                          RiskStatus.MachineOpen && (
+                          RiskStatus.Opened && (
                           <Tooltip
                             placement="top"
                             title={
